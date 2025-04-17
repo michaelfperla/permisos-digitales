@@ -1,0 +1,38 @@
+/**
+ * Main SCSS file for Permisos Digitales
+ * This file imports all other SCSS partials
+ */
+
+// Abstracts
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+
+// Vendors
+// No vendor styles yet
+
+// Base
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/accessibility';
+
+// Layouts
+@import 'layouts/grid';
+@import 'layouts/header';
+@import 'layouts/footer';
+
+// Components
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/alerts';
+@import 'components/ticker';
+
+// Pages
+@import 'pages/home';
+@import 'pages/login';
+@import 'pages/dashboard';
+@import 'pages/permit-detail';
+@import 'pages/permit-form';
+
+// Themes
+@import 'themes/default';

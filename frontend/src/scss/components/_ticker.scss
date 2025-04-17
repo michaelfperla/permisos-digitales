@@ -1,0 +1,94 @@
+/* Ticker component styles for Permisos Digitales */
+
+.benefit-ticker-section {
+  background-color: $color-white;
+  box-shadow: $shadow-md;
+  position: relative;
+  z-index: 10;
+  padding: $spacing-md 0;
+  border-top: 1px solid rgba($color-primary, 0.1);
+  border-bottom: 1px solid rgba($color-primary, 0.1);
+  margin: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-trust-indicators {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Optional fade effect at the edges */
+.hero-trust-indicators::before,
+.hero-trust-indicators::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-trust-indicators::before {
+  left: 0;
+  background: linear-gradient(to right, $color-white, transparent);
+}
+
+.hero-trust-indicators::after {
+  right: 0;
+  background: linear-gradient(to left, $color-white, transparent);
+}
+
+/* Ticker wrapper */
+.ticker-wrap {
+  display: inline-flex;
+  align-items: center;
+  animation: ticker-scroll 25s linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  white-space: nowrap;
+  width: auto;
+}
+
+/* Ticker items */
+.ticker-item {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-gray;
+  padding: 0 $spacing-md;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Ticker separators */
+.ticker-separator {
+  color: $color-primary;
+  font-weight: $font-weight-bold;
+  padding: 0 $spacing-sm;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Ticker animation */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-wrap {
+    animation-play-state: paused;
+  }
+}

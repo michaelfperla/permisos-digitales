@@ -1,0 +1,240 @@
+/* Button styles for Permisos Digitales */
+
+// Primary button
+.btn-primary {
+  @include button-primary;
+}
+
+// Secondary button
+.btn-secondary {
+  @include button-secondary;
+}
+
+// Outline button
+.btn-outline {
+  @include button-outline;
+}
+
+// Button sizes
+.btn-sm {
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-size-sm;
+}
+
+.btn-lg {
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-lg;
+}
+
+// Full width button
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+// Icon button
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Button with icon
+.btn-with-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &.btn-lg .icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &.btn-sm .icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// Disabled state
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-outline:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Loading state
+.btn-loading {
+  position: relative;
+  overflow: hidden;
+  cursor: wait;
+  
+  .btn-text {
+    opacity: 0.3;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -8px;
+    margin-left: -8px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s infinite linear;
+  }
+  
+  &.btn-outline::before {
+    border: 2px solid rgba($color-primary, 0.3);
+    border-top-color: $color-primary;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Button group
+.btn-group {
+  display: inline-flex;
+  
+  .btn {
+    border-radius: 0;
+    margin-right: -1px;
+    
+    &:first-child {
+      border-top-left-radius: $border-radius-md;
+      border-bottom-left-radius: $border-radius-md;
+    }
+    
+    &:last-child {
+      border-top-right-radius: $border-radius-md;
+      border-bottom-right-radius: $border-radius-md;
+      margin-right: 0;
+    }
+  }
+}
+
+// Alternative button colors
+.btn-success {
+  @include button-base;
+  background-color: $color-success;
+  color: $color-white;
+  border: 1px solid $color-success;
+  
+  &:hover, &:focus {
+    background-color: darken($color-success, 10%);
+    border-color: darken($color-success, 10%);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-danger {
+  @include button-base;
+  background-color: $color-danger;
+  color: $color-white;
+  border: 1px solid $color-danger;
+  
+  &:hover, &:focus {
+    background-color: darken($color-danger, 10%);
+    border-color: darken($color-danger, 10%);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-warning {
+  @include button-base;
+  background-color: $color-warning;
+  color: $color-dark;
+  border: 1px solid $color-warning;
+  
+  &:hover, &:focus {
+    background-color: darken($color-warning, 10%);
+    border-color: darken($color-warning, 10%);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-info {
+  @include button-base;
+  background-color: $color-info;
+  color: $color-white;
+  border: 1px solid $color-info;
+  
+  &:hover, &:focus {
+    background-color: darken($color-info, 10%);
+    border-color: darken($color-info, 10%);
+    transform: translateY(-2px);
+  }
+}
+
+// Hero CTA buttons
+.hero-cta-primary {
+  @include button-primary;
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-lg;
+  position: relative;
+  overflow: hidden;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8px 15px rgba($color-primary, 0.25);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.2),
+      rgba(255, 255, 255, 0));
+    animation: shine 3s infinite;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px rgba($color-primary, 0.3);
+  }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.hero-cta-secondary {
+  font-weight: $font-weight-medium;
+  padding: $spacing-md 0;
+  color: $color-primary;
+  text-decoration: none;
+  transition: all $transition-normal;
+  
+  &:hover {
+    color: $color-primary-dark;
+    transform: translateY(-2px);
+  }
+}
