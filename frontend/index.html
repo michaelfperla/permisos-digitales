@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!-- HTML5 - The modern standard. Keeps things clean. -->
+
+<html lang="es">
+<!-- Setting the language. Good practice, helps browsers and tools know what's up. -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Permisos Digitales: La forma moderna de gestionar tus permisos. Rápido, digital, sin complicaciones.">
+    <title>Permisos Digitales | Experiencia Online</title>
+    <link rel="icon" href="/assets/img/favicon.svg?v=3.0.0" type="image/svg+xml">
+
+    <!-- Google Fonts: Inter for body text and Montserrat for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- === STYLESHEETS === -->
+    <!-- Main CSS file that imports all component styles -->
+    <link rel="stylesheet" href="/assets/css/main-new.css">
+
+    <!-- Component styles are now imported by main.css directly -->
+    <!-- NOTE: We've moved individual component imports into main.css as part of our architecture improvements -->
+
+    <!-- === JAVASCRIPT === -->
+    <!-- Cache Busting Utility (must be loaded first) -->
+    <script src="/assets/js/utils/cache-buster.js?v=3.0.0"></script>
+
+    <!-- Utility Modules -->
+    <script src="/assets/js/utils/common.js?v=3.0.0" defer></script>
+    <script src="/assets/js/utils/validation.js?v=3.0.0" defer></script>
+    <script src="/assets/js/utils/router.js?v=3.0.0" defer></script>
+
+    <!-- Legacy Utils -->
+    <script src="/assets/js/utils.js?v=3.0.0" defer></script>
+
+    <!-- Component Modules -->
+    <script src="/assets/js/components/auth.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/admin-auth.js?v=3.0.0" defer></script>
+    <!-- Original dashboard component (commented out for now) -->
+    <!-- <script src="/assets/js/components/dashboard.js" defer></script> -->
+    <!-- Improved dashboard component with better testability -->
+    <script src="/assets/js/components/dashboard-improved.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/admin-dashboard.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/permit-ui.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/permits.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/ticker.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/home.js?v=3.0.0" defer></script>
+    <script src="/assets/js/components/header.js?v=3.0.0" defer></script>
+
+    <!-- Main Application -->
+    <script src="/assets/js/main.js?v=3.0.0" defer></script>
+</head>
+
+<body>
+    <!-- The visible stage itself. -->
+
+    <!-- Page Transition Overlay -->
+    <div id="page-transition-overlay" class="page-transition-overlay"></div>
+
+    <!-- Static Header Included Directly -->
+    <header id="app-header" class="app-header">
+        <div class="header-container">
+            <div class="header-branding">
+                <a href="#/" class="logo-link" aria-label="Permisos Digitales - Inicio">
+                    <img src="/assets/img/favicon.svg?v=3.0.0" alt="Permisos Digitales Icon" class="logo-mobile">
+                    <img src="/assets/img/logo.svg?v=3.0.0" alt="Permisos Digitales" class="logo-desktop">
+                </a>
+            </div>
+            <!-- Mobile Menu Toggle Button - Outside the nav for better positioning -->
+            <button id="mobile-menu-toggle" type="button" class="mobile-menu-toggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="header-nav">
+                <svg class="icon icon-menu" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-menu"></use></svg>
+            </button>
+            <!-- Navigation Panel (Initially hidden/positioned off-screen on mobile) -->
+            <nav id="header-nav" class="header-navigation" aria-label="Navegación principal">
+                <!-- Add a close button INSIDE the nav for mobile -->
+                <button id="mobile-menu-close" type="button" class="mobile-menu-close" aria-label="Cerrar menú de navegación">
+                    <svg class="icon icon-close" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-close"></use></svg>
+                </button>
+                <ul id="nav-links-container" class="nav-links">
+                    <!-- Links dynamically added by header.js -->
+                    <!-- Show a basic loading state maybe? -->
+                    <li><span class="nav-link">...</span></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Overlay - For closing the menu when clicking outside -->
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay" aria-hidden="true"></div>
+
+    <!-- Skip Link: An accessibility essential. Lets users jump right into the action. Think of it as a 'fast-forward' button. -->
+    <a href="#app-root" class="sr-only sr-only-focusable">Saltar al contenido principal</a>
+
+    <!-- The Main Stage: Where our dynamic views will appear and disappear. -->
+    <!-- <main> is semantic. id="app-root" is our target for JS. -->
+    <!-- tabindex="-1": Allows us to programmatically shift focus here, maybe after a smooth view transition completes, guiding the user's eye. Nice touch. -->
+    <main id="app-root" tabindex="-1">
+        <!-- Content gets injected here dynamically. Keep it clean initially. -->
+        <!-- A subtle loading animation could live here briefly, managed by CSS/JS... something to consider later for that polished feel. -->
+    </main>
+
+    <!-- Footer Section -->
+    <footer id="app-footer" class="app-footer">
+        <img src="/assets/img/logo-white.svg?v=3.0.0" alt="Permisos Digitales" class="footer-logo">
+        <p>© 2025 Permisos Digitales. Todos los derechos reservados.</p>
+        <ul class="footer-links">
+            <li><a href="#/politica-de-privacidad">Política de Privacidad</a></li>
+            <li><a href="#/terminos-y-condiciones">Términos y Condiciones</a></li>
+            <li><a href="#/contacto">Contacto</a></li>
+        </ul>
+    </footer>
+
+</body>
+
+</html>

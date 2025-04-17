@@ -1,0 +1,220 @@
+<!-- === New Permit Form View Partial (/frontend/views/permit-form.html) === -->
+<!-- All styles are now imported by main.css directly -->
+<!-- We've moved individual component imports into main.css as part of our architecture improvements -->
+
+<div class="permit-container">
+    <a href="#/dashboard" class="back-link">
+        <svg class="icon icon-chevron-left" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-chevron-left"></use></svg>
+        Volver al Dashboard
+    </a>
+
+    <div class="permit-card">
+        <h2 class="form-title">Solicitud de Nuevo Permiso Digital</h2>
+
+        <div class="notice notice-warning">
+            <strong>Aviso Importante:</strong> Los permisos son procesados de lunes a viernes (días hábiles).
+            Después de enviar esta solicitud y realizar el pago, podrá seleccionar una fecha de inicio deseada
+            para su permiso. Si no selecciona una fecha, su solicitud se procesará inmediatamente.
+        </div>
+
+        <div id="permit-form-message" class="message-area" hidden aria-live="assertive"></div>
+
+        <!-- Payment Instructions (shown after successful submission) -->
+        <div id="payment-instructions-area" class="payment-instructions permit-card" hidden>
+            <h3>Instrucciones de Pago</h3>
+            <div class="permit-timeline">
+                <div class="timeline-item completed">
+                    <div class="timeline-date">Ahora</div>
+                    <div class="timeline-title">Solicitud Enviada</div>
+                    <div class="timeline-content">Su solicitud ha sido registrada correctamente.</div>
+                </div>
+                <div class="timeline-item pending">
+                    <div class="timeline-date">Siguiente Paso</div>
+                    <div class="timeline-title">Realizar Pago</div>
+                    <div class="timeline-content">
+                        <p><strong>Referencia de Pago:</strong> <code id="payment-reference"></code></p>
+                        <p><strong>Monto a Pagar:</strong> <span id="payment-amount"></span> <span id="payment-currency"></span></p>
+                        <h4>Métodos de Pago:</h4>
+                        <ul id="payment-methods"></ul>
+                    </div>
+                </div>
+                <div class="timeline-item future">
+                    <div class="timeline-date">Después del Pago</div>
+                    <div class="timeline-title">Subir Comprobante</div>
+                    <div class="timeline-content">
+                        <p id="payment-next-steps"></p>
+                        <p>Puedes ver el estado de tu solicitud en tu <a href="#/dashboard">Dashboard</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-step Form Wizard -->
+        <form id="permit-form" class="form-wizard" novalidate>
+            <!-- Progress Indicator -->
+            <div class="wizard-progress">
+                <div class="wizard-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Datos del Solicitante</div>
+                </div>
+                <div class="wizard-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Datos del Vehículo</div>
+                </div>
+                <div class="wizard-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Revisar y Enviar</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Applicant Information -->
+            <div class="wizard-content active" data-step="1">
+                <div class="permit-section">
+                    <h3 class="permit-section-title">Datos del Solicitante</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="permit-nombre-completo">Nombre Completo <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-nombre-completo" name="nombre_completo" class="input-with-icon" required autocomplete="name" aria-describedby="permit-form-message permit-nombre-completo-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-user"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-user"></use></svg></span>
+                            </div>
+                            <small id="permit-nombre-completo-error" class="field-error" hidden></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="permit-curp-rfc">CURP o RFC <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-curp-rfc" name="curp_rfc" class="input-with-icon uppercase-input" required aria-describedby="permit-form-message permit-curp-rfc-error" placeholder="ABCD123456EFGHIJK78">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-id-card"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-id-card"></use></svg></span>
+                            </div>
+                            <small id="permit-curp-rfc-error" class="field-error" hidden></small>
+                            <small class="input-help-text">Ingrese su CURP o RFC completo sin espacios</small>
+                        </div>
+                        <div class="form-group form-group-span2">
+                            <label for="permit-domicilio">Domicilio Completo <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <textarea id="permit-domicilio" name="domicilio" rows="3" class="input-with-icon" required aria-describedby="permit-form-message permit-domicilio-error" placeholder="Calle y Número, Colonia, Código Postal, Ciudad, Estado"></textarea>
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-home"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-home"></use></svg></span>
+                            </div>
+                            <small id="permit-domicilio-error" class="field-error" hidden></small>
+                            <small class="input-help-text">Ejemplo: Av. Insurgentes Sur 1602, Crédito Constructor, 03940, Ciudad de México, CDMX</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <div></div> <!-- Empty div for flex spacing -->
+                    <button type="button" class="btn btn-primary btn-next" data-next="2">
+                        <span class="button-text">Siguiente</span>
+                        <svg class="icon icon-chevron-right" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-chevron-right"></use></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Vehicle Information -->
+            <div class="wizard-content" data-step="2">
+                <div class="permit-section">
+                    <h3 class="permit-section-title">Datos del Vehículo</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="permit-marca">Marca <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-marca" name="marca" class="input-with-icon" required aria-describedby="permit-form-message permit-marca-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-car"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-car"></use></svg></span>
+                            </div>
+                            <small id="permit-marca-error" class="field-error" hidden></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="permit-linea">Línea/Modelo <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-linea" name="linea" class="input-with-icon" required aria-describedby="permit-form-message permit-linea-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-car"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-car"></use></svg></span>
+                            </div>
+                            <small id="permit-linea-error" class="field-error" hidden></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="permit-color">Color <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-color" name="color" class="input-with-icon" required aria-describedby="permit-form-message permit-color-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-palette"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-palette"></use></svg></span>
+                            </div>
+                            <small id="permit-color-error" class="field-error" hidden></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="permit-ano-modelo">Año Modelo <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="permit-ano-modelo" name="ano_modelo" class="input-with-icon" required min="1900" max="2100" step="1" aria-describedby="permit-form-message permit-ano-modelo-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-calendar"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-calendar"></use></svg></span>
+                            </div>
+                            <small id="permit-ano-modelo-error" class="field-error" hidden></small>
+                        </div>
+                        <div class="form-group form-group-span2">
+                            <label for="permit-numero-serie">Número de Serie (VIN) <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-numero-serie" name="numero_serie" class="input-with-icon uppercase-input" required minlength="17" maxlength="17" aria-describedby="permit-form-message permit-numero-serie-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-barcode"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-barcode"></use></svg></span>
+                            </div>
+                            <small id="permit-numero-serie-error" class="field-error" hidden></small>
+                            <small class="input-help-text">El número de serie (VIN) debe tener exactamente 17 caracteres</small>
+                        </div>
+                        <div class="form-group form-group-span2">
+                            <label for="permit-numero-motor">Número de Motor <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input type="text" id="permit-numero-motor" name="numero_motor" class="input-with-icon" required aria-describedby="permit-form-message permit-numero-motor-error">
+                                <span class="input-icon" aria-hidden="true"><svg class="icon icon-engine"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-engine"></use></svg></span>
+                            </div>
+                            <small id="permit-numero-motor-error" class="field-error" hidden></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <button type="button" class="btn btn-secondary btn-prev" data-prev="1">
+                        <svg class="icon icon-chevron-left" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-chevron-left"></use></svg>
+                        <span class="button-text">Anterior</span>
+                    </button>
+                    <button type="button" class="btn btn-primary btn-next" data-next="3">
+                        <span class="button-text">Revisar</span>
+                        <svg class="icon icon-chevron-right" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-chevron-right"></use></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review and Submit -->
+            <div class="wizard-content" data-step="3">
+                <div class="permit-section">
+                    <h3 class="permit-section-title">Revisar Información</h3>
+                    <p>Por favor revise cuidadosamente la información antes de enviar su solicitud.</p>
+
+                    <div class="permit-card">
+                        <h4>Datos del Solicitante</h4>
+                        <dl class="detail-list detail-grid">
+                            <div><dt>Nombre Completo:</dt><dd id="review-nombre-completo">-</dd></div>
+                            <div><dt>CURP/RFC:</dt><dd id="review-curp-rfc">-</dd></div>
+                            <div class="span-2"><dt>Domicilio:</dt><dd id="review-domicilio">-</dd></div>
+                        </dl>
+                    </div>
+
+                    <div class="permit-card">
+                        <h4>Datos del Vehículo</h4>
+                        <dl class="detail-list detail-grid">
+                            <div><dt>Marca:</dt><dd id="review-marca">-</dd></div>
+                            <div><dt>Línea/Modelo:</dt><dd id="review-linea">-</dd></div>
+                            <div><dt>Color:</dt><dd id="review-color">-</dd></div>
+                            <div><dt>Año Modelo:</dt><dd id="review-ano-modelo">-</dd></div>
+                            <div class="span-2"><dt>Número de Serie (VIN):</dt><dd id="review-numero-serie" class="monospace-text">-</dd></div>
+                            <div class="span-2"><dt>Número de Motor:</dt><dd id="review-numero-motor" class="monospace-text">-</dd></div>
+                        </dl>
+                    </div>
+                </div>
+                <div class="wizard-buttons">
+                    <button type="button" class="btn btn-secondary btn-prev" data-prev="2">
+                        <svg class="icon icon-chevron-left" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-chevron-left"></use></svg>
+                        <span class="button-text">Anterior</span>
+                    </button>
+                    <button type="submit" id="permit-submit-btn" class="btn btn-primary">
+                        <span class="button-text">Enviar Solicitud</span>
+                        <div class="spinner" hidden aria-label="Enviando..."></div>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

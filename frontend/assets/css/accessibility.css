@@ -1,0 +1,77 @@
+/* === Accessibility Styles === */
+/* Styles to improve accessibility and screen reader support */
+
+/* Screen reader only - Hide visually but available to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Screen reader only, but focusable - Becomes visible when focused */
+.sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  z-index: 9999;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border-bottom-right-radius: var(--border-radius-md);
+}
+
+/* Visually hidden but still accessible to screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 3px solid rgba(var(--color-primary-rgb), 0.5);
+  outline-offset: 2px;
+}
+
+/* High contrast mode improvements */
+@media (forced-colors: active) {
+  .btn-primary {
+    border: 2px solid currentColor;
+  }
+  
+  .app-header, .app-footer {
+    border: 1px solid currentColor;
+  }
+}

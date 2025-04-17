@@ -1,0 +1,111 @@
+<!-- === Dashboard View Partial (/frontend/views/dashboard.html) === -->
+<!-- This HTML fragment is loaded dynamically into the #app-root container by main.js -->
+
+<div class="dashboard-container">
+    <!-- Dashboard Header Section -->
+    <header class="dashboard-header" aria-labelledby="dashboard-title">
+        <div class="dashboard-header-content">
+            <h1 id="dashboard-title">Mis Permisos Digitales</h1>
+            <div class="dashboard-actions">
+                <button id="clear-cache-btn" class="btn btn-icon btn-secondary" type="button" aria-label="Actualizar Caché">
+                    <svg class="icon" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-renew"></use></svg>
+                    <span class="btn-text">Actualizar Caché</span>
+                </button>
+                <button id="force-reload-btn" class="btn btn-icon btn-danger" type="button" aria-label="Forzar Recarga">
+                    <svg class="icon" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-refresh"></use></svg>
+                    <span class="btn-text">Forzar Recarga</span>
+                </button>
+                <a href="#/permits/new" class="btn btn-icon btn-primary" role="button" aria-label="Solicitar Nuevo Permiso">
+                    <svg class="icon" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-plus"></use></svg>
+                    <span class="btn-text">Solicitar Nuevo Permiso</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Error Message Area -->
+    <div id="dashboard-error-message" class="message-area error-message" hidden aria-live="assertive"></div>
+
+    <!-- Expiring Permits Section -->
+    <section id="expiring-permits" class="dashboard-section expiring-section" hidden aria-labelledby="expiring-title">
+        <div class="section-header">
+            <h2 id="expiring-title" class="section-title">Permisos Próximos a Vencer</h2>
+        </div>
+        <div class="section-content">
+            <ul id="expiring-permits-list" class="expiring-list"></ul>
+        </div>
+    </section>
+
+    <!-- Main Applications Section -->
+    <section id="application-list-section" class="dashboard-section" aria-labelledby="applications-title">
+        <div class="section-header">
+            <h2 id="applications-title" class="section-title">Historial de Solicitudes</h2>
+        </div>
+        <div class="section-content">
+            <!-- Empty State Message -->
+            <div id="empty-state-message" class="empty-state" hidden>
+                <svg class="empty-state-icon" focusable="false" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-document"></use></svg>
+                <p class="empty-state-text">Aún no tienes solicitudes de permiso registradas.</p>
+                <a href="#/permits/new" class="btn btn-primary">Solicitar tu primer permiso</a>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <!-- Applications Data Table -->
+                <table id="application-table" class="data-table" aria-labelledby="applications-title">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="col-id">ID</th>
+                            <th scope="col" class="col-vehicle">Vehículo</th>
+                            <th scope="col" class="col-folio">Folio</th>
+                            <th scope="col" class="col-status">Estado</th>
+                            <th scope="col" class="col-date">Fecha Solicitud</th>
+                            <th scope="col" class="col-date">Fecha Vencimiento</th>
+                            <th scope="col" class="col-relation">Relación</th>
+                            <th scope="col" class="col-actions">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <!-- Skeleton Loading State -->
+                    <tbody id="skeleton-tbody" class="skeleton-loading" aria-busy="true" aria-label="Cargando lista de solicitudes...">
+                        <tr>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line skeleton-badge"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-actions"><span></span><span></span></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line skeleton-badge"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-actions"><span></span><span></span></div></td>
+                        </tr>
+                        <tr>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line skeleton-badge"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-line"></div></td>
+                            <td><div class="skeleton-actions"><span></span><span></span></div></td>
+                        </tr>
+                    </tbody>
+
+                    <!-- Real Data Body (Populated by JS) -->
+                    <tbody id="application-list-body" hidden>
+                        <!-- Application rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>

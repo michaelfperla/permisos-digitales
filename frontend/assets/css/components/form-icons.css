@@ -1,0 +1,71 @@
+/* === Form Icons Component Styles === */
+/* This file provides consistent styling for form field icons across the application */
+/* Based on the implementation in login.css */
+
+/* Input field wrapper for positioning icons */
+.input-wrapper {
+  position: relative;
+}
+
+/* Base styling for icons inside input fields */
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  font-size: 1.1em;
+  z-index: 2;
+  transition: color var(--transition-duration-base) var(--transition-easing-base);
+}
+
+/* Adjustments for SVG icons in inputs */
+.input-icon .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* SVG icon sizing */
+.input-icon svg {
+  width: 1.1em;
+  height: 1.1em;
+  display: block;
+}
+
+/* Change icon color when the input is focused */
+.form-group:focus-within .input-icon {
+  color: var(--color-primary);
+}
+
+/* Input padding to accommodate the icon */
+.input-with-icon {
+  padding-left: 45px !important; /* Make space for icon */
+}
+
+/* Textarea icon positioning */
+.form-group textarea + .input-icon {
+  top: 24px;
+  transform: none;
+}
+
+/* Specific adjustments for problematic icons */
+.form-group .input-icon .icon-car,
+.form-group .input-icon svg.icon-car {
+  /* No transform needed for the new car icon */
+}
+
+.form-group .input-icon .icon-calendar,
+.form-group .input-icon svg.icon-calendar {
+  transform: translateX(1px);
+}
+
+.form-group .input-icon .icon-palette,
+.form-group .input-icon svg.icon-palette {
+  transform: translateX(0.5px);
+}
+
+.form-group .input-icon .icon-engine,
+.form-group .input-icon svg.icon-engine {
+  transform: translateX(0.5px);
+}

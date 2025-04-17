@@ -1,0 +1,62 @@
+<!-- === Admin Login View (/frontend/views/admin-login.html) === -->
+<!-- This HTML fragment is loaded dynamically into the #app-root container by main.js -->
+
+<div class="admin-auth-container">
+    <!-- The outer container responsible for centering the card -->
+
+    <div class="admin-auth-card" role="region" aria-labelledby="admin-login-title">
+        <!-- The card UI element containing the login form -->
+
+        <header class="admin-auth-header">
+            <!-- Header section within the card -->
+            <img src="/assets/img/logo.svg?v=3.0.0" alt="Permisos Digitales Admin" class="admin-auth-logo">
+            <h1 id="admin-login-title">Panel de Administración</h1>
+            <p class="admin-auth-subtitle">Acceso restringido a personal autorizado</p>
+
+            <!-- Error Message Area: Dynamically populated by admin-auth.js -->
+            <div id="admin-login-error-message" class="error-message" hidden aria-live="assertive">
+                <!-- Error messages appear here -->
+            </div>
+        </header>
+
+        <form id="admin-login-form" class="admin-auth-form" novalidate>
+            <!-- The login form itself -->
+
+            <div class="form-group">
+                <!-- Grouping for label, input, and icon -->
+                <label for="admin-login-email" class="sr-only">Correo Electrónico</label>
+                <div class="input-wrapper">
+                    <input type="email" id="admin-login-email" name="email" placeholder="Correo Electrónico" required autocomplete="email" aria-describedby="admin-login-error-message admin-login-email-error">
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-envelope"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-envelope"></use></svg></span>
+                </div>
+                <small id="admin-login-email-error" class="field-error" hidden></small>
+            </div>
+
+            <div class="form-group">
+                <label for="admin-login-password" class="sr-only">Contraseña</label>
+                <div class="input-wrapper password-wrapper">
+                    <input type="password" id="admin-login-password" name="password" placeholder="Contraseña" required autocomplete="current-password" aria-describedby="admin-login-error-message admin-login-password-error">
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-lock"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-lock"></use></svg></span>
+                    <button type="button" id="admin-login-toggle-password" class="password-toggle-btn" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar/Ocultar contraseña">
+                        <span class="toggle-icon"><svg class="icon icon-eye"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-eye"></use></svg></span>
+                    </button>
+                </div>
+                <small id="admin-login-password-error" class="field-error" hidden></small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="admin-login-submit-btn" class="btn btn-primary">
+                    <span class="button-text">Iniciar Sesión</span>
+                    <div class="spinner" hidden aria-label="Cargando..."></div>
+                </button>
+            </div>
+        </form>
+
+        <footer class="admin-auth-links">
+            <a href="#/forgot-password">¿Olvidaste tu contraseña?</a>
+            <span>|</span>
+            <a href="/">Ir a portal público</a>
+        </footer>
+
+    </div>
+</div>

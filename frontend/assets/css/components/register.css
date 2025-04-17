@@ -1,0 +1,42 @@
+/* === Registration Component Styles === */
+/* Styles specific to the registration view (/views/register.html) */
+/* Relies heavily on styles defined in main.css and login.css */
+
+/* --- Unique Registration Elements --- */
+
+/* Password Requirements Helper Text */
+.form-text {
+  display: block;
+  margin-top: var(--spacing-sm);
+  padding-left: var(--spacing-xs);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+/* Registration Specific Error/Success Message */
+#register-error-message {
+  /* Base styles inherited from .message-area in main.css */
+  margin-top: var(--spacing-md);
+}
+
+/* Style for success message state */
+#register-error-message.success-message {
+    /* Base styles inherited */
+    border-left: 4px solid var(--color-success); /* Add a distinct left border */
+}
+#register-error-message.success-message a {
+    /* Style link inside success message */
+    color: var(--color-success);
+    font-weight: var(--font-weight-medium);
+    text-decoration: underline;
+}
+#register-error-message.success-message a:hover {
+    color: darken(var(--color-success), 10%);
+}
+
+/* Registration specific footer link styling */
+/* .auth-links p { ... } */ /* Handled in login.css */
+/* .auth-links a { ... } */ /* Handled in login.css */
+
+/* --- End of register.css --- */

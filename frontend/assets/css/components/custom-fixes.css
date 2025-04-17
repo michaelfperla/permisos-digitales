@@ -1,0 +1,200 @@
+/* === Custom Fixes and Enhancements === */
+/* Custom fixes and visual enhancements for a professional appearance */
+
+/* ==== EMERGENCY FIXES ==== */
+/* Critical fixes for button colors and login functionality */
+
+/* EMERGENCY FIX: Make buttons red, not blue */
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary,
+.btn-primary,
+.hero-cta-primary,
+.btn.btn-primary,
+.cta-buttons .btn-primary {
+  background-color: #a72b31 !important;
+  border-color: #a72b31 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(167, 43, 49, 0.2) !important;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+input[type="submit"].btn-primary:hover,
+.hero-cta-primary:hover,
+.btn.btn-primary:hover,
+.cta-buttons .btn-primary:hover {
+  background-color: #852d2d !important;
+  border-color: #852d2d !important;
+  color: #ffffff !important;
+}
+
+/* Ultra-high specificity selector to ensure it overrides ANY other styles */
+html body main .btn-primary,
+html body main button.btn-primary,
+html body main a.btn-primary,
+html body main input[type="submit"].btn-primary,
+html body .hero-section .btn-primary,
+html body .final-cta-section .btn-primary,
+html body .form-actions .btn-primary {
+  background-color: #a72b31 !important;
+  border-color: #a72b31 !important;
+  color: #ffffff !important;
+}
+
+/* Fix for hero section CTA button */
+.hero-content .hero-cta .btn-primary,
+.cta-buttons .btn-primary,
+.form-actions .btn-primary {
+  background-color: #a72b31 !important;
+  border-color: #a72b31 !important;
+  color: #fff !important;
+}
+
+/* Fix login forms and submit buttons */
+#login-submit-btn,
+#admin-login-submit-btn,
+#reset-submit-btn,
+#forgot-submit-btn,
+#register-submit-btn {
+  background-color: #a72b31 !important;
+  border-color: #a72b31 !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced button styling with shine animation */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0), 
+    rgba(255, 255, 255, 0.2), 
+    rgba(255, 255, 255, 0));
+  transition: all 1s ease;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Enhanced card styling with subtle hover effects */
+.permit-card, .auth-card {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 
+              0 2px 10px rgba(0, 0, 0, 0.05), 
+              0 0 0 1px rgba(var(--color-primary-rgb), 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.permit-card:hover, .auth-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 
+              0 3px 15px rgba(0, 0, 0, 0.04), 
+              0 0 0 1px rgba(var(--color-primary-rgb), 0.08);
+}
+
+/* Text selection styling */
+::selection {
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+  color: var(--color-primary-dark);
+}
+
+/* Subtle animations for important UI elements */
+.hero-cta-primary, .btn-primary[type="submit"] {
+  animation: subtle-pulse 2s infinite alternate;
+}
+
+@keyframes subtle-pulse {
+  0% {
+    box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.2);
+  }
+  100% {
+    box-shadow: 0 8px 16px rgba(var(--color-primary-rgb), 0.3);
+  }
+}
+
+/* Ensure buttons never have underlines on hover */
+a.btn:hover,
+button:hover,
+.btn:hover,
+.btn-like-link:hover,
+.header-navigation a:hover,
+.header-navigation button:hover,
+.nav-link:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+a[class*="btn-"]:hover {
+  text-decoration: none !important;
+}
+
+/* Enhanced form input styling */
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.02);
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.15);
+  outline: none;
+}
+
+/* Custom scrollbar for modern browsers */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-primary-rgb), 0.2);
+  border-radius: 6px;
+  border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-primary-rgb), 0.3);
+}
+
+/* Enhanced badges */
+.status-badge {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  transform: translateY(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure mobile menu close button is never visible in desktop view */
+@media (min-width: 769px) {
+  .mobile-menu-close,
+  #mobile-menu-close {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* Only show close button in mobile view when menu is open */
+.mobile-menu-close,
+#mobile-menu-close {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .app-header.mobile-menu-open .mobile-menu-close,
+  .app-header.mobile-menu-open #mobile-menu-close {
+    display: flex !important;
+  }
+}

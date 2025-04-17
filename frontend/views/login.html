@@ -1,0 +1,121 @@
+<!-- === Login View Partial (/frontend/views/login.html) === -->
+<!-- This HTML fragment is loaded dynamically into the #app-root container by main.js -->
+
+<div class="auth-container">
+    <!-- The outer container responsible for centering the card -->
+
+    <div class="auth-card" role="region" aria-labelledby="login-title">
+        <!-- The card UI element containing the login form -->
+        <!-- role="region" and aria-labelledby improve accessibility by defining landmark -->
+
+        <header class="auth-header">
+            <!-- Header section within the card -->
+            <img src="/assets/img/logo.svg?v=3.0.0" alt="Permisos Digitales Logo" class="auth-logo">
+            <h1 id="login-title">Iniciar Sesión</h1>
+
+            <!-- Error Message Area: Dynamically populated by auth.js -->
+            <!-- 'aria-live="assertive"' ensures screen readers announce errors immediately -->
+            <!-- 'hidden' attribute is toggled by JS -->
+            <div id="login-error-message" class="error-message" hidden aria-live="assertive">
+                <!-- Error messages appear here -->
+            </div>
+        </header>
+
+        <form id="login-form" class="auth-form" novalidate>
+            <!-- The login form itself. 'novalidate' disables default browser validation,
+                 as we'll handle it more smoothly with JavaScript (auth.js) -->
+
+            <div class="form-group">
+                <!-- Grouping for label, input, and icon -->
+                <label for="login-email" class="sr-only">Correo Electrónico</label>
+                <!-- Visually hidden label, essential for screen readers -->
+                <div class="input-wrapper">
+                    <!-- Wrapper for positioning the icon -->
+                    <input type="email" id="login-email" name="email" placeholder="Correo Electrónico" required autocomplete="email" aria-describedby="login-error-message login-email-error">
+                    <!-- Input field:
+                         type="email" provides basic mobile keyboard hints and browser validation (though disabled by novalidate)
+                         id="login-email" links the label and is used by JS
+                         name="email" is used for form submission data (key in the JSON body)
+                         placeholder provides a visual hint
+                         required indicates the field must be filled (primarily for semantics/fallback)
+                         autocomplete="email" helps browsers autofill known email addresses
+                         aria-describedby links the input to the error message area for accessibility -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-envelope"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-envelope"></use></svg></span>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="login-email-error" class="field-error" hidden></small>
+                <!-- Decorative icon (aria-hidden hides it from screen readers) -->
+            </div>
+
+            <div class="form-group">
+                <label for="login-password" class="sr-only">Contraseña</label>
+                <div class="input-wrapper password-wrapper">
+                    <!-- Password input with visibility toggle -->
+                    <input type="password" id="login-password" name="password" placeholder="Contraseña" required autocomplete="current-password" aria-describedby="login-error-message login-password-error">
+                    <!-- type="password" masks input
+                         autocomplete="current-password" hints to password managers -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-lock"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-lock"></use></svg></span>
+                    <button type="button" id="login-toggle-password" class="password-toggle-btn" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar/Ocultar contraseña">
+                        <!-- Password visibility toggle button:
+                             type="button" prevents form submission
+                             aria-label describes the button's initial function
+                             aria-pressed indicates the toggle state (managed by JS) -->
+                        <span class="toggle-icon"><svg class="icon icon-eye"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-eye"></use></svg></span>
+                        <!-- The icon itself (will be updated by JS) -->
+                    </button>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="login-password-error" class="field-error" hidden></small>
+            </div>
+
+            <div class="form-actions">
+                <!-- Container for the main form action button -->
+                <button type="submit" id="login-submit-btn" class="btn btn-primary">
+                    <!-- The submit button:
+                         type="submit" triggers the form's submit event
+                         id is used by JS for targeting (e.g., loading state)
+                         classes define its appearance -->
+                    <span class="button-text">Iniciar Sesión</span>
+                    <!-- The visible text of the button -->
+                    <div class="spinner" hidden aria-label="Cargando..."></div>
+                    <!-- Loading indicator, initially hidden (managed by JS)
+                         aria-label provides context for the spinner when visible -->
+                </button>
+            </div>
+        </form>
+
+        <footer class="auth-links">
+            <!-- Footer section with auxiliary links -->
+            <a href="#/forgot-password">¿Olvidaste tu contraseña?</a>
+            <span>|</span> <!-- Simple visual separator -->
+            <a href="#/register">¿No tienes cuenta? Regístrate</a>
+            <!-- Hash links (#/...) trigger the SPA router in main.js -->
+            
+            <!-- Debug info to help troubleshoot -->
+            <div id="debug-info" style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                <div>Debug info - remove in production</div>
+                <div id="debug-auth-status">Auth status: Checking...</div>
+                <div id="debug-csp-status">CSP status: Checking...</div>
+                <div id="debug-css-status">CSS status: <span style="color: #a72b31;">Red button test</span></div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Check auth status
+                        const authStatus = sessionStorage.getItem('isAuthenticated') === 'true' ? 'Logged in' : 'Not logged in';
+                        document.getElementById('debug-auth-status').textContent = 'Auth status: ' + authStatus;
+                        
+                        // Check if our script is loading properly
+                        setTimeout(function() {
+                            // By this time, our auth.js script should have been loaded
+                            if (window.initLoginPage) {
+                                document.getElementById('debug-csp-status').textContent = 'CSP status: Scripts loading correctly';
+                            } else {
+                                document.getElementById('debug-csp-status').textContent = 'CSP status: Script loading issues';
+                            }
+                        }, 1000);
+                    });
+                </script>
+            </div>
+        </footer>
+
+    </div> <!-- End of auth-card -->
+</div> <!-- End of auth-container -->

@@ -1,0 +1,753 @@
+/* === Permisos Digitales - Permit Pages Stylesheet === */
+/* Styles for the permit form and permit detail pages */
+
+/* --- Common Styles for Permit Pages --- */
+.permit-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  position: relative;
+}
+
+/* Subtle background pattern */
+.permit-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -19px -19px;
+  opacity: 0.4;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Page entrance animation */
+.permit-container > * {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.permit-container > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.permit-container > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.permit-container > *:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+/* --- Status Header Styles --- */
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.status-header .permit-section-title {
+  margin-bottom: 0;
+}
+
+.permit-actions {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.permit-card {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-md);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  transition: all var(--transition-duration-base) var(--transition-easing-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.permit-card:hover {
+  box-shadow: var(--box-shadow-lg);
+}
+
+/* Card accent line */
+.permit-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-dark));
+  opacity: 0.8;
+}
+
+/* Card subtle pattern */
+.permit-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background-image: radial-gradient(circle at center, var(--color-primary-light) 0%, transparent 70%);
+  opacity: 0.05;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.permit-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.permit-section-title {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-semibold);
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-sm);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-bottom: var(--spacing-md);
+  font-size: 0.9rem;
+  transition: color var(--transition-duration-base) var(--transition-easing-base);
+}
+
+.back-link:hover {
+  color: var(--color-primary);
+}
+
+.back-link .icon {
+  margin-right: var(--spacing-xs);
+}
+
+/* --- Status Badge Styles --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-pill);
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge .icon {
+  margin-right: var(--spacing-xs);
+}
+
+.status-badge.status-pending,
+.status-badge.status-pending_payment,
+.status-badge.status-proof_submitted {
+  background-color: rgba(var(--color-warning-rgb), 0.15);
+  color: #856404;
+}
+
+.status-badge.status-approved,
+.status-badge.status-permit_ready,
+.status-badge.status-completed {
+  background-color: rgba(var(--color-success-rgb), 0.15);
+  color: #155724;
+}
+
+.status-badge.status-rejected,
+.status-badge.status-proof_rejected,
+.status-badge.status-expired {
+  background-color: rgba(var(--color-danger-rgb), 0.15);
+  color: #721c24;
+}
+
+/* --- Timeline Styles --- */
+.permit-timeline {
+  margin: var(--spacing-xl) 0;
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: var(--spacing-lg);
+  animation: fadeInRight 0.5s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.timeline-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.timeline-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.timeline-item:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  z-index: 1;
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.1);
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover::before {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 6px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  left: -23px;
+  top: 15px;
+  width: 2px;
+  height: calc(100% - 15px);
+  background-color: var(--color-border);
+  transition: background-color 0.3s ease;
+}
+
+.timeline-item:hover::after {
+  background-color: var(--color-primary-light);
+}
+
+.timeline-item:last-child::after {
+  display: none;
+}
+
+.timeline-date {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xs);
+  transition: color 0.3s ease;
+}
+
+.timeline-item:hover .timeline-date {
+  color: var(--color-primary);
+}
+
+.timeline-title {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xs);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.timeline-item:hover .timeline-title {
+  transform: translateX(3px);
+  color: var(--color-primary-dark);
+}
+
+.timeline-content {
+  color: var(--color-text);
+  position: relative;
+  padding-left: 10px;
+  border-left: 2px solid transparent;
+  transition: border-left-color 0.3s ease, padding-left 0.3s ease;
+}
+
+.timeline-item:hover .timeline-content {
+  border-left-color: var(--color-primary-light);
+  padding-left: 15px;
+}
+
+.timeline-item.completed::before {
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 4px rgba(var(--color-success-rgb), 0.1);
+}
+
+.timeline-item.completed:hover::before {
+  box-shadow: 0 0 0 6px rgba(var(--color-success-rgb), 0.2);
+}
+
+.timeline-item.pending::before {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 4px rgba(var(--color-warning-rgb), 0.1);
+}
+
+.timeline-item.pending:hover::before {
+  box-shadow: 0 0 0 6px rgba(var(--color-warning-rgb), 0.2);
+}
+
+.timeline-item.rejected::before {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 0 4px rgba(var(--color-danger-rgb), 0.1);
+}
+
+.timeline-item.rejected:hover::before {
+  box-shadow: 0 0 0 6px rgba(var(--color-danger-rgb), 0.2);
+}
+
+.timeline-item.future::before {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  box-shadow: 0 0 0 4px rgba(var(--color-secondary-rgb), 0.1);
+}
+
+.timeline-item.future:hover::before {
+  box-shadow: 0 0 0 6px rgba(var(--color-secondary-rgb), 0.2);
+}
+
+/* --- Form Wizard Styles --- */
+.form-wizard {
+  position: relative;
+}
+
+.wizard-progress {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  padding: var(--spacing-sm) 0;
+}
+
+.wizard-progress::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-border);
+  z-index: 0;
+}
+
+/* Progress indicator line that fills as steps are completed */
+.wizard-progress::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(to right, var(--color-success), var(--color-primary));
+  z-index: 0;
+  transition: width 0.5s cubic-bezier(0.645, 0.045, 0.355, 1);
+  width: var(--progress-width, 0); /* Will be set by JavaScript */
+  box-shadow: 0 0 8px rgba(var(--color-primary-rgb), 0.5);
+}
+
+/* Success animation for completed steps */
+.wizard-step.step-success .step-number {
+  animation: success-pulse 1s ease;
+}
+
+@keyframes success-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--color-success-rgb), 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--color-success-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--color-success-rgb), 0);
+  }
+}
+
+/* Shake animation for validation errors */
+.shake-animation {
+  animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  border-color: var(--color-danger) !important;
+}
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+.wizard-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-sm);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.step-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Pulse animation for active step */
+.wizard-step.active .step-number::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+}
+
+.wizard-step.active .step-number {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(var(--color-primary-rgb), 0.3);
+}
+
+.wizard-step.active .step-label {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  transform: translateY(-2px);
+}
+
+.wizard-step.completed .step-number {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-white);
+  box-shadow: 0 4px 8px rgba(var(--color-success-rgb), 0.3);
+}
+
+/* Removed checkmark from completed steps */
+.wizard-step.completed .step-number::after {
+  content: '';
+}
+
+.wizard-content {
+  display: none;
+}
+
+.wizard-content.active {
+  display: block;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.wizard-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-xl);
+}
+
+.wizard-buttons .btn {
+  min-width: 120px;
+}
+
+.wizard-buttons .btn-next {
+  margin-left: auto;
+}
+
+/* --- Form Styles --- */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -10px;
+  margin-left: -10px;
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+  padding-right: 10px;
+  padding-left: 10px;
+  flex: 0 0 100%;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .form-group {
+    flex: 0 0 50%;
+  }
+  
+  .form-group-span2 {
+    flex: 0 0 100%;
+  }
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.form-group label .required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-white);
+  background-clip: padding-box;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--border-radius-md);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
+  outline: 0;
+  transform: translateY(-2px);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-group .input-help-text {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: var(--color-text-muted);
+}
+
+/* Uppercase input for VIN and other codes */
+.uppercase-input {
+  text-transform: uppercase;
+}
+
+/* Form field icon container */
+.form-group .input-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  width: 44px; /* Fixed width container for all icons */
+  height: 18px; /* Height for the icon */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the icon horizontally */
+  line-height: 1;
+  z-index: 2;
+}
+
+/* Specific adjustments for SVG icons */
+.form-group .input-icon .icon,
+.form-group .input-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Specific adjustments for problematic icons */
+.form-group .input-icon .icon-car {
+  width: 20px; /* Slightly larger to account for uneven distribution */
+  height: 20px;
+  transform: translateX(1px); /* Slight adjustment to center the car icon */
+}
+
+.form-group .input-icon .icon-calendar {
+  transform: translateX(1px); /* Slight adjustment to center the calendar icon */
+}
+
+.form-group .input-icon .icon-palette {
+  transform: translateX(0.5px); /* Slight adjustment to center the color icon */
+}
+
+/* Preserve the correct alignment of the barcode icon */
+.form-group .input-icon .icon-barcode {
+  /* No transform needed as it's already centered correctly */
+}
+
+/* Adjust the engine icon */
+.form-group .input-icon .icon-engine {
+  transform: translateX(0.5px); /* Slight adjustment to center the engine icon */
+}
+
+.form-group .input-with-icon {
+  padding-left: 44px; /* Increased to match the new icon position */
+}
+
+/* Adjust position for textarea icons */
+.form-group textarea + .input-icon {
+  top: 24px; /* Align with first line of text */
+  transform: none;
+  /* Ensure consistent size and alignment */
+  width: 44px; /* Match the width of other icon containers */
+  height: 18px; /* Match the height of other icons */
+  left: 0; /* Match the position of other icons */
+}
+
+.form-group:focus-within .input-icon {
+  color: var(--color-primary);
+  transform: translateY(-50%);
+  /* Keep the container position consistent */
+  left: 0;
+}
+
+/* Adjust transform for textarea icons when focused */
+.form-group:focus-within textarea + .input-icon {
+  transform: none;
+  color: var(--color-primary);
+  /* Keep the icon position consistent */
+  left: 0;
+}
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .permit-container {
+    padding: var(--spacing-md);
+  }
+  
+  .permit-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .wizard-progress {
+    flex-wrap: wrap;
+  }
+  
+  .wizard-step {
+    flex: 0 0 33.333%;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+  }
+  
+  .wizard-buttons {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .wizard-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* --- Print Styles --- */
+@media print {
+  .permit-container::before {
+    display: none;
+  }
+  
+  .permit-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .permit-card::before,
+  .permit-card::after {
+    display: none;
+  }
+  
+  .wizard-progress,
+  .wizard-buttons,
+  .back-link {
+    display: none;
+  }
+  
+  .timeline-item {
+    break-inside: avoid;
+  }
+}

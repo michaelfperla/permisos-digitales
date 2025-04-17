@@ -1,0 +1,148 @@
+/* === Benefits Section Styles === */
+/* Styles for the benefits section on the home page */
+
+.benefits-section {
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background-color: var(--color-white);
+  margin-top: var(--spacing-xl);
+}
+
+.benefits-section .section-title {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  font-size: 2.2rem;
+  color: var(--color-dark);
+}
+
+.benefits-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.benefit-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-light);
+  box-shadow: var(--box-shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.benefit-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-md);
+}
+
+.benefit-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+}
+
+.benefit-title {
+  font-size: 1.4rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-dark);
+}
+
+.benefit-text {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background-color: var(--color-light);
+  position: relative;
+}
+
+.how-it-works-section .section-title {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  font-size: 2.2rem;
+  color: var(--color-dark);
+}
+
+.steps-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.step-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 50%;
+  margin-bottom: var(--spacing-md);
+}
+
+.step-title {
+  font-size: 1.4rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-dark);
+}
+
+.step-text {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .benefits-section,
+  .how-it-works-section {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  
+  .benefits-list,
+  .steps-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+  
+  .benefit-item,
+  .step-item {
+    padding: var(--spacing-md);
+  }
+  
+  .benefits-section .section-title,
+  .how-it-works-section .section-title {
+    font-size: 1.8rem;
+    margin-bottom: var(--spacing-lg);
+  }
+}

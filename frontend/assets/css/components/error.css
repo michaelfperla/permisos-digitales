@@ -1,0 +1,48 @@
+/* /frontend/assets/css/components/error.css */
+
+/* === Error Pages Component Styles === */
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-unit);
+  min-height: calc(100vh - 100px);
+}
+
+.error-card {
+  background-color: var(--color-white);
+  padding: calc(var(--spacing-unit) * 3);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 5rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-unit);
+}
+
+.error-card h1 {
+  font-size: 2rem;
+  color: var(--color-dark);
+  margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+
+.error-card p {
+  color: var(--color-text-muted);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+/* Button styling is inherited from main.css and login.css */
+.error-card .btn {
+  min-width: 200px;
+}

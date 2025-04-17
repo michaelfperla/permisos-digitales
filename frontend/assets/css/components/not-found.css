@@ -1,0 +1,40 @@
+/* /frontend/assets/css/components/not-found.css */
+/* Styles for the 404 Not Found View Partial */
+
+.not-found-container {
+    text-align: center;
+    padding: var(--spacing-xxl) var(--spacing-lg);
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.not-found-title {
+    font-size: 8rem; /* Larger 404 */
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+    line-height: 1;
+    font-weight: var(--font-weight-bold);
+}
+
+.not-found-subtitle {
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    font-weight: var(--font-weight-normal);
+}
+
+.not-found-text {
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    max-width: 500px;
+    margin: 0 auto var(--spacing-xl);
+    line-height: 1.6;
+}
+
+.not-found-actions .btn-primary {
+    padding: 10px 25px;
+}

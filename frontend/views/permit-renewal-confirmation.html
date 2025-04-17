@@ -1,0 +1,107 @@
+<!-- /frontend/views/permit-renewal-confirmation.html -->
+<div class="renewal-container permit-container">
+
+    <a href="#/dashboard" class="back-link">&larr; Volver al Dashboard</a>
+
+    <h2 id="renewal-title">Confirmar Renovación de Permiso</h2>
+
+    <!-- Message area for errors or final success -->
+    <div id="renewal-message-area" class="message-area" hidden aria-live="assertive"></div>
+
+    <!-- Confirmation Details Section -->
+    <div id="renewal-confirmation-content" class="permit-card">
+        <div class="renewal-intro">
+            <svg class="icon icon-renew renewal-icon" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-renew"></use></svg>
+            <p>Estás a punto de iniciar una nueva solicitud de permiso basada en los datos de tu permiso anterior.</p>
+        </div>
+
+        <div class="original-permit-details">
+            <h4>Datos del Permiso Original a Renovar:</h4>
+            <dl>
+                <div><dt>ID Original:</dt><dd><strong id="original-permit-id">Cargando...</strong></dd></div>
+                <div><dt>Vehículo:</dt><dd id="original-permit-vehicle">Cargando...</dd></div>
+                <div><dt>Vencimiento Actual:</dt><dd id="original-permit-expiry">Cargando...</dd></div>
+                <div><dt>Nuevo Vencimiento:</dt><dd id="new-permit-expiry"><strong>30 días</strong> a partir de la aprobación del pago</dd></div>
+            </dl>
+        </div>
+
+        <div class="renewal-info">
+            <div class="renewal-payment-info">
+                <svg class="icon icon-payment" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-payment"></use></svg>
+                <div>
+                    <h4>Información de Pago</h4>
+                    <p>Se creará una nueva solicitud y se requerirá un nuevo pago de <strong id="renewal-payment-amount">197.00 MXN</strong>.</p>
+                </div>
+            </div>
+
+            <div class="renewal-data-info">
+                <svg class="icon icon-copy" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-copy"></use></svg>
+                <div>
+                    <h4>Datos del Vehículo</h4>
+                    <p>Los datos del vehículo y solicitante se copiarán automáticamente de la solicitud original.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="renewal-question">
+            <p><strong>¿Deseas continuar con la renovación?</strong></p>
+        </div>
+
+        <div class="form-actions">
+            <a href="#/dashboard" class="btn btn-secondary">Cancelar</a>
+            <button type="button" id="confirm-renewal-btn" class="btn btn-primary">
+                <span class="button-text">Confirmar y Proceder al Pago</span>
+                <div class="spinner" hidden aria-label="Procesando...">
+                    <svg class="icon icon-spinner icon-spin"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-spinner"></use></svg>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Payment Instructions Area (Initially Hidden) -->
+    <div id="payment-instructions-area" class="payment-instructions permit-card" hidden>
+        <div class="success-message">
+            <svg class="icon icon-check-circle success-icon" aria-hidden="true"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-check-circle"></use></svg>
+            <h3 id="new-renewal-title">Renovación creada con éxito</h3>
+            <p>Su solicitud de renovación ha sido creada correctamente. A continuación encontrará las instrucciones de pago.</p>
+        </div>
+
+        <div class="payment-details">
+            <div class="payment-detail-item">
+                <span class="detail-label">Nueva Solicitud ID:</span>
+                <strong id="new-application-id" class="detail-value"></strong>
+            </div>
+            <div class="payment-detail-item">
+                <span class="detail-label">Referencia de Pago:</span>
+                <code id="payment-reference" class="detail-value"></code>
+            </div>
+            <div class="payment-detail-item">
+                <span class="detail-label">Monto a Pagar:</span>
+                <span class="detail-value"><span id="payment-amount"></span> <span id="payment-currency"></span></span>
+            </div>
+        </div>
+
+        <div class="payment-methods-section">
+            <h4>Métodos de Pago:</h4>
+            <ul id="payment-methods"></ul>
+        </div>
+
+        <div class="next-steps-section">
+            <h4>Próximos Pasos:</h4>
+            <p id="payment-next-steps" class="next-steps-text"></p>
+        </div>
+
+        <div class="redirect-countdown">
+            <p>Redirigiendo al Dashboard en <span id="countdown-timer">5</span> segundos...</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a id="link-to-new-permit" href="#" class="btn btn-secondary">Ver Nueva Solicitud</a>
+            <a href="#/dashboard" class="btn btn-primary">Ir al Dashboard Ahora</a>
+        </div>
+    </div>
+
+</div>

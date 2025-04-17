@@ -1,0 +1,107 @@
+<!-- === Registration View Partial (/frontend/views/register.html) === -->
+<!-- This HTML fragment is loaded dynamically into the #app-root container by main.js -->
+
+<div class="auth-container">
+    <!-- Outer container for centering -->
+
+    <div class="auth-card" role="region" aria-labelledby="register-title">
+        <!-- Card UI element for the registration form -->
+
+        <header class="auth-header">
+            <!-- Header section -->
+            <img src="/assets/img/logo.svg?v=3.0.0" alt="Permisos Digitales Logo" class="auth-logo">
+            <h1 id="register-title">Crear Cuenta</h1>
+
+            <!-- Registration-specific Error/Success Message Area -->
+            <!-- Populated by auth.js. aria-live ensures announcements. -->
+            <div id="register-error-message" class="error-message" hidden aria-live="assertive">
+                <!-- Messages appear here -->
+            </div>
+        </header>
+
+        <form id="register-form" class="auth-form" novalidate>
+            <!-- The registration form. novalidate delegates validation to JS. -->
+
+            <div class="form-group">
+                <!-- Corrected the 'for' attribute to match the input's ID -->
+                <label for="register-first-name" class="sr-only">Nombre(s)</label>
+                <div class="input-wrapper">
+                    <input type="text" id="register-first-name" name="first_name" placeholder="Nombre(s)" required autocomplete="given-name" aria-describedby="register-error-message register-first-name-error">
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-user"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-user"></use></svg></span>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="register-first-name-error" class="field-error" hidden></small>
+            </div>
+
+             <div class="form-group">
+                <label for="register-last-name" class="sr-only">Apellidos</label>
+                <div class="input-wrapper">
+                    <input type="text" id="register-last-name" name="last_name" placeholder="Apellidos" required autocomplete="family-name" aria-describedby="register-error-message register-last-name-error">
+                     <!-- Added field for last_name to match API -->
+                     <!-- autocomplete="family-name" is the standard hint -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-user"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-user"></use></svg></span>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="register-last-name-error" class="field-error" hidden></small>
+            </div>
+
+
+            <div class="form-group">
+                <label for="register-email" class="sr-only">Correo Electrónico</label>
+                <div class="input-wrapper">
+                    <input type="email" id="register-email" name="email" placeholder="Correo Electrónico" required autocomplete="email" aria-describedby="register-error-message register-email-error">
+                    <!-- name="email" matches API -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-envelope"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-envelope"></use></svg></span>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="register-email-error" class="field-error" hidden></small>
+            </div>
+
+            <div class="form-group">
+                <label for="register-password" class="sr-only">Crear Contraseña</label>
+                <div class="input-wrapper password-wrapper">
+                    <input type="password" id="register-password" name="password" placeholder="Crear Contraseña" required autocomplete="new-password" aria-describedby="password-requirements register-error-message register-password-error">
+                    <!-- name="password" matches API -->
+                    <!-- autocomplete="new-password" hints this is for setting a new password -->
+                    <!-- aria-describedby links to BOTH requirements text and error message -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-lock"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-lock"></use></svg></span>
+                    <button type="button" id="register-toggle-password" class="password-toggle-btn" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar/Ocultar contraseña">
+                        <span class="toggle-icon"><svg class="icon icon-eye"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-eye"></use></svg></span>
+                    </button>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="register-password-error" class="field-error" hidden></small>
+                <!-- Password requirements helper text -->
+                <p id="password-requirements" class="form-text text-muted">La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas, números y símbolos.</p>
+                 <!-- Updated text to reflect typical stronger requirements -->
+            </div>
+
+            <div class="form-group">
+                <label for="register-confirm-password" class="sr-only">Confirmar Contraseña</label>
+                <div class="input-wrapper password-wrapper">
+                    <input type="password" id="register-confirm-password" name="confirmPassword" placeholder="Confirmar Contraseña" required autocomplete="new-password" aria-describedby="register-error-message register-confirm-password-error">
+                    <!-- name="confirmPassword" used for client-side validation only, not sent to API -->
+                    <span class="input-icon" aria-hidden="true"><svg class="icon icon-lock"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-lock"></use></svg></span>
+                     <button type="button" id="register-toggle-confirm-password" class="password-toggle-btn" aria-label="Mostrar contraseña" aria-pressed="false" title="Mostrar/Ocultar contraseña">
+                        <span class="toggle-icon"><svg class="icon icon-eye"><use xlink:href="/assets/icons/sprite.svg?v=3.0.0#icon-eye"></use></svg></span>
+                    </button>
+                </div>
+                <!-- NEW Error Placeholder -->
+                <small id="register-confirm-password-error" class="field-error" hidden></small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="register-submit-btn" class="btn btn-primary">
+                    <span class="button-text">Crear Mi Cuenta</span>
+                    <div class="spinner" hidden aria-label="Creando cuenta..."></div>
+                </button>
+            </div>
+        </form>
+
+        <footer class="auth-links">
+             <p>¿Ya tienes una cuenta? <a href="#/login">Inicia Sesión Aquí</a></p>
+             <!-- Link back to the login view -->
+        </footer>
+
+    </div> <!-- End of auth-card -->
+</div> <!-- End of auth-container -->

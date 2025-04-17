@@ -1,0 +1,587 @@
+/* === HOME VIEW REDESIGN STYLES === */
+/* Styles for the redesigned Home View with integrated header, hero, and ticker */
+
+/* --- CSS Variables for Layout --- */
+:root {
+  --header-height: 70px;
+  --ticker-height: 40px;
+}
+
+/* --- General Container --- */
+.home-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Benefit Ticker Section --- */
+.benefit-ticker-section {
+  position: relative;
+  z-index: 10; /* Ensure it's above the hero but below the header */
+  width: 100%;
+  background-color: var(--color-white);
+  /* Position directly below hero buttons */
+  margin-top: var(--spacing-xl); /* Add margin to create space above ticker */
+  margin-bottom: var(--spacing-xl); /* Add margin to create space between sections */
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow for separation */
+}
+
+/* Trust indicators container - Scrolling Ticker */
+.hero-trust-indicators {
+  grid-area: trust; /* Keep its grid position */
+  background-color: var(--color-light); /* Give it a subtle background */
+  padding: var(--spacing-md) 0; /* Increased vertical padding */
+  overflow: hidden; /* CRITICAL: Hide overflowing content */
+  white-space: nowrap; /* Prevent items wrapping */
+  position: relative; /* For potential pseudo-element overlays */
+  border-top: 2px solid var(--color-border); /* Thicker top border */
+  border-bottom: 2px solid var(--color-border); /* Thicker bottom border */
+  z-index: 3;
+  height: auto; /* Let height be determined by content and padding */
+  min-height: var(--ticker-height); /* Minimum height */
+  display: flex;
+  align-items: center;
+  width: 100%; /* Ensure full width */
+}
+
+/* Optional: Add subtle fade effect at the edges */
+.hero-trust-indicators::before,
+.hero-trust-indicators::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px; /* Adjust width of fade */
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-trust-indicators::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-light), transparent);
+}
+
+.hero-trust-indicators::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-light), transparent);
+}
+
+/* Ticker wrapper */
+.ticker-wrap {
+  display: inline-flex; /* Use inline-flex to allow animation */
+  align-items: center; /* Vertically align items */
+  /* The animation will be applied here */
+  animation: ticker-scroll 25s linear infinite; /* Default duration, will be overridden by JS */
+  will-change: transform; /* Performance hint */
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Additional performance optimization */
+  perspective: 1000; /* Additional performance optimization */
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+/* Ticker items (benefit text) */
+.ticker-item {
+  font-family: var(--font-family-base); /* Use Inter */
+  font-size: 1rem; /* Slightly larger */
+  font-weight: 500; /* Medium */
+  color: var(--color-text-muted);
+  padding: 0 var(--spacing-md); /* Space around text */
+  flex-shrink: 0; /* Prevent items shrinking */
+  letter-spacing: 0.01em; /* Slightly increased letter spacing */
+}
+
+/* Ticker separators */
+.ticker-separator {
+  font-size: 1rem; /* Match ticker item size */
+  font-weight: 600; /* Slightly bolder */
+  color: var(--color-primary); /* Use brand color */
+  padding: 0 var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+/* Ticker animation */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Move left by exactly one sequence width */
+    transform: translateX(calc(-100% / var(--ticker-copies, 2)));
+  }
+}
+
+/* Accessibility - Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-wrap {
+    animation-play-state: paused;
+    /* Optionally make it scrollable instead */
+    /* animation: none; */
+    /* justify-content: flex-start; */ /* Ensure it starts at beginning */
+    /* overflow-x: auto; */ /* Add scrollbar if paused */
+  }
+}
+
+/* --- Hero Section --- */
+.hero-section {
+  position: relative;
+  background-color: var(--color-white);
+  padding: var(--spacing-lg) 0 var(--spacing-lg); /* Increased padding */
+  overflow: hidden; /* Contain decorative elements */
+  display: block; /* Use block instead of flex */
+  margin-bottom: 0; /* Remove bottom margin */
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-light) 100%);
+}
+
+/* Hero content container with grid layout */
+.hero-content {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-lg);
+  position: relative;
+  z-index: 2;
+}
+
+/* New headline styling */
+.hero-headline {
+  grid-column: 1 / 8; /* Start from the left edge of the grid */
+  margin: 0 0 var(--spacing-md) 0; /* Increased bottom margin */
+  line-height: 1.1;
+  color: var(--color-dark);
+  font-family: var(--font-family-heading);
+  font-size: clamp(2.5rem, 8vw, 5rem); /* Larger, more impactful size */
+  font-weight: 700; /* Bold */
+  letter-spacing: -0.02em; /* Subtle negative tracking */
+  text-align: left;
+  max-width: 600px; /* Control line length */
+  padding-left: var(--spacing-lg); /* Add padding for better visual alignment */
+}
+
+/* Emphasis span within headline */
+.hero-emphasis {
+  color: var(--color-primary); /* Brand color for emphasis */
+  display: block; /* Force to new line if needed */
+  font-weight: 800; /* Extra bold for emphasis */
+}
+
+/* Subheadline styling */
+.hero-subheadline {
+  grid-column: 1 / 8; /* Same alignment as headline */
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-xl) 0; /* Increased bottom margin */
+  max-width: 550px; /* Control line length for readability */
+  padding-left: var(--spacing-lg); /* Add padding for better visual alignment */
+}
+
+/* CTA container */
+.hero-cta {
+  grid-column: 1 / 8; /* Same alignment as headline */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg); /* Increased gap between buttons */
+  align-items: flex-start;
+  padding-left: var(--spacing-lg); /* Add padding for better visual alignment */
+}
+
+/* Enhanced Hero Background Design */
+
+/* Main background gradient */
+.hero-section {
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-light) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Large shield graphic */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  transform: translateY(-50%);
+  width: 50%;
+  height: 80%;
+  max-width: 600px;
+  max-height: 600px;
+  background-image: url('/frontend/assets/images/shield-outline.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.06;
+  z-index: 1;
+  animation: float 15s ease-in-out infinite;
+}
+
+/* Floating animation for shield */
+@keyframes float {
+  0% { transform: translateY(-50%) translateX(0); }
+  50% { transform: translateY(-52%) translateX(5px); }
+  100% { transform: translateY(-50%) translateX(0); }
+}
+
+/* Abstract grid pattern */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(to right, rgba(var(--color-primary-rgb), 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--color-primary-rgb), 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: 1;
+  opacity: 0.8;
+}
+
+/* Decorative elements container */
+.hero-decorative-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Decorative circles */
+.decorative-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(var(--color-primary-rgb), 0.03);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.05);
+  opacity: 0.7;
+}
+
+.decorative-circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  left: -100px;
+  animation: pulse-slow 15s infinite alternate;
+}
+
+.decorative-circle-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -50px;
+  right: 15%;
+  animation: pulse-slow 10s infinite alternate-reverse;
+}
+
+/* Decorative lines */
+.decorative-line {
+  position: absolute;
+  background-color: rgba(var(--color-primary-rgb), 0.07);
+}
+
+.decorative-line-1 {
+  width: 150px;
+  height: 2px;
+  top: 20%;
+  left: 0;
+  transform: rotate(-15deg);
+}
+
+.decorative-line-2 {
+  width: 2px;
+  height: 180px;
+  top: 40%;
+  right: 25%;
+  transform: rotate(10deg);
+}
+
+/* Decorative dots */
+.decorative-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+.decorative-dot-1 {
+  top: 25%;
+  left: 15%;
+  animation: pulse-fast 4s infinite;
+}
+
+.decorative-dot-2 {
+  bottom: 30%;
+  right: 10%;
+  width: 8px;
+  height: 8px;
+  animation: pulse-fast 3s infinite 1s;
+}
+
+.decorative-dot-3 {
+  top: 60%;
+  left: 30%;
+  width: 4px;
+  height: 4px;
+  animation: pulse-fast 5s infinite 0.5s;
+}
+
+/* Pulse animations */
+@keyframes pulse-slow {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.05); opacity: 0.5; }
+}
+
+@keyframes pulse-fast {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.5); opacity: 0.3; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+/* Decorative lines */
+.decorative-line {
+  position: absolute;
+  background-color: var(--color-primary);
+  opacity: 0.1;
+}
+
+/* Decorative line 1 - Horizontal top */
+.decorative-line-1 {
+  top: 15%;
+  left: -5%;
+  width: 30%;
+  height: 1px;
+  transform: rotate(-5deg);
+}
+
+/* Decorative line 2 - Vertical right */
+.decorative-line-2 {
+  top: 40%;
+  right: 15%;
+  width: 1px;
+  height: 40%;
+}
+
+/* Decorative shapes */
+.decorative-shape {
+  position: absolute;
+  border: 1px solid var(--color-primary);
+  opacity: 0.1;
+}
+
+/* Decorative shape 1 - Square */
+.decorative-shape-1 {
+  top: 20%;
+  right: 10%;
+  width: 150px;
+  height: 150px;
+  transform: rotate(15deg);
+}
+
+/* Decorative shape 2 - Rectangle */
+.decorative-shape-2 {
+  bottom: 15%;
+  left: 5%;
+  width: 100px;
+  height: 200px;
+  transform: rotate(-10deg);
+}
+
+/* --- Final CTA Section --- */
+.final-cta-section {
+  background-color: var(--color-light);
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  text-align: center;
+  position: relative;
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  border-top: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
+  overflow: hidden;
+}
+
+.final-cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(to right, rgba(var(--color-primary-rgb), 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--color-primary-rgb), 0.02) 1px, transparent 1px);
+  background-size: 30px 30px;
+  z-index: 0;
+}
+
+/* Decorative elements for CTA section */
+.final-cta-section .decorative-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decorative-circle-cta {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.03) 0%, rgba(var(--color-primary-rgb), 0.01) 100%);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.05);
+  top: -50px;
+  right: -50px;
+}
+
+.decorative-line-cta {
+  position: absolute;
+  width: 150px;
+  height: 2px;
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+  bottom: 30%;
+  left: 10%;
+  transform: rotate(-15deg);
+}
+
+.final-cta-section .section-title {
+  font-size: 2.5rem;
+  color: var(--color-dark);
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+.final-cta-text {
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin: 0 auto var(--spacing-xl);
+  position: relative;
+  z-index: 1;
+}
+
+.final-cta {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .final-cta-section {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  .final-cta-section .section-title {
+    font-size: 2rem;
+  }
+
+  .final-cta-text {
+    font-size: 1.1rem;
+  }
+
+  .final-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Decorative dots */
+.decorative-dot {
+  position: absolute;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  opacity: 0.2;
+}
+
+/* Decorative dot 1 */
+.decorative-dot-1 {
+  top: 30%;
+  left: 20%;
+  width: 8px;
+  height: 8px;
+}
+
+/* Decorative dot 2 */
+.decorative-dot-2 {
+  bottom: 25%;
+  right: 25%;
+  width: 12px;
+  height: 12px;
+}
+
+/* --- Responsive Styles --- */
+
+/* Tablet and smaller */
+@media (max-width: 991px) {
+  .hero-headline,
+  .hero-subheadline,
+  .hero-cta {
+    grid-column: 2 / 12; /* Wider on smaller screens */
+  }
+
+  .hero-section::before {
+    opacity: 0.04; /* More subtle background on smaller screens */
+    right: 0;
+    width: 70%;
+  }
+
+  /* Adjust spacing for tablet */
+  .hero-section {
+    padding-top: var(--spacing-xs);
+  }
+
+  /* Ensure the benefit ticker is close to hero content */
+  .benefit-ticker-section {
+    margin-top: var(--spacing-sm);
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .hero-headline,
+  .hero-subheadline,
+  .hero-cta {
+    grid-column: 1 / -1; /* Full width on mobile */
+    padding-left: var(--spacing-md); /* Consistent left padding */
+    padding-right: var(--spacing-md);
+  }
+
+  .hero-headline {
+    font-size: clamp(2rem, 10vw, 3rem); /* Smaller on mobile */
+  }
+
+  .hero-section {
+    padding: var(--spacing-xs) 0 var(--spacing-xs);
+  }
+
+  .hero-section::before {
+    opacity: 0.03; /* Even more subtle background on mobile */
+    width: 90%;
+  }
+
+  .hero-cta {
+    align-items: stretch; /* Full width buttons on mobile */
+  }
+
+  .hero-cta-secondary {
+    text-align: center; /* Center text in secondary button on mobile */
+  }
+
+  /* Ensure the benefit ticker is close to hero content on mobile */
+  .benefit-ticker-section {
+    margin-top: var(--spacing-xs);
+  }
+}
