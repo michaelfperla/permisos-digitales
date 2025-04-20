@@ -19,22 +19,25 @@ const LOCKOUT_SECONDS = LOCKOUT_TIME / 1000; // Convert to seconds for Redis TTL
 async function recordFailedAttempt(identifier) {
   const config = require('../config');
 
-  // Handle case when Redis client is completely unavailable
-  if (!redisClient) {
-    logger.error('Redis client not available for recordFailedAttempt.');
+  // Check if Redis client is unavailable or not in ready state
+  if (!redisClient || redisClient.status !== 'ready') {
+    logger.error('Redis client not available or not ready for recordFailedAttempt.');
 
     if (config.nodeEnv === 'production') {
-      // In production, assume this attempt triggers a lockout for safety
-      logger.warn(`SECURITY: Auto-locking account ${identifier} due to Redis unavailability during failed login`);
+      // In production, log a critical error but don't auto-lock
+      // This prevents widespread lockouts during temporary Redis issues
+      logger.error(`SECURITY ALERT: Unable to record failed login attempt for ${identifier} due to Redis unavailability`);
+      logger.warn('Note: Account lockout status will be checked on next login attempt (fail-closed)');
       return {
-        attempts: MAX_ATTEMPTS, // Assume max attempts reached
-        lockedUntil: Date.now() + LOCKOUT_TIME,
-        redisUnavailable: true // Flag to indicate this is due to Redis being down
+        attempts: 1, // We don't know the actual count
+        lockedUntil: null,
+        redisUnavailable: true, // Flag to indicate this is due to Redis being down
+        recorded: false // Indicate that the attempt was not actually recorded
       };
     } else {
       // In development, return a default structure
       logger.warn('Development environment: Not recording failed attempt due to Redis unavailability');
-      return { attempts: 0, lockedUntil: null, redisUnavailable: true };
+      return { attempts: 0, lockedUntil: null, redisUnavailable: true, recorded: false };
     }
   }
 
@@ -69,18 +72,21 @@ async function recordFailedAttempt(identifier) {
 
     // Handle Redis errors differently based on environment
     if (config.nodeEnv === 'production') {
-      // In production, assume this attempt triggers a lockout for safety
-      logger.warn(`SECURITY: Auto-locking account ${identifier} due to Redis error during failed login`);
+      // In production, log a critical error but don't auto-lock
+      // This prevents widespread lockouts during temporary Redis issues
+      logger.error(`SECURITY ALERT: Unable to record failed login attempt for ${identifier} due to Redis error`);
+      logger.warn('Note: Account lockout status will be checked on next login attempt (fail-closed)');
       return {
-        attempts: MAX_ATTEMPTS, // Assume max attempts reached
-        lockedUntil: Date.now() + LOCKOUT_TIME,
+        attempts: 1, // We don't know the actual count
+        lockedUntil: null,
         redisUnavailable: true, // Flag to indicate this is due to Redis being down
-        redisError: true // Additional flag to indicate this was an error, not just unavailability
+        redisError: true, // Additional flag to indicate this was an error, not just unavailability
+        recorded: false // Indicate that the attempt was not actually recorded
       };
     } else {
       // In development, return a default structure
       logger.warn('Development environment: Not recording failed attempt due to Redis error');
-      return { attempts: 0, lockedUntil: null, redisError: true };
+      return { attempts: 0, lockedUntil: null, redisError: true, recorded: false };
     }
   }
 }
@@ -93,10 +99,10 @@ async function recordFailedAttempt(identifier) {
 async function resetAttempts(identifier) {
   const config = require('../config');
 
-  // Handle case when Redis client is completely unavailable
-  if (!redisClient) {
+  // Check if Redis client is unavailable or not in ready state
+  if (!redisClient || redisClient.status !== 'ready') {
     if (config.nodeEnv === 'production') {
-      logger.error(`Redis client not available for resetAttempts on ${identifier}.`);
+      logger.error(`Redis client not available or not ready for resetAttempts on ${identifier}.`);
       logger.warn('SECURITY NOTE: Unable to reset login attempts due to Redis unavailability');
       // In production, we can't reset attempts without Redis, but this is less critical
       // than the other functions since it only affects user convenience, not security
@@ -133,9 +139,9 @@ async function resetAttempts(identifier) {
 async function checkLockStatus(identifier) {
   const config = require('../config');
 
-  // Handle case when Redis client is completely unavailable
-  if (!redisClient) {
-    logger.error('Redis client not available for checkLockStatus.');
+  // Check if Redis client is unavailable or not in ready state
+  if (!redisClient || redisClient.status !== 'ready') {
+    logger.error('Redis client not available or not ready for checkLockStatus.');
 
     if (config.nodeEnv === 'production') {
       // In production, fail closed (safer security approach)
