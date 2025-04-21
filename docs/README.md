@@ -17,6 +17,9 @@ Welcome to the Permisos Digitales documentation. This documentation provides com
 - [Monitoring Tools](../tools/monitoring/README.md) - Documentation for system monitoring tools
 - [Testing Tools](../tools/testing/README.md) - Documentation for testing utilities
 
+### Development Processes
+- [CI Setup](./CI-SETUP.md) - Setting up and configuring Continuous Integration
+
 ## Getting Started
 
 ### Prerequisites
