@@ -1,0 +1,185 @@
+/*
+ * Variables CSS file
+ * Contains all design tokens and configurable properties
+ */
+
+:root {
+  /* -- Primary Brand Colors -- */
+  --color-primary: #a72b31;          /* Red */
+  --color-primary-dark: #852023;     /* Dark Red */
+  --color-primary-darker: #6a1a1d;   /* Very Dark Red */
+  --color-primary-light: #c84a50;    /* Light Red */
+  --color-primary-lighter: #e8c0c2;  /* Very Light Red */
+  --color-primary-lightest: #f8e9ea; /* Extremely Light Red */
+
+  /* -- Legacy Colors (Deprecated) -- */
+  --color-accent: #ac8952;           /* Gold - Deprecated */
+  --color-accent-light: #d4b78a;     /* Light Gold - Deprecated */
+
+  /* -- Neutral Scale -- */
+  --color-white: #fff;
+  --color-neutral-100: #f8f9fa;
+  --color-neutral-200: #e9ecef;
+  --color-neutral-300: #dee2e6;      /* Base border color */
+  --color-neutral-400: #ced4da;
+  --color-neutral-500: #adb5bd;
+  --color-neutral-600: #6c757d;      /* Secondary text color */
+  --color-neutral-700: #495057;
+  --color-neutral-800: #343a40;
+  --color-neutral-900: #212529;      /* Primary text color */
+  --color-black: #000;
+
+  /* -- System Colors -- */
+  --color-blue: #0d6efd;
+  --color-indigo: #6610f2;
+  --color-purple: #6f42c1;
+  --color-pink: #d63384;
+  --color-red: #dc3545;
+  --color-orange: #fd7e14;
+  --color-yellow: #ffc107;
+  --color-green: #198754;
+  --color-teal: #20c997;
+  --color-cyan: #0dcaf0;
+
+  /* -- Functional Colors -- */
+  --color-success: var(--color-green);
+  --color-info: var(--color-cyan);
+  --color-warning: var(--color-yellow);
+  --color-danger: var(--color-red);
+  --color-light-bg: var(--color-neutral-100);
+  --color-dark-bg: var(--color-neutral-900);
+
+  /* -- Semantic Status Colors -- */
+  --status-critical: var(--color-primary);
+  --status-critical-bg: rgba(167, 43, 49, 0.1);
+  --status-critical-hover: var(--color-primary-dark);
+
+  --status-warning: var(--color-warning);
+  --status-warning-bg: rgba(255, 193, 7, 0.1);
+  --status-warning-hover: #e0a800;
+
+  --status-info: var(--color-info);
+  --status-info-bg: rgba(13, 202, 240, 0.1);
+  --status-info-hover: #0bacce;
+
+  --status-success: var(--color-success);
+  --status-success-bg: rgba(25, 135, 84, 0.1);
+  --status-success-hover: #146c43;
+
+  --status-neutral: var(--color-neutral-500);
+  --status-neutral-bg: rgba(173, 181, 189, 0.1);
+  --status-neutral-hover: var(--color-neutral-600);
+
+  /* -- Calm Waters Theme -- */
+  --calm-waters-bg: var(--color-neutral-100);
+  --calm-waters-card-bg: var(--color-white);
+  --calm-waters-card-border: var(--color-neutral-200);
+  --calm-waters-accent: #e8f4f8; /* Light blue accent for subtle highlights */
+  --calm-waters-text-primary: var(--color-neutral-900);
+  --calm-waters-text-secondary: var(--color-neutral-700);
+
+  /* -- Typography -- */
+  --font-family-sans: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-headings: 'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --font-size-base: 1rem;            /* Typically 16px */
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.25rem;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-base: 1.5;
+  --line-height-sm: 1.25;
+  --line-height-lg: 1.75;
+
+  /* -- Fluid Typography -- */
+  --font-size-fluid-xs: clamp(0.75rem, 2vw, 0.875rem);
+  --font-size-fluid-sm: clamp(0.875rem, 2.5vw, 1rem);
+  --font-size-fluid-base: clamp(1rem, 3vw, 1.125rem);
+  --font-size-fluid-lg: clamp(1.125rem, 3.5vw, 1.25rem);
+  --font-size-fluid-xl: clamp(1.25rem, 4vw, 1.5rem);
+  --font-size-fluid-2xl: clamp(1.5rem, 5vw, 2rem);
+  --font-size-fluid-3xl: clamp(2rem, 7vw, 3rem);
+  --font-size-fluid-4xl: clamp(2.5rem, 8vw, 4rem);
+
+  /* -- Body Defaults -- */
+  --body-font-family: var(--font-family-sans);
+  --body-font-size: var(--font-size-base);
+  --body-font-weight: var(--font-weight-normal);
+  --body-line-height: var(--line-height-base);
+  --body-color: var(--color-neutral-900);
+  --body-bg: var(--color-neutral-100); /* Light gray background */
+
+  /* -- Borders -- */
+  --border-width: 1px;
+  --border-color: var(--color-neutral-300);
+  --border-radius-sm: 0.25rem;
+  --border-radius: 0.375rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-xl: 1rem;
+  --border-radius-pill: 50rem;
+
+  /* -- Shadows -- */
+  --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+
+  /* -- Spacing -- */
+  /* Base spacing unit */
+  --space-unit: 0.25rem;
+
+  /* Fixed spacing scale */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --space-7: 2.5rem;   /* 40px */
+  --space-8: 3rem;     /* 48px */
+  --space-9: 4rem;     /* 64px */
+
+  /* -- Fluid Spacing -- */
+  --space-fluid-1: clamp(0.25rem, 1vw, 0.5rem);   /* 4px to 8px */
+  --space-fluid-2: clamp(0.5rem, 2vw, 1rem);      /* 8px to 16px */
+  --space-fluid-3: clamp(1rem, 3vw, 1.5rem);      /* 16px to 24px */
+  --space-fluid-4: clamp(1.5rem, 4vw, 2rem);      /* 24px to 32px */
+  --space-fluid-5: clamp(2rem, 5vw, 3rem);        /* 32px to 48px */
+
+  /* -- Breakpoints -- */
+  /* Primary Breakpoints */
+  --breakpoint-xs: 360px;  /* Extra small devices (small phones) - Common in Mexico */
+  --breakpoint-sm: 480px;  /* Small devices (phones) */
+  --breakpoint-md: 768px;  /* Medium devices (tablets) */
+  --breakpoint-lg: 1024px; /* Large devices (desktops) */
+  --breakpoint-xl: 1200px; /* Extra large devices (large desktops) */
+
+  /* Secondary Breakpoints */
+  --breakpoint-xxs: 320px; /* Very small phones */
+  --breakpoint-sm-md: 576px; /* Between small and medium */
+  --breakpoint-md-lg: 992px; /* Between medium and large */
+
+  /* Component-Specific Breakpoints */
+  --breakpoint-mobile-nav: 768px; /* Mobile navigation toggle point */
+  --breakpoint-card-layout: 576px; /* Switch to card layout for tables */
+  --breakpoint-stacked-form: 480px; /* Stack form fields */
+  --breakpoint-full-width-buttons: 480px; /* Make buttons full width */
+
+  /* -- Transitions -- */
+  --transition-base: all 0.2s ease-in-out;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* -- z-index -- */
+  --z-below: -1;
+  --z-normal: 1;
+  --z-above: 10;
+  --z-fixed: 100;
+  --z-modal: 1000;
+  --z-popup: 1100;
+  --z-overlay: 1200;
+  --z-tooltip: 1300;
+  --z-max: 9999;
+}

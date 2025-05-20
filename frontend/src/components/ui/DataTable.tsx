@@ -1,0 +1,222 @@
+import React, { useState, useMemo } from 'react';
+import styles from './DataTable.module.css';
+import Button from './Button/Button';
+
+export interface Column<T> {
+  header: string;
+  accessor: keyof T | ((data: T) => React.ReactNode);
+  sortable?: boolean;
+  cell?: (data: T) => React.ReactNode;
+}
+
+interface DataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  keyField: keyof T;
+  emptyMessage?: string;
+  pageSize?: number;
+  onRowClick?: (row: T) => void;
+}
+
+function DataTable<T>({
+  data,
+  columns,
+  keyField,
+  emptyMessage = 'No data available',
+  pageSize = 10,
+  onRowClick
+}: DataTableProps<T>) {
+  const [sortField, setSortField] = useState<keyof T | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Handle sorting
+  const handleSort = (accessor: keyof T | ((data: T) => React.ReactNode)) => {
+    if (typeof accessor === 'function') {
+      return; // Can't sort by function accessors
+    }
+
+    if (sortField === accessor) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(accessor);
+      setSortDirection('asc');
+    }
+  };
+
+  // Sort and paginate data
+  const sortedData = useMemo(() => {
+    if (!sortField) return data;
+
+    return [...data].sort((a, b) => {
+      const aValue = a[sortField];
+      const bValue = b[sortField];
+
+      if (aValue === bValue) return 0;
+
+      // Handle different types
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+
+      if (aValue === null || aValue === undefined) return sortDirection === 'asc' ? -1 : 1;
+      if (bValue === null || bValue === undefined) return sortDirection === 'asc' ? 1 : -1;
+
+      return sortDirection === 'asc'
+        ? aValue > bValue ? 1 : -1
+        : aValue < bValue ? 1 : -1;
+    });
+  }, [data, sortField, sortDirection]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = sortedData.slice(startIndex, startIndex + pageSize);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Render pagination controls
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className={styles.pagination}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+          className={styles.paginationButton}
+        >
+          &laquo;
+        </Button>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={styles.paginationButton}
+        >
+          &lsaquo;
+        </Button>
+
+        <span className={styles.paginationInfo}>
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={styles.paginationButton}
+        >
+          &rsaquo;
+        </Button>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className={styles.paginationButton}
+        >
+          &raquo;
+        </Button>
+      </div>
+    );
+  };
+
+  // Render sort icon
+  const renderSortIcon = (column: Column<T>) => {
+    if (!column.sortable || (typeof column.accessor === 'function')) return null;
+
+    if (sortField !== column.accessor) {
+      return null;
+    }
+
+    return (
+      <span className={`${styles.sortIcon} ${sortDirection === 'asc' ? styles.sortAsc : styles.sortDesc}`} />
+    );
+  };
+
+  // Render cell content
+  const renderCell = (row: T, column: Column<T>) => {
+    if (column.cell) {
+      return column.cell(row);
+    }
+
+    if (typeof column.accessor === 'function') {
+      return column.accessor(row);
+    }
+
+    const value = row[column.accessor];
+
+    // Handle different types of values
+    if (value === null || value === undefined) {
+      return '-';
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (value instanceof Date) {
+      return value.toLocaleDateString();
+    }
+
+    return String(value);
+  };
+
+  return (
+    <div className={styles.tableContainer}>
+      {data.length === 0 ? (
+        <div className={styles.emptyMessage}>{emptyMessage}</div>
+      ) : (
+        <>
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                {columns.map((column, index) => (
+                  <th
+                    key={index}
+                    onClick={() => column.sortable && typeof column.accessor !== 'function' && handleSort(column.accessor)}
+                    className={column.sortable && typeof column.accessor !== 'function' ? styles.sortableColumn : styles.nonSortableColumn}
+                  >
+                    {column.header}
+                    {renderSortIcon(column)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className={styles.tableBody}>
+              {paginatedData.map((row) => (
+                <tr
+                  key={String(row[keyField])}
+                  onClick={() => onRowClick && onRowClick(row)}
+                  className={onRowClick ? styles.clickableRow : styles.nonClickableRow}
+                >
+                  {columns.map((column, index) => (
+                    <td
+                      key={index}
+                      data-label={column.header}
+                    >
+                      {renderCell(row, column)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {renderPagination()}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default DataTable;

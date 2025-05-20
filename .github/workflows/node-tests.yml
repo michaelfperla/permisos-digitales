@@ -2,7 +2,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, fix/redis-lockout-production ]
   pull_request:
     branches: [ main, develop ]
 
@@ -22,6 +22,9 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Check for high and critical severity vulnerabilities
+      run: npm audit --audit-level=high
 
     - name: Run ESLint
       run: npm run lint:js
@@ -48,6 +51,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      # PostgreSQL service for database tests
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_permisos_digitales
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       matrix:
         node-version: [18.x]
@@ -64,22 +83,31 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Run unit tests
-      run: npm run test:unit
+    - name: Set up test database
+      run: npm run migrate:up
+      env:
+        PGHOST: localhost
+        PGPORT: 5432
+        PGUSER: postgres
+        PGPASSWORD: postgres
+        PGDATABASE: test_permisos_digitales
+        NODE_ENV: test
 
-    - name: Run integration tests
-      run: npm run test:integration
+    - name: Create test storage directory
+      run: mkdir -p test-storage
+
+    - name: Run all tests with coverage and check thresholds
+      run: npm run test:check-coverage
       env:
         REDIS_HOST: localhost
         REDIS_PORT: 6379
         NODE_ENV: test
-
-    - name: Run coverage
-      run: npm run test:cov
-      env:
-        REDIS_HOST: localhost
-        REDIS_PORT: 6379
-        NODE_ENV: test
+        TEST_DB_HOST: localhost
+        TEST_DB_PORT: 5432
+        TEST_DB_USER: postgres
+        TEST_DB_PASSWORD: postgres
+        TEST_DB_NAME: test_permisos_digitales
+        TEST_STORAGE_PATH: ./test-storage
 
     - name: Upload test results
       uses: actions/upload-artifact@v3
@@ -87,6 +115,13 @@ jobs:
       with:
         name: test-results
         path: coverage/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./coverage/
+        fail_ci_if_error: false
 
   build:
     name: Build

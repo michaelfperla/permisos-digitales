@@ -1,0 +1,335 @@
+/* Toast Container Styles - Siempre top-right */
+.toastContainer {
+  position: fixed;
+  z-index: var(--z-toast, 9000);
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Reduced from 10px */
+  max-width: 380px;
+  width: calc(100% - 32px);
+  pointer-events: none;
+  box-sizing: border-box;
+  top: 16px;
+  right: 16px;
+  align-items: flex-end;
+}
+
+/* Mantenemos la clase topRight para compatibilidad */
+.topRight {
+  /* Estilos ya aplicados en .toastContainer */
+}
+
+/* Mantenemos estas clases para compatibilidad, pero no se usarán */
+.topLeft, .bottomRight, .bottomLeft {
+  display: none;
+}
+
+/* Toast Styles - Using unique class names to avoid conflicts */
+.toast {
+  width: 100%;
+  border-radius: var(--border-radius, 8px);
+  box-shadow: var(--box-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  overflow: hidden;
+  animation: toastSlideIn 0.3s ease-out forwards;
+  pointer-events: auto;
+  position: relative;
+  background-color: var(--color-white, #fff);
+  border-left: 4px solid;
+  box-sizing: border-box;
+  max-width: 100%;
+  /* Añadir soporte para deslizamiento */
+  touch-action: pan-x;
+  user-select: none;
+  will-change: transform, opacity;
+}
+
+/* Estilos para el deslizamiento */
+.toastSwiping {
+  transition: transform 0.1s ease-out;
+}
+
+/* Toast Content - Completely redesigned for better spacing */
+.toastContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Changed from flex-start to center for better vertical alignment */
+  justify-content: space-between; /* Changed to space-between for better layout */
+  padding: 10px 12px; /* Reduced padding */
+  width: 100%;
+  min-height: 36px; /* Reduced minimum height */
+}
+
+/* Toast Types */
+.success {
+  border-left-color: var(--color-success, #198754);
+}
+
+.error {
+  border-left-color: var(--color-danger, #a72b31);
+}
+
+.warning {
+  border-left-color: var(--color-warning, #ffc107);
+}
+
+.info {
+  border-left-color: var(--color-info, #0d6efd);
+}
+
+/* Toast Icon Container - Optimized for vertical alignment */
+.toastIconContainer {
+  display: flex;
+  align-items: center; /* Changed from flex-start to center for better vertical alignment */
+  justify-content: center;
+  margin-right: 10px; /* Increased from 8px for better spacing */
+  flex-shrink: 0;
+  /* Removed padding-top: 2px to improve alignment */
+}
+
+/* Toast Icon - Reduced size */
+.icon {
+  font-size: 16px; /* Reduced from 18px */
+  line-height: 1;
+}
+
+.success .icon {
+  color: var(--color-success, #198754);
+}
+
+.error .icon {
+  color: var(--color-danger, #a72b31);
+}
+
+.warning .icon {
+  color: var(--color-warning, #ffc107);
+}
+
+.info .icon {
+  color: var(--color-info, #0d6efd);
+}
+
+/* Toast Message - Optimized for readability and space */
+.toastMessage {
+  flex: 1;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-neutral-900, #212529);
+  line-height: 1.4; /* Reduced from 1.5 */
+  margin-right: 8px; /* Increased from 4px for better separation from close button */
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  white-space: normal;
+  text-align: left;
+  padding: 1px 0; /* Reduced padding */
+}
+
+/* Close Button - Significantly redesigned */
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--color-neutral-600, #6c757d);
+  font-size: 10px; /* Reduced to 10px as requested */
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px; /* Reduced padding */
+  flex-shrink: 0;
+  min-width: 20px; /* Increased from 16px for better touch target */
+  min-height: 20px; /* Increased from 16px for better touch target */
+  align-self: center; /* Changed from flex-start to center for better vertical alignment */
+  margin-left: 8px; /* Increased from 3px for better separation from message */
+  border-radius: 50%; /* Make it circular */
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05); /* Light background on hover */
+}
+
+/* Toast Action */
+.toastAction {
+  padding: 0 12px 8px; /* Reduced padding */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  color: var(--color-primary, #a72b31);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--font-size-sm, 0.875rem);
+  cursor: pointer;
+  padding: 3px 6px; /* Reduced padding */
+  border-radius: var(--border-radius-sm, 4px);
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Progress Bar */
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  transition: width linear 100ms;
+}
+
+/* Paused state for progress bar */
+.progressBar.paused {
+  transition: none;
+}
+
+.success .progressBar {
+  background-color: var(--color-success, #198754);
+}
+
+.error .progressBar {
+  background-color: var(--color-danger, #a72b31);
+}
+
+.warning .progressBar {
+  background-color: var(--color-warning, #ffc107);
+}
+
+.info .progressBar {
+  background-color: var(--color-info, #0d6efd);
+}
+
+/* Toast Animations - Preserved from original */
+.toastExiting {
+  animation: toastSlideOut 0.3s forwards;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Animación para deslizamiento */
+@keyframes toastSwipeOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toastSwipeExit {
+  animation: toastSwipeOut 0.3s ease-out forwards;
+}
+
+/* Responsive styles - Optimized for all breakpoints */
+/* Tablet (768px) */
+@media (max-width: 768px) {
+  .toastContainer {
+    max-width: 85%;
+    width: 85%;
+    right: 7.5%;
+  }
+
+  .toast {
+    font-size: 14px;
+  }
+}
+
+/* Mobile (480px) */
+@media (max-width: 480px) {
+  .toastContainer {
+    max-width: 80%;
+    width: 80%;
+    padding: 0;
+    top: 8px;
+    right: 10%;
+  }
+
+  .toast {
+    border-radius: 6px;
+  }
+
+  .toastContent {
+    padding: 8px 10px; /* Further reduced padding */
+    min-height: 36px;
+  }
+
+  .toastMessage {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .toastIconContainer {
+    margin-right: 6px;
+  }
+
+  /* Improved visibility for progress bar */
+  .progressBar {
+    height: 4px;
+  }
+}
+
+/* Small Mobile (360px) - Optimized specifically for this breakpoint */
+@media (max-width: 360px) {
+  .toastContainer {
+    max-width: 90%;
+    width: 90%;
+    right: 5%;
+    top: 6px;
+  }
+
+  .toast {
+    border-radius: 5px;
+  }
+
+  .toastContent {
+    padding: 6px 8px; /* Minimal padding */
+    min-height: 32px;
+  }
+
+  .toastIconContainer {
+    margin-right: 6px; /* Adjusted from 4px for better spacing while keeping compact */
+  }
+
+  .icon {
+    font-size: 14px;
+  }
+
+  .toastMessage {
+    font-size: 13px;
+    line-height: 1.3;
+    margin-right: 6px; /* Adjusted from 2px for better spacing while keeping compact */
+  }
+
+  .closeButton {
+    min-width: 18px; /* Increased from 14px for better touch target while keeping compact */
+    min-height: 18px; /* Increased from 14px for better touch target while keeping compact */
+    margin-left: 4px; /* Adjusted from 2px for better spacing while keeping compact */
+  }
+
+  .actionButton {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+}
