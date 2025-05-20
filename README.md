@@ -1,286 +1,157 @@
 # Permisos Digitales
 
-A modern digital permit application and management system built with Node.js, Express, React, and TypeScript.
+Permisos Digitales is a comprehensive web application designed to modernize the process of applying for and managing digital vehicle permits. It provides a user-friendly platform for applicants and a robust management interface for administrators.
 
 [![Node.js CI](https://github.com/michaelfperla/permisos-digitales/actions/workflows/node-tests.yml/badge.svg)](https://github.com/michaelfperla/permisos-digitales/actions/workflows/node-tests.yml)
+[![codecov](https://codecov.io/gh/michaelfperla/permisos-digitales/branch/main/graph/badge.svg)](https://codecov.io/gh/michaelfperla/permisos-digitales)
 
-## Project Overview
+For detailed system architecture, component breakdown, and in-depth explanations, please see the [Comprehensive System Documentation](docs/PROJECT_DOCUMENTATION.md).
 
-Permisos Digitales is a full-stack web application for managing digital vehicle permits. The system consists of:
+## Key Features
 
-- **Backend**: Node.js/Express REST API with PostgreSQL database
-- **Frontend**: React/TypeScript SPA built with Vite
+**User Portal:**
+*   User Registration and Authentication
+*   New Digital Permit Applications
+*   Permit Status Tracking
+*   Payment Proof Upload
+*   Permit PDF Download
+*   Permit Renewal
 
-The application allows users to:
-- Apply for vehicle permits
-- Upload payment proofs
-- Download and print permits
-- Renew existing permits
-- Manage their user profile
+**Admin Portal:**
+*   Secure Admin Login
+*   User Management
+*   Application Review and Processing
+*   Payment Verification
+*   System Overview and Dashboards
 
-For contribution guidelines, see [CONTRIBUTING.md](docs/project/CONTRIBUTING.md).
+## Tech Stack
 
-### Development Ports
+*   **Backend**: Node.js, Express.js, PostgreSQL, JavaScript
+    *   Key Libraries: `pg`, `bcrypt`, `express-session`, `multer`, `nodemailer`, `conekta`, `helmet`
+*   **Frontend**: React, TypeScript, Vite
+    *   Key Libraries: `axios`, `react-router-dom`, `@tanstack/react-query`
+*   **Testing**: Jest (Backend), Vitest (Frontend)
+*   **CI/CD**: GitHub Actions
 
-The application uses the following development ports:
+## Prerequisites
 
-- **3001**: Backend API server
-- **3000**: Frontend development server (Vite)
+Before you begin, ensure you have the following installed:
+*   Node.js (Recommended: Version specified in `package.json` engines, e.g., >=16.0.0)
+*   npm (Bundled with Node.js)
+*   PostgreSQL Server
+*   Git
 
-### Quick Start
+## Development Setup
 
-1. Install dependencies for both backend and frontend:
-
+### 1. Clone the Repository
 ```bash
-# Install backend dependencies
-npm install
-
-# Install frontend dependencies
-cd frontend
-npm install
-cd ..
+git clone https://github.com/michaelfperla/permisos-digitales.git
+cd permisos-digitales
 ```
 
-2. Set up the database:
+### 2. Environment Configuration
 
-```bash
-# Create a .env file with your database configuration
-# See .env.example for required variables
+This project uses `.env` files for environment variables.
 
-# Set up the database schema
-npm run db:setup
-```
+*   **Backend (`.env`)**:
+    *   Copy `.env.example` to a new file named `.env` in the project root: `cp .env.example .env`
+    *   Update the `.env` file with your local settings:
+        *   `DATABASE_URL`: Your PostgreSQL connection string (e.g., `postgresql://user:password@localhost:5432/permisos_digitales_dev`)
+        *   `SESSION_SECRET`: A strong, unique random string for session encryption. **Generate a new one.**
+        *   `FRONTEND_URL`: (e.g., `http://localhost:3000`)
+        *   `API_URL`: (e.g., `http://localhost:3001/api`)
+        *   Email server details (`EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`) if email sending is required for local development.
+        *   Conekta API keys if testing payment functionalities.
+*   **Frontend (`frontend/.env.local`)**:
+    *   Navigate to the `frontend` directory: `cd frontend`
+    *   Create a `.env.local` file (e.g., `cp .env.example .env.local` if an example exists, otherwise create it).
+    *   Set the following variable:
+        *   `VITE_API_URL=http://localhost:3001/api` (or your backend API URL)
+    *   Return to the root directory: `cd ..`
 
-3. Start the development servers:
+### 3. Install Dependencies
 
-```bash
-# Start backend server
-npm run dev
+*   **Backend**:
+    ```bash
+    npm install
+    ```
+*   **Frontend**:
+    ```bash
+    cd frontend
+    npm install
+    cd ..
+    ```
 
-# In a separate terminal, start frontend server
-cd frontend
-npm run dev
-```
+### 4. Database Setup
 
-The backend will run on http://localhost:3001 and the frontend on http://localhost:3000.
+1.  Ensure your PostgreSQL server is running.
+2.  Create your development database (e.g., `permisos_digitales_dev`) and a dedicated user with appropriate permissions, matching your `DATABASE_URL` configuration.
+3.  Run the database setup script. This script typically creates the schema and runs initial migrations.
+    ```bash
+    npm run db:setup
+    ```
+    For more detailed information on database tools and manual migration execution, refer to `database/README.md`.
 
-### Development Scripts
+## Running the Application
 
-#### Backend Scripts
-- `npm start`: Start the production server
-- `npm run dev`: Start the backend development server with nodemon
-- `npm run migrate`: Run database migrations using node-pg-migrate
-- `npm run db:setup`: Set up the database schema
-- `npm run db:backup`: Create a database backup
-- `npm run db:restore`: Restore a database from backup
-- `npm run db:monitor`: Monitor database performance
-- `npm run db:verify`: Verify database connection
-- `npm run db:migrate`: Run database migrations using custom migration tool
-- `npm test`: Run backend tests
-- `npm run test:unit`: Run backend unit tests
-- `npm run test:integration`: Run backend integration tests
-- `npm run test:cov`: Run backend tests with coverage
-- `npm run lint:js`: Run ESLint on backend code
-- `npm run lint:fix`: Run ESLint with auto-fix
+The application consists of a backend server and a frontend development server, which should be run in separate terminals.
 
-#### Frontend Scripts (run from frontend directory)
-- `npm run dev`: Start the Vite development server
-- `npm run build`: Build the frontend for production
-- `npm run preview`: Preview the production build locally
-- `npm run test`: Run frontend tests
-- `npm run test:watch`: Run frontend tests in watch mode
-- `npm run test:coverage`: Run frontend tests with coverage
-- `npm run lint`: Run ESLint on frontend code
+1.  **Start the Backend Server**:
+    ```bash
+    npm run dev
+    ```
+    The backend API will typically run on `http://localhost:3001`.
 
-## Project Structure
-
-### Frontend (React/TypeScript)
-- `frontend/`: React frontend application
-  - `public/`: Static assets and HTML template
-  - `src/`: Source code
-    - `assets/`: Images, icons, and other static assets
-    - `components/`: Reusable React components
-    - `contexts/`: React context providers (Auth, Toast, etc.)
-    - `hooks/`: Custom React hooks
-    - `layouts/`: Layout components (MainLayout, AuthLayout)
-    - `pages/`: Page components
-    - `services/`: API service functions
-    - `styles/`: CSS styles
-    - `test/`: Test utilities
-    - `types/`: TypeScript interfaces and types
-    - `utils/`: Utility functions
-  - `node_modules/`: Frontend dependencies
-
-### Backend (Node.js/Express)
-- `src/`: Backend code (Node.js Express)
-  - `config/`: Application configuration
-  - `constants/`: Constant values and enums
-  - `controllers/`: Request handlers
-  - `db/`: Database connection and migrations
-  - `jobs/`: Scheduled jobs
-  - `middleware/`: Express middleware
-  - `repositories/`: Data access layer
-  - `routes/`: API routes
-  - `services/`: Business logic
-  - `utils/`: Utility functions
-  - `tests/`: Test setup and utilities
-
-### Database
-- `database/`: Database-related files and tools
-  - `schema/`: Database schema files
-    - `1_create_database.sql`: Creates the database and user
-    - `2_create_schema.sql`: Creates tables, indexes, and triggers
-    - `3_create_admin_user.sql`: Creates admin users
-  - `migrations/`: Database migration files
-  - `backups/`: Database backup files
-  - `tools/`: Database management scripts
-  - `config/`: Database configuration files
-
-### Configuration and Tools
-- `config/`: Application configuration files
-  - `bs-config.js`: Browser-sync configuration
-  - `pgm-config.js`: PostgreSQL migration configuration
-
-### Storage
-- `storage/`: File storage for uploads and generated files
-  - `pdfs/`: Generated permit PDFs
-  - `payment_proofs/`: Uploaded payment proof images
-  - `logs/`: Application logs
-
-### Documentation
-- `docs/`: Project documentation
-  - `backend/`: Backend architecture and API documentation
-  - `project/`: Project guidelines and setup instructions
-
-## API Documentation
-
-API documentation is available at `/api-docs` when the server is running.
+2.  **Start the Frontend Development Server**:
+    ```bash
+    cd frontend
+    npm run dev
+    ```
+    The frontend application will typically be accessible at `http://localhost:3000`.
 
 ## Testing
 
-This project uses Jest for backend testing and Vitest for frontend testing.
+*   **Backend (Jest)**:
+    ```bash
+    npm test                # Run all backend tests
+    npm run test:unit       # Run unit tests
+    npm run test:integration # Run integration tests
+    npm run test:cov        # Generate coverage report
+    ```
+    For more details, see `src/tests/README.md`.
 
-### Backend Testing
+*   **Frontend (Vitest)**:
+    ```bash
+    cd frontend
+    npm test                # Run all frontend tests (usually in watch mode by default with Vitest)
+    npm run test:coverage   # Generate coverage report
+    cd ..
+    ```
+    For more details, see `frontend/README.md`.
 
-Backend tests use Jest and are organized into:
+## Repository Structure
 
-1. **Unit Tests**: Test individual functions and components in isolation
-2. **Integration Tests**: Test the interaction between components, including API endpoints
+A brief overview of the main directories:
 
-```bash
-# Run all backend tests
-npm test
+*   `.github/`: GitHub Actions workflows and templates.
+*   `config/`: Application-level configuration files (e.g. for BrowserSync, some migration settings). See `config/README.md`.
+*   `database/`: Database schema, migration files, and utility scripts. See `database/README.md`.
+*   `docs/`: Project documentation, including the [Comprehensive System Documentation](docs/PROJECT_DOCUMENTATION.md).
+*   `frontend/`: React/TypeScript frontend application. See `frontend/README.md`.
+    *   `frontend/src/`: Source code for the frontend SPA. See `frontend/src/README.md`.
+*   `scripts/`: Miscellaneous helper scripts. See `scripts/README.md`.
+*   `src/`: Node.js/Express backend source code. See `src/README.md`.
+    *   `src/controllers/`: Request handlers. See `src/controllers/README.md`.
+    *   `src/services/`: Business logic. See `src/services/README.md`.
+    *   `src/repositories/`: Data access layer. See `src/repositories/README.md`.
+    *   `src/middleware/`: Express middleware. See `src/middleware/README.md`.
+    *   `src/db/`: Database connection and new migrations.
+    *   `src/tests/`: Backend tests. See `src/tests/README.md`.
 
-# Run unit tests only
-npm run test:unit
+## Contributing
 
-# Run integration tests only
-npm run test:integration
+Please refer to `CONTRIBUTING.md` for contribution guidelines (Note: Create or verify `CONTRIBUTING.md` file).
 
-# Run tests with coverage
-npm run test:cov
-```
+## License
 
-### Frontend Testing
-
-Frontend tests use Vitest and React Testing Library:
-
-```bash
-# Navigate to frontend directory
-cd frontend
-
-# Run all frontend tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Test Structure
-
-- **Backend Tests**:
-  - Unit tests are located alongside the code they test in `__tests__` directories
-  - Integration tests for API routes are in `src/routes/__tests__` with `.integration.test.js` naming convention
-  - Test utilities and mocks are in `src/tests`
-
-- **Frontend Tests**:
-  - Component tests are in `frontend/src/test` directory
-  - Tests use React Testing Library for component testing
-  - Tests use MSW (Mock Service Worker) for API mocking
-
-### Coverage Thresholds
-
-The project has the following code coverage thresholds:
-
-- **Backend**:
-  - Global: 75% for functions, lines, and statements; 70% for branches
-  - Controllers: 80% for all metrics
-  - Services: 80% for all metrics
-
-- **Frontend**:
-  - Components: 80% for all metrics
-  - Services: 80% for all metrics
-
-For more detailed testing information, see [TESTING.md](docs/project/TESTING.md).
-
-## Continuous Integration
-
-This project uses GitHub Actions for continuous integration. The CI pipeline runs on every push to the `main` and `develop` branches, as well as on pull requests to these branches.
-
-The CI pipeline consists of three jobs:
-
-1. **Lint**: Runs ESLint and Stylelint to check code quality
-2. **Test**: Runs all tests with coverage and uploads results to Codecov
-3. **Build**: Verifies that the application can be built
-
-[![codecov](https://codecov.io/gh/michaelfperla/permisos-digitales/branch/main/graph/badge.svg)](https://codecov.io/gh/michaelfperla/permisos-digitales)
-
-You can view the CI configuration in the `.github/workflows/node-tests.yml` file.
-
-For more details on CI integration, see [CI.md](docs/project/CI.md).
-
-## Pre-Deployment Security Checks
-
-**⚠️ CRITICAL SECURITY WARNING ⚠️**
-
-Before deploying to staging or production environments, a series of mandatory security checks must be completed. These checks are documented in detail in the [DEPLOYMENT_CHECKS.md](DEPLOYMENT_CHECKS.md) file.
-
-### Key Security Checks:
-
-1. **Session Secret Verification**: Ensure strong, unique session secrets are set in all environments
-2. **Database Connection Security**: Verify proper database credentials and security settings
-3. **Redis Configuration**: Confirm Redis is properly secured
-4. **HTTPS/TLS Setup**: Verify SSL certificates and security headers
-5. **API Rate Limiting**: Confirm rate limiting is properly configured
-
-**WARNING:** Deployment to Production **MUST NOT** proceed unless all checks in [DEPLOYMENT_CHECKS.md](DEPLOYMENT_CHECKS.md) are completed and verified. Using default or weak secrets poses a critical security risk.
-
-## Environment Variables
-
-The application uses the following environment variables:
-
-### Backend Environment Variables
-
-- `NODE_ENV`: Environment mode (development, production, test)
-- `PORT`: Backend server port (default: 3001)
-- `APP_URL`: Main application URL (default: http://localhost:3001)
-- `FRONTEND_URL`: Frontend development server URL (default: http://localhost:3000)
-- `API_URL`: API base URL (default: http://localhost:3001/api)
-- `DATABASE_URL`: PostgreSQL connection string
-- `SESSION_SECRET`: Secret for session encryption **(CRITICAL: Must be a strong, unique random string of at least 32 characters)**
-- `REDIS_HOST`: Redis host for session storage
-- `REDIS_PORT`: Redis port
-- `EMAIL_HOST`: SMTP server for sending emails
-- `EMAIL_PORT`: SMTP port
-- `EMAIL_USER`: SMTP username
-- `EMAIL_PASS`: SMTP password
-
-### Frontend Environment Variables
-
-- `VITE_API_URL`: Backend API URL (default: http://localhost:3001/api)
-- `VITE_APP_URL`: Backend app URL (default: http://localhost:3001)
-
-Create a `.env` file in the root directory for backend variables and a `.env.local` file in the frontend directory for frontend variables.
+This project is licensed under the MIT License. See the `LICENSE` file for details (Note: Verify `LICENSE` file exists).
