@@ -1,0 +1,10 @@
+.clientBreadcrumbs {
+  padding: 0.5rem 0;
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .clientBreadcrumbs {
+    padding: 0.25rem 0;
+  }
+}

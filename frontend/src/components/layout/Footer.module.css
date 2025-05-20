@@ -1,0 +1,66 @@
+/* Footer Component Styles - Refined Atelier Feel */
+.appFooter {
+  background-color: var(--bs-white);
+  color: var(--bs-gray-700);
+  border-top: 1px solid var(--bs-gray-200);
+}
+
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.copyrightText {
+  font-size: 0.85rem;
+  color: var(--bs-gray-600);
+  margin: 0;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.footerLink {
+  font-size: 0.85rem;
+  color: var(--bs-gray-700);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footerLink:hover,
+.footerLink:focus {
+  color: var(--bs-gray-900);
+  border-bottom-color: var(--dorado);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footerContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .footerLinks {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerContainer {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}

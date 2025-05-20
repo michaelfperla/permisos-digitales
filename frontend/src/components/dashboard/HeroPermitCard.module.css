@@ -1,0 +1,960 @@
+/* HeroPermitCard Component Styles - "Soft & Trustworthy" Design */
+
+/* Main Card Container - Enhanced "Soft & Trustworthy" Design */
+.cardContainer {
+  display: flex;
+  background-color: var(--color-white);
+  border-radius: 16px; /* Increased border radius for softer look */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* Subtle but noticeable shadow */
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem; /* Reduced top margin */
+  border: 1px solid var(--color-neutral-100); /* Very subtle border */
+  width: 100%;
+  max-width: 1000px; /* Increased maximum width */
+}
+
+.cardContainer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Left "Status Anchor" Section - 30% width */
+.statusAnchor {
+  flex: 0 0 30%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-neutral-100);
+  border-right: 1px solid var(--color-neutral-200);
+  text-align: center;
+  position: relative;
+}
+
+/* Status Icon - Enhanced for "Permiso Journey" */
+.statusIcon {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statusIcon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  opacity: 0.1;
+  z-index: 1;
+}
+
+.statusIconActive::before {
+  background-color: var(--color-success);
+}
+
+.statusIconPending::before {
+  background-color: var(--color-primary);
+}
+
+.statusIconExpiring::before {
+  background-color: var(--color-warning);
+}
+
+.statusIconExpired::before {
+  background-color: var(--color-neutral-600);
+}
+
+.icon {
+  font-size: 2.8rem;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.cardContainer:hover .icon {
+  transform: scale(1.1);
+}
+
+.iconActive {
+  color: var(--color-success);
+}
+
+.iconPending {
+  color: var(--color-primary);
+}
+
+.iconExpiring {
+  color: var(--color-warning);
+}
+
+.iconExpired {
+  color: var(--color-neutral-600);
+}
+
+.iconDefault {
+  color: var(--color-primary);
+}
+
+/* Status Text */
+.statusText {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin-bottom: 1.25rem;
+  line-height: 1.3;
+}
+
+/* Vehicle Info */
+.vehicleInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.vehicleText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.folioText {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+/* Status Anchor Navigation Controls */
+.statusAnchorNavControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.25rem;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+.statusAnchorNavControls .navButton {
+  width: 28px;
+  height: 28px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  color: var(--color-neutral-500);
+  opacity: 0.8;
+}
+
+.statusAnchorNavControls .numericalIndicator {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-neutral-600);
+  margin: 0 0.75rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Right "Journey & Action Details" Section - 70% width */
+.journeyDetails {
+  flex: 0 0 70%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Ensure consistent left alignment */
+}
+
+/* Journey Bar - Enhanced for "Permiso Journey" */
+.journeyBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-neutral-50);
+  border-radius: 12px; /* Increased border radius for softer look */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--color-neutral-100); /* Very subtle border */
+  width: 100%; /* Ensure full width */
+}
+
+.journeyStepContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.journeyStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.journeyStepCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 2px solid var(--color-neutral-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.journeyStepCircle::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  bottom: -4px;
+  left: -4px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.journeyStepIcon {
+  font-size: 1.1rem;
+  color: var(--color-white);
+}
+
+.journeyStepNumber {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-neutral-600);
+}
+
+.journeyStepLabel {
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  max-width: 80px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+/* Completed step styling */
+.journeyStepCompleted .journeyStepCircle {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  transform: scale(1.1);
+}
+
+.journeyStepCompleted .journeyStepCircle::after {
+  opacity: 0.3;
+  border-color: var(--color-success);
+}
+
+/* Current step styling - emphasized */
+.journeyStepCurrent .journeyStepCircle {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  transform: scale(1.25);
+  box-shadow: 0 4px 10px rgba(167, 43, 49, 0.3);
+}
+
+.journeyStepCurrent .journeyStepCircle::after {
+  opacity: 0.4;
+  border-color: var(--color-primary);
+}
+
+/* Warning step styling */
+.journeyStepWarning .journeyStepCircle {
+  background-color: var(--color-warning);
+  border-color: var(--color-warning);
+  transform: scale(1.15);
+}
+
+.journeyStepWarning .journeyStepCircle::after {
+  opacity: 0.3;
+  border-color: var(--color-warning);
+}
+
+/* Future step styling */
+.journeyStepFuture .journeyStepCircle {
+  background-color: var(--color-white);
+  border-color: var(--color-neutral-300);
+  opacity: 0.7;
+}
+
+.journeyStepFuture .journeyStepNumber {
+  color: var(--color-neutral-500);
+}
+
+.journeyStepFuture .journeyStepLabel {
+  color: var(--color-neutral-500);
+  font-weight: normal;
+}
+
+/* Label styling */
+.journeyStepCompleted .journeyStepLabel,
+.journeyStepCurrent .journeyStepLabel,
+.journeyStepWarning .journeyStepLabel {
+  font-weight: 600;
+  transform: translateY(2px);
+}
+
+.journeyStepCompleted .journeyStepLabel {
+  color: var(--color-success);
+}
+
+.journeyStepCurrent .journeyStepLabel {
+  color: var(--color-primary);
+}
+
+.journeyStepWarning .journeyStepLabel {
+  color: var(--color-warning-dark);
+}
+
+/* Connector styling */
+.journeyConnector {
+  flex: 1;
+  height: 4px;
+  background-color: var(--color-neutral-300);
+  position: relative;
+  z-index: 1;
+  border-radius: 2px;
+  margin: 0 5px;
+  transition: all 0.3s ease;
+}
+
+.journeyConnectorCompleted {
+  background-color: var(--color-success);
+  height: 4px;
+}
+
+.journeyConnectorWarning {
+  background-color: var(--color-warning);
+  height: 4px;
+}
+
+/* Key Information - Enhanced for "Permiso Journey" */
+.keyInfo {
+  margin-bottom: 1.75rem;
+  padding: 1.25rem;
+  background-color: var(--color-white);
+  border-radius: 12px; /* Increased border radius for softer look */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-neutral-100);
+  width: 100%; /* Ensure full width */
+}
+
+.keyInfoItem {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.keyInfoItem:last-child {
+  margin-bottom: 0;
+}
+
+.keyInfoLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.keyInfoValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.keyInfoValueWarning {
+  color: var(--color-warning-dark);
+  position: relative;
+  font-weight: 700;
+  font-size: 1.3rem;
+  background-color: rgba(255, 193, 7, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.keyInfoValueWarning::after {
+  content: '⚠️';
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.keyInfoValueExpired {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.keyInfoAlert {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-neutral-100);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 8px;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem; /* Add margin-bottom for better spacing */
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* Special styling for warning alerts */
+.keyInfoAlert:has(.keyInfoAlertIcon[class*="FaExclamationTriangle"]) {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid var(--color-warning);
+}
+
+.keyInfoAlert:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+}
+
+.keyInfoAlertIcon {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+/* Special styling for warning icons */
+.keyInfoAlertIcon[class*="FaExclamationTriangle"] {
+  color: var(--color-warning-dark);
+}
+
+.oxxoReferenceContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-neutral-50);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px dashed var(--color-primary);
+  margin-top: 0.25rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.oxxoReferenceWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.oxxoReferenceLabel {
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  margin-bottom: 0.25rem;
+}
+
+.oxxoReferenceValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+  font-family: monospace;
+  display: block;
+  margin-bottom: 0.25rem;
+  background-color: rgba(167, 43, 49, 0.05);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(167, 43, 49, 0.1);
+}
+
+.copyButton {
+  margin-left: 1rem;
+  white-space: nowrap;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Action Area - Enhanced for "Permiso Journey" */
+.actionArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-neutral-200);
+  width: 100%; /* Ensure full width */
+}
+
+/* Navigation Buttons */
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200); /* Lighter border */
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--box-shadow-sm);
+  opacity: 0.8; /* More subtle appearance */
+}
+
+.navButton:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+  transform: translateY(-1px);
+  box-shadow: var(--box-shadow-sm);
+  opacity: 1;
+}
+
+.navButton:active {
+  transform: translateY(0);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Numerical Indicator */
+.numericalIndicator {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-neutral-600);
+  margin: 0 0.75rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Primary Action Button - Simplified to only include layout-specific styles */
+.primaryActionButton {
+  gap: 0.75rem;
+  font-size: 1.1rem;
+}
+
+/* Button animation and hover effects now handled by Button component */
+
+/* Icon styling now handled by Button component */
+
+/* Button variants - Simplified to only include color overrides */
+.primaryActionDownload {
+  background-color: var(--color-success);
+}
+
+.primaryActionRenew {
+  background-color: var(--color-warning-dark);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.primaryActionOxxo {
+  background-color: var(--color-primary);
+}
+
+/* View Details Link - Simplified to only include layout-specific styles */
+.viewDetailsLink {
+  gap: 0.6rem;
+  font-size: 1rem;
+}
+
+/* Responsive adjustments - Enhanced for "Permiso Journey" */
+@media (max-width: 992px) {
+  .journeyStepLabel {
+    font-size: 0.75rem;
+    max-width: 70px;
+  }
+
+  .journeyStepCircle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .statusIcon {
+    width: 85px;
+    height: 85px;
+  }
+
+  .icon {
+    font-size: 2.5rem;
+  }
+
+  .keyInfoValue {
+    font-size: 1.2rem;
+  }
+
+  .primaryActionButton {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cardContainer {
+    flex-direction: column;
+    margin: 0.5rem auto 2rem; /* Center the card and add more bottom margin */
+  }
+
+  /* Status Anchor Section - Centered at the top */
+  .statusAnchor {
+    flex: 0 0 auto;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center all content horizontally */
+    text-align: center;
+  }
+
+  /* Large Thematic Status Icon - Centered */
+  .statusIcon {
+    margin: 0 auto 1rem;
+  }
+
+  /* Status Text - Centered */
+  .statusText {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Vehicle Info - Centered */
+  .vehicleInfo {
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  .vehicleText {
+    font-size: 1.1rem;
+  }
+
+  .folioText {
+    font-size: 0.9rem;
+  }
+
+  /* Status Anchor Navigation Controls */
+  .statusAnchorNavControls {
+    margin-top: 1.25rem;
+  }
+
+  .statusAnchorNavControls .navButton {
+    width: 26px;
+    height: 26px;
+  }
+
+  .statusAnchorNavControls .numericalIndicator {
+    font-size: 0.8rem;
+  }
+
+  /* Journey Details Section */
+  .journeyDetails {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 1rem;
+    align-items: center; /* Center all content horizontally */
+  }
+
+  /* Journey Bar - Simplified for mobile */
+  .journeyBar {
+    margin-bottom: 2rem;
+    padding: 1rem 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .journeyStepCircle {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.5rem;
+  }
+
+  .journeyStepIcon,
+  .journeyStepNumber {
+    font-size: 0.9rem;
+  }
+
+  .journeyStepLabel {
+    font-size: 0.75rem;
+    max-width: 70px;
+    text-align: center;
+  }
+
+  /* Key Information Area */
+  .keyInfo {
+    padding: 1.25rem;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .keyInfoItem {
+    margin-bottom: 1.5rem;
+  }
+
+  .keyInfoLabel {
+    font-size: 0.9rem;
+  }
+
+  .keyInfoValue {
+    font-size: 1.2rem;
+  }
+
+  /* OXXO Reference Container */
+  .oxxoReferenceContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .oxxoReferenceWrapper {
+    width: 100%;
+  }
+
+  .oxxoReferenceLabel {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .oxxoReferenceValue {
+    font-size: 1.4rem;
+    padding: 0.75rem;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Copy Button */
+  .copyButton {
+    margin-left: 0;
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  /* Key Info Alert */
+  .keyInfoAlert {
+    padding: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  /* Action Area */
+  .actionArea {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    padding-top: 1.5rem;
+    width: 100%;
+  }
+
+  .navButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .numericalIndicator {
+    font-size: 0.8rem;
+    min-width: 36px;
+  }
+
+  /* Primary Action Button */
+  .primaryActionButton {
+    width: 100%;
+    font-size: 1.1rem;
+  }
+
+  /* View Details Link */
+  .viewDetailsLink {
+    width: 100%;
+    font-size: 1rem;
+    gap: 0.5rem; /* Reduced gap from 0.75rem to 0.5rem */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Card Container */
+  .cardContainer {
+    border-radius: 12px; /* Slightly smaller border radius for smaller screens */
+  }
+
+  /* Status Anchor Section */
+  .statusAnchor {
+    padding: 0.75rem;
+  }
+
+  /* Status Icon */
+  .statusIcon {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 0.75rem;
+  }
+
+  .icon {
+    font-size: 2rem;
+  }
+
+  /* Status Text */
+  .statusText {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Vehicle Info */
+  .vehicleText {
+    font-size: 1rem;
+  }
+
+  .folioText {
+    font-size: 0.85rem;
+  }
+
+  /* Status Anchor Navigation Controls */
+  .statusAnchorNavControls {
+    margin-top: 1rem;
+    padding: 0.25rem;
+  }
+
+  .statusAnchorNavControls .navButton {
+    width: 24px;
+    height: 24px;
+  }
+
+  .statusAnchorNavControls .numericalIndicator {
+    font-size: 0.75rem;
+    min-width: 32px;
+    margin: 0 0.5rem;
+  }
+
+  /* Journey Details Section */
+  .journeyDetails {
+    padding: 0.75rem;
+  }
+
+  /* Journey Bar - Extremely simplified for very small screens */
+  .journeyBar {
+    padding: 0.75rem 0.25rem;
+  }
+
+  /* Hide journey step labels on very small screens */
+  .journeyStepLabel {
+    display: none;
+  }
+
+  .journeyStepCircle {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0;
+  }
+
+  .journeyConnector {
+    height: 3px;
+  }
+
+  .journeyConnectorCompleted,
+  .journeyConnectorWarning {
+    height: 3px;
+  }
+
+  /* Key Information Area */
+  .keyInfo {
+    padding: 1rem;
+  }
+
+  .keyInfoItem {
+    margin-bottom: 1.25rem;
+  }
+
+  .keyInfoLabel {
+    font-size: 0.85rem;
+  }
+
+  .keyInfoValue {
+    font-size: 1.1rem;
+  }
+
+  .keyInfoValueWarning {
+    font-size: 1.1rem;
+  }
+
+  .keyInfoValueWarning::after {
+    font-size: 0.8rem;
+  }
+
+  /* OXXO Reference */
+  .oxxoReferenceContainer {
+    padding: 1rem;
+  }
+
+  .oxxoReferenceValue {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+  }
+
+  .copyButton {
+    font-size: 0.9rem;
+  }
+
+  /* Key Info Alert */
+  .keyInfoAlert {
+    padding: 1rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .keyInfoAlertIcon {
+    font-size: 1.1rem;
+  }
+
+  /* Action Area */
+  .actionArea {
+    gap: 1.25rem;
+    padding-top: 1.25rem;
+  }
+
+  .navButton {
+    width: 24px;
+    height: 24px;
+  }
+
+  .numericalIndicator {
+    font-size: 0.75rem;
+    min-width: 32px;
+    margin: 0 0.5rem;
+  }
+
+  /* Primary Action Button */
+  .primaryActionButton {
+    padding: 0.85rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .actionButtonIcon {
+    font-size: 1.1rem;
+  }
+
+  /* View Details Link */
+  .viewDetailsLink {
+    font-size: 0.9rem;
+    padding: 0.75rem 0.5rem; /* Reduced horizontal padding from 1rem to 0.5rem */
+  }
+}

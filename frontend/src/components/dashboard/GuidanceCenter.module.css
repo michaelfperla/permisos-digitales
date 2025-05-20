@@ -1,0 +1,442 @@
+/* GuidanceCenter.module.css - "Calm Waters" Theme */
+
+/* Main container with enhanced styling */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%; /* Ensure it takes full width */
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid var(--color-neutral-200);
+  box-shadow: 0 4px 16px rgba(167, 43, 49, 0.08), 0 2px 4px rgba(167, 43, 49, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 6px 20px rgba(167, 43, 49, 0.1), 0 3px 6px rgba(167, 43, 49, 0.08);
+}
+
+/* Header section with improved visual treatment */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-fluid-3);
+  border-bottom: 1px solid var(--color-neutral-200);
+  background-color: var(--color-white);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-primary-light) 0%, var(--color-primary-lighter) 50%, transparent 100%);
+  opacity: 0.5;
+}
+
+/* Title styling with enhanced visual treatment */
+.title {
+  font-family: var(--font-family-headings, 'Montserrat', sans-serif);
+  font-size: var(--font-size-fluid-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  color: var(--color-primary-darker);
+  flex-grow: 1;
+  text-align: left;
+  letter-spacing: -0.01em;
+  position: relative;
+  display: inline-block;
+}
+
+/* Close button with enhanced styling */
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  padding: 0;
+  margin-left: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  box-shadow: 0 1px 3px rgba(167, 43, 49, 0.05);
+}
+
+.closeButton:hover {
+  background-color: rgba(167, 43, 49, 0.05);
+  color: var(--color-primary);
+  transform: scale(1.05);
+  box-shadow: 0 2px 5px rgba(167, 43, 49, 0.1);
+}
+
+.closeIcon {
+  font-size: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.closeButton:hover .closeIcon {
+  transform: rotate(90deg);
+}
+
+/* Content sections with enhanced styling */
+.section {
+  padding: 1.5rem;
+  width: 100%; /* Ensure it takes full width */
+  box-sizing: border-box; /* Include padding in width calculation */
+  border-bottom: 1px solid var(--color-neutral-200);
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.section:hover {
+  background-color: rgba(248, 249, 250, 0.7);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+/* Section title with improved visual treatment */
+.sectionTitle {
+  font-family: var(--font-family-headings, 'Montserrat', sans-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--color-primary-dark);
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 2.5rem;
+  height: 2px;
+  background-color: var(--color-primary-light);
+  opacity: 0.5;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.section:hover .sectionTitle::after {
+  width: 3.5rem;
+  opacity: 0.7;
+}
+
+/* Removed Assistant section styling for MVP */
+
+/* Utility list */
+.utilityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%; /* Ensure it takes full width */
+}
+
+/* Utility item */
+.utilityItem {
+  margin: 0;
+  width: 100%; /* Ensure it takes full width */
+}
+
+/* Utility link styles are now consolidated with utilityLinkAsButton */
+
+/* Utility link styled as button with enhanced visual treatment */
+.utilityLinkAsButton {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-3) var(--space-3);
+  text-decoration: none;
+  color: var(--color-neutral-700);
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-fluid-base);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  min-height: 44px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(167, 43, 49, 0.03);
+  margin-bottom: 2px;
+}
+
+.utilityLinkAsButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background-color: var(--color-primary-light);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.utilityLinkAsButton:hover {
+  background-color: rgba(167, 43, 49, 0.03);
+  color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.08);
+}
+
+.utilityLinkAsButton:hover::before {
+  opacity: 0.7;
+}
+
+.utilityLinkAsButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(167, 43, 49, 0.05);
+}
+
+/* The icon-text-align class handles the layout of the icon and text */
+.utilityLinkAsButton .icon-text-align {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+/* Utility icon with enhanced styling */
+.utilityIcon {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  width: 1.25rem;
+  flex-shrink: 0;
+  position: relative;
+  vertical-align: middle;
+  margin-right: 12px;
+  transition: transform 0.2s ease, color 0.2s ease;
+  filter: drop-shadow(0 1px 1px rgba(167, 43, 49, 0.1));
+}
+
+.utilityLinkAsButton:hover .utilityIcon {
+  transform: scale(1.1);
+  color: var(--color-primary-dark);
+}
+
+/* Responsive styles */
+@media (min-width: 769px) {
+  /* Hide close button on desktop */
+  .closeButton {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile-specific styles */
+  .container {
+    width: 100%; /* Ensure container takes full width of the panel */
+    border-radius: 0; /* Remove border radius on mobile */
+    border: none; /* Remove all borders on mobile */
+    box-shadow: none; /* Remove box shadow on mobile */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+  }
+
+  .header {
+    width: 100%; /* Ensure header takes full width */
+    padding: var(--space-3);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 0; /* Remove border radius on mobile */
+    box-sizing: border-box; /* Include padding in width calculation */
+    background-color: var(--color-white); /* Ensure white background */
+  }
+
+  .title {
+    padding-left: var(--space-2);
+  }
+
+  .closeButton {
+    margin-right: 0;
+  }
+
+  .closeIcon {
+    font-size: 1.75rem;
+  }
+
+  .section {
+    width: 100%; /* Ensure section takes full width */
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--color-neutral-200);
+    box-sizing: border-box; /* Include padding in width calculation */
+    margin: 0; /* Remove any margin */
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  .utilityLinkAsButton {
+    width: 100%; /* Ensure link takes full width */
+    padding: var(--space-3) var(--space-3);
+    min-height: 50px; /* Larger touch target for better usability */
+    border-bottom: 1px solid var(--color-neutral-100);
+    box-sizing: border-box; /* Include padding in width calculation */
+    margin: 0; /* Remove any margin */
+  }
+
+  .utilityItem:last-child .utilityLinkAsButton {
+    border-bottom: none;
+  }
+
+  .utilityIcon {
+    font-size: 1.25rem;
+  }
+
+  /* Ensure icon-text alignment is consistent on mobile */
+  .utilityLinkAsButton .icon-text-align {
+    gap: 0; /* Remove gap since we're using margin-right on the icon */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left-align the icon and text */
+    width: 100%; /* Take full width for consistent left alignment */
+  }
+
+  /* Improve spacing between utility items */
+  .utilityList {
+    width: 100%; /* Ensure list takes full width */
+    gap: 0; /* Remove gap and use borders instead for cleaner separation */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+  }
+
+  /* Add section dividers */
+  .sectionTitle {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-neutral-200);
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .container {
+    width: 100%; /* Ensure container takes full width of the panel */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+  }
+
+  .header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .title {
+    padding-left: 0;
+    font-size: var(--font-size-fluid-base);
+  }
+
+  .closeButton {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .closeIcon {
+    font-size: 1.5rem;
+  }
+
+  .section {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .utilityLinkAsButton {
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--font-size-fluid-sm);
+  }
+
+  .utilityIcon {
+    font-size: 1.1rem;
+  }
+
+  /* Adjust icon-text alignment for small mobile devices */
+  .utilityLinkAsButton .icon-text-align {
+    gap: 0; /* Remove gap since we're using margin-right on the icon */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left-align the icon and text */
+    width: 100%; /* Take full width for consistent left alignment */
+  }
+
+  /* Reduce section title size */
+  .sectionTitle {
+    font-size: 1rem;
+    margin-bottom: var(--space-2);
+    padding-bottom: var(--space-1);
+  }
+}
+
+/* Extra small devices - optimized for 360px width (common in Mexico) */
+@media (max-width: 360px) {
+  .container {
+    width: 100%; /* Ensure container takes full width of the panel */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
+  }
+
+  .header {
+    padding: var(--space-2);
+  }
+
+  .title {
+    font-size: var(--font-size-fluid-sm);
+  }
+
+  .closeButton {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .closeIcon {
+    font-size: 1.25rem;
+  }
+
+  .section {
+    padding: var(--space-2);
+  }
+
+  .utilityLinkAsButton {
+    padding: var(--space-2);
+  }
+
+  .utilityIcon {
+    font-size: 1rem;
+    margin-right: 8px;
+  }
+}

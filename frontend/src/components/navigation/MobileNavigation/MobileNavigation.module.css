@@ -1,0 +1,203 @@
+/* Mobile Navigation Styles */
+
+/* ===== Bottom Navigation Bar ===== */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-white);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 1000;
+  height: 60px;
+}
+
+.bottomNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-width: 60px;
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s ease;
+}
+
+.bottomNavItem:active {
+  opacity: 0.7;
+}
+
+.bottomNavItem.active {
+  color: var(--color-primary);
+}
+
+.navIcon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.bottomNavLabel {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ===== Drawer Navigation ===== */
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-800);
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.drawerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1002;
+  animation: fadeIn 0.3s ease;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: var(--color-white);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1003;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-800);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.drawerNav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.drawerNavItem {
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.drawerNavLink {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  color: var(--color-neutral-800);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.drawerNavLink:active {
+  background-color: var(--color-neutral-100);
+}
+
+.drawerNavLink.active {
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary);
+  border-left: 4px solid var(--color-primary);
+}
+
+.drawerNavLabel {
+  font-size: 16px;
+  font-weight: 500;
+  margin-left: 16px;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (min-width: 769px) {
+  /* Hide mobile navigation on larger screens */
+  .bottomNav,
+  .menuButton,
+  .drawer,
+  .drawerOverlay {
+    display: none;
+  }
+}
+
+/* Extra small devices (360px and below) */
+@media (max-width: 360px) {
+  .bottomNav {
+    height: 56px;
+    padding: 4px 0;
+  }
+  
+  .bottomNavItem {
+    padding: 6px 8px;
+    min-width: 48px;
+  }
+  
+  .navIcon {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+  
+  .bottomNavLabel {
+    font-size: 10px;
+  }
+  
+  .drawer {
+    width: 260px;
+  }
+  
+  .drawerNavLink {
+    padding: 14px;
+  }
+  
+  .drawerNavLabel {
+    font-size: 14px;
+  }
+}

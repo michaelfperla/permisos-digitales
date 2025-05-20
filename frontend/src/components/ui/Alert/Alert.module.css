@@ -1,0 +1,33 @@
+/* Soft & Trustworthy Alert Styles */
+.alert {
+  padding: 14px 18px; /* Slightly more padding */
+  border: 1px solid transparent;
+  border-radius: 8px; /* Rounded */
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Soft shadow */
+}
+
+.success {
+  color: var(--color-success); /* #198754 */
+  background-color: #e8f5e9; /* Light green */
+  border-color: #b8dfba; /* Slightly darker green border */
+}
+
+.error {
+  color: var(--color-primary); /* #a72b31 */
+  background-color: #fdeded; /* Light red/pink */
+  border-color: #f4c7c7; /* Slightly darker red border */
+}
+
+.warning {
+  color: #856404; /* Dark yellow */
+  background-color: #fff8e1; /* Light yellow */
+  border-color: #ffecb3; /* Slightly darker yellow border */
+}
+
+.info {
+  color: #0c5460; /* Dark cyan */
+  background-color: #e1f5fe; /* Light cyan */
+  border-color: #b3e5fc; /* Slightly darker cyan border */
+}

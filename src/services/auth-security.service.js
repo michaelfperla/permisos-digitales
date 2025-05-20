@@ -211,8 +211,77 @@ async function checkLockStatus(identifier) {
   }
 }
 
+/**
+ * Change user password
+ * @param {number} userId - User ID
+ * @param {string} currentPassword - Current password
+ * @param {string} newPassword - New password
+ * @returns {Promise<Object>} - Result object with success flag and message
+ */
+async function changePassword(userId, currentPassword, newPassword) {
+  const { userRepository } = require('../repositories');
+  const { verifyPassword, hashPassword } = require('../utils/password-utils');
+
+  try {
+    logger.debug(`Changing password for user ID: ${userId}`);
+
+    // Get user from repository
+    const user = await userRepository.findById(userId);
+
+    if (!user) {
+      logger.warn(`User not found for ID: ${userId}`);
+      return {
+        success: false,
+        message: 'User not found.',
+        reason: 'USER_NOT_FOUND'
+      };
+    }
+
+    // Verify current password
+    const isPasswordValid = await verifyPassword(currentPassword, user.password_hash);
+
+    if (!isPasswordValid) {
+      logger.warn(`Invalid current password for user ID: ${userId}`);
+      return {
+        success: false,
+        message: 'Current password is incorrect.',
+        reason: 'INVALID_CURRENT_PASSWORD'
+      };
+    }
+
+    // Hash new password
+    const newPasswordHash = await hashPassword(newPassword);
+
+    // Update password in database
+    const updated = await userRepository.updatePassword(userId, newPasswordHash);
+
+    if (!updated) {
+      logger.error(`Failed to update password for user ID: ${userId}`);
+      return {
+        success: false,
+        message: 'Failed to update password.',
+        reason: 'UPDATE_FAILED'
+      };
+    }
+
+    logger.info(`Password changed successfully for user ID: ${userId}`);
+    return {
+      success: true,
+      message: 'Password changed successfully.'
+    };
+  } catch (error) {
+    logger.error(`Error changing password for user ID: ${userId}:`, error);
+    return {
+      success: false,
+      message: 'An error occurred while changing the password.',
+      reason: 'INTERNAL_ERROR'
+    };
+  }
+}
+
 module.exports = {
   recordFailedAttempt,
   resetAttempts,
-  checkLockStatus
+  checkLockStatus,
+  changePassword
 };

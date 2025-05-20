@@ -1,0 +1,30 @@
+.pageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3);
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-2);
+  color: var(--color-neutral-900);
+}
+
+.pageSubtitle {
+  font-size: 1rem;
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-4);
+  max-width: 800px;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 480px) {
+  .pageTitle, .pageSubtitle {
+    display: none; /* Hide title and subtitle on mobile */
+  }
+  
+  .pageContainer {
+    padding: var(--space-2);
+  }
+}

@@ -1,0 +1,88 @@
+/* Tabs Component Styles - Soft & Trustworthy Design */
+.tabsContainer {
+  width: 100%;
+  margin-bottom: var(--space-4);
+}
+
+.tabsHeader {
+  display: flex;
+  border-bottom: 1px solid var(--color-neutral-200);
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.tabsHeader::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.tabButton {
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tabButton:hover {
+  color: var(--color-primary);
+}
+
+.tabActive {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.tabsContent {
+  position: relative;
+}
+
+.tabPanel {
+  display: none;
+  padding: var(--space-3) 0;
+}
+
+.tabPanelActive {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .tabsHeader {
+    padding-bottom: var(--space-1);
+  }
+  
+  .tabButton {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.9rem;
+    min-height: 44px; /* Minimum touch target size */
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .tabButton {
+    padding: var(--space-2) var(--space-2);
+    font-size: 0.85rem;
+  }
+}

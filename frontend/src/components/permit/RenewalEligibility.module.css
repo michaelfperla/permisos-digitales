@@ -1,0 +1,190 @@
+.container {
+  margin: 1rem 0;
+}
+
+.eligibleCard,
+.ineligibleCard {
+  display: flex;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.eligibleCard {
+  background-color: #e6f7e6;
+  border: 1px solid #c3e6cb;
+}
+
+.ineligibleCard {
+  background-color: #f8f9fa;
+  border: 1px solid #e2e3e5;
+}
+
+.iconContainer {
+  display: flex;
+  align-items: flex-start;
+  margin-right: 1rem;
+}
+
+.eligibleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #28a745;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.ineligibleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #6c757d;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.message {
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.expirationDate {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.renewalInfo {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #28a745;
+}
+
+.actions {
+  margin-top: 1rem;
+}
+
+.renewButton,
+.newPermitButton {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.renewButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+.renewButton:hover {
+  background-color: #218838;
+}
+
+.newPermitButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.newPermitButton:hover {
+  background-color: #0069d9;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e2e3e5;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #007bff;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  padding: 1rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+}
+
+.retryButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #c82333;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .eligibleCard,
+  .ineligibleCard {
+    flex-direction: column;
+  }
+
+  .iconContainer {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .renewButton,
+  .newPermitButton {
+    display: block;
+    width: 100%;
+  }
+}

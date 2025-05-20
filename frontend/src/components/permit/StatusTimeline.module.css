@@ -1,0 +1,196 @@
+/**
+ * StatusTimeline Component Styles
+ *
+ * This CSS file was previously named NewStatusTimeline.module.css and has been updated
+ * to support the new timeline component with improved responsive design and support
+ * for various status types including OXXO payments.
+ */
+
+/* Timeline Container */
+.timelineContainer {
+  margin: var(--space-5) 0;
+  padding: var(--space-4);
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: var(--space-2) 0;
+}
+
+/* Step Item */
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding: var(--space-3) 0;
+  z-index: 1;
+}
+
+/* Step Item - Not the last one (for connecting lines) */
+.stepItem:not(:last-child) {
+  /* This creates the vertical connecting line */
+  position: relative;
+}
+
+.stepItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 40px; /* Position after the indicator */
+  left: 20px; /* Center with the indicator (half of 40px) */
+  width: 3px;
+  height: calc(100% - 40px); /* Extend to the next step */
+  background-color: #dee2e6; /* Using a specific color to match Bootstrap gray-300 */
+  z-index: 0;
+}
+
+/* Completed step connecting line */
+.stepCompleted:not(:last-child)::after {
+  background-color: #28a745; /* Using a specific green color to match Bootstrap success */
+}
+
+/* Step Indicator */
+.stepIndicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  border: 3px solid var(--bs-gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-3);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Step Content */
+.stepContent {
+  flex: 1;
+}
+
+.stepTitle {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-1);
+}
+
+.stepDescription {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Completed Step */
+.stepCompleted .stepIndicator {
+  background-color: #28a745; /* Using a specific green color to match Bootstrap success */
+  border-color: #28a745;
+  color: white;
+  transform: scale(1.05);
+}
+
+.stepCompleted .stepTitle {
+  color: #28a745;
+}
+
+/* Current Step */
+.stepCurrent .stepIndicator {
+  background-color: #a72b31; /* Using a specific red color */
+  border-color: #a72b31;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(167, 43, 49, 0.3);
+}
+
+.stepCurrent .stepTitle {
+  color: #a72b31;
+  font-weight: 700;
+}
+
+/* Pending Step */
+.stepPending .stepIndicator {
+  background-color: white;
+  border-color: var(--bs-gray-300);
+  color: var(--bs-gray-500);
+}
+
+/* Rejected Step */
+.stepRejected .stepIndicator {
+  background-color: var(--bs-danger);
+  border-color: var(--bs-danger);
+  color: white;
+  transform: scale(1.05);
+}
+
+.stepRejected .stepTitle {
+  color: var(--bs-danger);
+}
+
+/* Expired Step */
+.stepExpired .stepIndicator {
+  background-color: var(--bs-warning);
+  border-color: var(--bs-warning);
+  color: #212529;
+  transform: scale(1.05);
+}
+
+.stepExpired .stepTitle {
+  color: var(--bs-warning);
+}
+
+/* Responsive styles for desktop */
+@media (min-width: 768px) {
+  .timeline {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .stepItem {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+    padding: 0 var(--space-2);
+  }
+
+  .stepIndicator {
+    margin-right: 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .stepContent {
+    width: 100%;
+  }
+
+  /* Override the vertical connector for horizontal layout */
+  .stepItem:not(:last-child)::after {
+    width: calc(100% - 40px);
+    height: 3px;
+    top: 20px; /* Center with the indicator */
+    left: 40px; /* Start after the indicator */
+    right: 0;
+    max-width: 100%; /* Ensure the connector doesn't overflow */
+  }
+
+  .stepTitle {
+    font-size: 1rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .stepDescription {
+    font-size: 0.85rem;
+  }
+}

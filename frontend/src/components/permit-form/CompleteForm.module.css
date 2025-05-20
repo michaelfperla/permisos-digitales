@@ -1,0 +1,1361 @@
+/* CompleteForm.module.css - A comprehensive, user-friendly form design */
+
+:root {
+  --form-primary: var(--color-primary, #a72b31);
+  --form-primary-hover: var(--color-primary-dark, #852d2d);
+  --form-text: #2d3142;
+  --form-text-light: #6c757d;
+  --form-background: #ffffff;
+  --form-background-alt: #f8f9fa;
+  --form-border: #e9ecef;
+  --form-shadow: rgba(0, 0, 0, 0.08);
+  --form-transition: 0.2s ease;
+  --form-success: #5cb85c;
+  --form-error: #dc3545;
+  --form-warning: #f0ad4e;
+  --form-info: #5bc0de;
+}
+
+/* Main Container */
+.formContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+}
+
+/* Breadcrumbs styles */
+.breadcrumbs {
+  margin-bottom: 1rem;
+}
+
+/* Form Header */
+.formHeader {
+  text-align: left;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--form-border);
+}
+
+.formTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin-bottom: 0.25rem;
+}
+
+.formSubtitle {
+  font-size: 0.9rem;
+  color: var(--form-text-light);
+  margin: 0;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+/* Form Layout */
+.formLayout {
+  display: flex;
+  gap: 2rem;
+}
+
+.confirmationLayout {
+  padding-top: 1rem;
+}
+
+.formMain {
+  flex: 1;
+}
+
+.formSidebar {
+  width: 300px;
+  position: sticky;
+  top: 1.5rem;
+  align-self: flex-start;
+  height: fit-content;
+}
+
+/* Step Indicator */
+.stepIndicator {
+  display: flex;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stepIndicator::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px; /* Thinner line */
+  background-color: var(--color-neutral-300, #dee2e6); /* Lighter color */
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.stepMarker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--form-background);
+  border: 1px solid var(--form-border); /* Thinner border */
+  color: var(--form-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  transition: all var(--form-transition);
+}
+
+.stepLabel {
+  font-size: 0.8rem;
+  color: var(--form-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: all var(--form-transition);
+}
+
+.stepActive .stepMarker {
+  background-color: var(--form-primary);
+  border-color: var(--form-primary);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(167, 43, 49, 0.2); /* Enhanced shadow for active step */
+}
+
+.stepActive .stepLabel {
+  color: var(--form-primary);
+  font-weight: 600;
+}
+
+.stepCompleted .stepMarker {
+  background-color: var(--form-success);
+  border-color: var(--form-success);
+  color: white;
+  box-shadow: 0 1px 4px rgba(92, 184, 92, 0.2); /* Subtle shadow for completed step */
+}
+
+.stepCompleted .stepLabel {
+  color: var(--form-success);
+}
+
+/* Form Sections */
+.formSection {
+  background-color: var(--form-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--form-shadow);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all var(--form-transition);
+}
+
+.formSection:hover {
+  box-shadow: 0 4px 12px var(--form-shadow);
+}
+
+.formSectionHeader {
+  padding: 1rem 1.25rem;
+  background-color: var(--form-background);
+  border-bottom: 1px solid var(--form-border);
+  display: flex;
+  align-items: center;
+}
+
+.formSectionIcon {
+  font-size: 1.1rem;
+  color: var(--form-primary);
+  margin-right: 0.75rem;
+}
+
+.formSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin: 0;
+  flex: 1;
+}
+
+.formSectionContent {
+  padding: 1.25rem;
+}
+
+/* Form Fields */
+.formFields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.formGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin-bottom: 0.4rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem 1rem; /* Increased padding for better touch targets */
+  font-size: 0.95rem;
+  border: 1px solid var(--form-border);
+  border-radius: 4px;
+  transition: all var(--form-transition);
+  min-height: 44px; /* Minimum height for touch targets */
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--form-primary);
+  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.1);
+}
+
+.formInput.invalid {
+  border-color: var(--form-error);
+}
+
+.formInput.valid {
+  border-color: var(--form-success);
+}
+
+.validationIcon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  z-index: 2;
+}
+
+.validIcon {
+  color: var(--form-success);
+  font-size: 1.1rem;
+}
+
+.invalidIcon {
+  color: var(--form-error);
+  font-size: 1.1rem;
+}
+
+.formHelperText {
+  font-size: 0.75rem;
+  color: var(--form-text-light);
+  margin-top: 0.35rem;
+}
+
+.formErrorText {
+  font-size: 0.75rem;
+  color: var(--form-error);
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid var(--form-error);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.errorText {
+  color: var(--form-error);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+.inputWithIcon {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--form-primary);
+  font-size: 1rem;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.inputWithIcon .formInput {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Quick Select Buttons */
+.quickSelectContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.quickSelectButton {
+  background-color: var(--form-background-alt);
+  border: 1px solid var(--form-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--form-text);
+  cursor: pointer;
+  transition: all var(--form-transition);
+}
+
+.quickSelectButton:hover {
+  background-color: rgba(167, 43, 49, 0.1);
+  border-color: var(--form-primary);
+  color: var(--form-primary);
+}
+
+.quickSelectActive {
+  background-color: var(--form-primary);
+  border-color: var(--form-primary);
+  color: white;
+}
+
+/* Form Navigation */
+.formNavigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.formButton {
+  padding: 0.75rem 1.5rem; /* Increased padding for better touch targets */
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content horizontally */
+  border: none;
+  transition: all var(--form-transition);
+  min-height: 44px; /* Minimum height for touch targets */
+  min-width: 44px; /* Minimum width for touch targets */
+}
+
+.buttonPrimary {
+  background-color: var(--form-primary);
+  color: white;
+}
+
+.buttonPrimary:hover {
+  background-color: var(--form-primary-hover);
+}
+
+.buttonSecondary {
+  background-color: var(--form-background-alt);
+  color: var(--form-text);
+  border: 1px solid var(--form-border);
+}
+
+.buttonSecondary:hover {
+  background-color: #e9ecef;
+}
+
+.buttonSuccess {
+  background-color: var(--form-success);
+  color: white;
+}
+
+.buttonSuccess:hover {
+  background-color: #4cae4c;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+}
+
+.buttonIconRight {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Summary Card */
+.summaryCard {
+  background-color: var(--form-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--form-shadow);
+  padding: 1.25rem;
+}
+
+.summaryTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--form-border);
+  display: flex;
+  align-items: center;
+}
+
+.summaryIcon {
+  margin-right: 0.5rem;
+  color: var(--form-primary);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.summaryLabel {
+  color: var(--form-text-light);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--form-text);
+}
+
+.summaryProgress {
+  margin-top: 1rem;
+}
+
+.progressBar {
+  height: 6px;
+  background-color: var(--form-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--form-primary);
+  border-radius: 3px;
+  transition: width var(--form-transition);
+  width: 0%; /* Default width */
+}
+
+/* Progress fill width classes */
+.progressFill0 { width: 0%; }
+.progressFill10 { width: 10%; }
+.progressFill20 { width: 20%; }
+.progressFill30 { width: 30%; }
+.progressFill40 { width: 40%; }
+.progressFill50 { width: 50%; }
+.progressFill60 { width: 60%; }
+.progressFill70 { width: 70%; }
+.progressFill80 { width: 80%; }
+.progressFill90 { width: 90%; }
+.progressFill100 { width: 100%; }
+
+.summarySteps {
+  margin-top: 1.5rem;
+}
+
+.summaryStep {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.summaryStepIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--form-border);
+  color: var(--form-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.summaryStepActive .summaryStepIcon {
+  background-color: var(--form-primary);
+  color: white;
+}
+
+.summaryStepCompleted .summaryStepIcon {
+  background-color: var(--form-success);
+  color: white;
+}
+
+.summaryStepText {
+  flex: 1;
+  color: var(--form-text-light);
+}
+
+.summaryStepActive .summaryStepText {
+  color: var(--form-primary);
+  font-weight: 600;
+}
+
+.summaryStepCompleted .summaryStepText {
+  color: var(--form-success);
+}
+
+.summaryStepEdit {
+  color: var(--form-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--form-transition);
+}
+
+.summaryStep:hover .summaryStepEdit {
+  opacity: 1;
+}
+
+/* Introduction Section */
+.introSection {
+  background-color: var(--form-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--form-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.introTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.introIcon {
+  margin-right: 0.75rem;
+  color: var(--form-primary);
+}
+
+.introText {
+  font-size: 0.95rem;
+  color: var(--form-text);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.introList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.introListItem {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--form-text);
+}
+
+.introListIcon {
+  color: var(--form-primary);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Review Section */
+.reviewSection {
+  margin-bottom: 1.5rem;
+}
+
+.reviewSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--form-border);
+  display: flex;
+  align-items: center;
+}
+
+.reviewSectionIcon {
+  margin-right: 0.75rem;
+  color: var(--form-primary);
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.reviewItem {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  background-color: var(--form-background-alt);
+  border-radius: 4px;
+}
+
+.reviewItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.reviewLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--form-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.reviewValue {
+  font-size: 0.95rem;
+  color: var(--form-text);
+  font-weight: 500;
+}
+
+.reviewEdit {
+  align-self: flex-end;
+  color: var(--form-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.reviewEditIcon {
+  margin-right: 0.25rem;
+}
+
+/* Confirmation Section */
+.confirmationSection {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--form-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--form-shadow);
+  max-width: 800px;
+  margin: 2rem auto 0;
+}
+
+.confirmationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.confirmationIcon {
+  font-size: 2.5rem;
+  color: var(--form-success);
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.confirmationTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--form-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.confirmationText {
+  font-size: 1rem;
+  color: var(--form-text);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirmationDetails {
+  background-color: var(--form-background-alt);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirmationDetailItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.confirmationDetailLabel {
+  font-weight: 600;
+  color: var(--form-text-light);
+}
+
+.confirmationDetailValue {
+  font-weight: 600;
+  color: var(--form-text);
+}
+
+.confirmationActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Info Box */
+.infoBox {
+  background-color: rgba(91, 192, 222, 0.1);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.infoIcon {
+  color: var(--form-info);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.infoText {
+  color: var(--form-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Warning Box */
+.warningBox {
+  background-color: #fff8e1; /* Light yellow background */
+  border: 1px solid #ffc107; /* Warning yellow border */
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.warningIcon {
+  color: #ff9800; /* Warning orange */
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.warningText {
+  color: #d32f2f; /* Red for emphasis */
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Save Progress */
+.saveProgress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--form-border);
+}
+
+.saveProgressButton {
+  background: none;
+  border: none;
+  color: var(--form-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.saveProgressIcon {
+  margin-right: 0.5rem;
+}
+
+/* Loading Spinner */
+.loadingSpinner {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* OXXO Payment Styles */
+.oxxoPaymentBox {
+  background-color: #f8f9fa;
+  border: 1px solid var(--form-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.oxxoPaymentTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--form-text);
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.oxxoPaymentIcon {
+  color: #e74c3c;
+  margin-right: 0.5rem;
+}
+
+.oxxoPaymentDetails {
+  margin-bottom: 1.5rem;
+}
+
+.oxxoPaymentItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid var(--form-border);
+}
+
+.oxxoPaymentItemIcon {
+  color: var(--form-primary);
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+}
+
+.oxxoPaymentItemLabel {
+  font-weight: 600;
+  color: var(--form-text);
+  margin-right: 0.5rem;
+}
+
+.oxxoPaymentItemValue {
+  flex: 1;
+  text-align: right;
+  font-weight: 600;
+  color: var(--form-text);
+}
+
+.oxxoReferenceContainer {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.oxxoReferenceValue {
+  font-weight: 700;
+  font-size: 1.2rem;
+  font-family: monospace;
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  margin-right: 0.5rem;
+  flex: 1;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  background-color: #dee2e6;
+}
+
+.copyIcon {
+  margin-right: 0.25rem;
+}
+
+.copyText {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.oxxoBarcode {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.oxxoBarcode img {
+  max-width: 100%;
+  height: auto;
+}
+
+.oxxoInstructions {
+  background-color: rgba(240, 173, 78, 0.1);
+  border: 1px solid var(--form-warning);
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.oxxoInstructionsIcon {
+  color: var(--form-warning);
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+  margin-top: 0.2rem;
+}
+
+.oxxoInstructionsText {
+  margin: 0;
+  color: var(--form-text);
+  font-size: 0.9rem;
+}
+
+/* Payment Method Selection */
+.paymentMethodSelector {
+  margin-bottom: 1.5rem;
+}
+
+.paymentMethodTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--form-text);
+}
+
+.paymentMethodOptions {
+  display: flex;
+  gap: 1rem;
+}
+
+.paymentMethodOption {
+  flex: 1;
+  border: 2px solid var(--form-border);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all var(--form-transition);
+  position: relative;
+}
+
+.paymentMethodOption:hover {
+  border-color: var(--form-primary);
+  background-color: rgba(167, 43, 49, 0.05);
+}
+
+.paymentMethodOptionSelected {
+  border-color: var(--form-primary);
+  background-color: rgba(167, 43, 49, 0.05);
+}
+
+.paymentMethodRadio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.paymentMethodLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.paymentMethodIcon {
+  font-size: 1.5rem;
+  color: var(--form-primary);
+  margin-bottom: 0.5rem;
+}
+
+.paymentMethodName {
+  font-weight: 600;
+  color: var(--form-text);
+  text-align: center;
+}
+
+.paymentMethodDescription {
+  font-size: 0.8rem;
+  color: var(--form-text-light);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Mobile Step Indicator */
+.mobileStepIndicator {
+  display: none;
+  background-color: var(--form-background-alt);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--form-text);
+  border: 1px solid var(--form-border);
+}
+
+/* Responsive Styles */
+@media (max-width: 900px) {
+  .formLayout {
+    flex-direction: column;
+  }
+
+  .formSidebar {
+    width: 100%;
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+
+  .formFields {
+    grid-template-columns: 1fr;
+  }
+
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepLabel {
+    font-size: 0.7rem;
+  }
+
+  .paymentMethodOptions {
+    flex-direction: column;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Step Indicator */
+  .stepIndicator {
+    display: none; /* Hide the desktop step indicator */
+  }
+
+  .mobileStepIndicator {
+    display: block; /* Show the mobile step indicator */
+  }
+
+  /* Navigation Buttons */
+  .formNavigation {
+    flex-direction: column-reverse; /* Stack buttons with primary on top */
+    gap: 12px;
+  }
+
+  .formNavigation .formButton {
+    width: 100%; /* Full-width buttons */
+    padding: 12px;
+    font-size: 1rem;
+    justify-content: center;
+  }
+
+  .formNavigation .buttonPrimary {
+    order: 1; /* Ensure primary button appears first (top) */
+  }
+
+  .formNavigation .buttonSecondary {
+    order: 2;
+    background-color: transparent;
+    border: 1px solid var(--form-border);
+    color: var(--form-text-light);
+  }
+
+  /* Form Fields */
+  .formFields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .formGroup {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  /* Label Positioning */
+  .formLabel {
+    display: block;
+    text-align: left;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  /* Input Field Width */
+  .formInput {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .inputWithIcon .formInput {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+
+  /* Error Messages */
+  .formErrorText {
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: block;
+    width: 100%;
+  }
+
+  /* Helper Text */
+  .formHelperText {
+    font-size: 0.8rem;
+    margin-top: 6px;
+  }
+
+  /* Info Box */
+  .infoBox {
+    padding: 12px;
+    margin: 16px 0;
+    gap: 12px;
+  }
+
+  .infoText {
+    font-size: 0.85rem;
+  }
+
+  /* Quick Select Buttons */
+  .quickSelectContainer {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .quickSelectButton {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  /* Form Section */
+  .formSectionHeader {
+    padding: 12px 16px;
+  }
+
+  .formSectionContent {
+    padding: 16px;
+  }
+
+  .formSectionTitle {
+    font-size: 1rem;
+  }
+
+  /* Review Step Mobile Optimizations */
+  .reviewSection {
+    margin-bottom: 20px;
+    padding: 16px;
+    background-color: var(--form-background-alt);
+    border-radius: 8px;
+    border: 1px solid var(--form-border);
+  }
+
+  .reviewSectionTitle {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .reviewGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reviewItem {
+    position: relative;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid var(--form-border);
+  }
+
+  .reviewLabel {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .reviewValue {
+    display: block;
+    width: 100%;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .reviewEdit {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: var(--form-background-alt);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    margin-top: 0;
+  }
+
+  /* Payment Step Mobile Optimizations */
+  .paymentMethodOptions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .paymentMethodOption {
+    width: 100%;
+    padding: 16px;
+    border-radius: 8px;
+    min-height: 60px;
+  }
+
+  .paymentMethodLabel {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
+  }
+
+  .paymentMethodIcon {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+  }
+
+  .paymentMethodName {
+    font-size: 1rem;
+  }
+
+  .paymentMethodDescription {
+    display: none;
+  }
+
+  /* Card Payment Form */
+  .cardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .cardFormRow {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cardFormField {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  /* OXXO Instructions */
+  .oxxoInstructions {
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+
+  .oxxoInstructionsText {
+    font-size: 0.9rem;
+  }
+
+  /* Payment Details */
+  .paymentDetails {
+    margin: 16px 0;
+    padding: 12px;
+    background-color: var(--form-background-alt);
+    border-radius: 8px;
+    border: 1px solid var(--form-border);
+  }
+
+  .paymentAmount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+  }
+
+  .paymentLabel {
+    font-weight: 600;
+  }
+
+  .paymentValue {
+    font-weight: 700;
+    color: var(--form-primary);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .formSection:hover {
+    transform: none;
+  }
+
+  .formButton:hover {
+    transform: none;
+  }
+
+  .stepActive .stepMarker {
+    transform: none;
+  }
+
+  .loadingSpinner {
+    animation: none;
+  }
+}

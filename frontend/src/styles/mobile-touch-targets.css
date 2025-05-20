@@ -1,0 +1,22 @@
+/*
+ * DEPRECATED: mobile-touch-targets.css
+ *
+ * This file is deprecated and will be removed in a future update.
+ * All touch target enhancements have been moved to more appropriate locations:
+ *
+ * - Button styles: button-styles.css
+ * - Form input styles: Component CSS modules (Input.module.css, etc.)
+ * - Checkbox/Radio styles: FormControl.module.css
+ * - Link styles: global.css
+ * - Navigation styles: Component CSS modules (Navigation.module.css, etc.)
+ * - Form group styles: Component CSS modules (Form.module.css, etc.)
+ * - Table styles: Component CSS modules (Table.module.css, etc.)
+ * - Modal styles: Component CSS modules (Modal.module.css, etc.)
+ * - Card styles: Component CSS modules (Card.module.css, etc.)
+ * - Accordion styles: Component CSS modules (Accordion.module.css, etc.)
+ * - Pagination styles: Component CSS modules (Pagination.module.css, etc.)
+ * - Small screen overrides: Component CSS modules and global.css
+ *
+ * This file is kept temporarily for backward compatibility but should not be used for new code.
+ * Please use the appropriate component CSS modules or global styles instead.
+ */
