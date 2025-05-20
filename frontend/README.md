@@ -1,54 +1,60 @@
-# React + TypeScript + Vite
+# Permisos Digitales - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the frontend application for Permisos Digitales, a modern Single Page Application (SPA) built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+For a comprehensive understanding of the overall project architecture, including how the frontend interacts with the backend, please see the [main System Documentation](../docs/PROJECT_DOCUMENTATION.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Development
 
-## Expanding the ESLint configuration
+### Prerequisites
+*   Node.js (version compatible with Vite and project dependencies, e.g., >=16.0.0)
+*   npm (bundled with Node.js)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Environment Configuration
+*   Create a `.env.local` file in this `frontend/` directory.
+*   Set the `VITE_API_URL` variable to point to your running backend API. Example:
+    ```
+    VITE_API_URL=http://localhost:3001/api
+    ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Installation
+1.  Navigate to this directory: `cd frontend`
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+### Running the Development Server
+```bash
+npm run dev
 ```
+This command starts the Vite development server, typically available at `http://localhost:3000`. The server supports Hot Module Replacement (HMR) for a fast development experience.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## Building for Production
+```bash
+npm run build
 ```
+This command compiles the TypeScript code, bundles the application using Vite, and outputs static assets to the `dist/` directory (configurable in `vite.config.ts`).
+
+## Testing (Vitest)
+```bash
+npm test                # Run all tests (usually in watch mode by default)
+npm run test:coverage   # Generate test coverage report
+```
+Tests are written using [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/). Test files are typically located alongside the code they test (e.g., in `__tests__` subdirectories) or within `src/test/`.
+
+## Linting
+```bash
+npm run lint
+```
+This project uses ESLint for code quality and style checking. Configuration can be found in `.eslintrc.json` or similar.
+
+## Project Structure Overview
+
+*   **`public/`**: Static assets that are copied directly to the build output (e.g., `favicon.svg`, `service-worker.js`).
+*   **`src/`**: Contains all the React/TypeScript source code. See `src/README.md` for a detailed breakdown.
+*   **`vite.config.ts`**: Vite build and development server configuration.
+*   **`tsconfig.json`**: TypeScript compiler options.
+*   **`package.json`**: Project metadata, dependencies, and scripts.
+
+For more details on the frontend architecture, see the [Frontend Documentation section in the main System Documentation](../docs/PROJECT_DOCUMENTATION.md#4-frontend-documentation).
