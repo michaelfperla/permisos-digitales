@@ -1,70 +1,23 @@
-# Admin User Management
+# Project Scripts
 
-This directory contains scripts for managing admin users in the Permisos Digitales application.
+This directory contains utility and helper scripts for the Permisos Digitales project.
 
-## Creating an Admin User
+## Available Scripts
 
-There are two ways to create an admin user:
+*   **`create-admin-user.js`**:
+    *   **Purpose**: A Node.js script to interactively create a new administrative user in the database.
+    *   **Usage**:
+        ```bash
+        node scripts/create-admin-user.js
+        ```
+    *   It will prompt for the new admin user's email, password, first name, and last name.
+    *   **Dependencies**: This script might require certain Node.js packages to be installed (e.g., `bcrypt` for password hashing, `pg` for database interaction, `readline` for prompts). If running it standalone outside of the main application's `npm install` context, you might need to install these. Refer to the script's content for its specific dependencies.
+    *   **Note**: This script is an alternative to using pre-defined admin credentials (if any are set up by database seeds) or managing users through an admin interface.
 
-### Option 1: Use the existing admin credentials
+*   **(Other scripts, if any)**:
+    *   If other `.js` or shell scripts are present in this directory, they should be documented here with their purpose and usage instructions.
 
-The database already has admin users created:
+## General Notes
 
-- **Admin**: admin@permisos-digitales.mx / AdminSecure2025!
-- **Supervisor**: supervisor@permisos-digitales.mx / StaffAccess2025!
-
-You can use these credentials to log in to the admin portal.
-
-### Option 2: Create a new admin user using the script
-
-1. Make sure you have Node.js installed
-2. Install the required dependencies:
-   ```bash
-   npm install bcrypt pg readline
-   ```
-3. Run the script:
-   ```bash
-   node scripts/create-admin-user.js
-   ```
-4. Follow the prompts to enter the admin user details:
-   - Email
-   - Password
-   - First Name
-   - Last Name
-
-The script will create a new admin user with the provided details.
-
-## Database Schema
-
-The `users` table has the following admin-related fields:
-
-- `role`: Set to 'admin' for admin users
-- `account_type`: Set to 'admin' for admin users
-- `is_admin_portal`: Set to TRUE for users who can access the admin portal
-
-## Manual SQL
-
-If you prefer to create an admin user directly using SQL, you can run the following query:
-
-```sql
-INSERT INTO users (
-  email,
-  password_hash,
-  first_name,
-  last_name,
-  role,
-  account_type,
-  is_admin_portal
-) VALUES (
-  'your-admin-email@example.com',
-  -- bcrypt hash of your password (you need to generate this)
-  '$2b$10$bQqR3vSP.4X5XCeRQjrpj.mXaDN6jJeHPFTQpfvjgqLHX/QuV0Fpe', -- This is 'AdminSecure2025!'
-  'Your',
-  'Name',
-  'admin',
-  'admin',
-  TRUE
-);
-```
-
-Note: You should replace the password hash with a properly generated bcrypt hash of your desired password.
+*   Ensure that any script interacting with the database has access to the necessary database connection details, typically through environment variables (as configured in your `.env` file for the main application).
+*   Review script dependencies if running them in an environment where `node_modules` from the root project are not directly accessible.

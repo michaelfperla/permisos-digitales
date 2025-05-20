@@ -1,81 +1,54 @@
-# Permisos Digitales Database
+# Database Management
 
-This directory contains all database-related files for the Permisos Digitales application.
+This directory contains files and tools related to the PostgreSQL database for the Permisos Digitales application.
+
+For a high-level overview of the database schema and key tables, please refer to the [Database Documentation section in the main System Documentation](../docs/PROJECT_DOCUMENTATION.md#5-database-documentation).
 
 ## Directory Structure
 
-- **schema/** - Core database schema files
-  - `1_create_database.sql` - Creates the database and user
-  - `2_create_schema.sql` - Creates tables, indexes, and triggers
-  - `3_create_admin_user.sql` - Creates admin users
+*   **`schema/`**: Contains SQL scripts for the initial database setup.
+    *   `1_create_database.sql`: Script to create the database instance and primary user.
+    *   `2_create_schema.sql`: Script to define the initial set of tables, indexes, views, and other database objects.
+    *   `3_create_admin_user.sql`: Script to pre-populate default administrative users.
+*   **`migrations/`**: Contains older SQL-based migration files. Newer migrations are typically managed by `node-pg-migrate` and reside in `src/db/migrations/`.
+*   **`backups/`**: Intended for storing database backup files.
+*   **`tools/`**: Contains JavaScript utility scripts for database operations:
+    *   `backup.js`: Script to perform database backups.
+    *   `restore.js`: Script to restore the database from a backup.
+    *   `monitor.js`: Script for monitoring database performance (if implemented).
+    *   `verify-connection.js` & `test-db-connection.js`: Scripts to test and verify the database connection.
+    *   `run-migrations.js` & `run-migration.js`: Scripts potentially used for managing SQL migrations in the `database/migrations/` folder.
+*   **`config/`**: Configuration files related to database setup or specific environments.
+    *   `setup.js` & `production_setup.js`: Scripts that likely orchestrate the initial database setup using the files in `database/schema/`.
 
-- **migrations/** - Database migration files
-  - `20240414_add_password_reset_tokens.sql` - Adds password reset functionality
-  - `add_desired_start_date.sql` - Adds desired_start_date column to permit_applications
+## Database Setup
 
-- **backups/** - Database backup files
-  - `db_backup_before_migration.sql` - Backup before migration
-  - `permisos_digitales_2025-04-20T18-32-21-289Z.sql` - Recent backup
+To set up a new database instance for development:
 
-- **tools/** - Database management scripts
-  - `backup.js` - Creates database backups
-  - `restore.js` - Restores database from backups
-  - `monitor.js` - Monitors database performance
-  - `verify-connection.js` - Verifies database connection
-  - `test-db-connection.js` - Tests database connection
-  - `run-migrations.js` - Runs all migrations
-  - `run-migration.js` - Runs a specific migration
+1.  Ensure your PostgreSQL server is running.
+2.  Configure your backend `.env` file with the correct `DATABASE_URL` (pointing to your desired database name, user, and password).
+3.  The target database should exist, or you should have permissions to create it.
+4.  Run the setup script from the project root:
+    ```bash
+    npm run db:setup
+    ```
+    This command typically executes the `database/config/setup.js` script, which in turn runs the SQL files in `database/schema/` to create the database structure and initial admin users.
 
-- **config/** - Database configuration files
-  - `setup.js` - Main setup script
-  - `production_setup.js` - Production environment setup
-  - `postgresql.production.conf` - Production PostgreSQL configuration
+## Migrations
 
-## Database Schema
+Schema changes beyond the initial setup are managed via migrations.
 
-The database has several main tables:
-- `users` - Stores user information (clients and administrators)
-- `permit_applications` - Stores permit application data
-- `payment_verification_log` - Logs payment verification activities
-- `security_audit_log` - Logs security events for auditing
-- `user_sessions` - Stores user session information
-- `password_reset_tokens` - Stores password reset tokens
+*   **Primary Migration Tool**: The project uses `node-pg-migrate` for managing schema evolution. Migration files for this tool are located in `src/db/migrations/`.
+    *   To apply new migrations: `npm run migrate:up`
+    *   To roll back the last migration: `npm run migrate:down`
+    *   To create a new migration: `npm run migrate:create YourMigrationName`
+*   **Legacy SQL Migrations**: Older SQL migration files might exist in `database/migrations/`. The scripts in `database/tools/` (e.g., `run-migrations.js`) might be used for these, if applicable. It's recommended to use `node-pg-migrate` for all new schema changes.
 
 ## Development Credentials
 
-- **Admin**: admin@permisos-digitales.mx / AdminSecure2025!
-- **Supervisor**: supervisor@permisos-digitales.mx / StaffAccess2025!
-- **Client**: cliente@ejemplo.com / Cliente2025!
+Default administrative and client credentials created by the `3_create_admin_user.sql` script are:
+*   **Admin**: `admin@permisos-digitales.mx` / `AdminSecure2025!`
+*   **Supervisor**: `supervisor@permisos-digitales.mx` / `StaffAccess2025!`
+*   **Client**: `cliente@ejemplo.com` / `Cliente2025!`
 
-## Usage
-
-### Setting Up the Database
-
-```bash
-# Run the setup script
-node database/config/setup.js
-```
-
-### Creating a Backup
-
-```bash
-# Create a database backup
-node database/tools/backup.js
-```
-
-### Running Migrations
-
-```bash
-# Run all migrations
-node database/tools/run-migrations.js
-
-# Run a specific migration
-node database/tools/run-migration.js
-```
-
-### Testing Database Connection
-
-```bash
-# Test database connection
-node database/tools/test-db-connection.js
-```
+**Note**: Always change default passwords in production environments.
