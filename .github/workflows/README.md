@@ -1,65 +1,56 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflow configurations for continuous integration and deployment.
+This directory contains YAML configuration files for GitHub Actions, used for Continuous Integration (CI) and potentially Continuous Deployment (CD) of the Permisos Digitales application.
 
-## Available Workflows
+## Main Workflow: `node-tests.yml`
 
-### `node-tests.yml`
+This is the primary CI workflow for the project. It is typically triggered on:
+*   Pushes to main branches (e.g., `main`, `develop`).
+*   Pull requests targeting these main branches.
 
-This workflow runs on every push to `main` and `develop` branches, as well as on pull requests to these branches.
+### Key Jobs
 
-It consists of three jobs:
+The `node-tests.yml` workflow generally consists of the following jobs:
 
-1. **Lint**: Runs ESLint and Stylelint to check code quality
-2. **Test**: Runs unit tests and integration tests with Redis support
-3. **Build**: Verifies that the application can be built
+1.  **Lint**:
+    *   **Purpose**: Checks the codebase for linting errors and style inconsistencies.
+    *   **Actions**:
+        *   Runs ESLint on backend (JavaScript/Node.js) and frontend (TypeScript/React) code.
+        *   May run Stylelint on CSS or SCSS files.
 
-#### Job Details
+2.  **Test**:
+    *   **Purpose**: Executes automated tests for both backend and frontend to ensure code correctness and prevent regressions.
+    *   **Actions**:
+        *   Sets up the Node.js environment.
+        *   Installs dependencies for both backend (`npm install`) and frontend (`cd frontend && npm install`).
+        *   **Service Containers**: Often starts service containers for dependencies like PostgreSQL and Redis, making them available to integration tests. Environment variables for these services are configured within the workflow.
+        *   **Database Setup**: Runs database migrations (`npm run migrate:up` or similar) on the test PostgreSQL instance.
+        *   **Backend Tests**: Executes backend tests using `npm test` or `npm run test:cov`.
+        *   **Frontend Tests**: Executes frontend tests using `cd frontend && npm test` (or `npm run test:coverage`).
+        *   **Code Coverage**: Generates code coverage reports. Results are often uploaded to [Codecov](https://codecov.io/) or a similar service, and a badge may be displayed in the main `README.md`.
+        *   **Artifacts**: May upload test results or build artifacts for inspection.
 
-##### Lint
-- Runs ESLint on JavaScript files
-- Runs Stylelint on CSS files
+3.  **Build (Optional but Recommended)**:
+    *   **Purpose**: Verifies that the application (both frontend and backend, if applicable) can be successfully built for production.
+    *   **Actions**:
+        *   Frontend: `cd frontend && npm run build`.
+        *   Backend: While Node.js doesn't always have a "build" step like compiled languages, this job might check for packaging scripts or other build-related tasks if they exist.
 
-##### Test
-- Starts Redis and PostgreSQL service containers for integration tests
-- Sets up the test database schema using migrations
-- Creates test storage directory for file uploads
-- Runs all tests (unit and integration) with coverage
-- Generates test coverage report
-- Uploads test results as artifacts
-- Uploads coverage report to Codecov
+### Workflow Triggers and Concurrency
 
-##### Build
-- Verifies that the application can be built
+*   The workflow specifies `on: [push, pull_request]` triggers with branch filters.
+*   Concurrency settings might be used to cancel outdated workflow runs on the same branch/PR.
 
-## Environment Variables
+### Environment Variables in CI
 
-The following environment variables are set for the test job:
+The workflow file (`node-tests.yml`) defines various environment variables required for the jobs, especially for the test environment. These include:
+*   Database connection details for the PostgreSQL service container.
+*   Redis connection details.
+*   `NODE_ENV=test`.
+*   Secrets (like `CODECOV_TOKEN`) are usually managed via GitHub repository secrets.
 
-- `REDIS_HOST`: localhost
-- `REDIS_PORT`: 6379
-- `NODE_ENV`: test
-- `TEST_DB_HOST`: localhost
-- `TEST_DB_PORT`: 5432
-- `TEST_DB_USER`: postgres
-- `TEST_DB_PASSWORD`: postgres
-- `TEST_DB_NAME`: test_permisos_digitales
-- `TEST_STORAGE_PATH`: ./test-storage
-- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`: PostgreSQL connection parameters for migrations
+## Other Workflows
 
-## Adding New Workflows
+If other workflow files exist in this directory (e.g., for deployment, scheduled tasks via GitHub Actions), they should also be documented here, outlining their purpose, triggers, and key jobs.
 
-To add a new workflow:
-
-1. Create a new YAML file in this directory
-2. Define the workflow triggers, jobs, and steps
-3. Update this README with information about the new workflow
-
-## Best Practices
-
-- Keep workflows focused on specific tasks
-- Use descriptive names for workflows, jobs, and steps
-- Reuse steps and actions where possible
-- Use service containers for dependencies like databases and Redis
-- Upload artifacts for test results and build outputs
-- Use environment variables for configuration
+For the exact and most up-to-date details of the CI pipeline, always refer to the content of the `.github/workflows/node-tests.yml` file itself.
