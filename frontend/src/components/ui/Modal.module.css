@@ -1,0 +1,140 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modalContainer {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-lg);
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 80px); /* Account for bottom navigation (60px) + extra space (20px) */
+  overflow-y: auto;
+  animation: modalFadeIn 0.3s ease-out;
+  margin-bottom: 70px; /* Ensure space below modal for bottom navigation */
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-neutral-900);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: var(--color-neutral-900);
+}
+
+.modalContent {
+  padding: var(--space-4);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .modalContainer {
+    width: 95%;
+    max-height: calc(100vh - 80px); /* Account for bottom navigation (60px) + extra space (20px) */
+    margin-bottom: 70px; /* Ensure space below modal for bottom navigation */
+  }
+
+  .modalHeader {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .modalContent {
+    padding: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: var(--space-2);
+    align-items: flex-start; /* Align to top to give more space at bottom */
+    padding-top: 10vh; /* Start modal from top 10% of screen */
+  }
+
+  .modalContainer {
+    width: 100%;
+    max-height: calc(100vh - 75px); /* Account for bottom navigation (60px) + extra space (15px) */
+    margin-bottom: 65px; /* Ensure space below modal for bottom navigation */
+  }
+
+  .modalHeader {
+    padding: var(--space-2);
+  }
+
+  .modalTitle {
+    font-size: 1.1rem;
+  }
+
+  .modalContent {
+    padding: var(--space-2);
+  }
+}
+
+@media (max-width: 360px) {
+  .modalOverlay {
+    padding: var(--space-1);
+    align-items: flex-start; /* Align to top to give more space at bottom */
+    padding-top: 5vh; /* Start modal from top 5% of screen */
+  }
+
+  .modalContainer {
+    width: 100%;
+    max-height: calc(100vh - 70px); /* Account for bottom navigation (56px) + extra space (14px) */
+    margin-bottom: 60px; /* Ensure space below modal for bottom navigation */
+    border-radius: var(--border-radius-sm, var(--border-radius));
+  }
+
+  .modalHeader {
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .modalTitle {
+    font-size: 1rem;
+  }
+
+  .modalContent {
+    padding: var(--space-1);
+    padding-bottom: var(--space-3); /* Add extra padding at the bottom of content */
+  }
+}

@@ -1,0 +1,449 @@
+/* Application Details Page Styles */
+.applicationDetailsPage {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #343a40;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.backButton:hover {
+  background-color: #e9ecef;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0;
+}
+
+.statusContainer {
+  display: flex;
+  align-items: center;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0;
+}
+
+.statusPending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.statusSubmitted {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.statusVerified {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.statusRejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.statusReady {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.statusCompleted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.statusCancelled {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.approveButton,
+.rejectButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.approveButton {
+  background-color: #198754;
+  color: white;
+}
+
+.approveButton:hover {
+  background-color: #157347;
+}
+
+.rejectButton {
+  background-color: #a72b31;
+  color: white;
+}
+
+.rejectButton:hover {
+  background-color: #852d2d;
+}
+
+/* Application Content */
+.applicationContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Details Section */
+.detailsSection {
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.detailsCard {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  padding: 1.5rem;
+}
+
+.detailsHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.detailsIcon {
+  font-size: 1.5rem;
+  color: #a72b31;
+}
+
+.detailsTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.detailValue {
+  font-size: 0.875rem;
+  color: #343a40;
+  font-weight: 500;
+}
+
+/* Payment Proof Actions */
+.paymentProofActions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1.5rem;
+}
+
+.viewProofButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.viewProofButton:hover {
+  background-color: #0b5ed7;
+}
+
+/* Loading Payment Proof */
+.loadingPaymentProof {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid #e9ecef;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalText {
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  color: #343a40;
+}
+
+.rejectReasonInput,
+.verifyNotesInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  font-size: 0.875rem;
+  resize: vertical;
+}
+
+.rejectReasonInput:focus,
+.verifyNotesInput:focus {
+  outline: none;
+  border-color: #a72b31;
+}
+
+.verifyDetails {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+.verifyDetail {
+  margin-bottom: 0.5rem;
+}
+
+.verifyDetail:last-child {
+  margin-bottom: 0;
+}
+
+.verifyDetailLabel {
+  font-size: 0.75rem;
+  color: #6c757d;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.verifyDetailValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #343a40;
+}
+
+.verifyNotesContainer {
+  margin-top: 1rem;
+}
+
+.verifyNotesLabel {
+  font-size: 0.875rem;
+  color: #343a40;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #343a40;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.cancelButton:hover {
+  background-color: #e9ecef;
+}
+
+.confirmRejectButton,
+.confirmVerifyButton {
+  padding: 0.5rem 1rem;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  min-width: 150px;
+}
+
+.confirmRejectButton {
+  background-color: #a72b31;
+}
+
+.confirmRejectButton:hover:not(:disabled) {
+  background-color: #852d2d;
+}
+
+.confirmVerifyButton {
+  background-color: #198754;
+}
+
+.confirmVerifyButton:hover:not(:disabled) {
+  background-color: #157347;
+}
+
+.confirmRejectButton:disabled,
+.confirmVerifyButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #a72b31;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorIcon {
+  font-size: 3rem;
+  color: #a72b31;
+  margin-bottom: 1rem;
+}
+
+.errorActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  background-color: #a72b31;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.retryButton:hover {
+  background-color: #852d2d;
+}

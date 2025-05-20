@@ -1,0 +1,261 @@
+/* ResendVerificationPage Styles */
+.verificationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: var(--font-family-sans);
+}
+
+.verificationHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.verificationTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.verificationSubtitle {
+  font-size: 1rem;
+  color: var(--color-neutral-600);
+  margin: 0;
+  text-align: center;
+}
+
+.verificationCard {
+  width: 100%;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formIconWrapper {
+  width: 80px;
+  height: 80px;
+  background-color: rgba(167, 43, 49, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(167, 43, 49, 0.2);
+}
+
+.formIcon {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+.label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--color-neutral-800);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.errorText {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* Success State */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.successIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.successIcon {
+  font-size: 2.5rem;
+  color: var(--color-success);
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.successMessage {
+  font-size: 1rem;
+  color: var(--color-neutral-700);
+  margin: 0 0 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.loginButton {
+  min-width: 200px;
+  margin-top: 1rem;
+}
+
+.buttonIcon {
+  margin-left: 0.5rem;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.2);
+}
+
+.backLink {
+  display: block;
+  text-align: center;
+  margin-top: 1.25rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.infoBox {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.infoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.infoIcon {
+  margin-right: 8px;
+  color: var(--color-primary);
+}
+
+.alertMargin {
+  margin-bottom: 1.5rem;
+}
+
+.infoText {
+  margin: 0;
+  color: var(--color-neutral-700);
+  line-height: 1.5;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--color-white);
+  font-size: 1.25rem;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .verificationContainer {
+    padding: 0;
+  }
+
+  .verificationTitle {
+    font-size: 1.5rem;
+  }
+
+  .cardContent {
+    padding: 1.25rem;
+  }
+
+  .successIconWrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .successIcon {
+    font-size: 2rem;
+  }
+
+  .successTitle {
+    font-size: 1.3rem;
+  }
+
+  .submitButton {
+    padding: 0.8rem 1.25rem;
+    font-size: 1rem;
+  }
+}

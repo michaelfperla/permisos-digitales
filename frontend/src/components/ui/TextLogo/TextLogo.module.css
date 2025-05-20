@@ -1,0 +1,65 @@
+.textLogo {
+  font-size: 1.15rem;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-headings);
+  text-decoration: none;
+  color: var(--color-neutral-800);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+  transition: transform 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.textLogo span {
+  font-weight: var(--font-weight-normal);
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.secondWord {
+  margin-left: 0.1em; /* Reduced spacing between words for more natural appearance */
+}
+
+/* Styling for initials-only mode ("PD") */
+.initialsLogo {
+  font-weight: var(--font-weight-bold);
+}
+
+/* Styling for the "D" in initials-only mode */
+.secondInitial {
+  font-weight: var(--font-weight-bold);
+  margin-left: 0.02em; /* Very small spacing for natural character spacing */
+}
+
+/* Light variant for dark backgrounds (like sidebars) */
+.textLogo.light {
+  color: var(--color-white, #ffffff);
+}
+
+.textLogo.light span {
+  color: var(--color-primary-light, #c84a50);
+}
+
+.textLogo:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 992px) {
+  .textLogo {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .textLogo {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .textLogo {
+    font-size: 1rem;
+  }
+}

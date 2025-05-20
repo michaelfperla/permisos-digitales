@@ -1,0 +1,77 @@
+/* SkeletonTable Component Styles */
+.skeletonContainer {
+  width: 100%;
+  overflow-x: auto;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: var(--space-4);
+}
+
+.skeletonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.skeletonHeader {
+  background-color: var(--color-neutral-100);
+  border-bottom: 2px solid var(--color-neutral-200);
+  padding: var(--space-3);
+  height: 56px;
+}
+
+.skeletonHeaderCell {
+  height: 24px;
+  background-color: var(--color-neutral-300);
+  border-radius: var(--border-radius-sm);
+  margin-right: var(--space-3);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeletonRow {
+  border-bottom: 1px solid var(--color-neutral-200);
+  padding: var(--space-3);
+  height: 60px;
+}
+
+.skeletonRow:last-child {
+  border-bottom: none;
+}
+
+.skeletonCell {
+  height: 20px;
+  background-color: var(--color-neutral-200);
+  border-radius: var(--border-radius-sm);
+  margin-right: var(--space-3);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.autoCell {
+  width: 35%;
+}
+
+.dateCell {
+  width: 20%;
+}
+
+.statusCell {
+  width: 20%;
+}
+
+.actionsCell {
+  width: 15%;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}

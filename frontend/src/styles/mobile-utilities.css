@@ -1,0 +1,38 @@
+/*
+ * Mobile Utilities
+ * A collection of essential utility classes for implementing the mobile design system
+ * Optimized for devices common in the Mexican market (360px width)
+ */
+
+/*
+ * Text utilities
+ * Apply these classes to make text responsive with fluid typography
+ */
+.u-text-fluid {
+  font-size: var(--font-size-fluid-base);
+}
+
+.u-heading-fluid {
+  font-size: var(--font-size-fluid-xl);
+  line-height: 1.2;
+}
+
+.u-subheading-fluid {
+  font-size: var(--font-size-fluid-lg);
+  line-height: 1.3;
+}
+
+/*
+ * Layout utilities
+ * Apply these classes to create responsive layouts
+ */
+.u-stack-on-mobile {
+  display: flex;
+  flex-direction: row;
+}
+
+@media (max-width: var(--breakpoint-md)) {
+  .u-stack-on-mobile {
+    flex-direction: column;
+  }
+}
