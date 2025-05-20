@@ -1,0 +1,88 @@
+/* Pagination Component Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--space-4) 0;
+  gap: var(--space-2);
+}
+
+.paginationItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px; /* WCAG-compliant touch target */
+  min-height: 44px; /* WCAG-compliant touch target */
+  padding: var(--space-2);
+  border-radius: var(--border-radius);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-300);
+  color: var(--color-neutral-800);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.paginationItem:hover:not(.disabled):not(.active) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-400);
+}
+
+.paginationItem.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+}
+
+.paginationItem.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.paginationEllipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--color-neutral-600);
+}
+
+.paginationInfo {
+  margin: 0 var(--space-2);
+  color: var(--color-neutral-600);
+  font-size: 0.9rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .paginationItem {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: var(--space-1);
+  }
+  
+  .paginationItem {
+    min-width: 36px;
+    min-height: 36px;
+    padding: var(--space-1);
+    font-size: 0.8rem;
+  }
+  
+  /* Hide some pagination items on very small screens */
+  .paginationItem.hideMobile {
+    display: none;
+  }
+}

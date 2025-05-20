@@ -1,0 +1,257 @@
+/* VerifyEmailPage Styles */
+.verificationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: var(--font-family-sans);
+}
+
+.verificationHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.verificationTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.verificationSubtitle {
+  font-size: 1rem;
+  color: var(--color-neutral-600);
+  margin: 0;
+  text-align: center;
+}
+
+.verificationCard {
+  width: 100%;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.spinnerWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1.5rem;
+}
+
+.spinner {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  animation: spin 1.2s linear infinite;
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  color: var(--color-neutral-700);
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success State */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.successIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.successIcon {
+  font-size: 2.5rem;
+  color: var(--color-success);
+}
+
+.successTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.successMessage {
+  font-size: 1rem;
+  color: var(--color-neutral-700);
+  margin: 0 0 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.loginButton {
+  min-width: 200px;
+  margin-top: 1rem;
+}
+
+.buttonIcon {
+  margin-left: 0.5rem;
+}
+
+/* Error State */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.errorIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+}
+
+.errorIcon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.errorMessage {
+  font-size: 1rem;
+  color: var(--color-neutral-700);
+  margin: 0 0 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.errorNote {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin: 0 0 1.5rem;
+  text-align: center;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  width: 100%;
+}
+
+.errorActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.actionButton {
+  min-width: 200px;
+  margin-bottom: 1rem;
+}
+
+.actionLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.actionLink:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.linkDivider {
+  margin: 0.5rem 0;
+  color: var(--color-neutral-500);
+}
+
+/* Responsive styles */
+@media (max-width: 576px) {
+  .verificationContainer {
+    padding: 0;
+  }
+
+  .verificationTitle {
+    font-size: 1.5rem;
+  }
+
+  .spinnerWrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .spinner {
+    font-size: 2rem;
+  }
+
+  .loadingText {
+    font-size: 1rem;
+  }
+
+  .successIconWrapper,
+  .errorIconWrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .successIcon,
+  .errorIcon {
+    font-size: 2rem;
+  }
+
+  .successTitle,
+  .errorTitle {
+    font-size: 1.3rem;
+  }
+
+  .cardContent {
+    padding: 1.25rem;
+  }
+}

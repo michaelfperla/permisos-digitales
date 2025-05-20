@@ -1,0 +1,105 @@
+/* Sidebar Component Styles */
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem 0;
+  overflow-y: auto;
+}
+
+/* User section styles */
+.userSection {
+  padding: 0 1.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.userName {
+  font-weight: 600;
+  color: var(--color-neutral-800);
+}
+
+/* Navigation styles */
+.sidebarNav {
+  flex: 1;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navItem {
+  margin-bottom: 0.25rem;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: var(--color-neutral-700);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.navLink:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+}
+
+.navLink.active {
+  background-color: var(--color-neutral-100);
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  font-weight: 500;
+}
+
+.navIcon {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  min-width: 1.1rem;
+}
+
+.navText {
+  font-size: 0.95rem;
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+  .sidebarContent {
+    padding-top: 3.5rem; /* Space for the close button */
+  }
+
+  .navLink {
+    padding: 1rem 1.5rem; /* Larger touch targets on mobile */
+  }
+
+  .navIcon {
+    font-size: 1.2rem;
+  }
+
+  .navText {
+    font-size: 1rem;
+  }
+}

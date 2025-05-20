@@ -21,11 +21,13 @@ It consists of three jobs:
 - Runs Stylelint on CSS files
 
 ##### Test
-- Starts a Redis service container for integration tests
-- Runs unit tests
-- Runs integration tests
+- Starts Redis and PostgreSQL service containers for integration tests
+- Sets up the test database schema using migrations
+- Creates test storage directory for file uploads
+- Runs all tests (unit and integration) with coverage
 - Generates test coverage report
 - Uploads test results as artifacts
+- Uploads coverage report to Codecov
 
 ##### Build
 - Verifies that the application can be built
@@ -37,6 +39,13 @@ The following environment variables are set for the test job:
 - `REDIS_HOST`: localhost
 - `REDIS_PORT`: 6379
 - `NODE_ENV`: test
+- `TEST_DB_HOST`: localhost
+- `TEST_DB_PORT`: 5432
+- `TEST_DB_USER`: postgres
+- `TEST_DB_PASSWORD`: postgres
+- `TEST_DB_NAME`: test_permisos_digitales
+- `TEST_STORAGE_PATH`: ./test-storage
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`: PostgreSQL connection parameters for migrations
 
 ## Adding New Workflows
 

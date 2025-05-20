@@ -1,0 +1,134 @@
+.loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.loginContainer {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.loginCard {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  padding: 2rem;
+}
+
+.loginHeader {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.loginTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-top: 1rem;
+}
+
+.logo {
+  max-width: 200px;
+  margin: 0 auto;
+  display: block;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #343a40;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.formInput {
+  padding: 0.75rem;
+  padding-left: 2.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #a72b31;
+}
+
+.loginButton {
+  background-color: #a72b31;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.loginButton:hover:not(:disabled) {
+  background-color: #852d2d;
+}
+
+.loginButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a72b31;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.successMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #155724;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.errorIcon {
+  font-size: 1rem;
+}
+
+.successIcon {
+  font-size: 1rem;
+  color: #155724;
+}

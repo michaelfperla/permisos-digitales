@@ -1,0 +1,305 @@
+/* HomePage.module.css */
+
+/* Page Wrapper */
+.pageWrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 0;
+  background-color: var(--color-neutral-100);
+}
+
+/* Main Content Pane */
+.mainPane {
+  max-width: 1440px;
+  width: 90%;
+  margin: 2rem auto 3rem;
+  background-color: var(--color-white);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- Internal Header --- */
+.paneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-neutral-200);
+  background-color: var(--color-white);
+  position: relative;
+  z-index: 10;
+}
+
+/* Assuming TextLogo.module.css handles TextLogo styles */
+/* .textLogo, :global(a.textLogo) and .textLogo span, :global(a.textLogo) span removed from here */
+
+/* Desktop Navigation Links */
+.desktopNavLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.navLink { /* For raw <a> tags styled as links/buttons */
+  color: var(--color-neutral-700);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  transition: color 0.2s ease, background-color 0.2s ease;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+.navLink:hover {
+  color: var(--color-primary);
+  background-color: rgba(167, 43, 49, 0.05);
+}
+
+/* Mobile Menu Button */
+.menuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-neutral-800);
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1010;
+  padding: 0;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.menuButton:hover { background-color: var(--color-neutral-100); }
+.menuButton:focus-visible { outline: none; border-color: var(--color-primary); /* Add actual shadow if var(--color-primary-dark_rgba_0_25) is not defined */ box-shadow: 0 0 0 2px rgba(167, 43, 49, 0.25); }
+
+/* Mobile Menu */
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+.mobileMenuOpen { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s linear 0s; }
+.mobileMenuOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); }
+.mobileMenuContent {
+  position: fixed;
+  top: 0; right: 0;
+  width: 280px;
+  height: 100%;
+  background-color: var(--color-white) !important;
+  box-shadow: -3px 0 15px rgba(0, 0, 0, 0.15);
+  padding: 6rem var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  overflow-y: auto;
+  z-index: 1;
+}
+.mobileMenuOpen .mobileMenuContent { transform: translateX(0); }
+.mobileMenuButton { display: block; width: 100%; }
+.mobileMenuButton :global(.btn) { width: 100% !important; }
+.mobileMenuLink { color: var(--color-neutral-700); text-decoration: none; font-weight: var(--font-weight-medium); padding: var(--space-3); display: block; text-align: center; border-radius: var(--border-radius); transition: color 0.2s ease, background-color 0.2s ease; min-height: 44px; }
+.mobileMenuLink:hover { color: var(--color-primary); background-color: var(--color-neutral-100); }
+
+/* --- Hero Content Area --- */
+.paneHeroContent {
+  text-align: center;
+  /* Responsive vertical padding: More on desktop, less on mobile */
+  padding-top: clamp(3rem, 8vw, 5rem);
+  /* Increased bottom padding to ensure space for the button before overlap */
+  padding-bottom: clamp(6rem, 15vw, 9rem); /* INCREASED THIS SIGNIFICANTLY */
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(to bottom, var(--color-white), var(--color-neutral-100));
+}
+
+.paneHeroContent h1 {
+  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+  color: var(--color-neutral-900);
+  line-height: 1.2;
+  max-width: 800px;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-5);
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+.heroAction {
+  margin-top: var(--space-3); /* This ensures the button itself has some space from the subtitle */
+}
+
+/* --- Overlapping Content Section --- */
+.overlappingContent {
+  position: relative;
+  z-index: 1;
+  /* Default negative margin for desktop */
+  margin-top: -6rem; /* Adjusted from -5rem to be a bit more predictable */
+  margin-left: var(--space-5);
+  margin-right: var(--space-5);
+  margin-bottom: var(--space-5);
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+}
+
+/* Other sections (.statsSection, .howItWorksTimeline, etc.) remain largely the same from your previous version */
+/* I'll only include changes relevant to the overlap and general polish here */
+
+.statsSection { padding: var(--space-5) 0; }
+.statsHeading { text-align: center; font-size: clamp(1.6rem, 4.5vw, 2rem); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-5); color: var(--color-neutral-800); }
+.valuePropsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.cardLink { text-decoration: none; color: inherit; display: block; height: 100%; }
+.statCard { padding: var(--space-4); display: flex; flex-direction: column; align-items: center; text-align: center; height: 100%; background-color: var(--color-white); border-radius: var(--border-radius); }
+.statIconContainer { margin-bottom: var(--space-3); }
+.statCardIcon { width: 60px; height: 60px; background-color: rgba(167, 43, 49, 0.07); /* var(--color-primary) with low alpha */ border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: none; transition: transform 0.3s ease; }
+.cardLink:hover .statCardIcon { transform: scale(1.1); }
+.statIcon { color: var(--color-primary); font-size: 1.75rem; }
+.statTitle { font-size: 1.2rem; margin-bottom: var(--space-2); color: var(--color-neutral-900); font-weight: var(--font-weight-semibold); }
+.statDescription { font-size: 0.9rem; color: var(--color-neutral-700); line-height: 1.6; }
+
+.howItWorksTimeline { padding: var(--space-5) 0; border-top: 1px solid var(--color-neutral-200); }
+.howItWorksTimeline h2 { text-align: center; font-size: clamp(1.6rem, 4.5vw, 2rem); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-5); color: var(--color-neutral-800); }
+.timelineContainer { display: flex; align-items: flex-start; justify-content: space-between; position: relative; }
+.timelineStep { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; position: relative; padding: 0 var(--space-3); }
+.stepIndicatorTimeline { width: 36px; height: 36px; border-radius: 50%; background-color: var(--color-primary); color: var(--color-white); display: flex; align-items: center; justify-content: center; font-weight: var(--font-weight-bold); font-size: 1rem; margin-bottom: var(--space-3); box-shadow: 0 2px 6px rgba(167, 43, 49, 0.25); }
+.stepTitleTimeline { font-weight: var(--font-weight-semibold); margin-bottom: var(--space-1); font-size: 1.05rem; color: var(--color-neutral-900); }
+.stepDescriptionTimeline { font-size: 0.9rem; color: var(--color-neutral-700); line-height: 1.5; }
+.timelineConnector { flex-grow: 1; height: 2px; background-color: var(--color-neutral-300); margin-top: 18px; min-width: 30px; }
+
+.faqSection { padding: var(--space-5) 0; border-top: 1px solid var(--color-neutral-200); }
+.faqSection h2 { text-align: center; font-size: clamp(1.6rem, 4.5vw, 2rem); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-4); color: var(--color-neutral-800); }
+.accordionContainer { max-width: 760px; margin: 0 auto; border: 1px solid var(--color-neutral-200); border-radius: var(--border-radius); overflow: hidden; box-shadow: none; background-color: var(--color-white); }
+.accordionItem { border-bottom: 1px solid var(--color-neutral-200); }
+.accordionItem:last-child { border-bottom: none; }
+.accordionHeader { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: var(--space-3) var(--space-4); background-color: transparent; border: none; cursor: pointer; text-align: left; font-size: 1.05rem; font-weight: var(--font-weight-medium); color: var(--color-neutral-800); transition: background-color 0.2s ease; }
+.accordionHeader:hover { background-color: var(--color-neutral-50); }
+.accordionTitle { margin-right: var(--space-3); flex: 1; white-space: normal; word-break: break-word; }
+.accordionIcon { font-size: 1.1rem; color: var(--color-neutral-500); transition: transform 0.3s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.accordionHeader[aria-expanded="true"] .accordionIcon { color: var(--color-primary); transform: rotate(45deg); }
+.accordionPanel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; background-color: var(--color-neutral-50); }
+.accordionPanelOpen { max-height: 350px; transition: max-height 0.4s ease-in, padding 0.3s ease-in; overflow-y: auto; }
+.accordionContent { padding: var(--space-3) var(--space-4); font-size: 0.9rem; color: var(--color-neutral-700); line-height: 1.7; white-space: normal; word-break: break-word; }
+
+.securitySection { padding: var(--space-5) 0; text-align: center; border-top: 1px solid var(--color-neutral-200); background-color: var(--color-neutral-50); }
+.securitySection h2 { font-size: clamp(1.6rem, 4.5vw, 2rem); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-4); color: var(--color-neutral-800); }
+.securityIconWrapper { margin: 0 auto var(--space-4); display: inline-block; padding: var(--space-3); background-color: rgba(167, 43, 49, 0.1); /* var(--color-primary) with alpha */ border-radius: 50%; }
+.securityIcon { display: block; color: var(--color-primary); font-size: 2rem; }
+.securityText { max-width: 700px; margin: 0 auto; text-align: center; font-size: 0.95rem; color: var(--color-neutral-700); line-height: 1.7; }
+.securityText strong { font-weight: var(--font-weight-semibold); color: var(--color-neutral-800); }
+
+.finalCtaSection { padding: var(--space-5) 0; border-top: 1px solid var(--color-neutral-200); background-color: var(--color-white); }
+.finalCtaContentWrapper { max-width: 700px; margin: 0 auto; text-align: center; }
+.finalCtaContentWrapper h2 { font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 700; margin-bottom: var(--space-3); color: var(--color-neutral-900); }
+.ctaSubtitle { font-size: clamp(1rem, 2.5vw, 1.15rem); color: var(--color-neutral-700); margin-bottom: var(--space-4); line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto; }
+.ctaButtonWrapper { margin-top: var(--space-2); display: inline-block; }
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) { /* Tablet */
+  .mainPane { width: 100%; margin: 0; border-radius: 0; box-shadow: none; }
+  .overlappingContent { margin-left: var(--space-4); margin-right: var(--space-4); }
+  .valuePropsGrid { grid-template-columns: 1fr; gap: var(--space-4); }
+}
+
+@media (max-width: 768px) { /* Mobile */
+  .pageWrapper { padding: 0; }
+  .mainPane { margin: 0 auto; border-radius: 0; }
+  .paneHeader { padding: var(--space-3); }
+  /* TextLogo font-size handled by its own module or specific selectors below */
+
+  .menuButton { display: flex; }
+  .mobileMenu { display: block; }
+  .desktopNavLinks { display: none; }
+
+  .paneHeroContent {
+    padding-top: var(--space-5); /* Reduced top padding for mobile */
+    padding-bottom: var(--space-8); /* WAS var(--space-6) - Further Increased bottom padding to make space for overlap */
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .overlappingContent {
+    margin-top: -1rem; /* Keep a significant overlap but less than desktop */
+    margin-left: var(--space-3);
+    margin-right: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--border-radius-lg);
+  }
+
+  .statsSection, .howItWorksTimeline, .faqSection, .securitySection, .finalCtaSection { padding-left: 0; padding-right: 0; }
+  .statsHeading, .howItWorksTimeline h2, .faqSection h2, .securitySection h2, .finalCtaContentWrapper h2 { font-size: clamp(1.4rem, 5vw, 1.8rem); margin-bottom: var(--space-4); }
+  .timelineContainer { flex-direction: column; align-items: stretch; }
+  .timelineStep { align-items: flex-start; text-align: left; padding-left: 50px; margin-bottom: var(--space-4); }
+  .stepIndicatorTimeline { position: absolute; left: 0; top: 0; margin-bottom: 0; }
+  .timelineConnector { display: none; }
+  .timelineStep:not(:last-child)::after { content: ''; position: absolute; left: 18px; top: 40px; bottom: calc(-1 * var(--space-4) + 4px); width: 2px; background-color: var(--color-neutral-300); z-index: -1; }
+  .accordionContainer { margin-left: 0; margin-right: 0; max-width: 100%; border-left:none; border-right:none; border-radius:0; }
+  .accordionHeader { padding: var(--space-3); }
+  .accordionTitle { font-size: 1rem; }
+  .accordionContent { padding: var(--space-2) var(--space-3) var(--space-3); font-size: 0.9rem; }
+  .ctaButtonWrapper { width: 100%; padding: 0 var(--space-3); }
+  .ctaButtonWrapper :global(.btn) { width: 100%; }
+}
+
+/* Mobile Header Specific Refinements */
+@media (max-width: var(--breakpoint-sm)) { /* 480px */
+  .paneHeader { padding: var(--space-3); }
+  /* Assuming TextLogo.module.css handles its own font size at this breakpoint */
+  .mobileMenuContent { padding-top: 5rem; max-width: 300px; }
+
+  .paneHeroContent {
+    padding-bottom: var(--space-7); /* Maintain enough space */
+  }
+  .overlappingContent {
+    margin-top: -3.5rem; /* Adjust overlap for smaller mobile */
+    margin-left: var(--space-2);
+    margin-right: var(--space-2);
+    padding: var(--space-3);
+  }
+}
+
+@media (max-width: var(--breakpoint-xs)) { /* 360px */
+  .paneHeader { padding: var(--space-2) var(--space-3); }
+  /* Assuming TextLogo.module.css handles its own font size at this breakpoint */
+  .menuButton { width: 36px; height: 36px; font-size: 1.25rem; }
+  .mobileMenuContent { max-width: 260px; padding-top: 4.5rem; gap: var(--space-2); }
+  .mobileMenuButton :global(.btn), .mobileMenuLink { font-size: var(--font-size-sm); padding-top: var(--space-2); padding-bottom: var(--space-2); }
+
+  .paneHeroContent h1 { font-size: clamp(1.8rem, 7vw, 2.2rem); } /* Adjusted for very small screens */
+  .subtitle { font-size: clamp(0.9rem, 3vw, 1rem); } /* Adjusted */
+  .paneHeroContent {
+    padding-bottom: var(--space-6); /* Bottom padding for hero to avoid overlap */
+  }
+  .overlappingContent {
+    margin-top: -2.5rem; /* Reduced negative margin further */
+    margin-left: var(--space-1);
+    margin-right: var(--space-1);
+    padding: var(--space-3) var(--space-2); /* Adjust padding */
+  }
+  .stepIndicatorTimeline { width:32px; height:32px; font-size:0.9rem;}
+  .timelineStep:not(:last-child)::after { left: 16px; top:36px; bottom: calc(-1 * var(--space-4) + 2px); }
+}

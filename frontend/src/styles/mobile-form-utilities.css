@@ -1,0 +1,181 @@
+/*
+ * Mobile Form Utilities
+ * Additional utility classes for mobile forms
+ * These classes take precedence over component-specific styles
+ * BUT only apply mobile-specific properties at appropriate breakpoints
+ */
+
+/* Mobile Form Links - Base styles */
+.mobile-form-links {
+  text-align: center;
+  margin-top: var(--space-4);
+  line-height: 1.6;
+  border-top: 1px solid var(--color-neutral-200);
+  padding-top: var(--space-3);
+}
+
+.mobile-form-links p {
+  margin-bottom: 0.75rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Form links section - for grouping related content */
+.mobile-form-links-section {
+  margin-bottom: var(--space-3);
+}
+
+.mobile-form-links-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Link Styles - Base styles */
+.mobile-link-minor {
+  color: var(--color-neutral-600);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: inline-block;
+  padding: var(--space-1);
+}
+
+.mobile-link-minor:hover {
+  color: var(--color-neutral-900);
+  text-decoration: underline;
+}
+
+.mobile-link-action {
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  display: inline-block;
+  padding: var(--space-1);
+}
+
+.mobile-link-action:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+/* Text Styles - Base styles */
+.mobile-text-muted {
+  color: var(--color-neutral-600);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-1);
+}
+
+.mobile-success-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  color: var(--color-neutral-800);
+}
+
+.mobile-link-button {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Button Styles - Base styles */
+.mobile-button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Touch Target Spacing - Base styles */
+.touch-target-spacing > * {
+  margin-bottom: 0.25rem;
+}
+
+.touch-target-spacing > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Adjustments - Apply mobile-specific styles only at appropriate breakpoints */
+@media (max-width: 768px) {
+  /* Tablet breakpoint - Start applying some mobile optimizations */
+  .mobile-button {
+    width: 100%;
+    min-height: 40px;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+  }
+
+  .mobile-link-minor,
+  .mobile-link-action,
+  .mobile-link-button {
+    padding: 0.4rem;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  .touch-target-spacing > * {
+    margin-bottom: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Mobile breakpoint - Apply full mobile optimizations */
+  .mobile-form-links {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+  }
+
+  .mobile-form-links-section {
+    margin-bottom: var(--space-2);
+  }
+
+  .mobile-link-minor,
+  .mobile-link-action {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-link-button {
+    padding: 0.25rem;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mobile-button {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  .touch-target-spacing > * {
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Small mobile breakpoint - Further optimizations for small screens */
+  .mobile-form-links {
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+  }
+
+  .mobile-form-links-section {
+    margin-bottom: var(--space-2);
+  }
+
+  .mobile-link-minor,
+  .mobile-link-action {
+    font-size: 0.85rem;
+  }
+
+  .mobile-text-muted {
+    font-size: 0.85rem;
+  }
+}

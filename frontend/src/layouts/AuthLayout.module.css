@@ -1,0 +1,71 @@
+/* Auth Layout Styles */
+
+.authPage {
+  margin: 0;
+  padding: 0;
+  position: fixed; /* Fixed to cover viewport */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-neutral-100);
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.9));
+  overflow: hidden; /* Prevent scrollbars on the page itself */
+  display: flex; /* Added flex to directly center .authContainer if needed, though authContainer does it too */
+  align-items: center;
+  justify-content: center;
+}
+
+.authContainer {
+  display: flex; /* For internal alignment of the card */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; /* Padding for small screen edges */
+  width: 100%; /* Take full width of parent (.authPage) */
+  height: 100%; /* Take full height of parent (.authPage) */
+  box-sizing: border-box;
+  overflow-y: auto; /* Allow scrolling if content (e.g. tall card) exceeds viewport height */
+}
+
+.authCardWrapper {
+  /* This class is applied to the <Card variant="auth"> component */
+  width: 100%;
+  max-width: 420px; /* Max width of the card itself */
+  /* Margins for spacing if authContainer wasn't centering it, but usually not needed for centering here */
+  /* margin: 0 auto; */ /* Standard horizontal centering if parent wasn't display:flex justify-content:center */
+}
+
+.authLogo {
+  /* This class is passed to the TextLogo component used as the Card's title */
+  /* TextLogo.module.css should handle its own font/color. This is for placement. */
+  display: block; /* To allow auto margins for horizontal centering if needed */
+  margin: 0 auto var(--space-4); /* Centered with bottom margin, adjusted variables */
+  /* Height might not be needed if TextLogo is text; font-size controls its height */
+  /* height: 56px; */
+  /* object-fit: contain; */ /* Only for <img> tags */
+  transition: transform 0.2s ease; /* Standardized transition */
+}
+
+.authLogo:hover {
+  transform: scale(1.03); /* Slightly less aggressive hover scale */
+}
+
+/* Responsive styles */
+@media (max-width: 768px) { /* This breakpoint is fine for tablets/large mobiles */
+  .authContainer {
+    padding: 0.75rem; /* Keep padding */
+    justify-content: flex-start; /* Align card to top on mobile if keyboard pushes content up */
+    padding-top: var(--space-5); /* Add some top padding on mobile */
+  }
+
+  .authCardWrapper {
+    /* max-width: 100%; */ /* Already width:100%, so max-width here means it won't exceed 420px */
+    /* width: 100%; */ /* Already set */
+  }
+
+  .authLogo {
+    /* height: 48px; /* If TextLogo is text, adjust font-size in TextLogo.module.css for responsive */
+    margin: 0 auto var(--space-3); /* Adjusted variables */
+  }
+}
