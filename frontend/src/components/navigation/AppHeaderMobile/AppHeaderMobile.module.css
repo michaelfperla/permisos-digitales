@@ -5,7 +5,7 @@
   align-items: center;
   background-color: var(--color-white);
   border-bottom: 1px solid var(--color-neutral-200);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
   position: fixed;
   top: 0;
   left: 0;
@@ -20,12 +20,13 @@
 /* Optional: slightly more prominent shadow when menu is open */
 .headerBar.menuIsOpenActually {
   /* Used when this component's panel is open */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
+
   /* TextLogo component should handle its own scaling/styles */
 }
 
@@ -65,10 +66,7 @@
 /* --- Menu Panel --- */
 .menuPanelContainer {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: var(--z-modal); /* Higher than headerBar */
   opacity: 0;
   visibility: hidden;
@@ -84,11 +82,8 @@
 
 .menuOverlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4); /* Slightly softer overlay */
+  inset: 0;
+  background-color: rgb(0 0 0 / 40%); /* Slightly softer overlay */
   z-index: 1;
   cursor: pointer;
 }
@@ -101,7 +96,7 @@
   max-width: 85vw; /* Ensure it doesn't take full screen on slightly larger mobiles */
   height: 100%;
   background-color: var(--color-white);
-  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  box-shadow: -2px 0 12px rgb(0 0 0 / 10%); /* Softer shadow */
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
@@ -193,10 +188,12 @@
   font-size: var(--font-size-base); /* 1rem */
   border-left: 4px solid transparent;
 }
+
 .navLinkText:hover {
   background-color: var(--color-neutral-100);
   color: var(--color-primary);
 }
+
 .navLinkText.activeLink {
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
@@ -223,6 +220,7 @@
   color: var(--color-white);
   border-color: var(--color-primary);
 }
+
 .navButtonPrimary:hover {
   background-color: var(--color-primary-dark);
   color: var(--color-white); /* Ensure text color remains on hover */
@@ -233,6 +231,7 @@
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
+
 .navButtonSecondary:hover {
   background-color: var(--color-primary-lightest);
   color: var(--color-primary-dark); /* Ensure text color remains on hover */
@@ -245,6 +244,7 @@
   width: 20px; /* Fixed width for alignment */
   text-align: center;
 }
+
 .activeLink .navLinkIcon {
   color: var(--color-primary);
 }
@@ -264,24 +264,30 @@
     height: var(--mobile-header-height-sm, 52px);
     padding: 0 var(--space-2);
   }
+
   .menuToggleButton,
   .panelCloseButton {
     width: 36px;
     height: 36px;
   }
+
   .hamburgerIcon {
     font-size: 1.2rem;
   }
+
   .closeIcon {
     font-size: 1.3rem;
   }
+
   .menuPanel {
     width: 260px;
   }
+
   .navLinkText {
     padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-sm);
   }
+
   .navButton {
     margin: var(--space-2);
     width: calc(100% - (2 * var(--space-2)));

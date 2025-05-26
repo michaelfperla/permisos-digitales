@@ -46,7 +46,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .footerContainer {
     flex-direction: column;
     text-align: center;
@@ -60,7 +60,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .footerContainer {
     padding-top: 2rem;
     padding-bottom: 2rem;

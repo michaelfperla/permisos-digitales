@@ -88,7 +88,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .accordionButton {
     padding: var(--space-3);
   }
@@ -98,7 +98,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .accordionButton {
     padding: var(--space-2) var(--space-3);
     font-size: 0.95rem;

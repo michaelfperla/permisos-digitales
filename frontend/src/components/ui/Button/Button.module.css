@@ -6,24 +6,34 @@
  */
 .buttonStandard {
 }
+
 .primary {
 }
+
 .secondary {
 }
+
 .success {
 }
+
 .danger {
 }
+
 .info {
 }
+
 .warning {
 }
+
 .text {
 }
+
 .small {
 }
+
 .large {
 }
+
 .icon {
 } /* For icon-only buttons, still needs .btn-icon global class */
 
@@ -48,6 +58,7 @@
   line-height: 1; /* Crucial for tight vertical fit */
   height: 1em; /* Define a consistent box for the icon */
   width: 1em; /* Define a consistent box for the icon */
+
   /* No margin or padding here; use gap on .buttonContent */
 }
 
@@ -79,7 +90,9 @@
 }
 
 /* Special styling for icon-only buttons (where no children/text is provided) */
+
 /* This assumes Button.tsx adds styles.iconOnly to the main button element if size="icon" and no children */
+
 /* This also assumes button-styles.css defines .btn-icon for padding/aspect-ratio */
 .iconOnly .buttonContent {
   /* If the main button has styles.iconOnly */

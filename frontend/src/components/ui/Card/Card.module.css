@@ -55,12 +55,9 @@
 .cardAuth {
   /* Auth variant might be narrower on desktop and centered */
   max-width: 480px; /* Example max-width for auth forms on desktop */
-  margin-left: auto;
-  margin-right: auto;
+  margin: var(--space-5) auto var(--space-5) auto;
   box-shadow: var(--box-shadow); /* More pronounced shadow for auth */
   position: relative; /* For the ::before pseudo-element */
-  margin-top: var(--space-5);
-  margin-bottom: var(--space-5);
   box-sizing: border-box;
   width: 100%;
   overflow-x: hidden;
@@ -75,8 +72,11 @@
   right: 0;
   height: 4px; /* Thicker accent */
   background-color: var(--color-primary);
+
   /* border-top-left-radius: var(--border-radius-lg); /* Match card's radius */
+
   /* border-top-right-radius: var(--border-radius-lg); /* Match card's radius */
+
   /* No need for radius on the ::before if the card has overflow:hidden */
 }
 
@@ -88,6 +88,7 @@
   padding-bottom: var(--space-3);
   text-align: center;
 }
+
 .cardHeaderAuth .cardTitle {
   /* Title within auth header */
   font-size: var(--font-size-xl); /* Larger title for auth forms */
@@ -107,15 +108,19 @@
     margin-bottom: var(--space-3);
     border-radius: var(--border-radius); /* Slightly smaller radius on mobile */
   }
+
   .cardHeader {
     padding: var(--space-2) var(--space-3);
   }
+
   .cardTitle {
     font-size: var(--font-size-base); /* Adjust title size for mobile */
   }
+
   .cardBody {
     padding: var(--space-3);
   }
+
   .cardFooter {
     padding: var(--space-2) var(--space-3);
   }
@@ -123,21 +128,21 @@
   /* Auth card specific mobile adjustments */
   .cardAuth {
     width: 100%; /* Full width on small mobile */
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: var(--space-3);
-    margin-bottom: var(--space-3);
+    margin: var(--space-3) 0 var(--space-3) 0;
     border-radius: var(--border-radius); /* Consistent mobile radius */
     max-width: 100%;
     overflow-x: hidden; /* Prevent horizontal overflow */
   }
+
   .cardHeaderAuth {
     padding-top: var(--space-4);
     padding-bottom: var(--space-2);
   }
+
   .cardHeaderAuth .cardTitle {
     font-size: var(--font-size-lg); /* Adjust for mobile */
   }
+
   .cardBodyAuth {
     padding: var(--space-2) var(--space-3) var(--space-4);
     overflow-x: hidden; /* Prevent horizontal overflow */
@@ -145,7 +150,7 @@
 }
 
 /* Extra small devices (360px and below) */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .cardAuth {
     padding: 0;
     overflow-x: hidden;

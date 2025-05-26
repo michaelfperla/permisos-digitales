@@ -47,21 +47,21 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .withPadding {
     padding-left: var(--space-fluid-2);
     padding-right: var(--space-fluid-2);
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .withPadding {
     padding-left: var(--space-fluid-2);
     padding-right: var(--space-fluid-2);
   }
 }
 
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .withPadding {
     padding-left: var(--space-fluid-1);
     padding-right: var(--space-fluid-1);

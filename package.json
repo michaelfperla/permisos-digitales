@@ -25,10 +25,10 @@
     "db:restore": "node database/tools/restore.js",
     "db:monitor": "node database/tools/monitor.js",
     "db:migrate": "node database/tools/run-migration.js",
-    "lint:js": "eslint src/ frontend/src/",
+    "lint:js": "eslint src/ && (cd frontend && npm run lint)",
     "lint:css": "stylelint frontend/src/**/*.css",
     "lint": "npm run lint:js && npm run lint:css",
-    "lint:fix": "eslint src/ frontend/src/ --fix",
+    "lint:fix": "eslint src/ --fix && (cd frontend && npm run lint -- --fix)",
     "prepare": "husky && husky install"
   },
   "dependencies": {
@@ -80,7 +80,7 @@
     "supertest": "^6.3.4"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.12.0"
   },
   "overrides": {
     "axios": "^1.8.2"

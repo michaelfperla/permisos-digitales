@@ -4,7 +4,7 @@
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
 }
 
 .formTitle {
@@ -35,7 +35,7 @@
 .input:focus {
   outline: none;
   border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 0 0 2px rgb(74 144 226 / 20%);
 }
 
 .error {
@@ -60,7 +60,7 @@
 }
 
 .submitButton:disabled {
-  background-color: #cccccc;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 

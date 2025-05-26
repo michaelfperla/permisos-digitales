@@ -16,7 +16,7 @@
   align-items: center;
   padding: 1rem;
   border-radius: 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
   animation: slideIn 0.3s ease forwards;
   background-color: white;
   border-left: 4px solid #ccc;
@@ -99,6 +99,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;

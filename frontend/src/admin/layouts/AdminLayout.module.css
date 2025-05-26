@@ -8,11 +8,8 @@
 /* Overlay for mobile sidebar */
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background-color: rgb(0 0 0 / 50%);
   z-index: 999;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -53,11 +50,11 @@
 
 .sidebar.mobile.open {
   transform: translateX(0); /* Slide in from right */
-  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 12px rgb(0 0 0 / 10%);
 }
 
 /* Desktop sidebar collapsed state */
-.sidebar:not(.mobile):not(.open) {
+.sidebar:not(.mobile, .open) {
   width: 60px;
 }
 
@@ -67,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -88,7 +85,7 @@
 }
 
 /* Ensure the logo is centered in collapsed state */
-.sidebar:not(.mobile):not(.open) .sidebarLogo {
+.sidebar:not(.mobile, .open) .sidebarLogo {
   justify-content: center;
   padding-left: 0;
 }
@@ -116,11 +113,11 @@
 
 .sidebarUser {
   padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
 }
 
 /* Adjust padding and remove border in collapsed sidebar user section */
-.sidebar:not(.mobile):not(.open) .sidebarUser {
+.sidebar:not(.mobile, .open) .sidebarUser {
   padding: 0;
   min-height: 0;
   border-bottom: none;
@@ -141,7 +138,7 @@
 
 .userEmail {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -157,7 +154,7 @@
   display: flex;
   align-items: center;
   padding: 0.85rem 1.25rem; /* Increased padding for better touch targets */
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   text-decoration: none;
   transition: all 0.15s ease;
   min-height: 44px; /* Minimum height for touch targets */
@@ -165,7 +162,7 @@
 }
 
 .navLink:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   color: #fff;
 }
 
@@ -190,12 +187,12 @@
 }
 
 /* Collapsed sidebar styles */
-.sidebar:not(.mobile):not(.open) .navText {
+.sidebar:not(.mobile, .open) .navText {
   display: none;
 }
 
 /* Center icons in collapsed state */
-.sidebar:not(.mobile):not(.open) .navIcon {
+.sidebar:not(.mobile, .open) .navIcon {
   margin-right: 0;
   margin-left: 0;
   justify-content: center;
@@ -203,29 +200,29 @@
 }
 
 /* Ensure logo container doesn't overflow in collapsed state */
-.sidebar:not(.mobile):not(.open) .sidebarLogo {
+.sidebar:not(.mobile, .open) .sidebarLogo {
   overflow: hidden;
 }
 
 /* Hide user info in collapsed sidebar (desktop) */
-.sidebar:not(.mobile):not(.open) .userInfo {
+.sidebar:not(.mobile, .open) .userInfo {
   display: none;
 }
 
 /* Additional styling for navLinks in collapsed state */
-.sidebar:not(.mobile):not(.open) .navLink {
+.sidebar:not(.mobile, .open) .navLink {
   justify-content: center;
   padding: 0.85rem 0;
 }
 
 .sidebarFooter {
   padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgb(255 255 255 / 10%);
   margin-top: auto; /* Push to bottom of sidebar */
 }
 
 /* Adjust padding in collapsed sidebar footer */
-.sidebar:not(.mobile):not(.open) .sidebarFooter {
+.sidebar:not(.mobile, .open) .sidebarFooter {
   padding: 1rem 0.5rem; /* Reduce horizontal padding in collapsed state */
 }
 
@@ -240,7 +237,7 @@
   align-items: center;
   width: 100%;
   padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   border: none;
   color: #fff;
   cursor: pointer;
@@ -248,7 +245,7 @@
 }
 
 .logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgb(255 255 255 / 20%);
 }
 
 /* These styles are for the default state of the logoutIcon.
@@ -258,6 +255,7 @@
 */
 .logoutIcon {
   /* Removed font-size, margin-right, min-width, display, align-items, justify-content */
+
   /* These should be handled by the Icon component and Button component's internal flexbox */
   color: var(--color-white); /* Keep explicit color if needed */
 }
@@ -271,9 +269,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgb(255 255 255 / 5%);
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgb(255 255 255 / 60%);
   cursor: pointer;
   transition: all 0.15s ease;
   border-radius: 50%;
@@ -281,11 +279,11 @@
 }
 
 .sidebarToggleButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   color: var(--color-white);
 }
 
-.sidebar:not(.mobile):not(.open) .sidebarToggleButton {
+.sidebar:not(.mobile, .open) .sidebarToggleButton {
   margin-bottom: var(--space-3);
 }
 
@@ -297,12 +295,12 @@
   justify-content: center;
 }
 
-.sidebar:not(.mobile):not(.open) .logoutText {
+.sidebar:not(.mobile, .open) .logoutText {
   display: none;
 }
 
 /* Styles for the logout button when sidebar is collapsed (desktop) */
-.sidebar:not(.mobile):not(.open) .logoutButton {
+.sidebar:not(.mobile, .open) .logoutButton {
   /* These rules are for the button container itself, not its internal icon */
   display: flex; /* Use flexbox to center its content (the icon) */
   align-items: center; /* Center content vertically */
@@ -314,7 +312,7 @@
   max-width: 44px; /* Prevent expansion */
   max-height: 44px; /* Prevent expansion */
   padding: 0; /* No internal padding, let the icon fill it */
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   border: none;
   border-radius: 4px;
   margin: 0 auto; /* Center the button within the footer */
@@ -322,8 +320,9 @@
 }
 
 /* Remove any conflicting overrides for the button's internal icon wrapper */
-.sidebar:not(.mobile):not(.open) .logoutButton :global(.buttonIcon) {
+.sidebar:not(.mobile, .open) .logoutButton :global(.buttonIcon) {
   /* Removed `width`, `height`, `font-size` overrides */
+
   /* These are now handled by the Icon component and Button's internal styling */
   margin: 0; /* Ensure no margin from the `Button` component's internal icon wrapper */
 }
@@ -348,7 +347,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Mobile sidebar text visibility */
   .sidebar.mobile:not(.open) .navText,
   .sidebar.mobile:not(.open) .logoutText {
@@ -396,7 +395,7 @@
 }
 
 /* Tablet Styles */
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .mainContent {
     padding: var(--space-fluid-2, 1.25rem);
   }
@@ -407,7 +406,7 @@
 }
 
 /* Mobile Styles */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .mainContent {
     padding: 1rem;
   }
@@ -418,7 +417,7 @@
 }
 
 /* Very Small Mobile Styles */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .mainContent {
     padding: 0.75rem;
   }

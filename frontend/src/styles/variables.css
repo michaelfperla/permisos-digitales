@@ -51,23 +51,19 @@
 
   /* -- Semantic Status Colors -- */
   --status-critical: var(--color-primary);
-  --status-critical-bg: rgba(167, 43, 49, 0.1);
+  --status-critical-bg: rgb(167 43 49 / 10%);
   --status-critical-hover: var(--color-primary-dark);
-
   --status-warning: var(--color-warning);
-  --status-warning-bg: rgba(255, 193, 7, 0.1);
+  --status-warning-bg: rgb(255 193 7 / 10%);
   --status-warning-hover: #e0a800;
-
   --status-info: var(--color-info);
-  --status-info-bg: rgba(13, 202, 240, 0.1);
+  --status-info-bg: rgb(13 202 240 / 10%);
   --status-info-hover: #0bacce;
-
   --status-success: var(--color-success);
-  --status-success-bg: rgba(25, 135, 84, 0.1);
+  --status-success-bg: rgb(25 135 84 / 10%);
   --status-success-hover: #146c43;
-
   --status-neutral: var(--color-neutral-500);
-  --status-neutral-bg: rgba(173, 181, 189, 0.1);
+  --status-neutral-bg: rgb(173 181 189 / 10%);
   --status-neutral-hover: var(--color-neutral-600);
 
   /* -- Calm Waters Theme -- */
@@ -80,12 +76,11 @@
 
   /* -- Typography -- */
   --font-family-sans:
-    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Inter', system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
   --font-family-headings:
-    'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    'Montserrat', system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
   --font-family-mono:
-    SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-
+    sfmono-regular, menlo, monaco, consolas, 'Liberation Mono', 'Courier New', monospace;
   --font-size-base: 1rem; /* Typically 16px */
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.25rem;
@@ -126,11 +121,12 @@
   --border-radius-pill: 50rem;
 
   /* -- Shadows -- */
-  --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --box-shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  --box-shadow-sm: 0 0.125rem 0.25rem rgb(0 0 0 / 7.5%);
+  --box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 15%);
+  --box-shadow-lg: 0 1rem 3rem rgb(0 0 0 / 17.5%);
 
   /* -- Spacing -- */
+
   /* Base spacing unit */
   --space-unit: 0.25rem;
 
@@ -153,6 +149,7 @@
   --space-fluid-5: clamp(2rem, 5vw, 3rem); /* 32px to 48px */
 
   /* -- Breakpoints -- */
+
   /* Primary Breakpoints */
   --breakpoint-xs: 360px; /* Extra small devices (small phones) - Common in Mexico */
   --breakpoint-sm: 480px; /* Small devices (phones) */

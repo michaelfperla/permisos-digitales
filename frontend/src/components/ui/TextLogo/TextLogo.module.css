@@ -35,7 +35,7 @@
 
 /* Light variant for dark backgrounds (like sidebars) */
 .textLogo.light {
-  color: var(--color-white, #ffffff);
+  color: var(--color-white, #fff);
 }
 
 .textLogo.light span {
@@ -46,19 +46,19 @@
   transform: translateY(-1px);
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .textLogo {
     font-size: 1.1rem;
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .textLogo {
     font-size: 1.05rem;
   }
 }
 
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .textLogo {
     font-size: 1rem;
   }
