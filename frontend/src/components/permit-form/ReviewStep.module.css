@@ -56,7 +56,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .reviewItem {
     flex-direction: column;
   }

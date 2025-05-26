@@ -60,6 +60,7 @@
     opacity: 0;
     transform: translateY(5px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -67,7 +68,7 @@
 }
 
 /* Mobile Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tabsHeader {
     padding-bottom: var(--space-1);
   }
@@ -80,7 +81,7 @@
 }
 
 /* Small Mobile Devices */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .tabButton {
     padding: var(--space-2) var(--space-2);
     font-size: 0.85rem;

@@ -43,13 +43,13 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .navLink {
     padding: 12px 14px;
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .navLink {
     padding: 10px 12px;
     font-size: 0.9rem;

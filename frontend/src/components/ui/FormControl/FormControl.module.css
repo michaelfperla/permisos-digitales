@@ -1,4 +1,5 @@
 /* Soft & Trustworthy Checkbox and Radio Styles */
+
 /* Hide Default Input */
 .checkboxInput,
 .radioInput {
@@ -24,7 +25,6 @@
   padding-left: 36px; /* Increased for better touch target */
   margin-bottom: 12px;
   cursor: pointer;
-  -webkit-user-select: none;
   user-select: none;
   min-height: 44px; /* Minimum height for WCAG-compliant touch target */
   align-items: center; /* Vertically center the content */
@@ -43,7 +43,7 @@
   border: 1px solid var(--bs-gray-400);
   border-radius: 4px; /* Slightly rounded */
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
 .checkboxWrapper:hover .checkboxInput ~ .checkboxIndicator {
@@ -53,7 +53,7 @@
 .checkboxWrapper .checkboxInput:checked ~ .checkboxIndicator {
   background-color: var(--rojo);
   border-color: var(--rojo);
-  box-shadow: 0 1px 3px rgba(167, 43, 49, 0.2);
+  box-shadow: 0 1px 3px rgb(167 43 49 / 20%);
 }
 
 .checkboxWrapper .checkboxInput:disabled ~ .checkboxIndicator {
@@ -92,7 +92,6 @@
   padding-left: 36px; /* Increased for better touch target */
   margin-bottom: 12px;
   cursor: pointer;
-  -webkit-user-select: none;
   user-select: none;
   min-height: 44px; /* Minimum height for WCAG-compliant touch target */
   align-items: center; /* Vertically center the content */
@@ -111,7 +110,7 @@
   border: 1px solid var(--bs-gray-400);
   border-radius: 50%;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
 .radioWrapper:hover .radioInput ~ .radioIndicator {
@@ -120,7 +119,7 @@
 
 .radioWrapper .radioInput:checked ~ .radioIndicator {
   border: 5px solid var(--rojo); /* Filled circle effect */
-  box-shadow: 0 1px 3px rgba(167, 43, 49, 0.2);
+  box-shadow: 0 1px 3px rgb(167 43 49 / 20%);
 }
 
 .radioWrapper .radioInput:disabled ~ .radioIndicator {
@@ -156,7 +155,7 @@
   background-size: 16px 12px;
   border: 1px solid var(--bs-gray-300);
   border-radius: 8px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 7%);
   transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
@@ -169,8 +168,8 @@
   border-color: var(--rojo);
   outline: 0;
   box-shadow:
-    0 0 0 3px rgba(167, 43, 49, 0.15),
-    inset 0 1px 2px rgba(0, 0, 0, 0.07);
+    0 0 0 3px rgb(167 43 49 / 15%),
+    inset 0 1px 2px rgb(0 0 0 / 7%);
 }
 
 .select:disabled {

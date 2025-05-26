@@ -4,6 +4,7 @@
 .mobileForm {
   width: 100%;
   margin-bottom: var(--space-4);
+
   /* max-width removed as ResponsiveContainer handles width constraints */
   box-sizing: border-box;
   overflow-x: hidden;
@@ -57,14 +58,14 @@
   color: var(--color-neutral-900);
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  -webkit-appearance: none; /* Remove default iOS styling */
+    box-shadow 0.2s ease; /* Remove default iOS styling */
+
   appearance: none;
 }
 
 .formInput:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%);
   outline: none;
 }
 
@@ -91,7 +92,7 @@
 
 .formSelect:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%);
   outline: none;
 }
 
@@ -108,14 +109,14 @@
   resize: vertical;
   transition:
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  -webkit-appearance: none; /* Remove default iOS styling */
+    box-shadow 0.2s ease; /* Remove default iOS styling */
+
   appearance: none;
 }
 
 .formTextarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%);
   outline: none;
 }
 
@@ -163,7 +164,7 @@
 }
 
 .checkboxInput:focus {
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%);
   outline: none;
 }
 
@@ -196,7 +197,7 @@
 }
 
 /* Responsive Adjustments */
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .formActions {
     flex-direction: row;
     justify-content: center; /* Center buttons for consistency */
@@ -210,7 +211,7 @@
 }
 
 /* Small mobile devices */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .formGroup {
     margin-bottom: 16px;
   }
@@ -235,7 +236,7 @@
 }
 
 /* Extra small devices (360px and below) */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .mobileForm {
     width: 100%;
     max-width: 100%;

@@ -67,7 +67,7 @@
   background-color: var(--color-white);
   border-color: var(--color-accent);
   outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(172, 137, 82, 0.25);
+  box-shadow: 0 0 0 0.25rem rgb(172 137 82 / 25%);
 }
 
 .input.invalid {
@@ -82,7 +82,7 @@
 }
 
 .errorMessage {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgb(220 53 69 / 10%);
   color: var(--color-danger);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius);
@@ -92,7 +92,7 @@
 }
 
 .successMessage {
-  background-color: rgba(25, 135, 84, 0.1) !important;
+  background-color: rgb(25 135 84 / 10%) !important;
   color: var(--color-success) !important;
 }
 
@@ -122,7 +122,6 @@
   text-decoration: none;
   vertical-align: middle;
   cursor: pointer;
-  -webkit-user-select: none;
   user-select: none;
   background-color: var(--color-primary);
   border: 1px solid var(--color-primary);
@@ -167,7 +166,7 @@
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-radius: 50%;
   border-top-color: var(--color-white);
   animation: spin 0.8s linear infinite;

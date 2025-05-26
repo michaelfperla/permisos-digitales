@@ -5,10 +5,10 @@
   --form-primary-hover: var(--color-primary-dark, #852d2d);
   --form-text: #2d3142;
   --form-text-light: #6c757d;
-  --form-background: #ffffff;
+  --form-background: #fff;
   --form-background-alt: #f8f9fa;
   --form-border: #e9ecef;
-  --form-shadow: rgba(0, 0, 0, 0.08);
+  --form-shadow: rgb(0 0 0 / 8%);
   --form-transition: 0.2s ease;
   --form-success: #5cb85c;
   --form-error: #dc3545;
@@ -115,7 +115,7 @@
   font-weight: 600;
   position: relative;
   z-index: 2;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%); /* Subtle shadow */
   transition: all var(--form-transition);
 }
 
@@ -134,7 +134,7 @@
   border-color: var(--form-primary);
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(167, 43, 49, 0.2); /* Enhanced shadow for active step */
+  box-shadow: 0 2px 6px rgb(167 43 49 / 20%); /* Enhanced shadow for active step */
 }
 
 .stepActive .stepLabel {
@@ -146,7 +146,7 @@
   background-color: var(--form-success);
   border-color: var(--form-success);
   color: white;
-  box-shadow: 0 1px 4px rgba(92, 184, 92, 0.2); /* Subtle shadow for completed step */
+  box-shadow: 0 1px 4px rgb(92 184 92 / 20%); /* Subtle shadow for completed step */
 }
 
 .stepCompleted .stepLabel {
@@ -231,7 +231,7 @@
 .formInput:focus {
   outline: none;
   border-color: var(--form-primary);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.1);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 10%);
 }
 
 .formInput.invalid {
@@ -275,7 +275,7 @@
 }
 
 .errorBox {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgb(220 53 69 / 10%);
   border: 1px solid var(--form-error);
   border-radius: 4px;
   padding: 1rem;
@@ -330,7 +330,7 @@
 }
 
 .quickSelectButton:hover {
-  background-color: rgba(167, 43, 49, 0.1);
+  background-color: rgb(167 43 49 / 10%);
   border-color: var(--form-primary);
   color: var(--form-primary);
 }
@@ -412,7 +412,7 @@
 .summaryTitle {
   font-size: 0.95rem;
   font-weight: 600;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.75rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--form-border);
   display: flex;
@@ -464,33 +464,43 @@
 .progressFill0 {
   width: 0%;
 }
+
 .progressFill10 {
   width: 10%;
 }
+
 .progressFill20 {
   width: 20%;
 }
+
 .progressFill30 {
   width: 30%;
 }
+
 .progressFill40 {
   width: 40%;
 }
+
 .progressFill50 {
   width: 50%;
 }
+
 .progressFill60 {
   width: 60%;
 }
+
 .progressFill70 {
   width: 70%;
 }
+
 .progressFill80 {
   width: 80%;
 }
+
 .progressFill90 {
   width: 90%;
 }
+
 .progressFill100 {
   width: 100%;
 }
@@ -572,7 +582,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--form-text);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1rem;
   display: flex;
   align-items: center;
 }
@@ -592,7 +602,7 @@
 .introList {
   list-style: none;
   padding: 0;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1.5rem;
 }
 
 .introListItem {
@@ -619,7 +629,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--form-text);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--form-border);
   display: flex;
@@ -762,7 +772,7 @@
 
 /* Info Box */
 .infoBox {
-  background-color: rgba(91, 192, 222, 0.1);
+  background-color: rgb(91 192 222 / 10%);
   border-radius: 4px;
   padding: 1rem;
   margin: 1rem 0;
@@ -841,7 +851,7 @@
   display: inline-block;
   width: 1.2rem;
   height: 1.2rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-radius: 50%;
   border-top-color: white;
   animation: spin 0.8s linear infinite;
@@ -852,6 +862,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -870,7 +881,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--form-text);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1rem;
   display: flex;
   align-items: center;
 }
@@ -966,7 +977,7 @@
 }
 
 .oxxoInstructions {
-  background-color: rgba(240, 173, 78, 0.1);
+  background-color: rgb(240 173 78 / 10%);
   border: 1px solid var(--form-warning);
   border-radius: 4px;
   padding: 1rem;
@@ -1016,12 +1027,12 @@
 
 .paymentMethodOption:hover {
   border-color: var(--form-primary);
-  background-color: rgba(167, 43, 49, 0.05);
+  background-color: rgb(167 43 49 / 5%);
 }
 
 .paymentMethodOptionSelected {
   border-color: var(--form-primary);
-  background-color: rgba(167, 43, 49, 0.05);
+  background-color: rgb(167 43 49 / 5%);
 }
 
 .paymentMethodRadio {
@@ -1072,7 +1083,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .formLayout {
     flex-direction: column;
   }
@@ -1101,7 +1112,7 @@
 }
 
 /* Mobile Optimizations */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Step Indicator */
   .stepIndicator {
     display: none; /* Hide the desktop step indicator */

@@ -1,4 +1,5 @@
 /* src/styles/global.css */
+
 /*
  * CSS Import Order:
  * 1. Variables - Must be first so other files can use the variables
@@ -12,27 +13,29 @@
  */
 
 /* 1. Variables */
-@import './variables.css';
+@import url('./variables.css');
 
 /* 2. Reset */
-@import './reset.css';
+@import url('./reset.css');
 
 /* 3. Core Layout Systems */
+
 /* Note: breakpoint-system.css has been removed as all functionality has been migrated to component-specific modules */
 
 /* 4. Utility Classes */
-@import './visibility-utilities.css'; /* Responsive visibility utilities */
-@import './mobile-utilities.css'; /* Mobile utility classes */
+@import url('./visibility-utilities.css'); /* Responsive visibility utilities */
+@import url('./mobile-utilities.css'); /* Mobile utility classes */
 
 /* 5. Base Component Styles */
-@import './button-styles.css'; /* Standardized button styles */
+@import url('./button-styles.css'); /* Standardized button styles */
 
 /* 7. Form Utilities */
-@import './mobile-form-utilities.css'; /* Mobile form utility classes */
+@import url('./mobile-form-utilities.css'); /* Mobile form utility classes */
 
 /* 8. Touch Target Enhancements */
+
 /* DEPRECATED: Touch target enhancements have been moved to component CSS modules */
-@import './mobile-touch-targets.css'; /* DEPRECATED: Will be removed in a future update */
+@import url('./mobile-touch-targets.css'); /* DEPRECATED: Will be removed in a future update */
 
 /* Apply border-box sizing to all elements */
 *,
@@ -56,10 +59,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-top: 0; /* No padding needed with sidebar layout */
-  -webkit-text-size-adjust: 100%; /* Prevent iOS font size adjustment */
-  -moz-text-size-adjust: 100%; /* Firefox-specific prefix */
-  -ms-text-size-adjust: 100%; /* IE/Edge-specific prefix */
+  padding-top: 0; /* No padding needed with sidebar layout */ /* Prevent iOS font size adjustment */ /* Firefox-specific prefix */ /* IE/Edge-specific prefix */
   text-size-adjust: 100%; /* Standard property for text size adjustment */
   -webkit-font-smoothing: antialiased; /* Smoother text rendering */
   -moz-osx-font-smoothing: grayscale; /* Smoother text rendering in Firefox */
@@ -135,7 +135,9 @@ h3 {
 /* Container for title and subtitle for consistent bottom margin/border */
 .page-header-main-content {
   margin-bottom: var(--space-5);
+
   /* Optional: padding-bottom: var(--space-3); */
+
   /* Optional: border-bottom: 1px solid var(--color-neutral-200); */
 }
 
@@ -193,7 +195,7 @@ p {
 
 /* Touch-friendly link styles for non-button, non-navigation links */
 @media (max-width: var(--breakpoint-sm)) {
-  a:not(.btn):not([class*='btn-']):not([role='button']):not(.navLink):not([class*='nav-']) {
+  a:not(.btn, [class*='btn-'], [role='button'], .navLink, [class*='nav-']) {
     padding: 6px 0;
     display: inline-block;
     min-height: 44px;

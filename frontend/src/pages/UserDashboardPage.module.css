@@ -2,6 +2,7 @@
 
 .dashboardPage {
   /* This container is mostly for semantic grouping if UserLayout's <main> has a different bg */
+
   /* Centering of content within this is handled by .dashboardContentWrapper */
 }
 
@@ -15,8 +16,14 @@
 /* Page Header */
 .pageHeader {
   margin-bottom: var(--space-5); /* Increased space after header */
-  /* border-bottom: 1px solid var(--color-neutral-200); */ /* Optional: if you want a line under header */
-  /* padding-bottom: var(--space-3); */ /* Optional: if you want space before the line */
+
+  /* border-bottom: 1px solid var(--color-neutral-200); */
+
+ /* Optional: if you want a line under header */
+
+  /* padding-bottom: var(--space-3); */
+
+ /* Optional: if you want space before the line */
 }
 
 .pageHeader.centeredText .pageTitle,
@@ -28,7 +35,7 @@
   font-size: clamp(1.75rem, 4vw, 2.25rem); /* From global.css */
   font-weight: var(--font-weight-bold);
   color: var(--color-neutral-900);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
 }
 
 .pageSubtitle {
@@ -108,6 +115,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
+
 .statLink:hover {
   text-decoration: underline;
   color: var(--color-primary-dark);
@@ -127,6 +135,7 @@
   border-bottom: 1px solid var(--color-neutral-200);
   text-align: left; /* Default, but can be centered if needed */
 }
+
 .dashboardContentWrapper > .statusSection > .sectionTitle,
 .dashboardContentWrapper > .quickLinks > .sectionTitle {
   /* text-align: center; /* If you want these titles centered too */
@@ -152,6 +161,7 @@
     box-shadow 0.2s ease,
     transform 0.2s ease;
 }
+
 .statusCard:hover {
   box-shadow: var(--box-shadow);
   transform: translateY(-2px);
@@ -167,54 +177,68 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%; /* Optional: circular background for icon */
+
   /* background-color: rgba(0,0,0,0.03); /* Subtle background */
 }
 
 .iconPending {
   color: var(--status-warning);
 }
+
 .statusCard.statusPending {
   border-left-color: var(--status-warning);
 } /* Match border to icon */
 .iconSubmitted {
   color: var(--status-info);
 }
+
 .statusCard.statusSubmitted {
   border-left-color: var(--status-info);
 }
+
 .iconVerified {
   color: var(--status-success);
 }
+
 .statusCard.statusVerified {
   border-left-color: var(--status-success);
 }
+
 .iconRejected {
   color: var(--status-critical);
 }
+
 .statusCard.statusRejected {
   border-left-color: var(--status-critical);
 }
+
 .iconGenerated {
   color: var(--status-success);
 } /* Using success color */
 .statusCard.statusGenerated {
   border-left-color: var(--status-success);
 }
+
 .iconCompleted {
   color: var(--status-success);
 }
+
 .statusCard.statusCompleted {
   border-left-color: var(--status-success);
 }
+
 .iconCancelled {
   color: var(--color-neutral-500);
 }
+
 .statusCard.statusCancelled {
   border-left-color: var(--color-neutral-500);
 }
+
 .iconDefault {
   color: var(--color-neutral-500);
 }
+
 .statusCard.statusDefault {
   border-left-color: var(--color-neutral-500);
 }
@@ -260,6 +284,7 @@
   margin-bottom: var(--space-3);
   opacity: 0.7;
 }
+
 .emptyStatusMessage p {
   font-size: var(--font-size-base);
   line-height: 1.6;
@@ -294,7 +319,7 @@
   background-color: var(--color-primary-lightest);
   border-color: var(--color-primary-light);
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(167, 43, 49, 0.1); /* Primary color shadow */
+  box-shadow: 0 6px 12px rgb(167 43 49 / 10%); /* Primary color shadow */
   color: var(--color-primary-dark);
 }
 
@@ -314,6 +339,7 @@
     background-color 0.2s ease,
     color 0.2s ease;
 }
+
 .linkCard:hover .linkIconWrapper {
   background-color: var(--color-primary);
   color: var(--color-white);
@@ -357,11 +383,13 @@
   color: var(--color-danger);
   margin-bottom: var(--space-3);
 }
+
 .errorContainer h2 {
   font-size: 1.5rem;
   color: var(--color-neutral-800);
   margin-bottom: var(--space-2);
 }
+
 .errorContainer p {
   color: var(--color-neutral-600);
   margin-bottom: var(--space-4);
@@ -370,38 +398,45 @@
 .retryButton {
   /* Using Button component now, so this might not be needed */
   margin-top: var(--space-3);
+
   /* Styles will come from Button component if used */
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .dashboardContentWrapper {
     padding: 0 var(--space-3); /* Adjust side padding for tablets */
   }
+
   .statsOverview {
     grid-template-columns: 1fr; /* Stack stat cards */
     gap: var(--space-3);
   }
+
   .statusGrid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: var(--space-2);
   }
+
   .linksGrid {
     grid-template-columns: 1fr; /* Stack quick links */
     gap: var(--space-3);
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .dashboardContentWrapper {
     padding: 0 var(--space-2); /* Adjust side padding for mobile */
   }
+
   .pageTitle {
     font-size: 1.6rem;
   }
+
   .pageSubtitle {
     font-size: 0.95rem;
   }
+
   .sectionTitle {
     font-size: 1.3rem;
   }
@@ -411,18 +446,23 @@
   .linkCard {
     padding: var(--space-3);
   }
+
   .statValue {
     font-size: 2.25rem;
   }
+
   .statIcon {
     font-size: 2.25rem;
   }
+
   .statusCount {
     font-size: 1.5rem;
   }
+
   .statusName {
     font-size: 0.75rem;
   }
+
   .linkText {
     font-size: 0.95rem;
   }

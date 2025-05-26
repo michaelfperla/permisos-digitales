@@ -13,6 +13,7 @@
 .hidden-xs {
   display: none;
 }
+
 @media (min-width: var(--breakpoint-sm)) {
   .hidden-xs {
     display: block;
@@ -28,6 +29,7 @@
 .hide-xs-down {
   display: block; /* Default: visible */
 }
+
 @media (max-width: var(--breakpoint-xs)) {
   .hide-xs-down {
     display: none !important;
@@ -38,6 +40,7 @@
 .hide-sm-down {
   display: block;
 }
+
 @media (max-width: var(--breakpoint-sm)) {
   .hide-sm-down {
     display: none !important;
@@ -48,6 +51,7 @@
 .hide-md-down {
   display: block;
 }
+
 @media (max-width: var(--breakpoint-md)) {
   .hide-md-down {
     display: none !important;
@@ -58,6 +62,7 @@
 .hide-lg-down {
   display: block;
 }
+
 @media (max-width: var(--breakpoint-lg)) {
   .hide-lg-down {
     display: none !important;
@@ -68,6 +73,7 @@
 .hide-xl-down {
   display: block;
 }
+
 @media (max-width: var(--breakpoint-xl)) {
   .hide-xl-down {
     display: none !important;
@@ -83,6 +89,7 @@
 .show-xs-down {
   display: none; /* Default: hidden */
 }
+
 @media (max-width: var(--breakpoint-xs)) {
   .show-xs-down {
     display: block !important;
@@ -93,6 +100,7 @@
 .show-sm-down {
   display: none;
 }
+
 @media (max-width: var(--breakpoint-sm)) {
   .show-sm-down {
     display: block !important;
@@ -103,6 +111,7 @@
 .show-md-down {
   display: none;
 }
+
 @media (max-width: var(--breakpoint-md)) {
   .show-md-down {
     display: block !important;
@@ -113,6 +122,7 @@
 .show-lg-down {
   display: none;
 }
+
 @media (max-width: var(--breakpoint-lg)) {
   .show-lg-down {
     display: block !important;
@@ -123,6 +133,7 @@
 .show-xl-down {
   display: none;
 }
+
 @media (max-width: var(--breakpoint-xl)) {
   .show-xl-down {
     display: block !important;

@@ -30,7 +30,7 @@
 .toast {
   width: 100%;
   border-radius: var(--border-radius, 8px);
-  box-shadow: var(--box-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+  box-shadow: var(--box-shadow, 0 4px 12px rgb(0 0 0 / 15%));
   overflow: hidden;
   animation: toastSlideIn 0.3s ease-out forwards;
   pointer-events: auto;
@@ -39,6 +39,7 @@
   border-left: 4px solid;
   box-sizing: border-box;
   max-width: 100%;
+
   /* Añadir soporte para deslizamiento */
   touch-action: pan-x;
   user-select: none;
@@ -101,6 +102,7 @@
   justify-content: center;
   margin-right: 10px; /* Increased from 8px for better spacing */
   flex-shrink: 0;
+
   /* Removed padding-top: 2px to improve alignment */
 }
 
@@ -164,7 +166,7 @@
 
 .closeButton:hover {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.05); /* Light background on hover */
+  background-color: rgb(0 0 0 / 5%); /* Light background on hover */
 }
 
 /* Toast Action */
@@ -187,7 +189,7 @@
 }
 
 .actionButton:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
 }
 
 /* Progress Bar */
@@ -196,7 +198,7 @@
   bottom: 0;
   left: 0;
   height: 3px;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(0 0 0 / 10%);
   transition: width linear 100ms;
 }
 
@@ -231,6 +233,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -242,6 +245,7 @@
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;
@@ -261,8 +265,9 @@
 }
 
 /* Responsive styles - Optimized for all breakpoints */
+
 /* Tablet (768px) */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .toastContainer {
     max-width: 85%;
     width: 85%;
@@ -275,7 +280,7 @@
 }
 
 /* Mobile (480px) */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .toastContainer {
     max-width: 80%;
     width: 80%;
@@ -309,7 +314,7 @@
 }
 
 /* Small Mobile (360px) - Optimized specifically for this breakpoint */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .toastContainer {
     max-width: 90%;
     width: 90%;

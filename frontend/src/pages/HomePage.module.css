@@ -6,6 +6,7 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--color-neutral-100);
+
   /* padding-top will be applied by .pageWrapperMobilePadded on mobile */
 }
 
@@ -13,6 +14,7 @@
 .pageWrapperMobilePadded {
   padding-top: var(--mobile-header-height, 56px);
 }
+
 @media (max-width: var(--breakpoint-xs)) {
   /* For even smaller header */
   .pageWrapperMobilePadded {
@@ -27,7 +29,7 @@
   margin: 2rem auto 3rem; /* Default margins for desktop */
   background-color: var(--color-white);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 8%);
   position: relative;
   overflow: hidden;
 }
@@ -63,18 +65,16 @@
   display: inline-flex;
   align-items: center;
 }
+
 .navLink:hover {
   color: var(--color-primary);
-  background-color: rgba(167, 43, 49, 0.05);
+  background-color: rgb(167 43 49 / 5%);
 }
 
 /* --- Hero Content Area --- */
 .paneHeroContent {
   text-align: center;
-  padding-top: clamp(3rem, 8vw, 5rem);
-  padding-bottom: clamp(8rem, 18vw, 12rem); /* Increased bottom padding */
-  padding-left: var(--space-5);
-  padding-right: var(--space-5);
+  padding: clamp(3rem, 8vw, 5rem) var(--space-5) clamp(8rem, 18vw, 12rem) var(--space-5); /* Increased bottom padding */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -111,20 +111,18 @@
 .overlappingContent {
   position: relative;
   z-index: 3;
-  margin-top: -6rem;
-  margin-left: var(--space-5);
-  margin-right: var(--space-5);
-  margin-bottom: var(--space-5);
+  margin: -6rem var(--space-5) var(--space-5) var(--space-5);
   background-color: var(--color-white);
   border-radius: var(--border-radius-lg);
   padding: clamp(1.5rem, 4vw, 3rem);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 35px rgb(0 0 0 / 8%);
 }
 
 /* --- Stats Section --- */
 .statsSection {
   padding: var(--space-5) 0;
 }
+
 .statsHeading {
   text-align: center;
   font-size: clamp(1.6rem, 4.5vw, 2rem);
@@ -132,17 +130,20 @@
   margin-bottom: var(--space-5);
   color: var(--color-neutral-800);
 }
+
 .valuePropsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-5);
 }
+
 .cardLink {
   text-decoration: none;
   color: inherit;
   display: block;
   height: 100%;
 }
+
 .statCard {
   padding: var(--space-4);
   display: flex;
@@ -153,15 +154,18 @@
   background-color: var(
     --color-white
   ); /* Assuming Card component handles this or it's transparent */
+
   border-radius: var(--border-radius); /* Card component might also handle this */
 }
+
 .statIconContainer {
   margin-bottom: var(--space-3);
 }
+
 .statCardIcon {
   width: 60px;
   height: 60px;
-  background-color: rgba(167, 43, 49, 0.07);
+  background-color: rgb(167 43 49 / 7%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -169,20 +173,24 @@
   box-shadow: none;
   transition: transform 0.3s ease;
 }
+
 .cardLink:hover .statCardIcon {
   transform: scale(1.1);
 }
+
 .statIcon {
   /* This styles the Icon component if it's passed a class */
   color: var(--color-primary);
   font-size: 1.75rem; /* Adjust size of icon from Icon component */
 }
+
 .statTitle {
   font-size: 1.2rem;
   margin-bottom: var(--space-2);
   color: var(--color-neutral-900);
   font-weight: var(--font-weight-semibold);
 }
+
 .statDescription {
   font-size: 0.9rem;
   color: var(--color-neutral-700);
@@ -194,6 +202,7 @@
   padding: var(--space-5) 0;
   border-top: 1px solid var(--color-neutral-200);
 }
+
 .howItWorksTimeline h2 {
   text-align: center;
   font-size: clamp(1.6rem, 4.5vw, 2rem);
@@ -201,12 +210,14 @@
   margin-bottom: var(--space-5);
   color: var(--color-neutral-800);
 }
+
 .timelineContainer {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   position: relative;
 }
+
 .timelineStep {
   display: flex;
   flex-direction: column;
@@ -216,6 +227,7 @@
   position: relative;
   padding: 0 var(--space-3);
 }
+
 .stepIndicatorTimeline {
   width: 36px;
   height: 36px;
@@ -228,19 +240,22 @@
   font-weight: var(--font-weight-bold);
   font-size: 1rem;
   margin-bottom: var(--space-3);
-  box-shadow: 0 2px 6px rgba(167, 43, 49, 0.25);
+  box-shadow: 0 2px 6px rgb(167 43 49 / 25%);
 }
+
 .stepTitleTimeline {
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-1);
   font-size: 1.05rem;
   color: var(--color-neutral-900);
 }
+
 .stepDescriptionTimeline {
   font-size: 0.9rem;
   color: var(--color-neutral-700);
   line-height: 1.5;
 }
+
 .timelineConnector {
   flex-grow: 1;
   height: 2px;
@@ -254,6 +269,7 @@
   padding: var(--space-5) 0;
   border-top: 1px solid var(--color-neutral-200);
 }
+
 .faqSection h2 {
   text-align: center;
   font-size: clamp(1.6rem, 4.5vw, 2rem);
@@ -261,6 +277,7 @@
   margin-bottom: var(--space-4);
   color: var(--color-neutral-800);
 }
+
 .accordionContainer {
   max-width: 760px;
   margin: 0 auto;
@@ -270,12 +287,15 @@
   box-shadow: none;
   background-color: var(--color-white);
 }
+
 .accordionItem {
   border-bottom: 1px solid var(--color-neutral-200);
 }
+
 .accordionItem:last-child {
   border-bottom: none;
 }
+
 .accordionHeader {
   display: flex;
   justify-content: space-between;
@@ -291,15 +311,18 @@
   color: var(--color-neutral-800);
   transition: background-color 0.2s ease;
 }
+
 .accordionHeader:hover {
   background-color: var(--color-neutral-50);
 }
+
 .accordionTitle {
   margin-right: var(--space-3);
   flex: 1; /* Allow title to take available space */
   white-space: normal; /* Allow text to wrap */
   word-break: break-word; /* Break long words */
 }
+
 .accordionIcon {
   /* Styles the span wrapping the Icon component */
   font-size: 1.1rem; /* Base size for icon container */
@@ -310,10 +333,12 @@
   justify-content: center;
   flex-shrink: 0; /* Prevent icon from shrinking */
 }
+
 .accordionHeader[aria-expanded='true'] .accordionIcon {
   color: var(--color-primary);
   transform: rotate(45deg); /* For BsPlus to look like 'X' */
 }
+
 .accordionPanel {
   max-height: 0;
   overflow: hidden;
@@ -322,6 +347,7 @@
     padding 0.3s ease-out;
   background-color: var(--color-neutral-50); /* Slightly different background for open panel */
 }
+
 .accordionPanelOpen {
   max-height: 350px; /* Adjust as needed */
   transition:
@@ -329,6 +355,7 @@
     padding 0.3s ease-in;
   overflow-y: auto; /* Scroll if content is too long */
 }
+
 .accordionContent {
   padding: var(--space-3) var(--space-4);
   font-size: 0.9rem;
@@ -345,25 +372,29 @@
   border-top: 1px solid var(--color-neutral-200);
   background-color: var(--color-neutral-50); /* Light background for contrast */
 }
+
 .securitySection h2 {
   font-size: clamp(1.6rem, 4.5vw, 2rem);
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-4);
   color: var(--color-neutral-800);
 }
+
 .securityIconWrapper {
   margin: 0 auto var(--space-4);
   display: inline-block; /* Allows centering with margin auto */
   padding: var(--space-3);
-  background-color: rgba(167, 43, 49, 0.1); /* Primary color with alpha */
+  background-color: rgb(167 43 49 / 10%); /* Primary color with alpha */
   border-radius: 50%;
 }
+
 .securityIcon {
   /* Styles the Icon component if passed a class */
   display: block; /* Icon component might be inline by default */
   color: var(--color-primary);
   font-size: 2rem; /* Size of the icon itself */
 }
+
 .securityText {
   max-width: 700px;
   margin: 0 auto;
@@ -372,6 +403,7 @@
   color: var(--color-neutral-700);
   line-height: 1.7;
 }
+
 .securityText strong {
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-800);
@@ -383,17 +415,20 @@
   border-top: 1px solid var(--color-neutral-200);
   background-color: var(--color-white);
 }
+
 .finalCtaContentWrapper {
   max-width: 700px;
   margin: 0 auto;
   text-align: center;
 }
+
 .finalCtaContentWrapper h2 {
   font-size: clamp(1.6rem, 5vw, 2.2rem);
   font-weight: 700;
   margin-bottom: var(--space-3);
   color: var(--color-neutral-900);
 }
+
 .ctaSubtitle {
   font-size: clamp(1rem, 2.5vw, 1.15rem);
   color: var(--color-neutral-700);
@@ -403,13 +438,14 @@
   margin-left: auto;
   margin-right: auto;
 }
+
 .ctaButtonWrapper {
   margin-top: var(--space-2);
   display: inline-block;
 }
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 992px) {
+@media (width <= 992px) {
   /* Tablet */
   .mainPane {
     width: 100%;
@@ -418,18 +454,21 @@
     border-radius: 0;
     box-shadow: none;
   }
+
   .overlappingContent {
     margin-left: var(--space-4);
     margin-right: var(--space-4);
   }
+
   .valuePropsGrid {
     grid-template-columns: 1fr;
     gap: var(--space-4);
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Mobile (isMdDown breakpoint) */
+
   /* .pageWrapper gets padding-top via .pageWrapperMobilePadded in HomePage.tsx */
   .mainPane {
     margin-top: 0;
@@ -439,17 +478,11 @@
   }
 
   .paneHeroContent {
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-9); /* Ensure enough space for button */
-    padding-left: var(--space-3);
-    padding-right: var(--space-3);
+    padding: var(--space-4) var(--space-3) var(--space-9) var(--space-3); /* Ensure enough space for button */
   }
 
   .overlappingContent {
-    margin-top: -2.5rem; /* Critical: Adjust this value. Try -1.5rem, -2rem, -2.5rem */
-    margin-left: var(--space-2);
-    margin-right: var(--space-2);
-    margin-bottom: var(--space-4);
+    margin: -2.5rem var(--space-2) var(--space-4) var(--space-2); /* Critical: Adjust this value. Try -1.5rem, -2rem, -2.5rem */
     padding: var(--space-3);
     border-radius: var(--border-radius-md);
   }
@@ -462,6 +495,7 @@
     padding-left: 0;
     padding-right: 0;
   }
+
   .statsHeading,
   .howItWorksTimeline h2,
   .faqSection h2,
@@ -470,25 +504,30 @@
     font-size: clamp(1.4rem, 5vw, 1.8rem);
     margin-bottom: var(--space-4);
   }
+
   .timelineContainer {
     flex-direction: column;
     align-items: stretch;
   }
+
   .timelineStep {
     align-items: flex-start;
     text-align: left;
     padding-left: 50px;
     margin-bottom: var(--space-4);
   }
+
   .stepIndicatorTimeline {
     position: absolute;
     left: 0;
     top: 0;
     margin-bottom: 0;
   }
+
   .timelineConnector {
     display: none;
   }
+
   .timelineStep:not(:last-child)::after {
     content: '';
     position: absolute;
@@ -499,6 +538,7 @@
     background-color: var(--color-neutral-300);
     z-index: -1;
   }
+
   .accordionContainer {
     margin-left: 0;
     margin-right: 0;
@@ -507,20 +547,25 @@
     border-right: none;
     border-radius: 0;
   }
+
   .accordionHeader {
     padding: var(--space-3);
   }
+
   .accordionTitle {
     font-size: 1rem;
   }
+
   .accordionContent {
     padding: var(--space-2) var(--space-3) var(--space-3);
     font-size: 0.9rem;
   }
+
   .ctaButtonWrapper {
     width: 100%;
     padding: 0 var(--space-3);
   }
+
   .ctaButtonWrapper :global(.btn) {
     width: 100%;
   }
@@ -532,6 +577,7 @@
     padding-top: var(--space-3);
     padding-bottom: var(--space-8);
   }
+
   .overlappingContent {
     margin-top: -2rem; /* Further adjust */
   }
@@ -543,9 +589,11 @@
     padding-top: var(--space-2);
     padding-bottom: var(--space-7);
   }
+
   .paneHeroContent h1 {
     font-size: clamp(1.8rem, 7vw, 2.2rem);
   }
+
   .subtitle {
     font-size: clamp(0.9rem, 3vw, 1rem);
   }
@@ -553,11 +601,13 @@
   .overlappingContent {
     margin-top: -1.5rem; /* Further adjust, make it less negative */
   }
+
   .stepIndicatorTimeline {
     width: 32px;
     height: 32px;
     font-size: 0.9rem;
   }
+
   .timelineStep:not(:last-child)::after {
     left: 16px;
     top: 36px;

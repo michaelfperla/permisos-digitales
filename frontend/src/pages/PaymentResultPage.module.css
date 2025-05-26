@@ -117,7 +117,7 @@
   background-color: var(--color-primary-light);
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .actions {
     flex-direction: row;
     justify-content: center;

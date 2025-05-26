@@ -7,7 +7,7 @@
 
 .desktopHeader {
   background-color: var(--color-white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
   padding: 1rem 2rem;
 }
 
@@ -110,7 +110,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .legalTitle {
     font-size: 1.5rem;
   }
