@@ -9,16 +9,14 @@
 
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  inset: 0;
+  background-color: rgb(0 0 0 / 40%);
   z-index: calc(var(--z-modal) - 1);
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
   pointer-events: none;
 }
+
 .overlayVisible {
   opacity: 1;
   pointer-events: auto;
@@ -45,7 +43,8 @@
   left: 0;
   transform: translateX(0);
 }
-.sidebar:not(.mobile):not(.open) {
+
+.sidebar:not(.mobile, .open) {
   width: 60px;
 }
 
@@ -55,8 +54,9 @@
   width: 280px;
   max-width: 85vw;
   transform: translateX(100%);
-  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 12px rgb(0 0 0 / 10%);
 }
+
 .sidebar.mobile.open {
   transform: translateX(0);
 }
@@ -67,7 +67,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -94,14 +94,16 @@
     background-color 0.2s ease,
     color 0.2s ease;
 }
+
 .sidebarPanelCloseButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   color: var(--color-white);
 }
+
 .sidebarPanelCloseButton:focus-visible {
   outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
 }
 
 .sidebar:not(.mobile) .sidebarLogo {
@@ -110,12 +112,15 @@
   justify-content: center;
   width: 100%;
 }
+
 .textLogoInSidebar {
   /* New class if needed for specific styling of TextLogo in this sidebar */
+
   /* Example:
     font-size: 1.1rem !important; 
     */
 }
+
 .sidebar:not(.mobile) .sidebarHeader .textLogoInSidebar {
   /* Target specific TextLogo instance */
   color: var(--color-white);
@@ -124,17 +129,20 @@
     transform 0.2s ease,
     opacity 0.2s ease;
 }
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) {
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) {
   transform: scale(0.8);
   width: 40px;
   overflow: hidden;
   text-overflow: clip;
   white-space: nowrap;
 }
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) .secondWord {
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) .secondWord {
   display: none;
 }
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar.initialsLogo {
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar.initialsLogo {
   font-size: 1.6rem;
   display: flex;
   justify-content: center;
@@ -143,13 +151,15 @@
 
 .sidebarUser {
   padding: var(--space-3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
   flex-shrink: 0;
 }
+
 .userInfo {
   display: flex;
   flex-direction: column;
 }
+
 .userName {
   font-weight: 600;
   font-size: 0.9rem;
@@ -157,9 +167,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .userEmail {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -170,26 +181,30 @@
   padding: var(--space-2) 0;
   overflow-y: auto;
 }
+
 .navLink {
   display: flex;
   align-items: center;
   padding: var(--space-2) var(--space-4);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgb(255 255 255 / 80%);
   text-decoration: none;
   transition: all 0.15s ease;
   min-height: 44px;
   margin: 0 var(--space-2) var(--space-1);
   border-radius: var(--border-radius-sm);
 }
+
 .navLink:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   color: var(--color-white);
 }
+
 .navLink.active {
   background-color: var(--color-primary);
   color: var(--color-white);
   font-weight: var(--font-weight-semibold);
 }
+
 /* Ensure .navIcon and .navText are styled for icons from Icon component */
 .navIcon :global(svg),
 .navIcon {
@@ -200,6 +215,7 @@
   display: inline-flex; /* From Icon component or direct style */
   align-items: center; /* From Icon component or direct style */
 }
+
 .navText {
   white-space: nowrap;
   overflow: hidden;
@@ -207,61 +223,70 @@
   font-size: 0.9rem;
 }
 
-.sidebar:not(.mobile):not(.open) .navText,
-.sidebar:not(.mobile):not(.open) .userInfo,
-.sidebar:not(.mobile):not(.open) .logoutText {
+.sidebar:not(.mobile, .open) .navText,
+.sidebar:not(.mobile, .open) .userInfo,
+.sidebar:not(.mobile, .open) .logoutText {
   display: none;
 }
-.sidebar:not(.mobile):not(.open) .sidebarUser {
+
+.sidebar:not(.mobile, .open) .sidebarUser {
   padding: 0;
   border-bottom: none;
   height: 0;
   overflow: hidden;
 }
-.sidebar:not(.mobile):not(.open) .navLink {
+
+.sidebar:not(.mobile, .open) .navLink {
   justify-content: center;
   padding: var(--space-3) 0;
   margin: 0 auto var(--space-1);
   width: 40px;
   height: 40px;
 }
-.sidebar:not(.mobile):not(.open) .navIcon :global(svg),
-.sidebar:not(.mobile):not(.open) .navIcon {
+
+.sidebar:not(.mobile, .open) .navIcon :global(svg),
+.sidebar:not(.mobile, .open) .navIcon {
   margin-right: 0;
   font-size: 1.3rem;
 }
 
 .sidebarFooter {
   padding: var(--space-3);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgb(255 255 255 / 10%);
   margin-top: auto;
   flex-shrink: 0;
 }
+
 .footerActions {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
-.sidebar:not(.mobile):not(.open) .sidebarFooter {
+
+.sidebar:not(.mobile, .open) .sidebarFooter {
   padding: var(--space-3) var(--space-2);
 }
-.sidebar:not(.mobile):not(.open) .footerActions {
+
+.sidebar:not(.mobile, .open) .footerActions {
   align-items: center;
 }
 
 .logoutButton {
   width: 100%;
 }
-.sidebar:not(.mobile):not(.open) .logoutButton {
+
+.sidebar:not(.mobile, .open) .logoutButton {
   width: 40px;
   height: 40px;
   padding: 0;
 }
+
 /* Ensure icon inside button is centered when text is hidden */
-.sidebar:not(.mobile):not(.open) .logoutButton :global(.buttonIcon) {
+.sidebar:not(.mobile, .open) .logoutButton :global(.buttonIcon) {
   margin: 0 !important; /* Override Button.tsx default margin for icon */
 }
-.sidebar:not(.mobile):not(.open) .logoutButton :global(.buttonContent) {
+
+.sidebar:not(.mobile, .open) .logoutButton :global(.buttonContent) {
   gap: 0 !important; /* Remove gap for icon-only button */
 }
 
@@ -271,19 +296,21 @@
   min-width: 36px;
   min-height: 36px;
   padding: 0;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgb(255 255 255 / 5%);
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgb(255 255 255 / 60%);
   cursor: pointer;
   transition: all 0.15s ease;
   border-radius: 50%;
   margin: 0 auto var(--space-2);
 }
+
 .sidebarToggleButton:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
   color: var(--color-white);
 }
-.sidebar:not(.mobile):not(.open) .sidebarToggleButton {
+
+.sidebar:not(.mobile, .open) .sidebarToggleButton {
   margin-bottom: var(--space-3);
 }
 
@@ -294,6 +321,7 @@
   transition: margin-left 0.3s ease;
   margin-left: 250px;
 }
+
 .mainContent.expanded {
   margin-left: 60px;
 }
@@ -304,19 +332,20 @@
   padding-top: calc(var(--mobile-header-height, 56px) + var(--space-4));
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .mainContent {
     margin-left: 0;
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .mainContent,
   .mobileContentPadded {
     padding-left: var(--space-3);
     padding-right: var(--space-3);
     padding-bottom: var(--space-3);
   }
+
   .mobileContentPadded {
     padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-3));
   }
@@ -324,33 +353,39 @@
   .sidebar.mobile {
     width: 260px;
   }
+
   .sidebarHeader,
   .sidebarUser,
   .sidebarFooter {
     padding-left: var(--space-2);
     padding-right: var(--space-2);
   }
+
   .navLink {
     padding: var(--space-2) var(--space-3);
   }
+
   .userName {
     font-size: 0.85rem;
   }
+
   .userEmail {
     font-size: 0.75rem;
   }
+
   .navText {
     font-size: 0.85rem;
   }
 }
 
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .mainContent,
   .mobileContentPadded {
     padding-left: var(--space-2);
     padding-right: var(--space-2);
     padding-bottom: var(--space-2);
   }
+
   .mobileContentPadded {
     padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-2));
   }

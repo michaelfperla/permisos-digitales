@@ -47,7 +47,7 @@
 }
 
 /* Responsive adjustments for very small screens */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .sizeXs {
     font-size: 0.7rem;
   }

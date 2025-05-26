@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
   position: fixed;
   top: 0;
   left: 0;
@@ -41,11 +41,12 @@
 
 /* REMOVE all .mobileMenu, .mobileMenuOpen, .mobileMenuOverlay, .mobileMenuContent, .mobileMenuLink styles */
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   /* isMdDown breakpoint */
   .desktopHeader {
     display: none; /* This is handled by JSX, but good for clarity */
   }
+
   /* .verificationContainer padding-top is already correct for mobile due to above calc */
 }
 

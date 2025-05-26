@@ -96,7 +96,7 @@
 .vehicleIcon {
   width: 48px;
   height: 48px;
-  background-color: rgba(167, 43, 49, 0.1);
+  background-color: rgb(167 43 49 / 10%);
   border-radius: var(--border-radius-lg);
   display: flex;
   align-items: center;
@@ -128,8 +128,8 @@
   display: flex;
   align-items: flex-start;
   padding: 1.5rem 2rem;
-  background-color: rgba(255, 193, 7, 0.1);
-  border-bottom: 1px solid rgba(255, 193, 7, 0.3);
+  background-color: rgb(255 193 7 / 10%);
+  border-bottom: 1px solid rgb(255 193 7 / 30%);
 }
 
 .warningIcon {
@@ -144,7 +144,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--bs-gray-900);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
 }
 
 .rejectionMessage p {
@@ -254,7 +254,7 @@
 .formInput:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.1);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 10%);
 }
 
 .inputHelp {
@@ -271,7 +271,7 @@
 .statusWarning {
   display: flex;
   align-items: center;
-  background-color: rgba(255, 193, 7, 0.1);
+  background-color: rgb(255 193 7 / 10%);
   border-radius: var(--border-radius);
   padding: var(--space-3);
   margin-top: var(--space-3);
@@ -320,7 +320,7 @@
 }
 
 .editButton:hover {
-  background-color: rgba(167, 43, 49, 0.05);
+  background-color: rgb(167 43 49 / 5%);
 }
 
 .previewContent {
@@ -408,7 +408,7 @@
   display: flex;
   align-items: center;
   padding: var(--space-3) var(--space-4);
-  background-color: rgba(25, 135, 84, 0.05);
+  background-color: rgb(25 135 84 / 5%);
   border-top: var(--border-width) solid var(--border-color);
 }
 
@@ -473,7 +473,7 @@
 .loadingSpinner {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(167, 43, 49, 0.2);
+  border: 3px solid rgb(167 43 49 / 20%);
   border-radius: 50%;
   border-top-color: var(--color-primary);
   animation: spin 1s linear infinite;
@@ -527,7 +527,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pageContainer {
     padding: var(--space-3);
   }
@@ -568,7 +568,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .vehicleInfoSection {
     flex-direction: column;
     align-items: flex-start;

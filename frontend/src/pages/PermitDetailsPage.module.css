@@ -114,19 +114,19 @@
   gap: 8px;
   background-color: var(--color-primary);
   color: var(--color-white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   min-width: 200px;
 }
 
 .contextPrimaryButton:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 6px rgb(0 0 0 / 15%);
 }
 
 .contextPrimaryButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
 .contextPrimaryButton:disabled {
@@ -199,7 +199,10 @@
   padding: 24px;
   box-shadow: var(--box-shadow);
   overflow-wrap: break-word; /* Ensure content wraps correctly */
-  word-break: break-word; /* Additional wrapping for long content */
+
+  /* word-break: break-word; */
+
+  /* Additional wrapping for long content - replaced by overflow-wrap */
   border: 1px solid var(--color-neutral-200);
   margin-bottom: 24px;
 }
@@ -251,7 +254,7 @@
   font-size: 1.1rem;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary-dark);
-  margin: 24px 0 16px 0;
+  margin: 24px 0 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-neutral-200);
 }
@@ -286,7 +289,7 @@
   color: var(--text-primary, var(--color-neutral-900));
   font-size: 0.95rem;
   font-weight: 600;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Status Tab Panel */
@@ -298,7 +301,7 @@
   font-size: 1.4rem;
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-800);
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -322,7 +325,7 @@
   font-size: 1.1rem;
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary-dark);
-  margin: 24px 0 16px 0;
+  margin: 24px 0 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-neutral-200);
 }
@@ -384,17 +387,10 @@
   padding: var(--space-3);
   background-color: var(--color-white);
   border-radius: var(--border-radius);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 }
 
-.statusInstructionsPanel {
-  background-color: var(--color-neutral-50);
-  border-radius: var(--border-radius);
-  padding: var(--space-5);
-  margin-top: var(--space-5);
-  border-top: 3px solid var(--color-primary-light);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
+/* .statusInstructionsPanel removed, consolidated with definition around line 313 */
 
 .statusInstructionsTitle {
   font-size: 1.25rem;
@@ -419,8 +415,10 @@
 }
 
 /* Payment Status Card */
+
+/* .oxxoInstructionsHeader (around line 509) removed, consolidated with definition around line 327 */
 .paymentStatusCard {
-  background-color: rgba(var(--color-info-rgb), 0.05);
+  background-color: rgb(var(--color-info-rgb), 0.05);
   border: 1px solid var(--color-info-light);
   border-radius: var(--border-radius);
   padding: var(--space-3);
@@ -486,22 +484,15 @@
 
 /* OXXO Payment Instructions */
 .oxxoInstructions {
-  background-color: rgba(var(--color-warning-rgb), 0.05);
+  background-color: rgb(var(--color-warning-rgb), 0.05);
   border: 1px solid var(--color-warning-light);
   border-radius: var(--border-radius);
   padding: var(--space-4);
   margin-top: var(--space-4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 }
 
-.oxxoInstructionsHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-warning-light);
-}
+/* Duplicate .oxxoInstructionsHeader removed from here */
 
 .oxxoInstructionsIcon {
   color: var(--color-warning);
@@ -532,14 +523,14 @@
   border-radius: var(--border-radius);
   padding: var(--space-4);
   margin: var(--space-4) 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
 .infoValueImportant {
   font-weight: var(--font-weight-bold);
   font-size: 1.15rem;
   color: var(--color-neutral-900);
-  background-color: rgba(var(--color-warning-rgb), 0.1);
+  background-color: rgb(var(--color-warning-rgb), 0.1);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--border-radius);
   display: inline-block;
@@ -588,7 +579,7 @@
 
 /* Rejection Reason */
 .rejectionReason {
-  background-color: rgba(var(--color-danger-rgb), 0.05);
+  background-color: rgb(var(--color-danger-rgb), 0.05);
   border: 1px solid var(--color-danger-light);
   border-radius: var(--border-radius);
   padding: var(--space-4);
@@ -668,6 +659,9 @@
   width: 100%;
 }
 
+/* .supportFooter (around line 1066) removed, consolidated with definition around line 667 */
+
+/* .supportFooterText (around line 1075) removed, consolidated with definition around line 673 */
 .supportFooterText {
   color: var(--color-neutral-700);
   font-size: 0.9rem;
@@ -809,13 +803,13 @@
 }
 
 /* Responsive styles */
-@media (min-width: 769px) {
+@media (width >= 769px) {
   .contextPrimaryActions {
     margin-top: var(--space-3);
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Page wrapper responsive styles */
   .pageWrapper {
     padding: 16px;
@@ -932,7 +926,7 @@
   /* Tab content on mobile */
   .tabSubheading {
     font-size: 1rem;
-    margin: 20px 0 12px 0;
+    margin: 20px 0 12px;
   }
 
   /* Info rows stack on mobile */
@@ -1020,6 +1014,7 @@
     --color-primary,
     #a72b31
   ); /* Updated from var(--rojo) to canonical var(--color-primary) */
+
   color: white;
   border: none;
   border-radius: var(--border-radius);
@@ -1033,9 +1028,10 @@
     --color-primary-dark,
     #852d2d
   ); /* Updated from var(--rojofuerte) to canonical var(--color-primary-dark) */
+
   color: white; /* Explicitly set text color on hover to ensure visibility */
   transform: translateY(-1px);
-  box-shadow: 0 5px 12px rgba(167, 43, 49, 0.3); /* Add box-shadow for visual consistency with standard buttons */
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%); /* Add box-shadow for visual consistency with standard buttons */
 }
 
 .downloadButton:hover .downloadIcon {
@@ -1044,7 +1040,7 @@
 
 .downloadButton:active {
   transform: translateY(0);
-  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.25); /* Reduced shadow for active state */
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%); /* Reduced shadow for active state */
   color: white; /* Ensure text remains visible in active state */
 }
 
@@ -1061,23 +1057,13 @@
 }
 
 /* Support Footer */
-.supportFooter {
-  background-color: var(--color-neutral-50);
-  border-radius: var(--border-radius);
-  padding: var(--space-4);
-  margin-top: var(--space-4);
-  text-align: center;
-  border: 1px solid var(--color-neutral-200);
-}
 
-.supportFooterText {
-  margin: 0;
-  color: var(--color-neutral-700);
-  font-size: 0.95rem;
-}
+/* Duplicate .supportFooter removed from here */
+
+/* Duplicate .supportFooterText removed from here */
 
 /* Media Queries for Document Section */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .documentItem {
     flex-direction: column;
     align-items: flex-start;
@@ -1091,6 +1077,7 @@
       --color-primary,
       #a72b31
     ); /* Explicitly set for mobile to ensure it's applied */
+
     color: white; /* Ensure text is visible */
   }
 
@@ -1104,7 +1091,7 @@
 }
 
 /* Responsive Styles for Mobile */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pageWrapper {
     padding: 16px;
   }
@@ -1172,7 +1159,7 @@
 }
 
 /* Small mobile devices */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .pageWrapper {
     padding: 12px;
   }
@@ -1239,7 +1226,7 @@
 }
 
 /* Extra small devices - optimized for 360px width (common in Mexico) */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .pageWrapper {
     padding: 8px;
   }

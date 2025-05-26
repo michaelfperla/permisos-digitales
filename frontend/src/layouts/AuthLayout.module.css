@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
   position: fixed;
   top: 0;
   left: 0;
@@ -34,6 +34,7 @@
   flex-grow: 1;
   width: 100%;
   padding: var(--space-4);
+
   /* Add padding-top to account for the fixed header */
   padding-top: calc(var(--mobile-header-height, 56px) + var(--space-4));
   box-sizing: border-box;
@@ -55,5 +56,6 @@
   .authContainer {
     padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-3));
   }
+
   /* .desktopHeader is hidden by isMdDown in JSX */
 }

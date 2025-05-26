@@ -5,7 +5,7 @@
   border-radius: 8px; /* Rounded */
   margin-bottom: 1rem;
   font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Soft shadow */
+  box-shadow: 0 2px 5px rgb(0 0 0 / 8%); /* Soft shadow */
 }
 
 .success {

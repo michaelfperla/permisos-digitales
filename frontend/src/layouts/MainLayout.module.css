@@ -1,4 +1,5 @@
 /* Main Layout Styles - Simplified for New Dashboard */
+
 /* Optimized for mobile responsiveness, especially for Mexican market (360px width devices) */
 
 /* Main Layout Container */
@@ -41,13 +42,13 @@
 .contentSection {
   background-color: var(--color-white);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
 /* Responsive styles for tablets */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .mainContentFullWidth {
     padding: 1.5rem;
   }
@@ -63,7 +64,7 @@
 }
 
 /* Small Mobile Devices */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .mainContentFullWidth {
     padding: 1rem;
   }
@@ -89,7 +90,7 @@
 }
 
 /* Extra Small Mobile Devices - Optimized for Mexican market (360px width) */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .mainContentFullWidth {
     padding: 0.75rem;
   }

@@ -7,7 +7,7 @@
 /* Page styles now use shared styles from UserDashboardPage.module.css */
 
 /* Mobile Optimizations */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .pageContainer {
     padding: var(--space-2);
   }
