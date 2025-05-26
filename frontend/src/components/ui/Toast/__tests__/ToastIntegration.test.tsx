@@ -1,19 +1,19 @@
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
 
 // Mock the ToastContext
 const mockShowToast = vi.fn();
 const mockHideToast = vi.fn();
 const mockSetPosition = vi.fn();
 
-vi.mock('../../../contexts/ToastContext', () => ({
+vi.mock('../../../shared/hooks/useToast', () => ({
   useToast: () => ({
     showToast: mockShowToast,
     hideToast: mockHideToast,
     setPosition: mockSetPosition,
-    position: 'top-right'
+    position: 'top-right',
   }),
-  ToastProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  ToastProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 // Test component that uses the mocked toast functions
@@ -45,8 +45,8 @@ const TestComponent = () => {
     mockShowToast('Mensaje con acción', 'info', {
       action: {
         label: 'Acción',
-        onClick: actionFn
-      }
+        onClick: actionFn,
+      },
     });
   };
 
@@ -90,10 +90,7 @@ describe('Toast Integration', () => {
     fireEvent.click(screen.getByTestId('success-button'));
 
     // Verify that showToast was called with the correct parameters
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Operación completada exitosamente',
-      'success'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('Operación completada exitosamente', 'success');
   });
 
   it('shows multiple toast notifications', async () => {
@@ -104,15 +101,9 @@ describe('Toast Integration', () => {
     fireEvent.click(screen.getByTestId('error-button'));
 
     // Verify that showToast was called with the correct parameters
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Operación completada exitosamente',
-      'success'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('Operación completada exitosamente', 'success');
 
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Ha ocurrido un error',
-      'error'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('Ha ocurrido un error', 'error');
   });
 
   it('passes custom duration to the toast system', async () => {
@@ -124,10 +115,8 @@ describe('Toast Integration', () => {
     // Verify that showToast was called with the correct parameters
     // In our implementation, we pass the duration to the toast system,
     // but the toast system itself ignores it and uses the standardized duration
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Mensaje con duración personalizada',
-      'info',
-      { duration: 10000 }
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('Mensaje con duración personalizada', 'info', {
+      duration: 10000,
+    });
   });
 });

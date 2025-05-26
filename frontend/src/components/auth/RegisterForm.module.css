@@ -1,6 +1,6 @@
 /* Styles for multi-step RegisterForm */
 
-/* Step indicator */
+/* Step indicator (Existing - keeping for completeness, though not visible in target image for step 1) */
 .stepIndicator {
   display: flex;
   align-items: center;
@@ -12,8 +12,8 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: var(--bs-gray-200);
-  color: var(--bs-gray-600);
+  background-color: var(--bs-gray-200); /* Consider var(--color-neutral-200) */
+  color: var(--bs-gray-600); /* Consider var(--color-neutral-600) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,20 +22,20 @@
 }
 
 .activeStep {
-  background-color: var(--rojo);
+  background-color: var(--rojo); /* var(--color-primary) */
   color: white;
 }
 
 .stepConnector {
   height: 2px;
   width: 60px;
-  background-color: var(--bs-gray-200);
+  background-color: var(--bs-gray-200); /* Consider var(--color-neutral-200) */
   margin: 0 10px;
 }
 
 .stepTitle {
   font-size: 1.1rem;
-  color: var(--bs-gray-700);
+  color: var(--bs-gray-700); /* Consider var(--color-neutral-700) */
   margin-bottom: 1rem;
   text-align: center;
   font-weight: 600;
@@ -47,113 +47,177 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Override form group spacing */
+/* Form group custom spacing if needed, MobileFormGroup already has margin */
 .formGroup {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem; /* Consistent with MobileFormGroup or slight adjustment */
 }
 
-/* Override label styling */
+/* Label styling (applied via className in RegisterForm.tsx) */
 .label {
   display: block;
-  margin-bottom: 0.3rem;
-  font-weight: 600;
-  color: var(--bs-gray-700);
-  font-size: 0.9rem;
+  margin-bottom: 0.5rem; /* Increased spacing */
+  font-weight: 600; /* Bolder labels */
+  color: var(--color-neutral-800, #333); /* Using theme variables */
+  font-size: 0.9rem; /* Slightly smaller than input text */
 }
 
-/* Override input styling */
+/* Input styling (applied via className in RegisterForm.tsx) */
 .input {
   width: 100%;
-  padding: 8px; /* Reduced from 10px */
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.95rem; /* Reduced from 16px */
+  min-height: 44px; /* Good touch target */
+  padding: 10px 14px; /* Comfortable padding */
+  border: 1px solid var(--color-neutral-300, #ddd);
+  border-radius: 8px; /* Softer, more modern rounded corners */
+  font-size: 1rem; /* Standard input font size, 16px to prevent iOS zoom */
+  background-color: var(--color-white, #fff);
+  color: var(--color-neutral-900, #222);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(167, 43, 49, 0.1);
+  border-color: var(--color-primary, #a72b31);
+  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15); /* Accent shadow on focus */
 }
 
-/* Override error text spacing */
+/* Error text (associated with MobileFormInput's error prop) */
 .errorText {
+  /* This class is from the original, MobileFormInput handles its own error display */
   color: var(--rojo, #a72b31);
-  font-size: 0.8rem; /* Reduced from 14px */
-  margin-top: 2px; /* Reduced from 5px */
+  font-size: 0.8rem;
+  margin-top: 4px; /* Consistent small spacing */
   display: block;
   font-weight: 500;
 }
 
-/* Terms text */
-.termsText {
-  font-size: 0.75rem;
-  color: var(--bs-gray-600);
-  text-align: center;
-  margin-top: 1rem;
-  line-height: 1.3;
-  padding: 0 0.25rem;
-}
-
-/* Override form links spacing */
-.formLinks {
-  text-align: center;
-  margin-top: 10px; /* Reduced from 15px */
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  font-size: 0.85rem; /* Added smaller font size */
-}
-
-/* Form title */
+/* Form title (handled by MobileForm title prop and its styles) */
 .formTitle {
-  margin-bottom: 0.75rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  /* This is from the original, likely for a non-MobileForm setup */
+  margin-bottom: 1.5rem; /* Adjusted from 0.75rem */
+  font-size: 1.6rem; /* Slightly larger and bolder for "Crear cuenta" */
+  font-weight: 700;
   text-align: center;
-  color: var(--bs-gray-800);
+  color: var(--color-neutral-900, #222);
 }
 
-/* Error message */
+/* Server error message styling */
 .errorMessage {
+  /* Class for the <Alert> message */
   margin-bottom: 1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
-  color: var(--rojo);
+  /* Alert component likely has its own styling, this could be for additional text */
 }
 
-/* Button styles */
+/* Button Group & Individual Buttons */
 .buttonGroup {
+  /* Used for Back/Next group in step 2 */
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 1.5rem; /* More space before buttons */
 }
 
+/* Specific styling for the "Siguiente" button in Step 1 if needed */
+/* It uses MobileFormActions, which handles flex layout.
+   Button variant="primary" should handle most styling.
+   To make it full-width within MobileFormActions (which is flex-column on mobile): */
+.stepOneNextButton button {
+  /* Target the button element if Button component allows className pass-through */
+  width: 100%;
+}
+/* .nextButton, .backButton, .registerButton - These can be applied as classNames to the Button component if it supports it */
+/* For example, if Button component passes className to its root element: */
 .nextButton {
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Primary button styles usually suffice */
+  /* If Button is inline-block/inline-flex by default, make it full width for Step 1 */
+  width: 100%; /* Ensure it takes full width in MobileFormActions */
 }
 
 .backButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Secondary button styles usually suffice */
 }
 
 .registerButton {
-  flex: 1;
+  flex: 1; /* If in a row with back button */
 }
 
 .buttonIcon {
   margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-right: 0.5rem; /* For icons inside buttons */
   font-size: 0.8rem;
+}
+
+/* Footer Links Section Styles */
+.formFooterLinks {
+  text-align: center;
+  margin-top: 1.5rem; /* Increased space */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Space between "terms" and "login" sections */
+}
+
+.formFooterSection {
+  /* Each section (terms, login prompt) */
+}
+
+.mutedText {
+  font-size: 0.8rem; /* Smaller text for prompts */
+  color: var(--color-neutral-600, #666);
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.termsLinksContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  gap: 0.25rem 0.5rem; /* row and column gap */
+}
+
+.minorLink {
+  font-size: 0.8rem;
+  color: var(--color-primary, #a72b31); /* Use primary color for links */
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.minorLink:hover {
+  text-decoration: none;
+}
+
+.termsSeparator {
+  font-size: 0.8rem;
+  color: var(--color-neutral-600, #666);
+  margin: 0 0.1rem;
+}
+
+.actionLink {
+  font-size: 0.9rem; /* Slightly larger for primary alternative action */
+  color: var(--color-primary-dark, #862328); /* Darker shade of primary or distinct color */
+  text-decoration: underline;
+  font-weight: 600; /* Bolder */
+}
+
+.actionLink:hover {
+  text-decoration: none;
+}
+
+/* Spinner - if current one needs adjustment */
+.spinner {
+  /* Assuming Button component's loading state has a spinner */
 }

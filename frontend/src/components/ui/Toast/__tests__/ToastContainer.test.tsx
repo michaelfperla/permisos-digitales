@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ToastContainer from '../ToastContainer';
+import { describe, it, expect, vi } from 'vitest';
+
 import { ToastType } from '../Toast';
+import ToastContainer from '../ToastContainer';
 
 // Mock the Toast component
 vi.mock('../Toast', () => ({
@@ -24,17 +25,12 @@ vi.mock('../Toast.module.css', () => ({
     error: 'error',
     info: 'info',
     warning: 'warning',
-  }
+  },
 }));
 
 describe('ToastContainer Component', () => {
   it('renders nothing when there are no toasts', () => {
-    const { container } = render(
-      <ToastContainer
-        toasts={[]}
-        onClose={() => {}}
-      />
-    );
+    const { container } = render(<ToastContainer toasts={[]} onClose={() => {}} />);
 
     expect(container.firstChild).toBeNull();
   });
@@ -54,12 +50,7 @@ describe('ToastContainer Component', () => {
       },
     ];
 
-    render(
-      <ToastContainer
-        toasts={toasts}
-        onClose={mockOnClose}
-      />
-    );
+    render(<ToastContainer toasts={toasts} onClose={mockOnClose} />);
 
     expect(screen.getByTestId('toast-toast-1')).toBeInTheDocument();
     expect(screen.getByTestId('toast-toast-2')).toBeInTheDocument();
@@ -77,11 +68,7 @@ describe('ToastContainer Component', () => {
 
     // Try to render with a different position
     const { container } = render(
-      <ToastContainer
-        toasts={toasts}
-        onClose={mockOnClose}
-        position="bottom-left"
-      />
+      <ToastContainer toasts={toasts} onClose={mockOnClose} position="bottom-left" />,
     );
 
     // The container should have the topRight class
@@ -109,13 +96,7 @@ describe('ToastContainer Component', () => {
       },
     ];
 
-    render(
-      <ToastContainer
-        toasts={toasts}
-        onClose={mockOnClose}
-        maxToasts={2}
-      />
-    );
+    render(<ToastContainer toasts={toasts} onClose={mockOnClose} maxToasts={2} />);
 
     // Only the last 2 toasts should be rendered
     expect(screen.queryByTestId('toast-toast-1')).not.toBeInTheDocument();
@@ -133,12 +114,7 @@ describe('ToastContainer Component', () => {
       },
     ];
 
-    render(
-      <ToastContainer
-        toasts={toasts}
-        onClose={mockOnClose}
-      />
-    );
+    render(<ToastContainer toasts={toasts} onClose={mockOnClose} />);
 
     // The container should have the proper accessibility attributes
     const container = screen.getByRole('region', { name: 'Notificaciones' });

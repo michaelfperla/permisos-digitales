@@ -83,7 +83,7 @@
 }
 
 .stepIndicator::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 50%;
   left: 0;
@@ -461,17 +461,39 @@
 }
 
 /* Progress fill width classes */
-.progressFill0 { width: 0%; }
-.progressFill10 { width: 10%; }
-.progressFill20 { width: 20%; }
-.progressFill30 { width: 30%; }
-.progressFill40 { width: 40%; }
-.progressFill50 { width: 50%; }
-.progressFill60 { width: 60%; }
-.progressFill70 { width: 70%; }
-.progressFill80 { width: 80%; }
-.progressFill90 { width: 90%; }
-.progressFill100 { width: 100%; }
+.progressFill0 {
+  width: 0%;
+}
+.progressFill10 {
+  width: 10%;
+}
+.progressFill20 {
+  width: 20%;
+}
+.progressFill30 {
+  width: 30%;
+}
+.progressFill40 {
+  width: 40%;
+}
+.progressFill50 {
+  width: 50%;
+}
+.progressFill60 {
+  width: 60%;
+}
+.progressFill70 {
+  width: 70%;
+}
+.progressFill80 {
+  width: 80%;
+}
+.progressFill90 {
+  width: 90%;
+}
+.progressFill100 {
+  width: 100%;
+}
 
 .summarySteps {
   margin-top: 1.5rem;

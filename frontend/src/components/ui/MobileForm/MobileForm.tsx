@@ -1,4 +1,5 @@
 import React from 'react';
+
 import styles from './MobileForm.module.css';
 import ResponsiveContainer from '../ResponsiveContainer/ResponsiveContainer';
 
@@ -36,13 +37,10 @@ const MobileForm: React.FC<MobileFormProps> = ({
   onSubmit,
   className = '',
   title,
-  description
+  description,
 }) => {
   return (
-    <ResponsiveContainer
-      type="fluid"
-      withPadding={true}
-    >
+    <ResponsiveContainer type="fluid" withPadding={true}>
       {title && <h2 className={styles.formTitle}>{title}</h2>}
       {description && <p className={styles.formDescription}>{description}</p>}
       <form
@@ -75,15 +73,8 @@ export interface MobileFormGroupProps {
  *
  * A container for grouping form elements with consistent spacing.
  */
-export const MobileFormGroup: React.FC<MobileFormGroupProps> = ({
-  children,
-  className = ''
-}) => {
-  return (
-    <div className={`${styles.formGroup} ${className}`}>
-      {children}
-    </div>
-  );
+export const MobileFormGroup: React.FC<MobileFormGroupProps> = ({ children, className = '' }) => {
+  return <div className={`${styles.formGroup} ${className}`}>{children}</div>;
 };
 
 export interface MobileFormLabelProps {
@@ -114,13 +105,10 @@ export const MobileFormLabel: React.FC<MobileFormLabelProps> = ({
   children,
   htmlFor,
   required = false,
-  className = ''
+  className = '',
 }) => {
   return (
-    <label
-      htmlFor={htmlFor}
-      className={`${styles.formLabel} ${className}`}
-    >
+    <label htmlFor={htmlFor} className={`${styles.formLabel} ${className}`}>
       {children}
       {required && <span className={styles.requiredIndicator}>*</span>}
     </label>
@@ -146,24 +134,33 @@ export interface MobileFormInputProps extends React.InputHTMLAttributes<HTMLInpu
  * MobileFormInput Component
  *
  * A touch-friendly input field with error handling.
+ * Compatible with React Hook Form's register function.
+ *
+ * @example
+ * // With React Hook Form
+ * <MobileFormInput
+ *   id="email"
+ *   error={errors.email?.message}
+ *   {...register('email')}
+ * />
  */
-export const MobileFormInput: React.FC<MobileFormInputProps> = ({
-  id,
-  error,
-  className = '',
-  ...props
-}) => {
-  return (
-    <>
-      <input
-        id={id}
-        className={`${styles.formInput} ${error ? styles.inputError : ''} ${className}`}
-        {...props}
-      />
-      {error && <div className={styles.errorMessage}>{error}</div>}
-    </>
-  );
-};
+export const MobileFormInput = React.forwardRef<HTMLInputElement, MobileFormInputProps>(
+  ({ id, error, className = '', ...props }, ref) => {
+    return (
+      <>
+        <input
+          id={id}
+          className={`${styles.formInput} ${error ? styles.inputError : ''} ${className}`}
+          ref={ref}
+          {...props}
+        />
+        {error && <div className={styles.errorMessage}>{error}</div>}
+      </>
+    );
+  },
+);
+
+MobileFormInput.displayName = 'MobileFormInput';
 
 export interface MobileFormSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   /**
@@ -188,31 +185,46 @@ export interface MobileFormSelectProps extends React.SelectHTMLAttributes<HTMLSe
  * MobileFormSelect Component
  *
  * A touch-friendly select dropdown with error handling.
+ * Compatible with React Hook Form's Controller component.
+ *
+ * @example
+ * // With React Hook Form's Controller
+ * <Controller
+ *   name="category"
+ *   control={control}
+ *   render={({ field }) => (
+ *     <MobileFormSelect
+ *       id="category"
+ *       options={categoryOptions}
+ *       error={errors.category?.message}
+ *       {...field}
+ *     />
+ *   )}
+ * />
  */
-export const MobileFormSelect: React.FC<MobileFormSelectProps> = ({
-  id,
-  options,
-  error,
-  className = '',
-  ...props
-}) => {
-  return (
-    <>
-      <select
-        id={id}
-        className={`${styles.formSelect} ${error ? styles.inputError : ''} ${className}`}
-        {...props}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && <div className={styles.errorMessage}>{error}</div>}
-    </>
-  );
-};
+export const MobileFormSelect = React.forwardRef<HTMLSelectElement, MobileFormSelectProps>(
+  ({ id, options, error, className = '', ...props }, ref) => {
+    return (
+      <>
+        <select
+          id={id}
+          className={`${styles.formSelect} ${error ? styles.inputError : ''} ${className}`}
+          ref={ref}
+          {...props}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {error && <div className={styles.errorMessage}>{error}</div>}
+      </>
+    );
+  },
+);
+
+MobileFormSelect.displayName = 'MobileFormSelect';
 
 export interface MobileFormTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   /**
@@ -233,26 +245,42 @@ export interface MobileFormTextareaProps extends React.TextareaHTMLAttributes<HT
  * MobileFormTextarea Component
  *
  * A touch-friendly textarea with error handling.
+ * Compatible with React Hook Form's Controller component.
+ *
+ * @example
+ * // With React Hook Form's Controller
+ * <Controller
+ *   name="description"
+ *   control={control}
+ *   render={({ field }) => (
+ *     <MobileFormTextarea
+ *       id="description"
+ *       error={errors.description?.message}
+ *       {...field}
+ *     />
+ *   )}
+ * />
  */
-export const MobileFormTextarea: React.FC<MobileFormTextareaProps> = ({
-  id,
-  error,
-  className = '',
-  ...props
-}) => {
-  return (
-    <>
-      <textarea
-        id={id}
-        className={`${styles.formTextarea} ${error ? styles.inputError : ''} ${className}`}
-        {...props}
-      />
-      {error && <div className={styles.errorMessage}>{error}</div>}
-    </>
-  );
-};
+export const MobileFormTextarea = React.forwardRef<HTMLTextAreaElement, MobileFormTextareaProps>(
+  ({ id, error, className = '', ...props }, ref) => {
+    return (
+      <>
+        <textarea
+          id={id}
+          className={`${styles.formTextarea} ${error ? styles.inputError : ''} ${className}`}
+          ref={ref}
+          {...props}
+        />
+        {error && <div className={styles.errorMessage}>{error}</div>}
+      </>
+    );
+  },
+);
 
-export interface MobileFormCheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+MobileFormTextarea.displayName = 'MobileFormTextarea';
+
+export interface MobileFormCheckboxProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /**
    * Checkbox ID
    */
@@ -275,20 +303,40 @@ export interface MobileFormCheckboxProps extends Omit<React.InputHTMLAttributes<
  * MobileFormCheckbox Component
  *
  * A touch-friendly checkbox with error handling.
+ * Compatible with React Hook Form's Controller component.
+ *
+ * @example
+ * // With React Hook Form's Controller
+ * <Controller
+ *   name="acceptTerms"
+ *   control={control}
+ *   render={({ field: { onChange, onBlur, value, ref } }) => (
+ *     <MobileFormCheckbox
+ *       id="acceptTerms"
+ *       label="I accept the terms and conditions"
+ *       error={errors.acceptTerms?.message}
+ *       checked={value}
+ *       onChange={onChange}
+ *       onBlur={onBlur}
+ *       inputRef={ref}
+ *     />
+ *   )}
+ * />
  */
-export const MobileFormCheckbox: React.FC<MobileFormCheckboxProps> = ({
-  id,
-  label,
-  error,
-  className = '',
-  ...props
-}) => {
+export const MobileFormCheckbox = React.forwardRef<
+  HTMLInputElement,
+  MobileFormCheckboxProps & { inputRef?: React.Ref<HTMLInputElement> }
+>(({ id, label, error, className = '', inputRef, ...props }, ref) => {
+  // Use inputRef if provided (for Controller), otherwise use ref
+  const resolvedRef = inputRef || ref;
+
   return (
     <div className={`${styles.formCheckbox} ${className}`}>
       <input
         type="checkbox"
         id={id}
         className={styles.checkboxInput}
+        ref={resolvedRef}
         {...props}
       />
       <label htmlFor={id} className={styles.checkboxLabel}>
@@ -297,7 +345,9 @@ export const MobileFormCheckbox: React.FC<MobileFormCheckboxProps> = ({
       {error && <div className={styles.errorMessage}>{error}</div>}
     </div>
   );
-};
+});
+
+MobileFormCheckbox.displayName = 'MobileFormCheckbox';
 
 export interface MobileFormActionsProps {
   /**
@@ -317,13 +367,9 @@ export interface MobileFormActionsProps {
  */
 export const MobileFormActions: React.FC<MobileFormActionsProps> = ({
   children,
-  className = ''
+  className = '',
 }) => {
-  return (
-    <div className={`${styles.formActions} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${styles.formActions} ${className}`}>{children}</div>;
 };
 
 export default MobileForm;

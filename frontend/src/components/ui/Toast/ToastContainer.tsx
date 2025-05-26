@@ -1,4 +1,5 @@
 import React, { useMemo, memo } from 'react';
+
 import Toast, { ToastType } from './Toast';
 import styles from './Toast.module.css';
 
@@ -23,40 +24,44 @@ interface ToastContainerProps {
   maxToasts?: number;
 }
 
-const ToastContainer: React.FC<ToastContainerProps> = memo(({
-  toasts,
-  onClose,
-  position = 'top-right', // Ignoramos este valor y siempre usamos 'top-right'
-  maxToasts = 5
-}) => {
-  if (toasts.length === 0) return null;
+const ToastContainer: React.FC<ToastContainerProps> = memo(
+  ({
+    toasts,
+    onClose,
+    position: _position = 'top-right', // Ignoramos este valor y siempre usamos 'top-right'
+    maxToasts = 5,
+  }) => {
+    // Limit the number of toasts shown - memoized to prevent unnecessary calculations
+    const visibleToasts = useMemo(() => toasts.slice(-maxToasts), [toasts, maxToasts]);
 
-  // Limit the number of toasts shown - memoized to prevent unnecessary calculations
-  const visibleToasts = useMemo(() => toasts.slice(-maxToasts), [toasts, maxToasts]);
+    if (toasts.length === 0) return null;
 
-  // Siempre usamos la posición 'top-right' independientemente del valor pasado
-  const positionClass = styles.topRight;
+    // Siempre usamos la posición 'top-right' independientemente del valor pasado
+    const positionClass = styles.topRight;
 
-  return (
-    <div
-      className={`${styles.toastContainer} ${positionClass}`}
-      role="region"
-      aria-label="Notificaciones"
-      aria-live="polite"
-    >
-      {visibleToasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          id={toast.id}
-          message={toast.message}
-          type={toast.type}
-          // No pasamos duration para usar el valor predeterminado de 3300ms
-          action={toast.action}
-          onClose={onClose}
-        />
-      ))}
-    </div>
-  );
-});
+    return (
+      <div
+        className={`${styles.toastContainer} ${positionClass}`}
+        role="region"
+        aria-label="Notificaciones"
+        aria-live="polite"
+      >
+        {visibleToasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            id={toast.id}
+            message={toast.message}
+            type={toast.type}
+            // No pasamos duration para usar el valor predeterminado de 3300ms
+            action={toast.action}
+            onClose={onClose}
+          />
+        ))}
+      </div>
+    );
+  },
+);
+
+ToastContainer.displayName = 'ToastContainer';
 
 export default ToastContainer;

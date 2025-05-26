@@ -80,16 +80,13 @@ class ConektaConfig {
    * Uses a promise to ensure initialization is only performed once
    * @returns {Promise<boolean>} - Whether initialization was successful
    */
-  async initialize() {
-    // If already initializing, return the existing promise
+  async initialize() { // This outer `async` is fine, it means `initialize()` returns a Promise
     if (this.initPromise) {
       return this.initPromise;
     }
 
-    // Create a new initialization promise
-    this.initPromise = new Promise(async (resolve, reject) => {
+    this.initPromise = new Promise((resolve, reject) => { // REMOVED `async` here
       try {
-        // If already initialized, resolve immediately
         if (this.initialized && this.conekta) {
           resolve(true);
           return;
@@ -97,33 +94,22 @@ class ConektaConfig {
 
         logger.info('Initializing Conekta SDK...');
 
-        // Initialize the Conekta SDK with the current supported version
         const Configuration = conekta.Configuration;
         const apiConfig = new Configuration({
           accessToken: config.conektaPrivateKey
         });
 
-        // Create API clients for different Conekta resources
         this.conekta = {
-          // Store the raw SDK
           sdk: conekta,
-
-          // Store the configuration
           config: apiConfig,
-
-          // Create API clients for different resources
           customers: new conekta.CustomersApi(apiConfig),
           orders: new conekta.OrdersApi(apiConfig),
           tokens: new conekta.TokensApi(apiConfig),
           charges: new conekta.ChargesApi(apiConfig),
           events: new conekta.EventsApi(apiConfig),
           webhooks: new conekta.WebhooksApi(apiConfig),
-
-          // Store API keys for reference
           publicKey: config.conektaPublicKey,
           privateKey: config.conektaPrivateKey,
-
-          // Create a direct HTTP client for custom requests
           apiClient: axios.create({
             baseURL: 'https://api.conekta.io',
             headers: {
@@ -134,8 +120,7 @@ class ConektaConfig {
           })
         };
 
-        // Add helper methods for common operations
-        this.addHelperMethods();
+        this.addHelperMethods(); // This is a synchronous call
 
         logger.info('Conekta SDK initialized successfully');
         this.initialized = true;
@@ -144,7 +129,11 @@ class ConektaConfig {
         logger.error('Error initializing Conekta configuration:', error);
         this.initialized = false;
         this.conekta = null;
-        this.initPromise = null;
+        // It's generally safer not to modify this.initPromise from within its own executor
+        // if an error occurs. Let the caller handle the rejected promise.
+        // If you *must* reset it, consider how it affects concurrent calls to initialize().
+        // For now, let's leave it commented or remove it, as the promise will be rejected.
+        // this.initPromise = null; 
         reject(error);
       }
     });

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import useMediaQuery from './useMediaQuery';
 
 /**
@@ -8,12 +9,12 @@ export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 /**
  * Custom hook that provides responsive design utilities based on the design system breakpoints
- * 
+ *
  * @returns Object with responsive utility functions and boolean flags
- * 
+ *
  * @example
  * const { isXs, isSm, isMd, isLg, isXl, isSmDown, isMdDown, isLgDown, isXlDown, isSmUp, isMdUp, isLgUp, isXlUp } = useResponsive();
- * 
+ *
  * // Conditionally render based on screen size
  * return (
  *   <div>
@@ -25,14 +26,22 @@ const useResponsive = () => {
   // Get CSS variables for breakpoints
   const getCSSBreakpoint = (name: string): string => {
     if (typeof document === 'undefined') return '0px';
-    return getComputedStyle(document.documentElement).getPropertyValue(`--breakpoint-${name}`).trim();
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(`--breakpoint-${name}`)
+      .trim();
   };
 
   // Create media queries for each breakpoint
   const isXs = useMediaQuery(`(max-width: ${getCSSBreakpoint('xs')})`);
-  const isSm = useMediaQuery(`(min-width: ${getCSSBreakpoint('xs')}) and (max-width: ${getCSSBreakpoint('sm')})`);
-  const isMd = useMediaQuery(`(min-width: ${getCSSBreakpoint('sm')}) and (max-width: ${getCSSBreakpoint('md')})`);
-  const isLg = useMediaQuery(`(min-width: ${getCSSBreakpoint('md')}) and (max-width: ${getCSSBreakpoint('lg')})`);
+  const isSm = useMediaQuery(
+    `(min-width: ${getCSSBreakpoint('xs')}) and (max-width: ${getCSSBreakpoint('sm')})`,
+  );
+  const isMd = useMediaQuery(
+    `(min-width: ${getCSSBreakpoint('sm')}) and (max-width: ${getCSSBreakpoint('md')})`,
+  );
+  const isLg = useMediaQuery(
+    `(min-width: ${getCSSBreakpoint('md')}) and (max-width: ${getCSSBreakpoint('lg')})`,
+  );
   const isXl = useMediaQuery(`(min-width: ${getCSSBreakpoint('lg')})`);
 
   // Create "down" media queries (e.g., sm and smaller)
@@ -52,36 +61,54 @@ const useResponsive = () => {
   // Helper function to determine if the current breakpoint matches
   const is = (breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
-      case 'xs': return isXs;
-      case 'sm': return isSm;
-      case 'md': return isMd;
-      case 'lg': return isLg;
-      case 'xl': return isXl;
-      default: return false;
+      case 'xs':
+        return isXs;
+      case 'sm':
+        return isSm;
+      case 'md':
+        return isMd;
+      case 'lg':
+        return isLg;
+      case 'xl':
+        return isXl;
+      default:
+        return false;
     }
   };
 
   // Helper function to determine if the current breakpoint is smaller than or equal to the given breakpoint
   const down = (breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
-      case 'xs': return isXsDown;
-      case 'sm': return isSmDown;
-      case 'md': return isMdDown;
-      case 'lg': return isLgDown;
-      case 'xl': return isXlDown;
-      default: return false;
+      case 'xs':
+        return isXsDown;
+      case 'sm':
+        return isSmDown;
+      case 'md':
+        return isMdDown;
+      case 'lg':
+        return isLgDown;
+      case 'xl':
+        return isXlDown;
+      default:
+        return false;
     }
   };
 
   // Helper function to determine if the current breakpoint is larger than or equal to the given breakpoint
   const up = (breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
-      case 'xs': return isXsUp;
-      case 'sm': return isSmUp;
-      case 'md': return isMdUp;
-      case 'lg': return isLgUp;
-      case 'xl': return isXlUp;
-      default: return false;
+      case 'xs':
+        return isXsUp;
+      case 'sm':
+        return isSmUp;
+      case 'md':
+        return isMdUp;
+      case 'lg':
+        return isLgUp;
+      case 'xl':
+        return isXlUp;
+      default:
+        return false;
     }
   };
 
@@ -104,21 +131,21 @@ const useResponsive = () => {
       isMd,
       isLg,
       isXl,
-      
+
       // Down breakpoint flags (e.g., sm and smaller)
       isXsDown,
       isSmDown,
       isMdDown,
       isLgDown,
       isXlDown,
-      
+
       // Up breakpoint flags (e.g., sm and larger)
       isXsUp,
       isSmUp,
       isMdUp,
       isLgUp,
       isXlUp,
-      
+
       // Helper functions
       is,
       down,
@@ -126,7 +153,7 @@ const useResponsive = () => {
       between,
       only,
     }),
-    [isXs, isSm, isMd, isLg, isXl, isSmDown, isMdDown, isLgDown, isSmUp, isMdUp, isLgUp, isXlUp]
+    [isXs, isSm, isMd, isLg, isXl, isSmDown, isMdDown, isLgDown, isSmUp, isMdUp, isLgUp, isXlUp],
   );
 };
 

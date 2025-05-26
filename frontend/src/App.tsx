@@ -1,33 +1,33 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from './layouts/MainLayout';
-import UserLayout from './layouts/UserLayout';
-import AuthLayout from './layouts/AuthLayout';
-import HomeLayout from './layouts/HomeLayout';
-import VerificationLayout from './layouts/VerificationLayout';
+
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PermitRouteGuard from './components/permit/PermitRouteGuard';
+import LoadingSpinner from './components/ui/LoadingSpinner';
+import AuthLayout from './layouts/AuthLayout';
+import HomeLayout from './layouts/HomeLayout';
+import MainLayout from './layouts/MainLayout';
+import UserLayout from './layouts/UserLayout';
+import VerificationLayout from './layouts/VerificationLayout';
+import CompletePermitFormPage from './pages/CompletePermitFormPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
-import ResendVerificationPage from './pages/ResendVerificationPage';
-import PreVerificationPage from './pages/PreVerificationPage';
-import NewDashboardPage from './pages/NewDashboardPage';
-import UserDashboardPage from './pages/UserDashboardPage';
-import PermitsListPage from './pages/PermitsListPage';
-import UserPermitsPage from './pages/UserPermitsPage';
-import CompletePermitFormPage from './pages/CompletePermitFormPage';
-import PermitDetailsPage from './pages/PermitDetailsPage';
-import PermitRenewalPage from './pages/PermitRenewalPage';
-import ProfilePage from './pages/ProfilePage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentErrorPage from './pages/PaymentErrorPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PermitDetailsPage from './pages/PermitDetailsPage';
 import PermitPaymentPage from './pages/PermitPaymentPage';
-import MobileDesignSystemTest from './pages/MobileDesignSystemTest';
-import LoadingSpinner from './components/ui/LoadingSpinner';
-import useAuth from './hooks/useAuth';
+import PermitsListPage from './pages/PermitsListPage';
+import PreVerificationPage from './pages/PreVerificationPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ProfilePage from './pages/ProfilePage';
+import RegisterPage from './pages/RegisterPage';
+import ResendVerificationPage from './pages/ResendVerificationPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
+import UserDashboardPage from './pages/UserDashboardPage';
+import UserPermitsPage from './pages/UserPermitsPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import { useUserAuth as useAuth } from './shared/hooks/useAuth';
 
 function App() {
   const { isLoading } = useAuth();
@@ -58,16 +58,12 @@ function App() {
       <Route element={<ProtectedRoute />}>
         {/* Legacy layout */}
         <Route element={<MainLayout />}>
-          {/* Keep the original dashboard for backward compatibility */}
-          <Route path="/dashboard-legacy" element={<NewDashboardPage />} />
           <Route path="/permits-legacy" element={<PermitsListPage />} />
 
           {/* Payment result pages */}
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/error" element={<PaymentErrorPage />} />
 
-          {/* Test pages */}
-          <Route path="/mobile-design-test" element={<MobileDesignSystemTest />} />
         </Route>
 
         {/* New User Layout */}
@@ -82,11 +78,6 @@ function App() {
           <Route path="/permits/:id" element={
             <PermitRouteGuard>
               <PermitDetailsPage />
-            </PermitRouteGuard>
-          } />
-          <Route path="/permits/:id/renew" element={
-            <PermitRouteGuard>
-              <PermitRenewalPage />
             </PermitRouteGuard>
           } />
 
@@ -105,6 +96,10 @@ function App() {
       <Route element={<HomeLayout />}>
         <Route path="/" element={<HomePage />} />
       </Route>
+
+      {/* Legal pages */}
+      <Route path="/terminos-y-condiciones" element={<TermsAndConditionsPage />} />
+      <Route path="/politica-de-privacidad" element={<PrivacyPolicyPage />} />
 
       {/* 404 Route - can be added later */}
       {/* <Route path="*" element={<NotFoundPage />} /> */}

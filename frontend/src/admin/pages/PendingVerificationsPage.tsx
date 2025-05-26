@@ -1,7 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { FaExclamationTriangle } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+
 import styles from './PendingVerificationsPage.module.css';
+import Icon from '../../shared/components/ui/Icon';
 
 /**
  * PendingVerificationsPage Component
@@ -15,17 +17,29 @@ const PendingVerificationsPage: React.FC = () => {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Verificaciones de Pago</h1>
-          <p className={styles.pageSubtitle}>
-            Sistema de verificación de pagos actualizado
-          </p>
+          <p className={styles.pageSubtitle}>Sistema de verificación de pagos actualizado</p>
         </div>
       </header>
 
       <div className={styles.emptyState}>
-        <FaExclamationTriangle className={styles.noticeIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.noticeIcon}
+          size="xl"
+          color="var(--color-warning)"
+        />
         <h2>Funcionalidad en actualización</h2>
-        <p>El sistema de verificación manual de pagos ha sido reemplazado por verificación automática a través de un proveedor de pagos.</p>
-        <p>Para ver todas las solicitudes, visite la <Link to="/applications" className={styles.linkText}>lista de solicitudes</Link>.</p>
+        <p>
+          El sistema de verificación manual de pagos ha sido reemplazado por verificación automática
+          a través de un proveedor de pagos.
+        </p>
+        <p>
+          Para ver todas las solicitudes, visite la{' '}
+          <Link to="/applications" className={styles.linkText}>
+            lista de solicitudes
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

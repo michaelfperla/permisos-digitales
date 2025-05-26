@@ -1,8 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import Toast from '../Toast';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import ToastContainer from '../ToastContainer';
-import styles from '../Toast.module.css';
+
+// Mock the Icon component
+vi.mock('../../../../shared/components/ui/Icon', () => ({
+  default: ({ IconComponent, className, color }: any) => {
+    const Icon = IconComponent();
+    return (
+      <span className={className} style={{ color }}>
+        {Icon}
+      </span>
+    );
+  },
+}));
 
 // Mock the Button component
 vi.mock('../../Button/Button', () => ({
@@ -25,14 +36,14 @@ vi.mock('../Toast.module.css', () => ({
     error: 'error',
     info: 'info',
     warning: 'warning',
-  }
+  },
 }));
 
 // Mock window.matchMedia for testing media queries
 const mockMatchMedia = (matches: boolean) => {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: vi.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches,
       media: query,
       onchange: null,
@@ -73,7 +84,7 @@ describe('Toast Responsive Behavior', () => {
           },
         ]}
         onClose={() => {}}
-      />
+      />,
     );
 
     // Verify the container has the correct class
@@ -95,7 +106,7 @@ describe('Toast Responsive Behavior', () => {
           },
         ]}
         onClose={() => {}}
-      />
+      />,
     );
 
     // Verify the container has the correct class
@@ -117,7 +128,7 @@ describe('Toast Responsive Behavior', () => {
           },
         ]}
         onClose={() => {}}
-      />
+      />,
     );
 
     // Verify the container has the correct class
@@ -139,7 +150,7 @@ describe('Toast Responsive Behavior', () => {
           },
         ]}
         onClose={() => {}}
-      />
+      />,
     );
 
     // Verify the container has the correct class

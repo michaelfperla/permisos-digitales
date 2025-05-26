@@ -15,6 +15,32 @@ class ApplicationRepository extends BaseRepository {
   }
 
   /**
+   * Override findById to ensure all fields including fecha_vencimiento are returned
+   * @param {number} id - Application ID
+   * @returns {Promise<Object|null>} - Found application or null
+   */
+  async findById(id) {
+    // Use wildcard to select all columns to avoid issues with missing columns
+    const query = `SELECT * FROM ${this.tableName} WHERE ${this.primaryKey} = $1`;
+
+    try {
+      const { rows } = await db.query(query, [id]);
+
+      // Log the result for debugging
+      if (rows.length > 0) {
+        logger.debug(`Application ${id} found with fecha_vencimiento: ${rows[0].fecha_vencimiento}`);
+      } else {
+        logger.warn(`Application ${id} not found`);
+      }
+
+      return rows[0] || null;
+    } catch (error) {
+      logger.error(`Error in ${this.tableName}.findById:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Find applications by user ID
    * @param {number} userId - User ID
    * @param {Object} options - Additional options (limit, offset, orderBy)
@@ -513,8 +539,7 @@ class ApplicationRepository extends BaseRepository {
     `;
 
     let query = `
-      SELECT pa.id, pa.status, pa.created_at, pa.payment_proof_uploaded_at,
-             pa.payment_verified_at,
+      SELECT pa.id, pa.status, pa.created_at,
              pa.payment_reference, pa.nombre_completo, pa.marca, pa.linea, pa.ano_modelo,
              u.email as user_email
       FROM permit_applications pa
@@ -599,29 +624,19 @@ class ApplicationRepository extends BaseRepository {
       `;
       const statusResults = await db.query(statusQuery);
 
-      // Get today's verifications
-      const todayQuery = `
-        SELECT
-          SUM(CASE WHEN action = 'verify' THEN 1 ELSE 0 END) as approved,
-          SUM(CASE WHEN action = 'reject' THEN 1 ELSE 0 END) as rejected
-        FROM payment_verification_log
-        WHERE created_at >= CURRENT_DATE
-      `;
-      const todayResults = await db.query(todayQuery);
-
-      // Get pending verifications count
+      // Get pending verifications count - using AWAITING_OXXO_PAYMENT status
       const pendingQuery = `
         SELECT COUNT(*) as count
         FROM permit_applications
         WHERE status = $1
       `;
-      const pendingResults = await db.query(pendingQuery, [ApplicationStatus.PROOF_SUBMITTED]);
+      const pendingResults = await db.query(pendingQuery, [ApplicationStatus.AWAITING_OXXO_PAYMENT]);
 
       return {
         statusCounts: statusResults.rows,
         todayVerifications: {
-          approved: parseInt(todayResults.rows[0]?.approved || 0),
-          rejected: parseInt(todayResults.rows[0]?.rejected || 0)
+          approved: 0,
+          rejected: 0
         },
         pendingVerifications: parseInt(pendingResults.rows[0]?.count || 0)
       };

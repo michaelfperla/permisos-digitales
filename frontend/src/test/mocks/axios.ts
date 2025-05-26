@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+
 import { mockCsrfToken } from './authService';
 
 // Create a mock axios instance
@@ -6,7 +7,7 @@ const createAxiosInstance = (config: any = {}) => {
   return {
     defaults: {
       ...axiosMock.defaults,
-      ...config
+      ...config,
     },
     get: axiosMock.get,
     post: axiosMock.post,
@@ -16,14 +17,14 @@ const createAxiosInstance = (config: any = {}) => {
       request: {
         use: vi.fn(),
         eject: vi.fn(),
-        clear: vi.fn()
+        clear: vi.fn(),
       },
       response: {
         use: vi.fn(),
         eject: vi.fn(),
-        clear: vi.fn()
-      }
-    }
+        clear: vi.fn(),
+      },
+    },
   };
 };
 
@@ -36,15 +37,15 @@ const axiosMock = {
       get: {},
       delete: {},
       patch: {},
-      put: {}
+      put: {},
     },
-    withCredentials: true
+    withCredentials: true,
   },
 
   get: vi.fn().mockImplementation((url: string) => {
     if (url === '/api/auth/csrf-token') {
       return Promise.resolve({
-        data: { csrfToken: mockCsrfToken }
+        data: { csrfToken: mockCsrfToken },
       });
     }
 
@@ -88,7 +89,7 @@ const axiosMock = {
     axiosMock.put.mockClear();
     axiosMock.delete.mockClear();
     axiosMock.create.mockClear();
-  }
+  },
 };
 
 // Add default export

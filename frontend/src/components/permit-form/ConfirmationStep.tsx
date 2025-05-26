@@ -1,13 +1,9 @@
 import React from 'react';
+import { FaCheckCircle, FaFileAlt, FaHome } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import {
-  FaCheckCircle,
-  FaFileAlt,
-  FaHome,
-  FaDownload
-} from 'react-icons/fa';
+
 import styles from './CompleteForm.module.css';
-import Button from '../../components/ui/Button/Button';
+import Button from "../ui/Button/Button";
 
 interface ConfirmationStepProps {
   applicationId: string;
@@ -19,10 +15,7 @@ interface ConfirmationStepProps {
   };
 }
 
-const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
-  applicationId,
-  formData
-}) => {
+const ConfirmationStep: React.FC<ConfirmationStepProps> = ({ applicationId, formData }) => {
   const navigate = useNavigate();
 
   // Format date for display
@@ -32,7 +25,7 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   };
 
@@ -54,8 +47,8 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
       </div>
 
       <p className={styles.confirmationText}>
-        Su solicitud de permiso digital ha sido recibida correctamente.
-        A continuación, encontrará los detalles de su solicitud y los pasos a seguir.
+        Su solicitud de permiso digital ha sido recibida correctamente. A continuación, encontrará
+        los detalles de su solicitud y los pasos a seguir.
       </p>
 
       <div className={styles.confirmationDetails}>
@@ -88,8 +81,8 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({
       </div>
 
       <p className={styles.confirmationText}>
-        <strong>Próximos pasos:</strong> Para completar el proceso, es necesario realizar el pago correspondiente.
-        Puede hacerlo ahora o más tarde desde su panel de control.
+        <strong>Próximos pasos:</strong> Para completar el proceso, es necesario realizar el pago
+        correspondiente. Puede hacerlo ahora o más tarde desde su panel de control.
       </p>
 
       <div className={styles.confirmationActions}>

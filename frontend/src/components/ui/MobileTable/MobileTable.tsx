@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaSort, FaSortUp, FaSortDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
 import styles from './MobileTable.module.css';
+import Icon from '../../../shared/components/ui/Icon';
 
 export interface Column<T> {
   /**
@@ -92,7 +94,7 @@ function MobileTable<T>({
   initialSortColumn,
   initialSortDirection = 'asc',
   emptyMessage = 'No data available',
-  className = ''
+  className = '',
 }: MobileTableProps<T>) {
   // Sort state
   const [sortColumn, setSortColumn] = useState<string | undefined>(initialSortColumn);
@@ -148,15 +150,22 @@ function MobileTable<T>({
 
   // Get sort icon based on current sort state
   const getSortIcon = (columnId: string) => {
-    if (sortColumn !== columnId) return <FaSort className={styles.sortIcon} />;
-    return sortDirection === 'asc'
-      ? <FaSortUp className={`${styles.sortIcon} ${styles.sortAsc}`} />
-      : <FaSortDown className={`${styles.sortIcon} ${styles.sortDesc}`} />;
+    if (sortColumn !== columnId)
+      return <Icon IconComponent={FaSort} className={styles.sortIcon} size="sm" />;
+    return sortDirection === 'asc' ? (
+      <Icon IconComponent={FaSortUp} className={`${styles.sortIcon} ${styles.sortAsc}`} size="sm" />
+    ) : (
+      <Icon
+        IconComponent={FaSortDown}
+        className={`${styles.sortIcon} ${styles.sortDesc}`}
+        size="sm"
+      />
+    );
   };
 
   // Sort columns for mobile view based on priority
   const mobilePriorityColumns = [...columns]
-    .filter(col => !col.hideMobile)
+    .filter((col) => !col.hideMobile)
     .sort((a, b) => (a.mobilePriority || 999) - (b.mobilePriority || 999));
 
   return (
@@ -191,10 +200,7 @@ function MobileTable<T>({
                   onClick={onRowClick ? () => onRowClick(item) : undefined}
                 >
                   {columns.map((column) => (
-                    <td
-                      key={column.id}
-                      data-label={column.mobileLabel || column.header}
-                    >
+                    <td key={column.id} data-label={column.mobileLabel || column.header}>
                       {column.cell(item)}
                     </td>
                   ))}
@@ -205,24 +211,38 @@ function MobileTable<T>({
 
           {/* Mobile Card View */}
           <div className={styles.mobileCards}>
-            {paginatedData.map((item) => (
-              <div
-                key={keyExtractor(item)}
-                className={`${styles.mobileCard} ${onRowClick ? styles.clickableCard : ''}`}
-                onClick={onRowClick ? () => onRowClick(item) : undefined}
-              >
-                {mobilePriorityColumns.map((column) => (
-                  <div key={column.id} className={styles.mobileCardItem}>
-                    <div className={styles.mobileCardLabel}>
-                      {column.mobileLabel || column.header}
+            {paginatedData.map((item) => {
+              const cardContent = (
+                <>
+                  {mobilePriorityColumns.map((column) => (
+                    <div key={column.id} className={styles.mobileCardItem}>
+                      <div className={styles.mobileCardLabel}>
+                        {column.mobileLabel || column.header}
+                      </div>
+                      <div className={styles.mobileCardValue}>{column.cell(item)}</div>
                     </div>
-                    <div className={styles.mobileCardValue}>
-                      {column.cell(item)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
+                  ))}
+                </>
+              );
+
+              return onRowClick ? (
+                <button
+                  key={keyExtractor(item)}
+                  type="button"
+                  className={`${styles.mobileCard} ${styles.clickableCard}`}
+                  onClick={() => onRowClick(item)}
+                >
+                  {cardContent}
+                </button>
+              ) : (
+                <div
+                  key={keyExtractor(item)}
+                  className={styles.mobileCard}
+                >
+                  {cardContent}
+                </div>
+              );
+            })}
           </div>
 
           {/* Pagination */}
@@ -234,7 +254,7 @@ function MobileTable<T>({
                 disabled={currentPage === 1}
                 aria-label="Previous page"
               >
-                <FaChevronLeft />
+                <Icon IconComponent={FaChevronLeft} size="sm" />
               </button>
 
               <span className={styles.paginationInfo}>
@@ -247,7 +267,7 @@ function MobileTable<T>({
                 disabled={currentPage === totalPages}
                 aria-label="Next page"
               >
-                <FaChevronRight />
+                <Icon IconComponent={FaChevronRight} size="sm" />
               </button>
             </div>
           )}

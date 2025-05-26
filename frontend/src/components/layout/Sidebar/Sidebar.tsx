@@ -1,14 +1,10 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { 
-  FaHome, 
-  FaClipboardList, 
-  FaUser, 
-  FaInfoCircle, 
-  FaQuestionCircle 
-} from 'react-icons/fa';
-import useAuth from '../../../hooks/useAuth';
+import { FaHome, FaClipboardList, FaUser, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+
 import styles from './Sidebar.module.css';
+import useAuth from '../../../hooks/useAuth';
+import Icon from '../../../shared/components/ui/Icon';
 
 interface SidebarProps {
   isMobileView: boolean;
@@ -17,7 +13,6 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
   const { isAuthenticated, user } = useAuth();
-  const location = useLocation();
 
   // Handle link click on mobile to close sidebar
   const handleLinkClick = () => {
@@ -33,7 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
         <div className={styles.userSection}>
           <div className={styles.userInfo}>
             <div className={styles.userAvatar}>
-              {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
+              {user?.first_name?.charAt(0)}
+              {user?.last_name?.charAt(0)}
             </div>
             <div className={styles.userName}>
               {user?.first_name} {user?.last_name}
@@ -46,15 +42,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
       <nav className={styles.sidebarNav}>
         <ul className={styles.navList}>
           <li className={styles.navItem}>
-            <NavLink 
-              to="/" 
+            <NavLink
+              to="/"
               end
-              className={({ isActive }) => 
-                `${styles.navLink} ${isActive ? styles.active : ''}`
-              }
+              className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
               onClick={handleLinkClick}
             >
-              <FaHome className={styles.navIcon} />
+              <Icon IconComponent={FaHome} className={styles.navIcon} size="md" />
               <span className={styles.navText}>Inicio</span>
             </NavLink>
           </li>
@@ -63,26 +57,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
             // Authenticated user links
             <>
               <li className={styles.navItem}>
-                <NavLink 
-                  to="/dashboard" 
-                  className={({ isActive }) => 
-                    `${styles.navLink} ${isActive ? styles.active : ''}`
-                  }
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
                   onClick={handleLinkClick}
                 >
-                  <FaClipboardList className={styles.navIcon} />
+                  <Icon IconComponent={FaClipboardList} className={styles.navIcon} size="md" />
                   <span className={styles.navText}>Mis Solicitudes</span>
                 </NavLink>
               </li>
               <li className={styles.navItem}>
-                <NavLink 
-                  to="/profile" 
-                  className={({ isActive }) => 
-                    `${styles.navLink} ${isActive ? styles.active : ''}`
-                  }
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
                   onClick={handleLinkClick}
                 >
-                  <FaUser className={styles.navIcon} />
+                  <Icon IconComponent={FaUser} className={styles.navIcon} size="md" />
                   <span className={styles.navText}>Mi Perfil</span>
                 </NavLink>
               </li>
@@ -90,14 +80,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
           ) : (
             // Non-authenticated user links
             <li className={styles.navItem}>
-              <NavLink 
-                to="/solicitar-permiso" 
-                className={({ isActive }) => 
-                  `${styles.navLink} ${isActive ? styles.active : ''}`
-                }
+              <NavLink
+                to="/solicitar-permiso"
+                className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
                 onClick={handleLinkClick}
               >
-                <FaClipboardList className={styles.navIcon} />
+                <Icon IconComponent={FaClipboardList} className={styles.navIcon} size="md" />
                 <span className={styles.navText}>Solicitar Permiso</span>
               </NavLink>
             </li>
@@ -105,26 +93,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
 
           {/* Common links for all users */}
           <li className={styles.navItem}>
-            <NavLink 
-              to="/acerca-de" 
-              className={({ isActive }) => 
-                `${styles.navLink} ${isActive ? styles.active : ''}`
-              }
+            <NavLink
+              to="/acerca-de"
+              className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
               onClick={handleLinkClick}
             >
-              <FaInfoCircle className={styles.navIcon} />
+              <Icon IconComponent={FaInfoCircle} className={styles.navIcon} size="md" />
               <span className={styles.navText}>Acerca de</span>
             </NavLink>
           </li>
           <li className={styles.navItem}>
-            <NavLink 
-              to="/ayuda" 
-              className={({ isActive }) => 
-                `${styles.navLink} ${isActive ? styles.active : ''}`
-              }
+            <NavLink
+              to="/ayuda"
+              className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}
               onClick={handleLinkClick}
             >
-              <FaQuestionCircle className={styles.navIcon} />
+              <Icon IconComponent={FaQuestionCircle} className={styles.navIcon} size="md" />
               <span className={styles.navText}>Ayuda</span>
             </NavLink>
           </li>

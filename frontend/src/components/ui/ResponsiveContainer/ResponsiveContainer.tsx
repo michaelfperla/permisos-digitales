@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+
 import styles from './ResponsiveContainer.module.css';
 
 /**
@@ -118,11 +119,7 @@ const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   // Join all classes with spaces
   const containerClasses = classNames.join(' ');
 
-  return (
-    <div className={containerClasses}>
-      {children}
-    </div>
-  );
+  return <div className={containerClasses}>{children}</div>;
 };
 
 export default ResponsiveContainer;

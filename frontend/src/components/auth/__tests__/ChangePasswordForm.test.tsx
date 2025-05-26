@@ -1,27 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import userService from '../../services/userService';
 import { render, screen, fireEvent, waitFor } from '../../test/test-utils';
 import ChangePasswordForm from '../ChangePasswordForm';
-import userService from '../../services/userService';
-import { ToastProvider } from '../../contexts/ToastContext';
 
 // Mock the userService
 vi.mock('../../services/userService', () => ({
   default: {
-    changePassword: vi.fn()
-  }
+    changePassword: vi.fn(),
+  },
 }));
 
 // Mock the toast context
 const mockShowToast = vi.fn();
-vi.mock('../../contexts/ToastContext', async () => {
-  const actual = await vi.importActual('../../contexts/ToastContext');
-  return {
-    ...actual as any,
-    useToast: () => ({
-      showToast: mockShowToast
-    })
-  };
-});
+vi.mock('../../shared/hooks/useToast', () => ({
+  useToast: () => ({
+    showToast: mockShowToast,
+  }),
+}));
 
 describe('ChangePasswordForm', () => {
   const mockOnSuccess = vi.fn();
@@ -33,7 +29,7 @@ describe('ChangePasswordForm', () => {
     // Default mock implementation for successful password change
     userService.changePassword = vi.fn().mockResolvedValue({
       success: true,
-      message: 'Password changed successfully'
+      message: 'Password changed successfully',
     });
   });
 
@@ -73,9 +69,15 @@ describe('ChangePasswordForm', () => {
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with non-matching passwords
-    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'currentPass123' } });
-    await fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'newPass123' } });
-    await fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'differentPass123' } });
+    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'currentPass123' },
+    });
+    await fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'newPass123' },
+    });
+    await fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'differentPass123' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });
@@ -96,9 +98,15 @@ describe('ChangePasswordForm', () => {
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with a short password
-    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'currentPass123' } });
-    await fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'short' } });
-    await fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'short' } });
+    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'currentPass123' },
+    });
+    await fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'short' },
+    });
+    await fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'short' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });
@@ -113,7 +121,7 @@ describe('ChangePasswordForm', () => {
       expect(errorElements.length).toBeGreaterThan(0);
 
       // Verify that at least one of them is an error message (has the errorText class)
-      const errorMessage = errorElements.find(el => el.className.includes('errorText'));
+      const errorMessage = errorElements.find((el) => el.className.includes('errorText'));
       expect(errorMessage).toBeInTheDocument();
     });
 
@@ -125,9 +133,15 @@ describe('ChangePasswordForm', () => {
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with valid data
-    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'currentPass123' } });
-    await fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'newPassword123' } });
-    await fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'newPassword123' } });
+    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'currentPass123' },
+    });
+    await fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'newPassword123' },
+    });
+    await fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'newPassword123' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });
@@ -147,15 +161,21 @@ describe('ChangePasswordForm', () => {
     // Mock failed password change
     userService.changePassword = vi.fn().mockResolvedValue({
       success: false,
-      message: 'La contraseña actual es incorrecta'
+      message: 'La contraseña actual es incorrecta',
     });
 
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with valid data
-    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'wrongPass123' } });
-    await fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'newPassword123' } });
-    await fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'newPassword123' } });
+    await fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'wrongPass123' },
+    });
+    await fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'newPassword123' },
+    });
+    await fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'newPassword123' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });
@@ -193,9 +213,15 @@ describe('ChangePasswordForm', () => {
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with valid data
-    fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'currentPass123' } });
-    fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'newPassword123' } });
-    fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'newPassword123' } });
+    fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'currentPass123' },
+    });
+    fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'newPassword123' },
+    });
+    fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'newPassword123' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });
@@ -240,15 +266,21 @@ describe('ChangePasswordForm', () => {
     // Mock API response for incorrect current password
     userService.changePassword = vi.fn().mockResolvedValue({
       success: false,
-      message: 'La contraseña actual es incorrecta'
+      message: 'La contraseña actual es incorrecta',
     });
 
     render(<ChangePasswordForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
 
     // Fill the form with valid data
-    fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), { target: { value: 'wrongPass123' } });
-    fireEvent.change(screen.getByTestId('new-password-input'), { target: { value: 'newPassword123' } });
-    fireEvent.change(screen.getByTestId('confirm-password-input'), { target: { value: 'newPassword123' } });
+    fireEvent.change(screen.getByLabelText(/Contraseña Actual/i), {
+      target: { value: 'wrongPass123' },
+    });
+    fireEvent.change(screen.getByTestId('new-password-input'), {
+      target: { value: 'newPassword123' },
+    });
+    fireEvent.change(screen.getByTestId('confirm-password-input'), {
+      target: { value: 'newPassword123' },
+    });
 
     // Submit the form
     const submitButton = screen.getByRole('button', { name: /Cambiar Contraseña/i });

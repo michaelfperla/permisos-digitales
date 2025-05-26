@@ -1,14 +1,14 @@
-import { vi, describe, test, expect, beforeEach } from 'vitest';
 import axios, { AxiosError } from 'axios';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+
 import { User } from '../../contexts/AuthContext';
+// Import userService AFTER mocks
+import authService from '../authService';
+import userService from '../userService';
 
 // Mock dependencies BEFORE importing userService
 vi.mock('axios');
 vi.mock('../authService');
-
-// Import userService AFTER mocks
-import userService from '../userService';
-import authService from '../authService';
 
 describe('userService', () => {
   beforeEach(() => {
@@ -25,15 +25,15 @@ describe('userService', () => {
         email: 'test@example.com',
         first_name: 'Test',
         last_name: 'User',
-        accountType: 'citizen'
+        accountType: 'citizen',
       };
 
       vi.mocked(axios.get).mockResolvedValueOnce({
         data: {
           success: true,
           user: mockProfileData,
-          message: 'Profile fetched successfully'
-        }
+          message: 'Profile fetched successfully',
+        },
       });
 
       // Act
@@ -43,7 +43,7 @@ describe('userService', () => {
       expect(result).toEqual({
         success: true,
         user: mockProfileData,
-        message: 'Profile fetched successfully'
+        message: 'Profile fetched successfully',
       });
       expect(axios.get).toHaveBeenCalledWith('/api/user/profile');
     });
@@ -58,7 +58,7 @@ describe('userService', () => {
         status: 404,
         statusText: 'Not Found',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
 
       vi.mocked(axios.get).mockRejectedValueOnce(mockAxiosError);
@@ -70,7 +70,7 @@ describe('userService', () => {
       expect(result).toEqual({
         success: false,
         user: null,
-        message: 'Error fetching user profile'
+        message: 'Error fetching user profile',
       });
       expect(axios.get).toHaveBeenCalledWith('/api/user/profile');
     });
@@ -86,7 +86,7 @@ describe('userService', () => {
       expect(result).toEqual({
         success: false,
         user: null,
-        message: 'Error fetching user profile'
+        message: 'Error fetching user profile',
       });
       expect(axios.get).toHaveBeenCalledWith('/api/user/profile');
     });
@@ -98,7 +98,7 @@ describe('userService', () => {
       // Arrange
       const updateData = {
         first_name: 'Updated',
-        last_name: 'User'
+        last_name: 'User',
       };
 
       const expectedUpdatedUser: User = {
@@ -106,7 +106,7 @@ describe('userService', () => {
         email: 'test@example.com',
         first_name: 'Updated',
         last_name: 'User',
-        accountType: 'citizen'
+        accountType: 'citizen',
       };
 
       const mockCsrfToken = 'test-csrf-token';
@@ -116,8 +116,8 @@ describe('userService', () => {
         data: {
           success: true,
           user: expectedUpdatedUser,
-          message: 'Profile updated successfully'
-        }
+          message: 'Profile updated successfully',
+        },
       });
 
       // Act
@@ -127,14 +127,14 @@ describe('userService', () => {
       expect(result).toEqual({
         success: true,
         user: expectedUpdatedUser,
-        message: 'Profile updated successfully'
+        message: 'Profile updated successfully',
       });
       expect(authService.getCsrfToken).toHaveBeenCalled();
       expect(axios.put).toHaveBeenCalledWith('/api/user/profile', updateData, {
         headers: {
-          'X-CSRF-Token': mockCsrfToken
+          'X-CSRF-Token': mockCsrfToken,
         },
-        signal: undefined
+        signal: undefined,
       });
     });
 
@@ -142,7 +142,7 @@ describe('userService', () => {
       // Arrange
       const updateData = {
         first_name: 'Updated',
-        last_name: 'User'
+        last_name: 'User',
       };
 
       const mockCsrfToken = 'test-csrf-token';
@@ -156,7 +156,7 @@ describe('userService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
 
       vi.mocked(axios.put).mockRejectedValueOnce(mockAxiosError);
@@ -166,9 +166,9 @@ describe('userService', () => {
       expect(authService.getCsrfToken).toHaveBeenCalled();
       expect(axios.put).toHaveBeenCalledWith('/api/user/profile', updateData, {
         headers: {
-          'X-CSRF-Token': mockCsrfToken
+          'X-CSRF-Token': mockCsrfToken,
         },
-        signal: undefined
+        signal: undefined,
       });
     });
 
@@ -176,7 +176,7 @@ describe('userService', () => {
       // Arrange
       const updateData = {
         first_name: 'Updated',
-        last_name: 'User'
+        last_name: 'User',
       };
 
       const mockCsrfToken = 'test-csrf-token';
@@ -190,9 +190,9 @@ describe('userService', () => {
       expect(authService.getCsrfToken).toHaveBeenCalled();
       expect(axios.put).toHaveBeenCalledWith('/api/user/profile', updateData, {
         headers: {
-          'X-CSRF-Token': mockCsrfToken
+          'X-CSRF-Token': mockCsrfToken,
         },
-        signal: undefined
+        signal: undefined,
       });
     });
   });
@@ -206,7 +206,7 @@ describe('userService', () => {
 
       vi.mocked(authService.changePassword).mockResolvedValueOnce({
         success: true,
-        message: 'Password changed successfully'
+        message: 'Password changed successfully',
       });
 
       // Act
@@ -215,7 +215,7 @@ describe('userService', () => {
       // Assert
       expect(result).toEqual({
         success: true,
-        message: 'Password changed successfully'
+        message: 'Password changed successfully',
       });
       expect(authService.changePassword).toHaveBeenCalledWith(currentPassword, newPassword);
     });
@@ -227,7 +227,7 @@ describe('userService', () => {
 
       vi.mocked(authService.changePassword).mockResolvedValueOnce({
         success: false,
-        message: 'Incorrect current password'
+        message: 'Incorrect current password',
       });
 
       // Act
@@ -236,7 +236,7 @@ describe('userService', () => {
       // Assert
       expect(result).toEqual({
         success: false,
-        message: 'Incorrect current password'
+        message: 'Incorrect current password',
       });
       expect(authService.changePassword).toHaveBeenCalledWith(currentPassword, newPassword);
     });
@@ -248,7 +248,7 @@ describe('userService', () => {
 
       vi.mocked(authService.changePassword).mockResolvedValueOnce({
         success: false,
-        message: undefined
+        message: undefined,
       });
 
       // Act
@@ -257,7 +257,7 @@ describe('userService', () => {
       // Assert
       expect(result).toEqual({
         success: false,
-        message: ''
+        message: '',
       });
       expect(authService.changePassword).toHaveBeenCalledWith(currentPassword, newPassword);
     });

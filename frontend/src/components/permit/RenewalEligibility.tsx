@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import applicationService from '../../services/applicationService';
-import { Application } from '../../services/applicationService';
+
 import styles from './RenewalEligibility.module.css';
+import applicationService, { Application } from '../../services/applicationService';
 
 interface RenewalEligibilityProps {
   application: Application;
   onRefresh?: () => void;
 }
 
-const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, onRefresh }) => {
+const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, onRefresh: _onRefresh }) => {
   const [eligibility, setEligibility] = useState<{
     eligible: boolean;
     message: string;
@@ -20,11 +20,7 @@ const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, on
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    checkEligibility();
-  }, [application.id]);
-
-  const checkEligibility = async () => {
+  const checkEligibility = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -37,7 +33,11 @@ const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, on
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [application.id]);
+
+  useEffect(() => {
+    checkEligibility();
+  }, [checkEligibility]);
 
   if (isLoading) {
     return (
@@ -55,11 +55,7 @@ const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, on
       <div className={styles.container}>
         <div className={styles.error}>
           <p>{error}</p>
-          <button
-            type="button"
-            className={styles.retryButton}
-            onClick={checkEligibility}
-          >
+          <button type="button" className={styles.retryButton} onClick={checkEligibility}>
             Reintentar
           </button>
         </div>
@@ -87,13 +83,11 @@ const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, on
               </p>
             )}
             <p className={styles.renewalInfo}>
-              Recuerde que todos los permisos tienen una validez de 30 días y pueden renovarse 7 días antes de su vencimiento o hasta 15 días después de vencidos.
+              Recuerde que todos los permisos tienen una validez de 30 días y pueden renovarse 7
+              días antes de su vencimiento o hasta 15 días después de vencidos.
             </p>
             <div className={styles.actions}>
-              <Link
-                to={`/permits/${application.id}/renew`}
-                className={styles.renewButton}
-              >
+              <Link to={`/permits/${application.id}/renew`} className={styles.renewButton}>
                 Renovar Permiso
               </Link>
             </div>
@@ -113,14 +107,12 @@ const RenewalEligibility: React.FC<RenewalEligibilityProps> = ({ application, on
               </p>
             )}
             <p className={styles.renewalInfo}>
-              Todos los permisos tienen una validez de 30 días y pueden renovarse 7 días antes de su vencimiento o hasta 15 días después de vencidos.
+              Todos los permisos tienen una validez de 30 días y pueden renovarse 7 días antes de su
+              vencimiento o hasta 15 días después de vencidos.
             </p>
             {eligibility.daysUntilExpiration && eligibility.daysUntilExpiration < -15 && (
               <div className={styles.actions}>
-                <Link
-                  to="/permits/new"
-                  className={styles.newPermitButton}
-                >
+                <Link to="/permits/new" className={styles.newPermitButton}>
                   Solicitar Nuevo Permiso
                 </Link>
               </div>

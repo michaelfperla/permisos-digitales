@@ -14,9 +14,9 @@ const DEBUG_ENABLED = true;
 export const debugLog = (component: string, message: string, data?: any) => {
   if (DEBUG_ENABLED) {
     if (data) {
-      console.log(`[DEBUG][${component}] ${message}`, data);
+      console.debug(`[DEBUG][${component}] ${message}`, data);
     } else {
-      console.log(`[DEBUG][${component}] ${message}`);
+      console.debug(`[DEBUG][${component}] ${message}`);
     }
   }
 };
@@ -29,7 +29,7 @@ export const debugLog = (component: string, message: string, data?: any) => {
  */
 export const errorLog = (component: string, message: string, error: any) => {
   console.error(`[ERROR][${component}] ${message}`, error);
-  
+
   // Log additional error details if available
   if (error) {
     if (error.response) {
@@ -46,7 +46,7 @@ export const errorLog = (component: string, message: string, error: any) => {
       console.error(`[ERROR][${component}] Error message:`, error.message);
     }
     console.error(`[ERROR][${component}] Error config:`, error.config);
-    
+
     // Log stack trace
     if (error.stack) {
       console.error(`[ERROR][${component}] Stack trace:`, error.stack);
@@ -64,7 +64,7 @@ export const setupGlobalErrorHandler = () => {
       source,
       lineno,
       colno,
-      error
+      error,
     });
     return false; // Let default handler run
   };

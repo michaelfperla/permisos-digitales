@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FaTachometerAlt,
   FaClipboardList,
@@ -7,17 +6,19 @@ import {
   FaHistory,
   FaUsers,
   FaSignOutAlt,
-  FaBars,
   FaTimes,
   FaChevronLeft,
-  FaChevronRight
+  FaChevronRight,
 } from 'react-icons/fa';
-import useAuth from '../hooks/useAuth';
-import useResponsive from '../../hooks/useResponsive';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+
 import styles from './AdminLayout.module.css';
+import AppHeaderMobile from '../../components/navigation/AppHeaderMobile/AppHeaderMobile';
 import Button from '../../components/ui/Button/Button';
 import TextLogo from '../../components/ui/TextLogo/TextLogo';
-import MobileHeader from '../../components/navigation/MobileHeader';
+import useResponsive from '../../hooks/useResponsive';
+import Icon from '../../shared/components/ui/Icon';
+import { useAdminAuth as useAuth } from '../../shared/hooks/useAuth';
 
 const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -26,17 +27,28 @@ const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(!isMdDown); // Open by default on desktop, closed on mobile
   const [showOverlay, setShowOverlay] = useState(false);
 
+  // Refs for accessibility and focus management
+  const sidebarCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const adminSidebarRef = useRef<HTMLElement>(null);
+
+  // Computed property for desktop collapsed state
+  const isDesktopCollapsed = !isMdDown && !sidebarOpen;
+
   // Update sidebar state when screen size changes
   useEffect(() => {
     setSidebarOpen(!isMdDown);
   }, [isMdDown]);
 
-  // Show/hide overlay with slight delay for animation
+  // Show/hide overlay with slight delay for animation and manage body scroll
   useEffect(() => {
     if (isMdDown) {
       if (sidebarOpen) {
         setShowOverlay(true);
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        // Focus the close button for accessibility
+        setTimeout(() => sidebarCloseButtonRef.current?.focus(), 100);
       } else {
+        document.body.style.overflow = ''; // Restore scrolling
         // Delay hiding the overlay to allow for animation
         const timer = setTimeout(() => {
           setShowOverlay(false);
@@ -45,7 +57,13 @@ const AdminLayout: React.FC = () => {
       }
     } else {
       setShowOverlay(false);
+      document.body.style.overflow = ''; // Ensure body scroll is normal on desktop
     }
+
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [sidebarOpen, isMdDown]);
 
   const toggleSidebar = () => {
@@ -65,53 +83,84 @@ const AdminLayout: React.FC = () => {
     }
   };
 
+  // Close sidebar and focus the hamburger button (for accessibility)
+  const closeSidebarAndFocusHamburger = () => {
+    setSidebarOpen(false);
+    // Focus the hamburger button after animation completes
+    setTimeout(() => {
+      const hamburgerButton = document.querySelector('[aria-label="Abrir menú"]') as HTMLElement;
+      hamburgerButton?.focus();
+    }, 300);
+  };
+
   return (
     <div className={styles.adminLayout}>
       {/* Mobile Header - Only visible on mobile */}
       {isMdDown && (
-        <MobileHeader
-          onMenuToggle={toggleSidebar}
+        <AppHeaderMobile
           logoPath="/admin"
+          navLinks={[]}
+          externalPanelControl={true}
+          onExternalPanelToggle={toggleSidebar}
+          isExternalPanelOpen={sidebarOpen}
         />
       )}
 
       {/* Overlay - Only visible on mobile when sidebar is open */}
-      {showOverlay && (
+      {showOverlay && isMdDown && (
         <div
           className={`${styles.overlay} ${sidebarOpen ? styles.overlayVisible : ''}`}
-          onClick={toggleSidebar}
+          onClick={closeSidebarAndFocusHamburger}
           aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''} ${isMdDown ? styles.mobile : ''}`}>
+      <aside
+        ref={adminSidebarRef}
+        className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''} ${isMdDown ? styles.mobile : ''}`}
+        aria-hidden={isMdDown ? !sidebarOpen : undefined}
+        role={isMdDown ? 'dialog' : undefined}
+        aria-modal={isMdDown ? sidebarOpen : undefined}
+        aria-label={isMdDown ? 'Menú de administrador' : undefined}
+      >
         <div className={styles.sidebarHeader}>
-          <div className={styles.sidebarLogo}>
-            <TextLogo
-              to="/admin"
-              className={styles.textLogo}
-              variant="light"
-              compact={!sidebarOpen}
-            />
-          </div>
+          {/* Desktop: Show full logo or initials */}
+          {!isMdDown && (
+            <div className={styles.sidebarLogo}>
+              <TextLogo
+                to="/admin"
+                className={styles.textLogo}
+                variant="light"
+                compact={isDesktopCollapsed}
+                initialsOnly={isDesktopCollapsed}
+              />
+            </div>
+          )}
+          {/* Mobile: Show logo and close button */}
           {isMdDown && (
-            <Button
-              variant="text"
-              size="icon"
-              className={styles.sidebarCloseButton}
-              onClick={toggleSidebar}
-              icon={<FaTimes />}
-              aria-label="Cerrar menú"
-            />
+            <>
+              <div className={styles.sidebarLogo}>
+                <TextLogo to="/admin" className={styles.textLogo} variant="light" />
+              </div>
+              <Button
+                ref={sidebarCloseButtonRef}
+                variant="text"
+                size="icon"
+                className={styles.sidebarCloseButton}
+                onClick={closeSidebarAndFocusHamburger}
+                icon={<Icon IconComponent={FaTimes} size="lg" color="var(--color-white)" />}
+                aria-label="Cerrar menú"
+              />
+            </>
           )}
         </div>
 
-
-
         <div className={styles.sidebarUser}>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>{user?.first_name} {user?.last_name}</span>
+            <span className={styles.userName}>
+              {user?.first_name} {user?.last_name}
+            </span>
             <span className={styles.userEmail}>{user?.email}</span>
           </div>
         </div>
@@ -125,7 +174,7 @@ const AdminLayout: React.FC = () => {
             }
             onClick={handleNavLinkClick}
           >
-            <FaTachometerAlt className={styles.navIcon} />
+            <Icon IconComponent={FaTachometerAlt} className={styles.navIcon} />
             <span className={styles.navText}>Dashboard</span>
           </NavLink>
 
@@ -136,7 +185,7 @@ const AdminLayout: React.FC = () => {
             }
             onClick={handleNavLinkClick}
           >
-            <FaClipboardList className={styles.navIcon} />
+            <Icon IconComponent={FaClipboardList} className={styles.navIcon} />
             <span className={styles.navText}>Solicitudes</span>
           </NavLink>
 
@@ -147,7 +196,7 @@ const AdminLayout: React.FC = () => {
             }
             onClick={handleNavLinkClick}
           >
-            <FaCheckCircle className={styles.navIcon} />
+            <Icon IconComponent={FaCheckCircle} className={styles.navIcon} />
             <span className={styles.navText}>Verificaciones Pendientes</span>
           </NavLink>
 
@@ -158,7 +207,7 @@ const AdminLayout: React.FC = () => {
             }
             onClick={handleNavLinkClick}
           >
-            <FaHistory className={styles.navIcon} />
+            <Icon IconComponent={FaHistory} className={styles.navIcon} />
             <span className={styles.navText}>Historial</span>
           </NavLink>
 
@@ -169,7 +218,7 @@ const AdminLayout: React.FC = () => {
             }
             onClick={handleNavLinkClick}
           >
-            <FaUsers className={styles.navIcon} />
+            <Icon IconComponent={FaUsers} className={styles.navIcon} />
             <span className={styles.navText}>Usuarios</span>
           </NavLink>
         </nav>
@@ -183,8 +232,22 @@ const AdminLayout: React.FC = () => {
                 size="icon"
                 className={styles.sidebarToggleButton}
                 onClick={toggleSidebar}
-                icon={sidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
-                aria-label={sidebarOpen ? "Contraer menú" : "Expandir menú"}
+                icon={
+                  sidebarOpen ? (
+                    <Icon
+                      IconComponent={FaChevronLeft}
+                      size="sm"
+                      color="rgba(255, 255, 255, 0.5)"
+                    />
+                  ) : (
+                    <Icon
+                      IconComponent={FaChevronRight}
+                      size="sm"
+                      color="rgba(255, 255, 255, 0.5)"
+                    />
+                  )
+                }
+                aria-label={sidebarOpen ? 'Contraer menú' : 'Expandir menú'}
               />
             )}
 
@@ -192,7 +255,7 @@ const AdminLayout: React.FC = () => {
               variant="danger"
               className={styles.logoutButton}
               onClick={handleLogout}
-              icon={<FaSignOutAlt className={styles.logoutIcon} />}
+              icon={<Icon IconComponent={FaSignOutAlt} size="lg" />}
             >
               <span className={styles.logoutText}>Cerrar Sesión</span>
             </Button>
@@ -201,11 +264,13 @@ const AdminLayout: React.FC = () => {
       </aside>
 
       {/* Main content */}
-      <main className={`
+      <main
+        className={`
         ${styles.mainContent}
-        ${sidebarOpen && !isMdDown ? '' : styles.expanded}
+        ${!isMdDown && !sidebarOpen ? styles.expanded : ''}
         ${isMdDown ? styles.mobileContent : ''}
-      `}>
+      `}
+      >
         <Outlet />
       </main>
     </div>

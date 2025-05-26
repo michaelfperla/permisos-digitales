@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+
 import Button from './Button/Button';
 import styles from './Modal.module.css';
 
@@ -62,9 +63,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
             &times;
           </Button>
         </div>
-        <div className={styles.modalContent}>
-          {children}
-        </div>
+        <div className={styles.modalContent}>{children}</div>
       </div>
     </div>
   );

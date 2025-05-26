@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import {
   FaPlus,
   FaCar,
@@ -12,15 +12,16 @@ import {
   FaExclamationTriangle,
   FaArchive,
   FaSpinner,
-  FaFolderOpen
+  FaFolderOpen,
+  FaSync,
 } from 'react-icons/fa';
+
 import styles from './PermitsListPage.module.css';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import ResponsiveContainer from '../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Button from '../components/ui/Button/Button';
-import { PermitCardProps } from '../types/permisos';
+import ResponsiveContainer from '../components/ui/ResponsiveContainer/ResponsiveContainer';
 import applicationService from '../services/applicationService';
-import useAuth from '../hooks/useAuth';
+import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
+import { PermitCardProps } from '../types/permisos';
 
 /**
  * PermitsListPage - Dedicated page for listing all user permits
@@ -31,20 +32,22 @@ import useAuth from '../hooks/useAuth';
 const PermitsListPage: React.FC = () => {
   // State for permits data
   const [permitCards, setPermitCards] = useState<PermitCardProps[]>([]);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'expiring_soon' | 'needs_attention' | 'archived'>('all');
+  const [activeFilter, setActiveFilter] = useState<
+    'all' | 'active' | 'expiring_soon' | 'needs_attention' | 'archived'
+  >('all');
 
   // Get current user from auth context
-  const { user: currentUserProfile } = useAuth(); // Not directly used in this version, but good for context
+  const { user: _currentUserProfile } = useAuth(); // Not directly used in this version, but good for context
 
   // Fetch applications data using React Query
   const {
     data: permitsData,
     isLoading,
     isError,
-    error
+    error,
   } = useQuery({
     queryKey: ['applications'],
-    queryFn: applicationService.getApplications
+    queryFn: applicationService.getApplications,
   });
 
   // Process data when it's available
@@ -65,7 +68,7 @@ const PermitsListPage: React.FC = () => {
 
   // Transform API data to permit cards
   const transformToPermitCards = (permits: any[]): PermitCardProps[] => {
-    return permits.map(permit => {
+    return permits.map((permit) => {
       let statusType: 'active' | 'expiring_soon' | 'needs_attention' | 'archived' = 'active';
       let statusText = 'Activo';
 
@@ -75,17 +78,17 @@ const PermitsListPage: React.FC = () => {
         return date.toLocaleDateString('es-MX', {
           day: 'numeric',
           month: 'short',
-          year: 'numeric'
+          year: 'numeric',
         });
       };
 
-      let creationDate = formatDate(permit.created_at);
-      let expirationDate = formatDate(permit.fecha_vencimiento);
+      const creationDate = formatDate(permit.created_at);
+      const expirationDate = formatDate(permit.fecha_vencimiento);
 
-      let primaryCta = {
+      const primaryCta = {
         text: 'Ver Detalles',
         link: `/permits/${permit.id}`,
-        icon: 'FaEye'
+        icon: 'FaEye',
       };
       let secondaryCta = null;
 
@@ -110,7 +113,11 @@ const PermitsListPage: React.FC = () => {
         statusType = 'needs_attention';
         statusText = 'En Procesamiento';
       } else if (permitStatus === 'PERMIT_READY' || permitStatus === 'COMPLETED') {
-        if (permit.days_remaining !== undefined && permit.days_remaining <= 30 && permit.days_remaining > 0) {
+        if (
+          permit.days_remaining !== undefined &&
+          permit.days_remaining <= 30 &&
+          permit.days_remaining > 0
+        ) {
           statusType = 'expiring_soon';
           statusText = `Vence en ${permit.days_remaining} días`;
         } else {
@@ -133,14 +140,32 @@ const PermitsListPage: React.FC = () => {
         primaryCta.link = `/permits/${permit.id}`;
         primaryCta.icon = 'FaCreditCard';
       } else if (permitStatus === 'PERMIT_READY' || permitStatus === 'COMPLETED') {
-        if (statusType === 'expiring_soon') {
+        // Check if permit is eligible for renewal based on fecha_vencimiento
+        const isEligibleForRenewal =
+          permit.fecha_vencimiento &&
+          (() => {
+            const expiryDate = new Date(permit.fecha_vencimiento);
+            const today = new Date();
+
+            // Set both dates to start of day for accurate comparison
+            expiryDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = expiryDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // Eligible if within 7 days before expiration or up to 15 days after expiration
+            return diffDays <= 7 && diffDays >= -15;
+          })();
+
+        if (isEligibleForRenewal) {
           primaryCta.text = 'Renovar Permiso';
           primaryCta.link = `/permits/${permit.id}/renew`;
-          primaryCta.icon = 'FaEdit';
+          primaryCta.icon = 'FaSync';
           secondaryCta = {
             text: 'Ver Detalles',
             link: `/permits/${permit.id}`,
-            icon: 'FaEye'
+            icon: 'FaEye',
           };
         }
       }
@@ -161,32 +186,43 @@ const PermitsListPage: React.FC = () => {
         receiptDocumentPath: permit.recibo_file_path,
         certificateDocumentPath: permit.certificado_file_path,
         licensePlatesDocumentPath: permit.placas_file_path,
-        rawStatus: permitStatus
+        rawStatus: permitStatus,
       };
     });
   };
 
-  const filteredPermits = permitCards.filter(permit => {
+  const filteredPermits = permitCards.filter((permit) => {
     if (activeFilter === 'all') return true;
     return permit.statusType === activeFilter;
   });
 
   const getStatusBadgeIcon = (statusType: PermitCardProps['statusType']) => {
     switch (statusType) {
-      case 'active': return <FaTag aria-hidden="true" />;
-      case 'expiring_soon': return <FaClock aria-hidden="true" />;
-      case 'needs_attention': return <FaExclamationTriangle aria-hidden="true" />;
-      case 'archived': return <FaArchive aria-hidden="true" />;
-      default: return <FaTag aria-hidden="true" />;
+      case 'active':
+        return <FaTag aria-hidden="true" />;
+      case 'expiring_soon':
+        return <FaClock aria-hidden="true" />;
+      case 'needs_attention':
+        return <FaExclamationTriangle aria-hidden="true" />;
+      case 'archived':
+        return <FaArchive aria-hidden="true" />;
+      default:
+        return <FaTag aria-hidden="true" />;
     }
   };
 
   const getCtaIcon = (iconName: string) => {
     switch (iconName) {
-      case 'FaEye': return <FaEye className={styles.ctaIcon} aria-hidden="true" />;
-      case 'FaEdit': return <FaEdit className={styles.ctaIcon} aria-hidden="true" />;
-      case 'FaCreditCard': return <FaCreditCard className={styles.ctaIcon} aria-hidden="true" />;
-      default: return <FaEye className={styles.ctaIcon} aria-hidden="true" />;
+      case 'FaEye':
+        return <FaEye className={styles.ctaIcon} aria-hidden="true" />;
+      case 'FaEdit':
+        return <FaEdit className={styles.ctaIcon} aria-hidden="true" />;
+      case 'FaSync':
+        return <FaSync className={styles.ctaIcon} aria-hidden="true" />;
+      case 'FaCreditCard':
+        return <FaCreditCard className={styles.ctaIcon} aria-hidden="true" />;
+      default:
+        return <FaEye className={styles.ctaIcon} aria-hidden="true" />;
     }
   };
 
@@ -214,7 +250,9 @@ const PermitsListPage: React.FC = () => {
           <div className={styles.vehicleInfo}>
             <FaCar className={styles.vehicleIcon} aria-hidden="true" />
             <div className={styles.vehicleDetails}>
-              <span className={styles.vehicleMakeModel}>{permit.vehicleMake} {permit.vehicleModel}</span>
+              <span className={styles.vehicleMakeModel}>
+                {permit.vehicleMake} {permit.vehicleModel}
+              </span>
               <span className={styles.vehicleYear}>{permit.vehicleYear}</span>
             </div>
           </div>
@@ -255,7 +293,6 @@ const PermitsListPage: React.FC = () => {
     { id: 'archived', label: 'Archivados', icon: <FaArchive /> },
   ] as const;
 
-
   return (
     <ResponsiveContainer
       type="fixed"
@@ -277,14 +314,18 @@ const PermitsListPage: React.FC = () => {
 
       <div className={styles.filterContainer}>
         <div className={styles.filterButtonsWrapper}>
-          {filterOptions.map(option => (
+          {filterOptions.map((option) => (
             <button
               key={option.id}
               className={`${styles.filterButton} ${activeFilter === option.id ? styles.active : ''} touch-target`}
               onClick={() => setActiveFilter(option.id as typeof activeFilter)}
               aria-pressed={activeFilter === option.id}
             >
-              {option.icon && <span className={styles.filterButtonIcon} aria-hidden="true">{option.icon}</span>}
+              {option.icon && (
+                <span className={styles.filterButtonIcon} aria-hidden="true">
+                  {option.icon}
+                </span>
+              )}
               <span className={styles.filterButtonText}>{option.label}</span>
             </button>
           ))}
@@ -299,26 +340,34 @@ const PermitsListPage: React.FC = () => {
         </div>
       ) : isError ? (
         <div className={styles.stateContainer}>
-           <FaExclamationTriangle className={`${styles.stateIcon} ${styles.errorIcon}`} aria-hidden="true" />
+          <FaExclamationTriangle
+            className={`${styles.stateIcon} ${styles.errorIcon}`}
+            aria-hidden="true"
+          />
           <p className={styles.stateText}>Error al cargar permisos</p>
-          <p className={styles.stateSubText}>Lo sentimos, ha ocurrido un error. Intenta recargar la página o contacta a soporte.</p>
+          <p className={styles.stateSubText}>
+            Lo sentimos, ha ocurrido un error. Intenta recargar la página o contacta a soporte.
+          </p>
         </div>
       ) : (
         <div className={styles.permitsGrid}>
           {filteredPermits.length > 0 ? (
-            filteredPermits.map(permit => renderPermitCard(permit))
+            filteredPermits.map((permit) => renderPermitCard(permit))
           ) : (
             <div className={`${styles.stateContainer} ${styles.emptyState}`}>
-              <FaFolderOpen className={`${styles.stateIcon} ${styles.emptyIcon}`} aria-hidden="true" />
+              <FaFolderOpen
+                className={`${styles.stateIcon} ${styles.emptyIcon}`}
+                aria-hidden="true"
+              />
               <p className={styles.stateText}>
                 {activeFilter === 'all'
-                  ? "No tienes permisos registrados."
-                  : `No hay permisos en "${filterOptions.find(f => f.id === activeFilter)?.label || activeFilter}".`}
+                  ? 'No tienes permisos registrados.'
+                  : `No hay permisos en "${filterOptions.find((f) => f.id === activeFilter)?.label || activeFilter}".`}
               </p>
               <p className={styles.stateSubText}>
                 {activeFilter === 'all'
-                  ? "Cuando solicites un permiso, aparecerá aquí."
-                  : "Prueba con otro filtro o solicita un nuevo permiso."}
+                  ? 'Cuando solicites un permiso, aparecerá aquí.'
+                  : 'Prueba con otro filtro o solicita un nuevo permiso.'}
               </p>
             </div>
           )}

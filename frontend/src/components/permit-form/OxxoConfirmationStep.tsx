@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   FaCheckCircle,
   FaHome,
@@ -10,10 +9,12 @@ import {
   FaBarcode,
   FaCopy,
   FaCheck,
-  FaEye
+  FaEye,
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 import styles from './CompleteForm.module.css';
-import Button from '../../components/ui/Button/Button';
+import Button from "../ui/Button/Button";
 
 interface OxxoConfirmationStepProps {
   applicationId: string;
@@ -35,7 +36,7 @@ interface OxxoConfirmationStepProps {
 const OxxoConfirmationStep: React.FC<OxxoConfirmationStepProps> = ({
   applicationId,
   formData,
-  oxxoDetails
+  oxxoDetails,
 }) => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState<string | null>(null);
@@ -48,7 +49,7 @@ const OxxoConfirmationStep: React.FC<OxxoConfirmationStepProps> = ({
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   };
 
@@ -56,7 +57,7 @@ const OxxoConfirmationStep: React.FC<OxxoConfirmationStepProps> = ({
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: currency || 'MXN'
+      currency: currency || 'MXN',
     }).format(amount);
   };
 
@@ -85,8 +86,8 @@ const OxxoConfirmationStep: React.FC<OxxoConfirmationStepProps> = ({
       </div>
 
       <p className={styles.confirmationText}>
-        Su solicitud de permiso digital ha sido recibida correctamente.
-        Para completar el proceso, realice el pago en cualquier tienda OXXO utilizando la referencia proporcionada.
+        Su solicitud de permiso digital ha sido recibida correctamente. Para completar el proceso,
+        realice el pago en cualquier tienda OXXO utilizando la referencia proporcionada.
       </p>
 
       <div className={styles.confirmationDetails}>
@@ -130,7 +131,13 @@ const OxxoConfirmationStep: React.FC<OxxoConfirmationStepProps> = ({
                 onClick={() => copyToClipboard(oxxoDetails.reference, 'reference')}
                 title="Copiar referencia"
                 className={styles.copyButton}
-                icon={copied === 'reference' ? <FaCheck className={styles.copyIcon} /> : <FaCopy className={styles.copyIcon} />}
+                icon={
+                  copied === 'reference' ? (
+                    <FaCheck className={styles.copyIcon} />
+                  ) : (
+                    <FaCopy className={styles.copyIcon} />
+                  )
+                }
               >
                 {copied === 'reference' ? 'Copiado' : 'Copiar'}
               </Button>

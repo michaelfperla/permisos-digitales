@@ -1,11 +1,12 @@
 import axios from 'axios';
+
+import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../constants';
 import { getCsrfToken } from '../utils/csrf';
 import {
   isSimulationMode,
   simulatePaymentProcess,
-  SimulatedPaymentOutcome
+  SimulatedPaymentOutcome,
 } from '../utils/paymentSimulation';
-import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../constants';
 
 // Define types for payment API responses
 export interface PaymentOrderResponse {
@@ -48,7 +49,7 @@ export interface PaymentStatusResponse {
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: '/api/payments',
-  withCredentials: true
+  withCredentials: true,
 });
 
 /**
@@ -60,12 +61,12 @@ const api = axios.create({
  */
 export const initiatePayment = async (
   applicationId: string,
-  simulatedOutcome?: SimulatedPaymentOutcome
+  _simulatedOutcome?: SimulatedPaymentOutcome,
 ): Promise<PaymentOrderResponse> => {
   try {
     // Check if we're in simulation mode
     if (isSimulationMode()) {
-      console.log('SIMULATION: Bypassing real payment initiation.');
+      console.info('SIMULATION: Bypassing real payment initiation.');
 
       // Create a simulated response
       const simulatedResponse: PaymentOrderResponse = {
@@ -75,7 +76,7 @@ export const initiatePayment = async (
         amount: DEFAULT_PERMIT_FEE,
         currency: DEFAULT_CURRENCY,
         description: 'Permiso de Circulación - Simulación',
-        referenceId: `SIM-APP-${applicationId}`
+        referenceId: `SIM-APP-${applicationId}`,
       };
 
       return simulatedResponse;
@@ -89,9 +90,9 @@ export const initiatePayment = async (
       {},
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -118,7 +119,7 @@ export const processCardPayment = async (
   applicationId: string,
   customerId: string,
   token: string,
-  deviceSessionId: string
+  deviceSessionId: string,
 ): Promise<PaymentMethodResponse> => {
   try {
     const csrfToken = getCsrfToken();
@@ -128,13 +129,13 @@ export const processCardPayment = async (
       {
         customerId,
         token,
-        device_session_id: deviceSessionId
+        device_session_id: deviceSessionId,
       },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -159,12 +160,12 @@ export const processCardPayment = async (
 export const processBankTransferPayment = async (
   applicationId: string,
   customerId: string,
-  simulatedOutcome?: SimulatedPaymentOutcome
+  simulatedOutcome?: SimulatedPaymentOutcome,
 ): Promise<PaymentMethodResponse> => {
   try {
     // Check if we're in simulation mode
     if (isSimulationMode()) {
-      console.log('SIMULATION: Bypassing real bank transfer payment processing.');
+      console.info('SIMULATION: Bypassing real bank transfer payment processing.');
 
       // Create a simulated response
       const simulatedResponse: PaymentMethodResponse = {
@@ -174,15 +175,12 @@ export const processBankTransferPayment = async (
         paymentMethod: 'spei',
         speiReference: '646180111812345678',
         expiresAt: Math.floor(Date.now() / 1000) + 86400, // 24 hours from now
-        checkoutUrl: `/checkout?order_id=sim_ord&method=spei&reference=646180111812345678`
+        checkoutUrl: `/checkout?order_id=sim_ord&method=spei&reference=646180111812345678`,
       };
 
       // Simulate the payment process with the specified outcome or a random one
       setTimeout(() => {
-        simulatePaymentProcess(
-          applicationId,
-          simulatedOutcome || SimulatedPaymentOutcome.SUCCESS
-        );
+        simulatePaymentProcess(applicationId, simulatedOutcome || SimulatedPaymentOutcome.SUCCESS);
       }, 500); // Short delay before redirect
 
       return simulatedResponse;
@@ -194,13 +192,13 @@ export const processBankTransferPayment = async (
     const response = await api.post<PaymentMethodResponse>(
       `/applications/${applicationId}/payment/bank-transfer`,
       {
-        customerId
+        customerId,
       },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -223,12 +221,12 @@ export const processBankTransferPayment = async (
  */
 export const processOxxoPayment = async (
   applicationId: string,
-  customerId: string
+  customerId: string,
 ): Promise<PaymentMethodResponse> => {
   try {
     // Check if we're in simulation mode
     if (isSimulationMode()) {
-      console.log('SIMULATION: Bypassing real OXXO payment processing.');
+      console.info('SIMULATION: Bypassing real OXXO payment processing.');
 
       // Create a simulated response
       const simulatedResponse: PaymentMethodResponse = {
@@ -238,7 +236,7 @@ export const processOxxoPayment = async (
         paymentMethod: 'oxxo_cash',
         oxxoReference: '93000123456789',
         expiresAt: Math.floor(Date.now() / 1000) + 172800, // 48 hours from now
-        checkoutUrl: `/checkout?order_id=sim_ord&method=oxxo&reference=93000123456789`
+        checkoutUrl: `/checkout?order_id=sim_ord&method=oxxo&reference=93000123456789`,
       };
 
       return simulatedResponse;
@@ -253,13 +251,13 @@ export const processOxxoPayment = async (
         customerId,
         amount: DEFAULT_PERMIT_FEE,
         description: 'Permiso de Circulación',
-        referenceId: `APP-${applicationId}`
+        referenceId: `APP-${applicationId}`,
       },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     // Extract the OXXO payment details from the response
@@ -272,7 +270,7 @@ export const processOxxoPayment = async (
         oxxoReference: response.data.data.oxxoReference,
         expiresAt: response.data.data.expiresAt,
         barcodeUrl: response.data.data.barcodeUrl,
-        checkoutUrl: null
+        checkoutUrl: null,
       };
     }
 
@@ -286,7 +284,7 @@ export const processOxxoPayment = async (
         oxxoReference: response.data.oxxoReference || '93000123456789',
         expiresAt: response.data.expiresAt || Math.floor(Date.now() / 1000) + 172800,
         barcodeUrl: response.data.barcodeUrl,
-        checkoutUrl: null
+        checkoutUrl: null,
       };
     }
 
@@ -310,12 +308,12 @@ export const processOxxoPayment = async (
  */
 export const checkPaymentStatus = async (
   applicationId: string,
-  simulatedStatus?: string
+  simulatedStatus?: string,
 ): Promise<PaymentStatusResponse> => {
   try {
     // Check if we're in simulation mode
     if (isSimulationMode()) {
-      console.log('SIMULATION: Bypassing real payment status check.');
+      console.info('SIMULATION: Bypassing real payment status check.');
 
       // Get status from URL if available
       const urlParams = new URLSearchParams(window.location.search);
@@ -353,7 +351,7 @@ export const checkPaymentStatus = async (
         currency: DEFAULT_CURRENCY,
         paymentMethod: 'spei',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       return simulatedResponse;
@@ -361,7 +359,7 @@ export const checkPaymentStatus = async (
 
     // Real implementation for production
     const response = await api.get<PaymentStatusResponse>(
-      `/applications/${applicationId}/payment/status`
+      `/applications/${applicationId}/payment/status`,
     );
 
     return response.data;
@@ -382,7 +380,7 @@ const paymentService = {
   processCardPayment,
   processBankTransferPayment,
   processOxxoPayment,
-  checkPaymentStatus
+  checkPaymentStatus,
 };
 
 export default paymentService;

@@ -61,7 +61,7 @@
   .pagination {
     flex-wrap: wrap;
   }
-  
+
   .paginationItem {
     min-width: 40px;
     min-height: 40px;
@@ -73,14 +73,14 @@
   .pagination {
     gap: var(--space-1);
   }
-  
+
   .paginationItem {
     min-width: 36px;
     min-height: 36px;
     padding: var(--space-1);
     font-size: 0.8rem;
   }
-  
+
   /* Hide some pagination items on very small screens */
   .paginationItem.hideMobile {
     display: none;

@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+
 import { Application, ApplicationStatus } from '../../services/applicationService';
 
 // Mock application data
@@ -25,14 +26,14 @@ export const mockApplications: Application[] = [
 
     // Permit Data
     folio: 'PD-2025-001',
-    importe: 1500.00,
+    importe: 1500.0,
     fecha_expedicion: '2025-01-15',
     fecha_vencimiento: '2026-01-15',
 
     // Payment Data
     payment_proof_path: '/uploads/payments/proof-001.jpg',
     payment_proof_uploaded_at: '2025-01-16T09:30:00Z',
-    payment_verified_at: '2025-01-17T11:45:00Z'
+    payment_verified_at: '2025-01-17T11:45:00Z',
   },
   {
     id: '2',
@@ -52,7 +53,7 @@ export const mockApplications: Application[] = [
     color: 'Azul',
     numero_serie: 'DEF456789012',
     numero_motor: 'M789012',
-    ano_modelo: '2022'
+    ano_modelo: '2022',
   },
   {
     id: '3',
@@ -77,31 +78,31 @@ export const mockApplications: Application[] = [
     // Payment Data
     payment_proof_path: '/uploads/payments/proof-003.jpg',
     payment_proof_uploaded_at: '2025-03-06T10:05:00Z',
-    payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.'
-  }
+    payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.',
+  },
 ];
 
 // Mock application service
 const applicationServiceMock = {
   getApplications: vi.fn().mockResolvedValue({
     success: true,
-    applications: mockApplications
+    applications: mockApplications,
   }),
 
   getApplicationById: vi.fn().mockImplementation((id: string) => {
-    const application = mockApplications.find(app => app.id === id);
+    const application = mockApplications.find((app) => app.id === id);
 
     if (application) {
       return Promise.resolve({
         success: true,
-        application
+        application,
       });
     }
 
     return Promise.resolve({
       success: false,
       application: {} as Application,
-      message: 'Application not found'
+      message: 'Application not found',
     });
   }),
 
@@ -126,7 +127,7 @@ const applicationServiceMock = {
       numero_motor: applicationData.numero_motor || 'NEWM123456',
       ano_modelo: applicationData.ano_modelo || '2025',
 
-      ...applicationData
+      ...applicationData,
     };
 
     return Promise.resolve({
@@ -137,114 +138,120 @@ const applicationServiceMock = {
         amount: 1500,
         currency: 'MXN',
         reference: `PD-${newApplication.id}`,
-        paymentMethods: [
-          'Transferencia Bancaria',
-          'Depósito en Banco',
-          'Pago en Línea'
-        ],
+        paymentMethods: ['Transferencia Bancaria', 'Depósito en Banco', 'Pago en Línea'],
         nextSteps: [
           'Realice el pago utilizando la referencia proporcionada.',
           'Guarde su comprobante de pago (recibo, captura de pantalla, etc.).',
           'Suba su comprobante de pago en la sección "Mis Solicitudes".',
-          'Una vez verificado el pago, su permiso estará disponible para descargar.'
-        ]
+          'Una vez verificado el pago, su permiso estará disponible para descargar.',
+        ],
+      },
+    });
+  }),
+
+  updateApplication: vi
+    .fn()
+    .mockImplementation((id: string, applicationData: Partial<Application>) => {
+      const application = mockApplications.find((app) => app.id === id);
+
+      if (!application) {
+        return Promise.resolve({
+          success: false,
+          application: {} as Application,
+          message: 'Application not found',
+        });
       }
-    });
-  }),
 
-  updateApplication: vi.fn().mockImplementation((id: string, applicationData: Partial<Application>) => {
-    const application = mockApplications.find(app => app.id === id);
+      if (application.status !== 'PENDING_PAYMENT') {
+        return Promise.resolve({
+          success: false,
+          application,
+          message: `Cannot update application in ${application.status} status`,
+        });
+      }
 
-    if (!application) {
+      const updatedApplication = {
+        ...application,
+        ...applicationData,
+        updated_at: new Date().toISOString(),
+      };
+
       return Promise.resolve({
-        success: false,
-        application: {} as Application,
-        message: 'Application not found'
+        success: true,
+        application: updatedApplication,
+        message: 'Application updated successfully',
       });
-    }
+    }),
 
-    if (application.status !== 'PENDING_PAYMENT') {
+  uploadPaymentProof: vi
+    .fn()
+    .mockImplementation((id: string, file: File, paymentReference?: string) => {
+      const application = mockApplications.find((app) => app.id === id);
+
+      if (!application) {
+        return Promise.resolve({
+          success: false,
+          application: {} as Application,
+          message: 'Application not found',
+        });
+      }
+
+      if (application.status !== 'PENDING_PAYMENT' && application.status !== 'PROOF_REJECTED') {
+        return Promise.resolve({
+          success: false,
+          application,
+          message: `Cannot upload payment proof in ${application.status} status`,
+        });
+      }
+
+      const now = new Date().toISOString();
+
+      const updatedApplication = {
+        ...application,
+        status: 'PROOF_SUBMITTED' as ApplicationStatus,
+        payment_proof_path: URL.createObjectURL(file),
+        payment_reference: paymentReference || null,
+        payment_proof_uploaded_at: now,
+        updated_at: now,
+      };
+
       return Promise.resolve({
-        success: false,
-        application,
-        message: `Cannot update application in ${application.status} status`
+        success: true,
+        application: updatedApplication,
+        message: 'Payment proof uploaded successfully',
       });
-    }
+    }),
 
-    const updatedApplication = {
-      ...application,
-      ...applicationData,
-      updated_at: new Date().toISOString()
-    };
+  downloadPermit: vi
+    .fn()
+    .mockImplementation(
+      (id: string, type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso') => {
+        const application = mockApplications.find((app) => app.id === id);
 
-    return Promise.resolve({
-      success: true,
-      application: updatedApplication,
-      message: 'Application updated successfully'
-    });
-  }),
+        if (!application) {
+          return Promise.reject(new Error('Application not found'));
+        }
 
-  uploadPaymentProof: vi.fn().mockImplementation((id: string, file: File, paymentReference?: string) => {
-    const application = mockApplications.find(app => app.id === id);
+        if (application.status !== 'PERMIT_READY' && application.status !== 'COMPLETED') {
+          return Promise.reject(
+            new Error(`Cannot download permit in ${application.status} status`),
+          );
+        }
 
-    if (!application) {
-      return Promise.resolve({
-        success: false,
-        application: {} as Application,
-        message: 'Application not found'
-      });
-    }
+        // Create a mock PDF blob based on document type
+        const typeLabels: Record<string, string> = {
+          permiso: 'Permiso',
+          recibo: 'Recibo',
+          certificado: 'Certificado',
+          placas: 'Placas',
+        };
 
-    if (application.status !== 'PENDING_PAYMENT' && application.status !== 'PROOF_REJECTED') {
-      return Promise.resolve({
-        success: false,
-        application,
-        message: `Cannot upload payment proof in ${application.status} status`
-      });
-    }
+        const mockPdfContent = `Mock PDF content for ${typeLabels[type] || 'document'} ${id}`;
+        const mockBlob = new Blob([mockPdfContent], { type: 'application/pdf' });
 
-    const now = new Date().toISOString();
-
-    const updatedApplication = {
-      ...application,
-      status: 'PROOF_SUBMITTED' as ApplicationStatus,
-      payment_proof_path: URL.createObjectURL(file),
-      payment_reference: paymentReference || null,
-      payment_proof_uploaded_at: now,
-      updated_at: now
-    };
-
-    return Promise.resolve({
-      success: true,
-      application: updatedApplication,
-      message: 'Payment proof uploaded successfully'
-    });
-  }),
-
-  downloadPermit: vi.fn().mockImplementation((id: string, type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso') => {
-    const application = mockApplications.find(app => app.id === id);
-
-    if (!application) {
-      return Promise.reject(new Error('Application not found'));
-    }
-
-    if (application.status !== 'PERMIT_READY' && application.status !== 'COMPLETED') {
-      return Promise.reject(new Error(`Cannot download permit in ${application.status} status`));
-    }
-
-    // Create a mock PDF blob based on document type
-    const typeLabels: Record<string, string> = {
-      'permiso': 'Permiso',
-      'recibo': 'Recibo',
-      'certificado': 'Certificado',
-      'placas': 'Placas'
-    };
-
-    const mockPdfContent = `Mock PDF content for ${typeLabels[type] || 'document'} ${id}`;
-    const mockBlob = new Blob([mockPdfContent], { type: 'application/pdf' });
-
-    return Promise.resolve(mockBlob);
-  })
+        return Promise.resolve(mockBlob);
+      },
+    ),
 };
 
 export default applicationServiceMock;

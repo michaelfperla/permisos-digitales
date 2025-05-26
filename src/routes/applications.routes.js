@@ -100,6 +100,15 @@ router.get(
   applicationController.downloadPermit
 );
 
+// GET /api/applications/:id/renewal-eligibility - Check if a permit is eligible for renewal
+// Auth applied in src/routes/index.js
+router.get(
+  '/:id/renewal-eligibility',
+  idParamValidation, // Validate ID
+  handleValidationErrors,
+  applicationController.checkRenewalEligibility
+);
+
 // POST /api/applications/:id/renew - Create a renewal application
 // Auth applied in src/routes/index.js
 router.post(

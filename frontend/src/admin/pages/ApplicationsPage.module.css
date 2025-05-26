@@ -340,7 +340,8 @@
     justify-content: flex-end;
   }
 
-  .viewButton, .viewButtonDisabled {
+  .viewButton,
+  .viewButtonDisabled {
     width: 48px;
     height: 48px;
     font-size: 1.1rem;
@@ -355,71 +356,7 @@
   }
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 2rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.paginationButton {
-  padding: 0.5rem 1rem;
-  background-color: white;
-  border: 1px solid #ced4da;
-  color: #343a40;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.15s ease;
-  min-height: 44px; /* Minimum touch target size */
-  min-width: 44px; /* Minimum touch target size */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.paginationButton:hover:not(:disabled) {
-  background-color: #e9ecef;
-}
-
-.paginationButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.paginationInfo {
-  font-size: 0.875rem;
-  color: #6c757d;
-  padding: 0.5rem;
-}
-
-/* Responsive pagination styles */
-@media (max-width: 576px) {
-  .pagination {
-    margin-top: 1.5rem;
-    gap: 0.5rem;
-  }
-
-  .paginationButton {
-    padding: 0.5rem 0.75rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .pagination {
-    margin-top: 1rem;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .paginationInfo {
-    order: -1;
-    margin-bottom: 0.5rem;
-  }
-}
+/* Pagination styles removed as we're using the built-in pagination from MobileTable */
 
 /* Empty State */
 .emptyState {

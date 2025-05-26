@@ -1,26 +1,35 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom'; // Removed useLocation and Link as they were not used for Card
-import Card from '../components/ui/Card/Card'; // Only import Card default export
-import TextLogo from '../components/ui/TextLogo';
-import styles from './AuthLayout.module.css'; // Assuming this file has .authPage, .authContainer, .authCardWrapper, .authLogo
+import { Outlet } from 'react-router-dom';
+
+import styles from './AuthLayout.module.css'; // We'll keep this for page-specific layout styles
+import AppHeaderMobile, {
+  NavLinkItem,
+} from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
+import Card from '../components/ui/Card/Card';
+import TextLogo from '../components/ui/TextLogo/TextLogo';
+import useResponsive from '../hooks/useResponsive';
 
 const AuthLayout: React.FC = () => {
-  // const location = useLocation(); // No longer needed for Card styling
-  // const isRegisterPage = location.pathname === '/register'; // No longer needed for Card styling
+  const { isMdDown } = useResponsive();
 
-  // The title for the auth card will be the TextLogo
-  const cardTitle = <TextLogo to="/" className={styles.authLogo} />;
+  const authNavLinks: NavLinkItem[] = [
+    { to: '/register', label: 'Crear cuenta', type: 'button-secondary' },
+    { to: '/login', label: 'Entrar', type: 'link' },
+  ];
 
   return (
     <div className={styles.authPage}>
+      {isMdDown ? (
+        <AppHeaderMobile logoPath="/" navLinks={authNavLinks} />
+      ) : (
+        <header className={styles.desktopHeader}>
+          <TextLogo to="/" />
+        </header>
+      )}
+
       <main className={styles.authContainer}>
-        <Card
-          variant="auth"
-          className={styles.authCardWrapper} // For any additional layout styling on the Card itself
-          title={cardTitle} // Pass TextLogo as the title prop
-        >
-          {/* The Outlet will be rendered inside the Card's body by default */}
-          <Outlet /> {/* Child route components render in the Card's body */}
+        <Card variant="auth" className={styles.authCardWrapper}>
+          <Outlet />
         </Card>
       </main>
     </div>

@@ -1,4 +1,10 @@
+/**
+ * @deprecated This hook is deprecated. Use React Hook Form with Zod validation instead.
+ * See frontend/src/shared/schemas/permit.schema.ts for the new validation approach.
+ */
+
 import { useMemo } from 'react';
+
 import { ApplicationFormRawData } from '../types/application.types';
 import {
   validateFullName,
@@ -9,7 +15,7 @@ import {
   validateVehicleColor,
   validateVehicleSerialNumber,
   validateVehicleEngineNumber,
-  validateVehicleModelYear
+  validateVehicleModelYear,
 } from '../utils/permit-validation';
 
 /**
@@ -31,6 +37,7 @@ export interface ValidationResult {
 }
 
 /**
+ * @deprecated Use React Hook Form with Zod validation instead.
  * Custom hook for validating permit application form data
  * @param formData The form data to validate
  * @returns Validation result with isValid flag and errors object
@@ -90,8 +97,13 @@ export const usePermitFormValidation = (formData: ApplicationFormRawData): Valid
     const applicantInfoValid = !errors.nombre_completo && !errors.curp_rfc && !errors.domicilio;
 
     // Check if vehicle info is valid
-    const vehicleInfoValid = !errors.marca && !errors.linea && !errors.color &&
-                            !errors.numero_serie && !errors.numero_motor && !errors.ano_modelo;
+    const vehicleInfoValid =
+      !errors.marca &&
+      !errors.linea &&
+      !errors.color &&
+      !errors.numero_serie &&
+      !errors.numero_motor &&
+      !errors.ano_modelo;
 
     // Overall validity
     const isValid = applicantInfoValid && vehicleInfoValid;
@@ -100,12 +112,13 @@ export const usePermitFormValidation = (formData: ApplicationFormRawData): Valid
       isValid,
       errors,
       applicantInfoValid,
-      vehicleInfoValid
+      vehicleInfoValid,
     };
   }, [formData]);
 };
 
 /**
+ * @deprecated Use React Hook Form with Zod validation instead.
  * Helper function to get the first error message from validation errors
  * @param errors Validation errors object
  * @returns First error message or undefined if no errors
@@ -120,6 +133,7 @@ export const getFirstError = (errors: ValidationErrors): string | undefined => {
 };
 
 /**
+ * @deprecated Use React Hook Form with Zod validation instead.
  * Helper function to get the first error message from a specific step's fields
  * @param errors Validation errors object
  * @param step Step name ('applicant' or 'vehicle')
@@ -127,11 +141,12 @@ export const getFirstError = (errors: ValidationErrors): string | undefined => {
  */
 export const getFirstStepError = (
   errors: ValidationErrors,
-  step: 'applicant' | 'vehicle'
+  step: 'applicant' | 'vehicle',
 ): string | undefined => {
-  const fields = step === 'applicant'
-    ? ['nombre_completo', 'curp_rfc', 'domicilio']
-    : ['marca', 'linea', 'color', 'numero_serie', 'numero_motor', 'ano_modelo'];
+  const fields =
+    step === 'applicant'
+      ? ['nombre_completo', 'curp_rfc', 'domicilio']
+      : ['marca', 'linea', 'color', 'numero_serie', 'numero_motor', 'ano_modelo'];
 
   for (const field of fields) {
     const key = field as keyof ApplicationFormData;

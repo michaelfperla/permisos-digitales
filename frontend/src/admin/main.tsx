@@ -1,13 +1,15 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App';
-import { AuthProvider } from './contexts/AuthContext';
-import { ToastProvider } from './contexts/ToastContext';
-import '../styles/global.css'; // Import global styles
 
-// Create a new QueryClient instance
+import App from './App';
+import authService from './services/authService';
+// Corrected import paths assuming shared is a sibling of admin, or one level up from src/admin
+import { AuthProvider } from '../shared/contexts/AuthContext'; 
+import { ToastProvider } from '../shared/contexts/ToastContext';
+import '../styles/global.css'; // Assuming styles is a sibling of admin, or one level up from src/admin
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -17,7 +19,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Find the root element
 const rootElement = document.getElementById('admin-root') || document.getElementById('root');
 
 if (!rootElement) {
@@ -30,30 +31,29 @@ if (!rootElement) {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename="/admin">
-          <AuthProvider>
+          <AuthProvider type="admin" authService={authService}>
             <ToastProvider>
               <App />
             </ToastProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 } else {
-  // Add console log to help with debugging
-  console.log('Admin app mounting with root element:', rootElement);
+  console.debug('Admin app mounting with root element:', rootElement); // Changed to debug
 
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename="/admin">
-          <AuthProvider>
+          <AuthProvider type="admin" authService={authService}>
             <ToastProvider>
               <App />
             </ToastProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }

@@ -1,123 +1,164 @@
-/* User Layout Styles */
+/* UserLayout.module.css */
 .userLayout {
   display: flex;
   min-height: 100vh;
   position: relative;
+  background-color: var(--color-neutral-100);
+  overflow-x: hidden;
 }
 
-/* Overlay for mobile sidebar */
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: calc(var(--z-modal) - 1);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease-in-out;
   pointer-events: none;
 }
-
 .overlayVisible {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Sidebar Styles */
 .sidebar {
   width: 250px;
-  background-color: var(--color-neutral-900, #343a40);
-  color: var(--color-white, #fff);
+  background-color: var(--color-neutral-900);
+  color: var(--color-white);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease;
   position: fixed;
+  top: 0;
   height: 100vh;
-  z-index: 1000;
+  z-index: var(--z-modal);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar:not(.mobile) {
+  left: 0;
   transform: translateX(0);
 }
-
-/* Mobile sidebar styles */
-.sidebar.mobile {
-  width: 80%; /* Take up 80% of screen width on mobile */
-  max-width: 300px;
-  transform: translateX(-100%); /* Start off-screen */
-  box-shadow: none;
-}
-
-.sidebar.mobile.open {
-  transform: translateX(0); /* Slide in */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Desktop sidebar collapsed state */
 .sidebar:not(.mobile):not(.open) {
   width: 60px;
 }
 
+.sidebar.mobile {
+  left: auto;
+  right: 0;
+  width: 280px;
+  max-width: 85vw;
+  transform: translateX(100%);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1);
+}
+.sidebar.mobile.open {
+  transform: translateX(0);
+}
+
 .sidebarHeader {
-  padding: 1rem;
+  padding: 0 var(--space-3);
+  height: var(--mobile-header-height, 56px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.sidebarLogo {
+.panelLogoContainerInSidebar {
+  display: flex;
+  align-items: center;
+}
+
+.sidebarPanelCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-300);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.sidebarPanelCloseButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+.sidebarPanelCloseButton:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar:not(.mobile) .sidebarLogo {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
 }
-
-.sidebarHeader .textLogo {
+.textLogoInSidebar {
+  /* New class if needed for specific styling of TextLogo in this sidebar */
+  /* Example:
+    font-size: 1.1rem !important; 
+    */
+}
+.sidebar:not(.mobile) .sidebarHeader .textLogoInSidebar {
+  /* Target specific TextLogo instance */
   color: var(--color-white);
   font-size: 1.25rem;
-  transition: transform 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
-
-.sidebarHeader .textLogo span {
-  color: var(--color-primary-light);
+.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) {
+  transform: scale(0.8);
+  width: 40px;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
 }
-
-.textLogo:hover {
-  transform: translateY(-1px);
+.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) .secondWord {
+  display: none;
 }
-
-.sidebarCloseButton {
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 1.25rem;
+.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogoInSidebar.initialsLogo {
+  font-size: 1.6rem;
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
+  align-items: center;
 }
 
 .sidebarUser {
-  padding: 1rem;
+  padding: var(--space-3);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
-
 .userInfo {
   display: flex;
   flex-direction: column;
 }
-
 .userName {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .userEmail {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   overflow: hidden;
@@ -125,298 +166,192 @@
 }
 
 .sidebarNav {
-  flex: 1;
-  padding: 1rem 0;
+  flex-grow: 1;
+  padding: var(--space-2) 0;
   overflow-y: auto;
 }
-
 .navLink {
   display: flex;
   align-items: center;
-  padding: 0.85rem 1.25rem; /* Increased padding for better touch targets */
-  color: rgba(255, 255, 255, 0.7);
+  padding: var(--space-2) var(--space-4);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   transition: all 0.15s ease;
-  min-height: 44px; /* Minimum height for touch targets */
-  margin-bottom: 4px; /* Add spacing between links */
+  min-height: 44px;
+  margin: 0 var(--space-2) var(--space-1);
+  border-radius: var(--border-radius-sm);
 }
-
 .navLink:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  color: var(--color-white);
 }
-
 .navLink.active {
-  background-color: var(--color-primary, #a72b31);
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
 }
-
+/* Ensure .navIcon and .navText are styled for icons from Icon component */
+.navIcon :global(svg),
 .navIcon {
-  font-size: 1.25rem;
-  margin-right: 0.75rem;
-  min-width: 20px;
+  /* Target Icon component's svg or if it's a direct element */
+  font-size: 1.1rem;
+  margin-right: var(--space-3);
+  min-width: 20px; /* From Icon component or direct style */
+  display: inline-flex; /* From Icon component or direct style */
+  align-items: center; /* From Icon component or direct style */
 }
-
 .navText {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.9rem;
 }
 
-/* Collapsed sidebar styles */
-.sidebar:not(.mobile):not(.open) .navText {
+.sidebar:not(.mobile):not(.open) .navText,
+.sidebar:not(.mobile):not(.open) .userInfo,
+.sidebar:not(.mobile):not(.open) .logoutText {
   display: none;
 }
-
-.sidebar:not(.mobile):not(.open) .sidebarLogo {
-  overflow: hidden;
-}
-
-/* Styling for the collapsed sidebar logo */
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogo:not(.initialsLogo) {
-  transform: scale(0.8);
-  width: 40px;
-  overflow: hidden;
-  text-overflow: clip;
-  white-space: nowrap;
-}
-
-/* Hide "Digitales" when compact but not initials-only */
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogo:not(.initialsLogo) .secondWord {
-  display: none;
-}
-
-/* Styling for the "PD" initials logo in collapsed sidebar */
-.sidebar:not(.mobile):not(.open) .sidebarHeader .textLogo.initialsLogo {
-  font-size: 1.6rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .sidebar:not(.mobile):not(.open) .sidebarUser {
   padding: 0;
   border-bottom: none;
   height: 0;
   overflow: hidden;
 }
-
-.sidebar:not(.mobile):not(.open) .userInfo {
-  display: none;
-}
-
 .sidebar:not(.mobile):not(.open) .navLink {
   justify-content: center;
-  padding: 0.85rem 0;
+  padding: var(--space-3) 0;
+  margin: 0 auto var(--space-1);
+  width: 40px;
+  height: 40px;
 }
-
+.sidebar:not(.mobile):not(.open) .navIcon :global(svg),
 .sidebar:not(.mobile):not(.open) .navIcon {
   margin-right: 0;
-  font-size: 1.4rem;
-}
-
-.sidebar:not(.mobile):not(.open) .sidebarToggleButton {
-  width: 28px;
-  height: 28px;
+  font-size: 1.3rem;
 }
 
 .sidebarFooter {
-  padding: 1rem;
+  padding: var(--space-3);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: auto; /* Push to bottom of sidebar */
+  margin-top: auto;
+  flex-shrink: 0;
 }
-
 .footerActions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
+  gap: var(--space-2);
 }
-
-/* When sidebar is OPEN and NOT mobile, use column layout with centered items */
-.sidebar.open:not(.mobile) .footerActions {
-  flex-direction: column;
+.sidebar:not(.mobile):not(.open) .sidebarFooter {
+  padding: var(--space-3) var(--space-2);
+}
+.sidebar:not(.mobile):not(.open) .footerActions {
   align-items: center;
-  width: 100%;
 }
 
 .logoutButton {
-  display: flex;
-  align-items: center;
   width: 100%;
-  padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
 }
-
-.logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.sidebar:not(.mobile):not(.open) .logoutButton {
+  width: 40px;
+  height: 40px;
+  padding: 0;
 }
-
-.logoutIcon {
-  font-size: 1.25rem; /* Match navIcon size */
-  margin-right: 0.75rem;
-  min-width: 20px; /* Match navIcon min-width */
+/* Ensure icon inside button is centered when text is hidden */
+.sidebar:not(.mobile):not(.open) .logoutButton :global(.buttonIcon) {
+  margin: 0 !important; /* Override Button.tsx default margin for icon */
+}
+.sidebar:not(.mobile):not(.open) .logoutButton :global(.buttonContent) {
+  gap: 0 !important; /* Remove gap for icon-only button */
 }
 
 .sidebarToggleButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   padding: 0;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(255, 255, 255, 0.05);
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.15s ease;
   border-radius: 50%;
-}
-
-/* Different margin for open vs collapsed state */
-.sidebar:not(.mobile):not(.open) .sidebarToggleButton {
-  margin: 0 auto 0.75rem;
-}
-
-.sidebar.open:not(.mobile) .sidebarToggleButton {
   margin: 0 auto var(--space-2);
 }
-
 .sidebarToggleButton:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+}
+.sidebar:not(.mobile):not(.open) .sidebarToggleButton {
+  margin-bottom: var(--space-3);
 }
 
-.sidebar:not(.mobile):not(.open) .logoutText,
-.sidebar.mobile:not(.open) .logoutText {
-  display: none;
-}
-
-/* Standardize logout button icon in collapsed sidebar */
-.sidebar:not(.mobile):not(.open) .logoutIcon {
-  font-size: 1.4rem; /* Match collapsed navIcon size */
-  margin-right: 0;
-  color: var(--color-white); /* Ensure icon color is white */
-}
-
-/* Center the logout icon in collapsed sidebar */
-.sidebar:not(.mobile):not(.open) .logoutButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%; /* Takes full width of collapsed sidebar (e.g., 60px) */
-  height: 44px; /* Match height of nav links */
-  padding: 0; /* Remove button padding */
-  background-color: rgba(255, 255, 255, 0.1); /* Ensure background is applied */
-  border: none; /* Ensure no border */
-}
-
-/* Main Content Styles */
 .mainContent {
   flex: 1;
-  margin-left: 250px;
-  padding: var(--space-fluid-3, 2rem);
-  background-color: var(--color-neutral-100, #f8f9fa);
+  padding: var(--space-4);
+  background-color: var(--color-neutral-100);
   transition: margin-left 0.3s ease;
+  margin-left: 250px;
 }
-
 .mainContent.expanded {
   margin-left: 60px;
 }
 
-/* Mobile content styles */
-.mobileContent {
+.mobileContentPadded {
   margin-left: 0;
-  padding-top: calc(60px + var(--space-fluid-3, 2rem)); /* Account for mobile header */
+  padding: var(--space-4);
+  padding-top: calc(var(--mobile-header-height, 56px) + var(--space-4));
 }
 
-/* Responsive Styles */
 @media (max-width: 768px) {
-  /* Mobile sidebar text visibility */
-  .sidebar.mobile:not(.open) .navText,
-  .sidebar.mobile:not(.open) .logoutText {
-    display: none;
-  }
-
-  .sidebar.mobile.open .navText,
-  .sidebar.mobile.open .logoutText {
-    display: inline;
-  }
-
-  /* Mobile content always takes full width */
-  .mainContent.mobileContent {
+  .mainContent {
     margin-left: 0;
   }
-
-  /* Ensure logo is visible on mobile */
-  .sidebar.mobile .textLogo {
-    font-size: 1.2rem;
-  }
-
-  /* Position the logo on mobile */
-  .sidebar.mobile .sidebarLogo {
-    justify-content: center;
-    padding-left: 0;
-  }
-
-  /* Adjust footer spacing on mobile */
-  .sidebar.mobile .footerActions {
-    gap: 1rem;
-  }
 }
 
-/* Tablet Styles */
-@media (max-width: 576px) {
-  .sidebar.mobile {
-    width: 80%; /* Standard width on tablets */
-  }
-
-  .mainContent {
-    padding: var(--space-fluid-2, 1.25rem);
-  }
-
-  .navLink {
-    padding: 0.8rem 1.25rem;
-  }
-}
-
-/* Mobile Styles */
 @media (max-width: 480px) {
+  .mainContent,
+  .mobileContentPadded {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+  .mobileContentPadded {
+    padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-3));
+  }
+
   .sidebar.mobile {
-    width: 85%; /* Wider on mobile */
+    width: 260px;
   }
-
-  .mainContent {
-    padding: 1rem;
+  .sidebarHeader,
+  .sidebarUser,
+  .sidebarFooter {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
   }
-
-  .textLogo {
-    font-size: 1.1rem;
+  .navLink {
+    padding: var(--space-2) var(--space-3);
+  }
+  .userName {
+    font-size: 0.85rem;
+  }
+  .userEmail {
+    font-size: 0.75rem;
+  }
+  .navText {
+    font-size: 0.85rem;
   }
 }
 
-/* Very Small Mobile Styles */
 @media (max-width: 360px) {
-  .sidebar.mobile {
-    width: 85%; /* Slightly wider on very small screens */
+  .mainContent,
+  .mobileContentPadded {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    padding-bottom: var(--space-2);
   }
-
-  .mainContent {
-    padding: 0.75rem;
-  }
-
-  .navLink {
-    padding: 0.75rem 1rem;
-  }
-
-  /* Ensure touch targets are large enough on small screens */
-  .sidebarCloseButton,
-  .sidebarToggleButton {
-    min-width: 44px;
-    min-height: 44px;
+  .mobileContentPadded {
+    padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-2));
   }
 }

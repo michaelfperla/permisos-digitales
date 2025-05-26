@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import {
   FaExclamationTriangle,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowLeft,
-  FaDownload,
   FaEye,
   FaCar,
   FaUser,
-  FaCalendarAlt,
   FaFileAlt,
-  FaMoneyBillWave
+  FaMoneyBillWave,
 } from 'react-icons/fa';
-import adminService from '../services/adminService';
-import { useToast } from '../contexts/ToastContext';
-import Button from '../../components/ui/Button/Button';
+import { useParams, useNavigate } from 'react-router-dom';
+
 import styles from './ApplicationDetailsPage.module.css';
+import Button from '../../components/ui/Button/Button';
+import Icon from '../../shared/components/ui/Icon';
+import { useToast } from '../../shared/hooks/useToast';
+import adminService from '../services/adminService';
 
 const ApplicationDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,27 +32,24 @@ const ApplicationDetailsPage: React.FC = () => {
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['applicationDetails', id],
     queryFn: () => adminService.getApplicationDetails(id!),
     enabled: !!id,
     onError: (err: Error) => {
       showToast(`Error al cargar detalles de la solicitud: ${err.message}`, 'error');
-    }
+    },
   });
 
   // Fetch payment proof details if application is in PROOF_SUBMITTED status
-  const {
-    data: paymentProofDetails,
-    isLoading: isLoadingPaymentProof
-  } = useQuery({
+  const { data: paymentProofDetails, isLoading: isLoadingPaymentProof } = useQuery({
     queryKey: ['paymentProofDetails', id],
     queryFn: () => adminService.getPaymentProofDetails(id!),
     enabled: !!id && application?.status === 'PROOF_SUBMITTED',
     onError: (err: Error) => {
       showToast(`Error al cargar detalles del comprobante: ${err.message}`, 'error');
-    }
+    },
   });
 
   // Format date for display
@@ -65,7 +62,7 @@ const ApplicationDetailsPage: React.FC = () => {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -196,22 +193,19 @@ const ApplicationDetailsPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Error al cargar detalles de la solicitud</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
         <div className={styles.errorActions}>
-          <Button
-            variant="primary"
-            size="small"
-            onClick={() => refetch()}
-          >
+          <Button variant="primary" size="small" onClick={() => refetch()}>
             Intentar nuevamente
           </Button>
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => navigate(-1)}
-          >
+          <Button variant="secondary" size="small" onClick={() => navigate(-1)}>
             Volver
           </Button>
         </div>
@@ -225,16 +219,14 @@ const ApplicationDetailsPage: React.FC = () => {
         <Button
           variant="secondary"
           size="small"
-          icon={<FaArrowLeft />}
+          icon={<Icon IconComponent={FaArrowLeft} size="sm" />}
           onClick={() => navigate(-1)}
         >
           Volver
         </Button>
 
         <div className={styles.headerContent}>
-          <h1 className={styles.pageTitle}>
-            Solicitud #{application?.id}
-          </h1>
+          <h1 className={styles.pageTitle}>Solicitud #{application?.id}</h1>
           <div className={styles.statusContainer}>
             <span className={`${styles.statusBadge} ${getStatusClass(application?.status || '')}`}>
               {getStatusDisplayName(application?.status || '')}
@@ -247,7 +239,7 @@ const ApplicationDetailsPage: React.FC = () => {
             <Button
               variant="success"
               size="small"
-              icon={<FaCheckCircle />}
+              icon={<Icon IconComponent={FaCheckCircle} size="sm" color="var(--color-success)" />}
               onClick={handleVerifyPayment}
             >
               Aprobar Pago
@@ -255,7 +247,7 @@ const ApplicationDetailsPage: React.FC = () => {
             <Button
               variant="danger"
               size="small"
-              icon={<FaTimesCircle />}
+              icon={<Icon IconComponent={FaTimesCircle} size="sm" color="var(--color-danger)" />}
               onClick={() => setShowRejectModal(true)}
             >
               Rechazar Pago
@@ -270,7 +262,7 @@ const ApplicationDetailsPage: React.FC = () => {
           <h2 className={styles.sectionTitle}>Información del Vehículo</h2>
           <div className={styles.detailsCard}>
             <div className={styles.detailsHeader}>
-              <FaCar className={styles.detailsIcon} />
+              <Icon IconComponent={FaCar} className={styles.detailsIcon} size="lg" />
               <h3 className={styles.detailsTitle}>Datos del Vehículo</h3>
             </div>
             <div className={styles.detailsGrid}>
@@ -306,7 +298,7 @@ const ApplicationDetailsPage: React.FC = () => {
           <h2 className={styles.sectionTitle}>Información del Solicitante</h2>
           <div className={styles.detailsCard}>
             <div className={styles.detailsHeader}>
-              <FaUser className={styles.detailsIcon} />
+              <Icon IconComponent={FaUser} className={styles.detailsIcon} size="lg" />
               <h3 className={styles.detailsTitle}>Datos del Solicitante</h3>
             </div>
             <div className={styles.detailsGrid}>
@@ -334,7 +326,7 @@ const ApplicationDetailsPage: React.FC = () => {
           <h2 className={styles.sectionTitle}>Información del Permiso</h2>
           <div className={styles.detailsCard}>
             <div className={styles.detailsHeader}>
-              <FaFileAlt className={styles.detailsIcon} />
+              <Icon IconComponent={FaFileAlt} className={styles.detailsIcon} size="lg" />
               <h3 className={styles.detailsTitle}>Datos del Permiso</h3>
             </div>
             <div className={styles.detailsGrid}>
@@ -352,11 +344,15 @@ const ApplicationDetailsPage: React.FC = () => {
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Fecha de Expedición:</span>
-                <span className={styles.detailValue}>{formatDate(application?.fecha_expedicion)}</span>
+                <span className={styles.detailValue}>
+                  {formatDate(application?.fecha_expedicion)}
+                </span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Fecha de Vencimiento:</span>
-                <span className={styles.detailValue}>{formatDate(application?.fecha_vencimiento)}</span>
+                <span className={styles.detailValue}>
+                  {formatDate(application?.fecha_vencimiento)}
+                </span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Importe:</span>
@@ -376,7 +372,7 @@ const ApplicationDetailsPage: React.FC = () => {
             <h2 className={styles.sectionTitle}>Información de Pago</h2>
             <div className={styles.detailsCard}>
               <div className={styles.detailsHeader}>
-                <FaMoneyBillWave className={styles.detailsIcon} />
+                <Icon IconComponent={FaMoneyBillWave} className={styles.detailsIcon} size="lg" />
                 <h3 className={styles.detailsTitle}>Comprobante de Pago</h3>
               </div>
 
@@ -390,21 +386,29 @@ const ApplicationDetailsPage: React.FC = () => {
                   <div className={styles.detailsGrid}>
                     <div className={styles.detailItem}>
                       <span className={styles.detailLabel}>Referencia de Pago:</span>
-                      <span className={styles.detailValue}>{application?.payment_reference || 'N/A'}</span>
+                      <span className={styles.detailValue}>
+                        {application?.payment_reference || 'N/A'}
+                      </span>
                     </div>
                     <div className={styles.detailItem}>
                       <span className={styles.detailLabel}>Fecha de Carga:</span>
-                      <span className={styles.detailValue}>{formatDate(application?.payment_proof_uploaded_at)}</span>
+                      <span className={styles.detailValue}>
+                        {formatDate(application?.payment_proof_uploaded_at)}
+                      </span>
                     </div>
                     {paymentProofDetails && (
                       <>
                         <div className={styles.detailItem}>
                           <span className={styles.detailLabel}>Nombre del Archivo:</span>
-                          <span className={styles.detailValue}>{paymentProofDetails.original_filename}</span>
+                          <span className={styles.detailValue}>
+                            {paymentProofDetails.original_filename}
+                          </span>
                         </div>
                         <div className={styles.detailItem}>
                           <span className={styles.detailLabel}>Tipo de Archivo:</span>
-                          <span className={styles.detailValue}>{paymentProofDetails.mime_type}</span>
+                          <span className={styles.detailValue}>
+                            {paymentProofDetails.mime_type}
+                          </span>
                         </div>
                         <div className={styles.detailItem}>
                           <span className={styles.detailLabel}>Tamaño:</span>
@@ -417,7 +421,9 @@ const ApplicationDetailsPage: React.FC = () => {
                     {application?.payment_rejection_reason && (
                       <div className={styles.detailItem}>
                         <span className={styles.detailLabel}>Motivo de Rechazo:</span>
-                        <span className={styles.detailValue}>{application.payment_rejection_reason}</span>
+                        <span className={styles.detailValue}>
+                          {application.payment_rejection_reason}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -426,7 +432,7 @@ const ApplicationDetailsPage: React.FC = () => {
                     <Button
                       variant="info"
                       size="small"
-                      icon={<FaEye />}
+                      icon={<Icon IconComponent={FaEye} size="sm" />}
                       onClick={handleViewPaymentProof}
                     >
                       Ver Comprobante
@@ -466,11 +472,7 @@ const ApplicationDetailsPage: React.FC = () => {
               />
             </div>
             <div className={styles.modalFooter}>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => setShowRejectModal(false)}
-              >
+              <Button variant="secondary" size="small" onClick={() => setShowRejectModal(false)}>
                 Cancelar
               </Button>
               <Button
@@ -502,7 +504,8 @@ const ApplicationDetailsPage: React.FC = () => {
             </div>
             <div className={styles.modalBody}>
               <p className={styles.modalText}>
-                ¿Está seguro que desea verificar este pago? Esta acción generará el permiso para el solicitante.
+                ¿Está seguro que desea verificar este pago? Esta acción generará el permiso para el
+                solicitante.
               </p>
               <div className={styles.verifyDetails}>
                 <div className={styles.verifyDetail}>
@@ -517,7 +520,9 @@ const ApplicationDetailsPage: React.FC = () => {
                 </div>
                 <div className={styles.verifyDetail}>
                   <span className={styles.verifyDetailLabel}>Referencia de Pago:</span>
-                  <span className={styles.verifyDetailValue}>{application?.payment_reference || 'N/A'}</span>
+                  <span className={styles.verifyDetailValue}>
+                    {application?.payment_reference || 'N/A'}
+                  </span>
                 </div>
               </div>
               <div className={styles.verifyNotesContainer}>
@@ -535,11 +540,7 @@ const ApplicationDetailsPage: React.FC = () => {
               </div>
             </div>
             <div className={styles.modalFooter}>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => setShowVerifyModal(false)}
-              >
+              <Button variant="secondary" size="small" onClick={() => setShowVerifyModal(false)}>
                 Cancelar
               </Button>
               <Button
