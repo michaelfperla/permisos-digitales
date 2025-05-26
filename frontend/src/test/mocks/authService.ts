@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+
 import { User } from '../../services/authService';
 
 // Mock user data
@@ -9,7 +10,7 @@ export const mockUser: User = {
   last_name: 'User',
   role: 'user',
   created_at: '2025-01-01T00:00:00Z',
-  updated_at: '2025-01-01T00:00:00Z'
+  updated_at: '2025-01-01T00:00:00Z',
 };
 
 // Mock CSRF token for tests
@@ -24,14 +25,14 @@ const authServiceMock = {
       return Promise.resolve({
         success: true,
         user: mockUser,
-        message: 'Login successful'
+        message: 'Login successful',
       });
     }
 
     return Promise.resolve({
       success: false,
       user: null,
-      message: 'Invalid email or password'
+      message: 'Invalid email or password',
     });
   }),
 
@@ -40,7 +41,7 @@ const authServiceMock = {
       return Promise.resolve({
         success: false,
         user: null,
-        message: 'Email already exists'
+        message: 'Email already exists',
       });
     }
 
@@ -51,13 +52,13 @@ const authServiceMock = {
       last_name: userData.last_name,
       role: 'user',
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     return Promise.resolve({
       success: true,
       user: newUser,
-      message: 'Registration successful'
+      message: 'Registration successful',
     });
   }),
 
@@ -66,7 +67,7 @@ const authServiceMock = {
     sessionStorage.removeItem('user');
     return Promise.resolve({
       success: true,
-      message: 'Logout successful'
+      message: 'Logout successful',
     });
   }),
 
@@ -79,7 +80,7 @@ const authServiceMock = {
     return Promise.resolve({
       success: true,
       isAuthenticated,
-      user
+      user,
     });
   }),
 
@@ -87,27 +88,27 @@ const authServiceMock = {
     if (email === 'test@example.com') {
       return Promise.resolve({
         success: true,
-        message: 'Password reset email sent'
+        message: 'Password reset email sent',
       });
     }
 
     return Promise.resolve({
       success: false,
-      message: 'Email not found'
+      message: 'Email not found',
     });
   }),
 
-  resetPassword: vi.fn().mockImplementation((token: string, password: string) => {
+  resetPassword: vi.fn().mockImplementation((token: string, _password: string) => {
     if (token === 'valid-token') {
       return Promise.resolve({
         success: true,
-        message: 'Password reset successful'
+        message: 'Password reset successful',
       });
     }
 
     return Promise.resolve({
       success: false,
-      message: 'Invalid or expired token'
+      message: 'Invalid or expired token',
     });
   }),
 
@@ -127,9 +128,9 @@ const authServiceMock = {
   changePassword: vi.fn().mockImplementation(() => {
     return Promise.resolve({
       success: true,
-      message: 'Password changed successfully'
+      message: 'Password changed successfully',
     });
-  })
+  }),
 };
 
 export default authServiceMock;

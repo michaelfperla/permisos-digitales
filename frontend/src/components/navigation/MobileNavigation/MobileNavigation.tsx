@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { FaHome, FaClipboardList, FaUser, FaBars, FaTimes } from 'react-icons/fa';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import styles from './MobileNavigation.module.css';
+import Icon from '../../../shared/components/ui/Icon';
 
 interface MobileNavigationProps {
   /**
@@ -27,11 +29,10 @@ interface MobileNavigationProps {
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
   isAuthenticated = false,
   className = '',
-  type = 'bottom'
+  type = 'bottom',
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Close drawer when route changes
   useEffect(() => {
@@ -71,7 +72,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     to: string;
     label: string;
     icon: React.ReactNode;
-    isActive?: (pathname: string) => boolean;
+    isActive?: (_pathname: string) => boolean;
   }
 
   // Custom isActive function for the home button
@@ -88,21 +89,23 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
     {
       to: isAuthenticated ? '/dashboard' : '/',
       label: 'Inicio',
-      icon: <FaHome className={styles.navIcon} />,
-      isActive: isHomeActive
+      icon: <Icon IconComponent={FaHome} className={styles.navIcon} size="md" />,
+      isActive: isHomeActive,
     },
-    ...(isAuthenticated ? [
-      {
-        to: '/permits',
-        label: 'Mis Solicitudes',
-        icon: <FaClipboardList className={styles.navIcon} />
-      },
-      {
-        to: '/profile',
-        label: 'Mi Perfil',
-        icon: <FaUser className={styles.navIcon} />
-      }
-    ] : [])
+    ...(isAuthenticated
+      ? [
+          {
+            to: '/permits',
+            label: 'Mis Solicitudes',
+            icon: <Icon IconComponent={FaClipboardList} className={styles.navIcon} size="md" />,
+          },
+          {
+            to: '/profile',
+            label: 'Mi Perfil',
+            icon: <Icon IconComponent={FaUser} className={styles.navIcon} size="md" />,
+          },
+        ]
+      : []),
   ];
 
   // Render bottom navigation bar
@@ -137,7 +140,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         onClick={() => setIsDrawerOpen(true)}
         aria-label="Open navigation menu"
       >
-        <FaBars />
+        <Icon IconComponent={FaBars} size="md" />
       </button>
 
       {/* Drawer overlay */}
@@ -157,7 +160,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             onClick={() => setIsDrawerOpen(false)}
             aria-label="Close navigation menu"
           >
-            <FaTimes />
+            <Icon IconComponent={FaTimes} size="md" />
           </button>
         </div>
 

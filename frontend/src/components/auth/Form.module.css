@@ -143,11 +143,19 @@
   text-align: center;
   margin-top: 15px;
   line-height: 1.4;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .termsLink {
   color: var(--color-primary, #a72b31);
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .termsLink:hover {
@@ -310,11 +318,16 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.successContainer, .errorContainer {
+.successContainer,
+.errorContainer {
   margin: 1.5rem 0;
   width: 100%;
 }
@@ -579,11 +592,27 @@
   .authLinkMinor,
   .authLinkSecondaryAction {
     font-size: 0.85rem;
+    min-width: unset; /* Remove fixed min-width */
+    line-height: normal; /* Allow natural line height */
+    display: inline-flex; /* Use inline-flex for better alignment */
+    align-items: center; /* Center content vertically */
+    padding: 0.3rem; /* Reduce padding */
+    min-height: 32px; /* Reduce min-height but keep it accessible */
   }
 
   .formAlert {
     padding: 0.75rem;
     font-size: 0.9rem;
+  }
+
+  /* Fix for terms text in RegisterForm */
+  .authFormLinks p {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 

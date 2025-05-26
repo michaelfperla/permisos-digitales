@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import styles from './PreVerificationPage.module.css';
 import {
   FaCheckCircle,
   FaEnvelope,
@@ -9,11 +7,14 @@ import {
   FaInfoCircle,
   FaClock,
   FaLock,
-  FaEnvelopeOpenText
+  FaEnvelopeOpenText,
 } from 'react-icons/fa';
-import Card from '../components/ui/Card/Card';
+import { Link, useLocation } from 'react-router-dom';
+
+import styles from './PreVerificationPage.module.css';
 import Alert from '../components/ui/Alert/Alert';
 import Button from '../components/ui/Button/Button';
+import Card from '../components/ui/Card/Card';
 
 const PreVerificationPage: React.FC = () => {
   const location = useLocation();
@@ -57,7 +58,7 @@ const PreVerificationPage: React.FC = () => {
             </h3>
             <ol className={styles.instructionsList}>
               <li>Revisa tu bandeja de entrada (y la carpeta de spam)</li>
-              <li>Abre el correo con asunto "Verifica tu dirección de correo electrónico"</li>
+              <li>Abre el correo con asunto &quot;Verifica tu dirección de correo electrónico&quot;</li>
               <li>Haz clic en el botón o enlace de verificación</li>
               <li>¡Listo! Podrás iniciar sesión inmediatamente</li>
             </ol>
@@ -69,9 +70,18 @@ const PreVerificationPage: React.FC = () => {
               Información importante:
             </h3>
             <ul className={styles.infoList}>
-              <li><FaClock className={styles.listItemIcon} /> El correo puede tardar hasta 5 minutos en llegar</li>
-              <li><FaEnvelopeOpenText className={styles.listItemIcon} /> El enlace de verificación estará activo durante 24 horas</li>
-              <li><FaLock className={styles.listItemIcon} /> No podrás iniciar sesión hasta verificar tu correo</li>
+              <li>
+                <FaClock className={styles.listItemIcon} /> El correo puede tardar hasta 5 minutos
+                en llegar
+              </li>
+              <li>
+                <FaEnvelopeOpenText className={styles.listItemIcon} /> El enlace de verificación
+                estará activo durante 24 horas
+              </li>
+              <li>
+                <FaLock className={styles.listItemIcon} /> No podrás iniciar sesión hasta verificar
+                tu correo
+              </li>
             </ul>
           </div>
 
@@ -82,11 +92,7 @@ const PreVerificationPage: React.FC = () => {
               </Button>
             </Link>
 
-            <Link
-              to="/resend-verification"
-              state={{ email }}
-              className={styles.resendLink}
-            >
+            <Link to="/resend-verification" state={{ email }} className={styles.resendLink}>
               No recibí el correo de verificación
             </Link>
           </div>

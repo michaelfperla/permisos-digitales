@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -20,15 +21,23 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
+          // Always log proxy errors (critical information)
           proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
+            console.error('Proxy error:', err); // Use console.error for errors
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-          });
+
+          // Conditional logging for request/response details
+          // To enable, run your dev server like: DEBUG_PROXY=true npm run dev
+          const DEBUG_PROXY = process.env.VITE_DEBUG_PROXY === 'true' || process.env.DEBUG_PROXY === 'true';
+
+          if (DEBUG_PROXY) {
+            proxy.on('proxyReq', (proxyReq, req, _res) => {
+              console.log(`[Proxy Req]: ${req.method} ${req.url}`);
+            });
+            proxy.on('proxyRes', (proxyRes, req, _res) => {
+              console.log(`[Proxy Res]: ${proxyRes.statusCode} ${req.url}`);
+            });
+          }
         },
       }
     }

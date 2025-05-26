@@ -65,5 +65,14 @@
   .withPadding {
     padding-left: var(--space-fluid-1);
     padding-right: var(--space-fluid-1);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .fluid,
+  .fixed {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }

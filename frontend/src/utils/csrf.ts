@@ -19,7 +19,7 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
   }
 
   try {
-    console.log('Fetching fresh CSRF token from server');
+    console.info('Fetching fresh CSRF token from server');
 
     // In development, use the Vite proxy which forwards requests to the backend
     // In production, use the environment variable or default to relative path
@@ -28,11 +28,11 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       ? '/api/auth/csrf-token' // Use relative path for proxy in development
       : `${import.meta.env.VITE_API_URL || ''}/api/auth/csrf-token`; // Use env var or relative path in production
 
-    console.log('Fetching CSRF token from:', csrfEndpoint);
+    console.info('Fetching CSRF token from:', csrfEndpoint);
 
     // Make a direct request to the CSRF token endpoint
     const response = await axios.get<any>(csrfEndpoint, {
-      withCredentials: true
+      withCredentials: true,
     });
 
     // Check different possible response structures
@@ -92,7 +92,7 @@ export const addCsrfTokenInterceptor = (axiosInstance: any) => {
     },
     (error: any) => {
       return Promise.reject(error);
-    }
+    },
   );
 };
 
@@ -107,8 +107,8 @@ export const handleCsrfError = async (error: any): Promise<boolean> => {
     error.response &&
     (error.response.status === 403 || error.response.status === 419) &&
     (error.response.data?.message?.includes('CSRF') ||
-     error.response.data?.error?.includes('CSRF') ||
-     error.response.statusText?.includes('CSRF'));
+      error.response.data?.error?.includes('CSRF') ||
+      error.response.statusText?.includes('CSRF'));
 
   if (isCsrfError) {
     console.warn('CSRF token validation failed. Refreshing token...');

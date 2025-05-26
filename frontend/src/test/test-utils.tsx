@@ -1,38 +1,50 @@
-import React, { ReactElement } from 'react';
+// frontend/src/test/test-utils.tsx
 import { render, RenderOptions } from '@testing-library/react';
+import React, { ReactElement, ReactNode } from 'react'; 
 import { BrowserRouter } from 'react-router-dom';
-import AuthContext from '../contexts/AuthContext';
-import { ToastProvider } from '../contexts/ToastContext';
-import { mockUser } from './mocks/authService';
 import { vi } from 'vitest';
 
-// Create a function to get a fresh auth context value for each test
-const createMockAuthContextValue = (initialState = { isAuthenticated: true }) => {
-  // Initialize session storage with user if authenticated
-  if (initialState.isAuthenticated && !sessionStorage.getItem('user')) {
-    sessionStorage.setItem('user', JSON.stringify(mockUser));
-  }
+import { mockUser } from './mocks/authService'; 
+// Ensure this alias matches your actual context export
+import { UserAuthContext as AuthContext, UserAuthContextType as AuthContextType } from '../shared/contexts/AuthContext';
+import { ToastProvider } from '../shared/contexts/ToastContext';
 
-  // Get user from session storage or use mock user
+// Define the initial state type for the hook
+interface UseMockAuthOptions {
+  isAuthenticatedByDefault?: boolean; 
+  initialUser?: any; 
+}
+
+// Custom Hook to provide mock auth context value
+const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
+  const { isAuthenticatedByDefault = true, initialUser = mockUser } = options || {};
+
   const getUserFromSession = () => {
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       try {
         return JSON.parse(userJson);
-      } catch (e) {
+      } catch (ignore) { // Changed _e to ignore
+        sessionStorage.removeItem('user'); 
         return null;
       }
     }
     return null;
   };
 
-  // Set initial user state
-  const [user, setUserState] = React.useState(getUserFromSession());
-  const [isAuthenticated, setIsAuthenticated] = React.useState(!!user);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
+  const initialAuthUser = isAuthenticatedByDefault ? (getUserFromSession() || initialUser) : null;
 
-  // Update session storage when user changes
+  if (isAuthenticatedByDefault && initialAuthUser && !sessionStorage.getItem('user')) {
+    sessionStorage.setItem('user', JSON.stringify(initialAuthUser));
+  } else if (!isAuthenticatedByDefault) {
+    sessionStorage.removeItem('user'); 
+  }
+
+  const [user, setUserState] = React.useState<any | null>(initialAuthUser); 
+  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(!!initialAuthUser);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string | null>(null); 
+
   React.useEffect(() => {
     if (user) {
       sessionStorage.setItem('user', JSON.stringify(user));
@@ -41,83 +53,57 @@ const createMockAuthContextValue = (initialState = { isAuthenticated: true }) =>
     }
   }, [user]);
 
-  // Login implementation
-  const login = vi.fn().mockImplementation((email, password) => {
+  const login = vi.fn().mockImplementation(async (email, password) => {
     setIsLoading(true);
-
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (email === 'test@example.com' && password === 'password123') {
-          setUserState(mockUser);
-          setIsAuthenticated(true);
-          setIsLoading(false);
-          resolve({
-            success: true,
-            user: mockUser,
-            message: 'Login successful'
-          });
-        } else {
-          setError('Invalid email or password');
-          setIsLoading(false);
-          resolve({
-            success: false,
-            user: null,
-            message: 'Invalid email or password'
-          });
-        }
-      }, 10); // Small timeout to simulate async
-    });
+    setError(null);
+    await new Promise(resolve => setTimeout(resolve, 10)); 
+    if (email === 'test@example.com' && password === 'password123') {
+      const loggedInUser = initialUser || mockUser; 
+      setUserState(loggedInUser);
+      setIsAuthenticated(true);
+      setIsLoading(false);
+      return { success: true, user: loggedInUser, message: 'Login successful' };
+    } else {
+      setError('Invalid email or password');
+      setIsLoading(false);
+      return { success: false, user: null, message: 'Invalid email or password' };
+    }
   });
 
-  // Logout implementation
-  const logout = vi.fn().mockImplementation(() => {
+  const logout = vi.fn().mockImplementation(async () => {
     setIsLoading(true);
-
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setUserState(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        resolve({ success: true, message: 'Logout successful' });
-      }, 10); // Small timeout to simulate async
-    });
+    setError(null);
+    await new Promise(resolve => setTimeout(resolve, 10));
+    setUserState(null);
+    setIsAuthenticated(false);
+    setIsLoading(false);
+    return { success: true, message: 'Logout successful' };
   });
 
-  // Register implementation
-  const register = vi.fn().mockImplementation(() => {
+  const register = vi.fn().mockImplementation(async () => {
     setIsLoading(true);
-
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setIsLoading(false);
-        resolve({ success: true, user: mockUser, message: 'Registration successful' });
-      }, 10); // Small timeout to simulate async
-    });
+    setError(null);
+    await new Promise(resolve => setTimeout(resolve, 10));
+    setIsLoading(false);
+    return { success: true, user: mockUser, message: 'Registration successful' };
   });
 
-  // Check auth implementation
-  const checkAuth = vi.fn().mockImplementation(() => {
+  const checkAuth = vi.fn().mockImplementation(async () => {
     setIsLoading(true);
-
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const currentUser = getUserFromSession();
-        setUserState(currentUser);
-        setIsAuthenticated(!!currentUser);
-        setIsLoading(false);
-        resolve();
-      }, 10); // Small timeout to simulate async
-    });
+    setError(null);
+    await new Promise(resolve => setTimeout(resolve, 10));
+    const currentUser = getUserFromSession();
+    setUserState(currentUser);
+    setIsAuthenticated(!!currentUser);
+    setIsLoading(false);
+    return currentUser;
   });
 
-  // Clear error implementation
   const clearError = vi.fn().mockImplementation(() => {
     setError(null);
   });
+
+  const resendVerificationEmail = vi.fn().mockResolvedValue({ success: true, message: 'Verification email sent' });
 
   return {
     isAuthenticated,
@@ -129,61 +115,30 @@ const createMockAuthContextValue = (initialState = { isAuthenticated: true }) =>
     checkAuth,
     error,
     clearError,
-    // Add setUser for tests that need to directly manipulate the user state
-    setUser: setUserState
-  };
-};
-
-// Custom render function that includes providers
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  // Create a fresh auth context value for each render
-  const mockAuthContextValue = createMockAuthContextValue();
-
-  return (
-    <BrowserRouter>
-      <AuthContext.Provider value={mockAuthContextValue}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </AuthContext.Provider>
-    </BrowserRouter>
-  );
+    setUser: setUserState, 
+    resendVerificationEmail,
+  } as AuthContextType; 
 };
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  authState?: { isAuthenticated: boolean };
+  authContextProps?: UseMockAuthOptions; 
 }
 
-const customRender = (
-  ui: ReactElement,
-  options?: CustomRenderOptions,
-) => {
-  // Create a custom wrapper with the provided auth state
-  const CustomWrapper = ({ children }: { children: React.ReactNode }) => {
-    const mockAuthContextValue = createMockAuthContextValue(options?.authState);
-
+const customRender = (ui: ReactElement, options?: CustomRenderOptions) => {
+  const WrapperComponent = ({ children }: { children: ReactNode }) => {
+    const authValue = useMockAuthContext(options?.authContextProps);
     return (
       <BrowserRouter>
-        <AuthContext.Provider value={mockAuthContextValue}>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+        <AuthContext.Provider value={authValue}>
+          <ToastProvider>{children}</ToastProvider>
         </AuthContext.Provider>
       </BrowserRouter>
     );
   };
 
-  // Use the custom wrapper if authState is provided, otherwise use the default wrapper
-  const wrapper = options?.authState ? CustomWrapper : AllTheProviders;
-
-  // Remove authState from options to avoid passing it to render
-  const { authState, ...renderOptions } = options || {};
-
-  return render(ui, { wrapper, ...renderOptions });
+  return render(ui, { wrapper: WrapperComponent, ...options });
 };
 
-// Re-export everything from testing-library
 export * from '@testing-library/react';
 
-// Override render method
 export { customRender as render };

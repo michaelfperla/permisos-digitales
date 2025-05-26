@@ -5,9 +5,9 @@ const api: AxiosInstance = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
-    'X-Portal-Type': 'admin'
+    'X-Portal-Type': 'admin',
   },
-  withCredentials: true // Include cookies for session authentication
+  withCredentials: true, // Include cookies for session authentication
 });
 
 // Function to get CSRF token
@@ -34,10 +34,7 @@ export const getCsrfToken = async (): Promise<string> => {
 api.interceptors.request.use(
   async (config: AxiosRequestConfig) => {
     // Only add CSRF token for mutating requests (POST, PUT, PATCH, DELETE)
-    if (
-      config.method &&
-      ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
-    ) {
+    if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
       try {
         const token = await getCsrfToken();
         if (config.headers) {
@@ -53,7 +50,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle common errors
@@ -64,23 +61,19 @@ api.interceptors.response.use(
   async (error) => {
     // Skip handling for canceled requests
     if (axios.isCancel(error)) {
-      console.log('Request canceled:', error.message);
+      console.info('Request canceled:', error.message);
       return Promise.reject(error);
     }
 
     // Handle CSRF token errors
-    if (
-      error.response &&
-      error.response.status === 403
-    ) {
+    if (error.response && error.response.status === 403) {
       // Check for CSRF error in various response formats
       const errorData = error.response.data;
       const isCsrfError =
         (typeof errorData === 'object' &&
           (errorData.error?.toLowerCase().includes('csrf') ||
-           errorData.message?.toLowerCase().includes('csrf'))) ||
-        (typeof errorData === 'string' &&
-          errorData.toLowerCase().includes('csrf'));
+            errorData.message?.toLowerCase().includes('csrf'))) ||
+        (typeof errorData === 'string' && errorData.toLowerCase().includes('csrf'));
 
       if (isCsrfError) {
         console.error('CSRF token error:', error.response.data);
@@ -98,7 +91,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

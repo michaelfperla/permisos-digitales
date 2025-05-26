@@ -1,24 +1,24 @@
-import React, { useState, FormEvent, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
 import styles from './Form.module.css';
-import useAuth from '../../hooks/useAuth';
-import { useToast } from '../../contexts/ToastContext';
+import { useUserAuth as useAuth } from '../../shared/hooks/useAuth';
+import { useToast } from '../../shared/hooks/useToast';
+import { loginSchema, LoginFormData } from '../../shared/schemas/auth.schema';
 import { debugLog, errorLog } from '../../utils/debug';
-import Button from '../../components/ui/Button/Button';
-import Alert from '../../components/ui/Alert/Alert';
+import Alert from "../ui/Alert/Alert";
+import Button from "../ui/Button/Button";
 import MobileForm, {
   MobileFormGroup,
   MobileFormLabel,
   MobileFormInput,
-  MobileFormActions
-} from '../../components/ui/MobileForm/MobileForm';
+  MobileFormActions,
+} from "../ui/MobileForm/MobileForm";
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
   const [resendVerificationSuccess, setResendVerificationSuccess] = useState(false);
@@ -34,6 +34,17 @@ const LoginForm: React.FC = () => {
   // Get the intended destination from location state, or default to dashboard
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onSubmit',
+  });
+
   // Clear auth errors when component unmounts
   useEffect(() => {
     return () => {
@@ -43,8 +54,10 @@ const LoginForm: React.FC = () => {
 
   // Handle resend verification email
   const handleResendVerification = async () => {
+    const email = getValues('email');
+
     if (!email) {
-      setEmailError('Por favor, ingresa tu correo electrónico');
+      showToast('Por favor, ingresa tu correo electrónico', 'error');
       return;
     }
 
@@ -56,11 +69,14 @@ const LoginForm: React.FC = () => {
 
       if (result.success) {
         setResendVerificationSuccess(true);
-        showToast('Correo de verificación reenviado exitosamente. Por favor, revisa tu bandeja de entrada.', 'success');
+        showToast(
+          'Correo de verificación reenviado exitosamente. Por favor, revisa tu bandeja de entrada.',
+          'success',
+        );
       } else {
         showToast(result.message || 'Error al reenviar el correo de verificación.', 'error');
       }
-    } catch (_) {
+    } catch (ignore) {
       // Ignore the specific error and just show a generic message
       showToast('Error al reenviar el correo de verificación.', 'error');
     } finally {
@@ -68,47 +84,11 @@ const LoginForm: React.FC = () => {
     }
   };
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValid = emailRegex.test(email);
-
-    if (!email) {
-      setEmailError('Falta tu correo electrónico');
-      return false;
-    } else if (!isValid) {
-      setEmailError('Escribe un correo electrónico válido');
-      return false;
-    }
-
-    setEmailError('');
-    return true;
-  };
-
-  const validatePassword = (password: string): boolean => {
-    if (!password) {
-      setPasswordError('Falta tu contraseña');
-      return false;
-    }
-
-    setPasswordError('');
-    return true;
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormData) => {
     debugLog('LoginForm', 'Login form submitted');
 
     // Clear any previous errors
     clearError();
-
-    // Validate form
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-
-    if (!isEmailValid || !isPasswordValid) {
-      debugLog('LoginForm', 'Form validation failed', { emailError, passwordError });
-      return;
-    }
 
     // Create a promise that will reject after a timeout
     const timeoutPromise = new Promise((_, reject) => {
@@ -118,11 +98,11 @@ const LoginForm: React.FC = () => {
     });
 
     try {
-      debugLog('LoginForm', `Attempting login with email: ${email}`);
+      debugLog('LoginForm', `Attempting login with email: ${data.email}`);
 
       // Race the login against the timeout
-      const loginPromise = login(email, password);
-      const success = await Promise.race([loginPromise, timeoutPromise]) as boolean;
+      const loginPromise = login(data.email, data.password);
+      const success = (await Promise.race([loginPromise, timeoutPromise])) as boolean;
 
       debugLog('LoginForm', `Login result: ${success}`);
 
@@ -146,7 +126,10 @@ const LoginForm: React.FC = () => {
 
       // Handle timeout specifically
       if (error instanceof Error && error.message === 'Login request timed out') {
-        showToast('La solicitud de inicio de sesión tardó demasiado. Por favor, inténtalo de nuevo.', 'error');
+        showToast(
+          'La solicitud de inicio de sesión tardó demasiado. Por favor, inténtalo de nuevo.',
+          'error',
+        );
       } else if (axios.isAxiosError(error)) {
         // Check for email not verified error
         const status = error.response?.status;
@@ -180,10 +163,7 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <MobileForm
-      title="Entrar"
-      onSubmit={handleSubmit}
-    >
+    <MobileForm title="Entrar" onSubmit={handleSubmit(onSubmit)}>
       {error && !isEmailNotVerified && (
         <Alert variant="error" className={styles.formAlert}>
           {error}
@@ -195,16 +175,22 @@ const LoginForm: React.FC = () => {
           <Alert variant="warning" className={styles.formAlert}>
             <h4>¡Necesitas verificar tu correo electrónico!</h4>
             <p>
-              <strong>No puedes iniciar sesión hasta verificar tu correo.</strong> Por favor, revisa tu bandeja de entrada y la carpeta de spam para encontrar el enlace de verificación que te enviamos.
+              <strong>No puedes iniciar sesión hasta verificar tu correo.</strong> Por favor, revisa
+              tu bandeja de entrada y la carpeta de spam para encontrar el enlace de verificación
+              que te enviamos.
             </p>
             <p>
-              El correo puede tardar hasta 5 minutos en llegar. Si no lo recibiste o el enlace ya expiró (son válidos por 24 horas), puedes solicitar uno nuevo.
+              El correo puede tardar hasta 5 minutos en llegar. Si no lo recibiste o el enlace ya
+              expiró (son válidos por 24 horas), puedes solicitar uno nuevo.
             </p>
 
             {resendVerificationSuccess ? (
               <div className={styles.successMessage}>
                 <p>¡Correo de verificación reenviado exitosamente!</p>
-                <p>El correo puede tardar hasta 5 minutos en llegar. Por favor, revisa tu bandeja de entrada y también tu carpeta de spam.</p>
+                <p>
+                  El correo puede tardar hasta 5 minutos en llegar. Por favor, revisa tu bandeja de
+                  entrada y también tu carpeta de spam.
+                </p>
                 <p>Recuerda que el enlace estará activo durante 24 horas.</p>
               </div>
             ) : (
@@ -229,9 +215,8 @@ const LoginForm: React.FC = () => {
         <MobileFormInput
           type="email"
           id="email"
-          error={emailError}
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+          error={errors.email?.message}
+          {...register('email')}
           required
           autoComplete="email"
           inputMode="email"
@@ -245,9 +230,8 @@ const LoginForm: React.FC = () => {
         <MobileFormInput
           type="password"
           id="password"
-          error={passwordError}
-          value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+          error={errors.password?.message}
+          {...register('password')}
           required
           autoComplete="current-password"
         />
@@ -257,11 +241,7 @@ const LoginForm: React.FC = () => {
         {/* Empty button to maintain consistent layout with RegisterForm */}
         <div className="hidden-xs"></div>
 
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={isLoading}
-        >
+        <Button type="submit" variant="primary" disabled={isLoading}>
           {isLoading ? (
             <>
               Entrando...
@@ -276,16 +256,18 @@ const LoginForm: React.FC = () => {
       <div className="mobile-form-links">
         <div className="mobile-form-links-section">
           <p>
-            <Link to="/forgot-password" className="mobile-link-minor touch-target">¿Olvidaste tu contraseña?</Link>
+            <Link to="/forgot-password" className="mobile-link-minor touch-target">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </p>
         </div>
 
         <div className="mobile-form-links-section">
-          <p className="mobile-text-muted">
-            ¿No tienes cuenta?
-          </p>
+          <p className="mobile-text-muted">¿No tienes cuenta?</p>
           <p>
-            <Link to="/register" className="mobile-link-action touch-target">Crear cuenta</Link>
+            <Link to="/register" className="mobile-link-action touch-target">
+              Crear cuenta
+            </Link>
           </p>
         </div>
       </div>

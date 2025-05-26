@@ -1,0 +1,70 @@
+/* 
+ * Icon Component Styles
+ * Provides consistent styling for icons throughout the application
+ */
+
+.iconBase {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  flex-shrink: 0;
+  position: relative;
+  width: 1em;
+  height: 1em;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Ensure SVGs within the icon span behave predictably */
+.iconBase svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Predefined sizes using CSS variables from variables.css */
+.sizeXs {
+  font-size: var(--font-size-sm, 0.75rem);
+}
+
+.sizeSm {
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.sizeMd {
+  font-size: var(--font-size-base, 1rem);
+}
+
+.sizeLg {
+  font-size: var(--font-size-lg, 1.25rem);
+}
+
+.sizeXl {
+  font-size: 1.5rem;
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 360px) {
+  .sizeXs {
+    font-size: 0.7rem;
+  }
+
+  .sizeSm {
+    font-size: 0.8rem;
+  }
+
+  .sizeMd {
+    font-size: 0.95rem;
+  }
+
+  .sizeLg {
+    font-size: 1.15rem;
+  }
+
+  .sizeXl {
+    font-size: 1.35rem;
+  }
+}

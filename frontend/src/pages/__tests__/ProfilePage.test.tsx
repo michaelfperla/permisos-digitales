@@ -1,19 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import ProfilePage from '../ProfilePage';
-import userService from '../../services/userService';
-import { mockUser } from '../../test/mocks/authService';
+import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import AuthContext from '../../contexts/AuthContext';
 import { ToastProvider } from '../../contexts/ToastContext';
-import { BrowserRouter } from 'react-router-dom';
+import userService from '../../services/userService';
+import { mockUser } from '../../test/mocks/authService';
+import ProfilePage from '../ProfilePage';
+
 
 // Mock userService
 vi.mock('../../services/userService', () => ({
   default: {
     getProfile: vi.fn(),
     updateProfile: vi.fn(),
-    changePassword: vi.fn()
-  }
+    changePassword: vi.fn(),
+  },
 }));
 
 // Mock ChangePasswordForm component
@@ -21,16 +23,12 @@ vi.mock('../../components/ChangePasswordForm', () => ({
   default: ({ onSuccess }: { onSuccess: () => void }) => {
     return (
       <div data-testid="mock-change-password-form">
-        <button
-          type="button"
-          data-testid="mock-success-button"
-          onClick={onSuccess}
-        >
+        <button type="button" data-testid="mock-success-button" onClick={onSuccess}>
           Mock Success
         </button>
       </div>
     );
-  }
+  },
 }));
 
 // Mock the toast context
@@ -38,10 +36,10 @@ const mockShowToast = vi.fn();
 vi.mock('../../contexts/ToastContext', async () => {
   const actual = await vi.importActual('../../contexts/ToastContext');
   return {
-    ...actual as any,
+    ...(actual as any),
     useToast: () => ({
-      showToast: mockShowToast
-    })
+      showToast: mockShowToast,
+    }),
   };
 });
 
@@ -49,7 +47,7 @@ describe('ProfilePage', () => {
   const updatedUser = {
     ...mockUser,
     first_name: 'Updated',
-    last_name: 'Name'
+    last_name: 'Name',
   };
 
   // Create a custom auth context for testing
@@ -64,21 +62,22 @@ describe('ProfilePage', () => {
       logout: vi.fn(),
       checkAuth: vi.fn(),
       clearError: vi.fn(),
-      setUser: vi.fn()
+      setUser: vi.fn(),
     };
   };
 
   // Custom render function with auth context
-  const customRender = (ui: React.ReactElement, { authContext = createAuthContext(), ...options } = {}) => {
+  const customRender = (
+    ui: React.ReactElement,
+    { authContext = createAuthContext(), ...options } = {},
+  ) => {
     return render(
       <BrowserRouter>
         <AuthContext.Provider value={authContext}>
-          <ToastProvider>
-            {ui}
-          </ToastProvider>
+          <ToastProvider>{ui}</ToastProvider>
         </AuthContext.Provider>
       </BrowserRouter>,
-      options
+      options,
     );
   };
 
@@ -89,7 +88,7 @@ describe('ProfilePage', () => {
     userService.updateProfile = vi.fn().mockResolvedValue({
       success: true,
       user: updatedUser,
-      message: 'Profile updated successfully'
+      message: 'Profile updated successfully',
     });
   });
 
@@ -116,7 +115,11 @@ describe('ProfilePage', () => {
     customRender(<ProfilePage />, { authContext });
 
     // Check if login message is displayed
-    expect(screen.getByText('No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText('Iniciar Sesión')).toBeInTheDocument();
 
     // Verify that profile information is not displayed
@@ -194,7 +197,7 @@ describe('ProfilePage', () => {
     // Check if updateProfile was called with correct data
     expect(userService.updateProfile).toHaveBeenCalledWith({
       first_name: 'Updated',
-      last_name: 'Name'
+      last_name: 'Name',
     });
 
     // Wait for the update to complete
@@ -215,7 +218,7 @@ describe('ProfilePage', () => {
     userService.updateProfile = vi.fn().mockResolvedValue({
       success: false,
       user: null,
-      message: 'Invalid profile data'
+      message: 'Invalid profile data',
     });
 
     customRender(<ProfilePage />);
@@ -269,12 +272,12 @@ describe('ProfilePage', () => {
   it('should show loading state during form submission', async () => {
     // Use a delayed promise to simulate a slow API call
     userService.updateProfile = vi.fn().mockImplementation(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
             success: true,
             user: updatedUser,
-            message: 'Profile updated successfully'
+            message: 'Profile updated successfully',
           });
         }, 10);
       });

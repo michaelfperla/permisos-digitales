@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { FaCreditCard, FaInfoCircle, FaCopy, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCreditCard, FaCopy, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+
 import styles from './TestCardInfo.module.css';
+import Icon from '../../shared/components/ui/Icon';
 
 interface TestCardInfoProps {
-  onSelectCard: (cardNumber: string, name: string, expMonth: string, expYear: string, cvc: string) => void;
+  onSelectCard: (
+    _cardNumber: string,
+    _name: string,
+    _expMonth: string,
+    _expYear: string,
+    _cvc: string,
+  ) => void;
 }
 
 const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
@@ -18,7 +26,7 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
       expYear: '25',
       cvc: '123',
       description: 'Tarjeta aprobada',
-      recommended: true
+      recommended: true,
     },
     {
       type: 'Mastercard',
@@ -28,7 +36,7 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
       expYear: '25',
       cvc: '123',
       description: 'Tarjeta aprobada',
-      recommended: false
+      recommended: false,
     },
     {
       type: 'Visa',
@@ -38,8 +46,8 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
       expYear: '25',
       cvc: '123',
       description: 'Tarjeta rechazada',
-      recommended: false
-    }
+      recommended: false,
+    },
   ];
 
   const copyToClipboard = (text: string, field: string) => {
@@ -48,25 +56,24 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const handleSelectCard = (card: typeof testCards[0]) => {
-    onSelectCard(
-      card.number.replace(/\s/g, ''),
-      card.name,
-      card.expMonth,
-      card.expYear,
-      card.cvc
-    );
+  const handleSelectCard = (card: (typeof testCards)[0]) => {
+    onSelectCard(card.number.replace(/\s/g, ''), card.name, card.expMonth, card.expYear, card.cvc);
   };
 
   return (
     <div className={styles.testCardContainer}>
       <div className={styles.testCardHeader}>
-        <FaExclamationTriangle className={styles.warningIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.warningIcon}
+          size="lg"
+          color="var(--color-warning)"
+        />
         <h3>¡IMPORTANTE! Tarjetas de Prueba</h3>
       </div>
       <p className={styles.testCardDescription}>
-        <strong>Para pruebas, DEBES usar la tarjeta 4242 4242 4242 4242</strong>. Otras tarjetas pueden ser rechazadas.
-        No se realizará ningún cargo real.
+        <strong>Para pruebas, DEBES usar la tarjeta 4242 4242 4242 4242</strong>. Otras tarjetas
+        pueden ser rechazadas. No se realizará ningún cargo real.
       </p>
       <div className={styles.testCardList}>
         {testCards.map((card, index) => (
@@ -76,15 +83,22 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
           >
             {card.recommended && (
               <div className={styles.recommendedBadge}>
-                <FaExclamationTriangle /> Usar esta tarjeta
+                <Icon
+                  IconComponent={FaExclamationTriangle}
+                  size="sm"
+                  color="var(--color-warning)"
+                />{' '}
+                Usar esta tarjeta
               </div>
             )}
             <div className={styles.testCardTop}>
               <div className={styles.testCardType}>
-                <FaCreditCard className={styles.cardIcon} />
+                <Icon IconComponent={FaCreditCard} className={styles.cardIcon} size="md" />
                 <span>{card.type}</span>
               </div>
-              <div className={`${styles.testCardStatus} ${card.recommended ? styles.recommendedStatus : ''}`}>
+              <div
+                className={`${styles.testCardStatus} ${card.recommended ? styles.recommendedStatus : ''}`}
+              >
                 {card.description}
               </div>
             </div>
@@ -99,7 +113,11 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
                     onClick={() => copyToClipboard(card.number, `number-${index}`)}
                     title="Copiar número"
                   >
-                    {copied === `number-${index}` ? <FaCheck /> : <FaCopy />}
+                    {copied === `number-${index}` ? (
+                      <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />
+                    ) : (
+                      <Icon IconComponent={FaCopy} size="sm" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -109,7 +127,9 @@ const TestCardInfo: React.FC<TestCardInfoProps> = ({ onSelectCard }) => {
               </div>
               <div className={styles.testCardField}>
                 <span className={styles.fieldLabel}>Expiración:</span>
-                <span className={styles.fieldValue}>{card.expMonth}/{card.expYear}</span>
+                <span className={styles.fieldValue}>
+                  {card.expMonth}/{card.expYear}
+                </span>
               </div>
               <div className={styles.testCardField}>
                 <span className={styles.fieldLabel}>CVC:</span>

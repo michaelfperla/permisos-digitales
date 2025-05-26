@@ -132,3 +132,9 @@
   font-size: 1rem;
   color: #155724;
 }
+
+.fieldError {
+  margin-top: 4px;
+  color: #a72b31;
+  font-size: 0.75rem;
+}

@@ -1,0 +1,290 @@
+/* src/components/navigation/AppHeaderMobile/AppHeaderMobile.module.css */
+.headerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-neutral-200);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-fixed); /* e.g., 1000 */
+  padding: 0 var(--space-3);
+  height: var(--mobile-header-height, 56px); /* Slightly shorter for elegance */
+  box-sizing: border-box;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Optional: slightly more prominent shadow when menu is open */
+.headerBar.menuIsOpenActually {
+  /* Used when this component's panel is open */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  /* TextLogo component should handle its own scaling/styles */
+}
+
+.menuToggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* Touch target */
+  height: 40px; /* Touch target */
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-700);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%; /* Circular button */
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.menuToggleButton:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary);
+}
+
+.menuToggleButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  background-color: var(--color-neutral-100);
+}
+
+.hamburgerIcon {
+  font-size: 1.3rem; /* Elegant size */
+  display: block; /* Remove extra space */
+}
+
+/* --- Menu Panel --- */
+.menuPanelContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-modal); /* Higher than headerBar */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.menuPanelContainer.isOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.menuOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4); /* Slightly softer overlay */
+  z-index: 1;
+  cursor: pointer;
+}
+
+.menuPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  max-width: 85vw; /* Ensure it doesn't take full screen on slightly larger mobiles */
+  height: 100%;
+  background-color: var(--color-white);
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother ease */
+  z-index: 2;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+.menuPanelContainer.isOpen .menuPanel {
+  transform: translateX(0);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-3); /* Same horizontal padding as headerBar */
+  height: var(--mobile-header-height, 56px);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--color-neutral-200);
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.panelLogoContainer {
+  opacity: 0.8; /* Slightly muted logo in panel */
+}
+
+.panelCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.panelCloseButton:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary);
+}
+
+.panelCloseButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  background-color: var(--color-neutral-100);
+}
+
+.closeIcon {
+  font-size: 1.4rem; /* Elegant size */
+  display: block;
+}
+
+.linkList {
+  list-style: none;
+  padding: var(--space-2) 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto; /* Allow scrolling if many links */
+}
+
+.linkList li {
+  margin: 0;
+}
+
+.navLinkBase {
+  display: flex; /* For icon alignment */
+  align-items: center;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+  font-weight: var(--font-weight-medium);
+}
+
+.navLinkText {
+  /* Specific class for text-style links */
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-neutral-800);
+  font-size: var(--font-size-base); /* 1rem */
+  border-left: 4px solid transparent;
+}
+.navLinkText:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary);
+}
+.navLinkText.activeLink {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--color-primary-lightest);
+  border-left-color: var(--color-primary);
+}
+
+.navButton {
+  /* Common styles for button-like links */
+  width: calc(100% - (2 * var(--space-3))); /* Full width minus padding */
+  margin: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  text-align: center;
+  justify-content: center; /* Center text for button */
+  font-size: var(--font-size-sm); /* 0.875rem */
+  font-weight: var(--font-weight-semibold);
+  border-width: 1px;
+  border-style: solid;
+}
+
+.navButtonPrimary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+.navButtonPrimary:hover {
+  background-color: var(--color-primary-dark);
+  color: var(--color-white); /* Ensure text color remains on hover */
+}
+
+.navButtonSecondary {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.navButtonSecondary:hover {
+  background-color: var(--color-primary-lightest);
+  color: var(--color-primary-dark); /* Ensure text color remains on hover */
+}
+
+.navLinkIcon {
+  margin-right: var(--space-3);
+  font-size: 1.1em; /* Relative to link font size */
+  color: var(--color-neutral-500);
+  width: 20px; /* Fixed width for alignment */
+  text-align: center;
+}
+.activeLink .navLinkIcon {
+  color: var(--color-primary);
+}
+
+.panelFooter {
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-neutral-200);
+  margin-top: auto;
+  flex-shrink: 0; /* Prevent footer from shrinking */
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--breakpoint-xs)) {
+  /* 360px */
+  .headerBar,
+  .panelHeader {
+    height: var(--mobile-header-height-sm, 52px);
+    padding: 0 var(--space-2);
+  }
+  .menuToggleButton,
+  .panelCloseButton {
+    width: 36px;
+    height: 36px;
+  }
+  .hamburgerIcon {
+    font-size: 1.2rem;
+  }
+  .closeIcon {
+    font-size: 1.3rem;
+  }
+  .menuPanel {
+    width: 260px;
+  }
+  .navLinkText {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+  .navButton {
+    margin: var(--space-2);
+    width: calc(100% - (2 * var(--space-2)));
+    padding: var(--space-2);
+  }
+}

@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
-import authService from '../../services/authService';
-import { useToast } from '../../contexts/ToastContext';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+
 import styles from './ChangePasswordForm.module.css';
+import authService from '../../services/authService';
+import { useToast } from '../../shared/hooks/useToast';
+import { changePasswordSchema, ChangePasswordFormData } from '../../shared/schemas/auth.schema';
 import Button from '../ui/Button/Button';
 
 interface ChangePasswordFormProps {
@@ -11,37 +15,30 @@ interface ChangePasswordFormProps {
   onCancel?: () => void;
 }
 
-const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
-  onSuccess,
-  onCancel
-}) => {
+const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ onSuccess, onCancel }) => {
   const { showToast } = useToast();
-  const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [errors, setErrors] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setError,
+  } = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    mode: 'onChange',
   });
 
   // Set up the mutation for changing password
   const passwordChangeMutation = useMutation({
-    mutationFn: (data: { currentPassword: string, newPassword: string }) =>
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
       authService.changePassword(data.currentPassword, data.newPassword),
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       showToast('Contraseña cambiada con éxito.', 'success');
 
       // Reset form
-      setFormData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
+      reset();
 
       // Call onSuccess callback if provided
       if (onSuccess) {
@@ -49,86 +46,30 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
       }
     },
     onError: (error) => {
-      const message = axios.isAxiosError(error) && error.response?.data?.message
-        ? error.response.data.message
-        : error instanceof Error ? error.message : 'Error al cambiar la contraseña.';
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : error instanceof Error
+            ? error.message
+            : 'Error al cambiar la contraseña.';
 
       showToast(message, 'error');
 
       // If the error is related to the current password being incorrect
-      if (message.toLowerCase().includes('actual') ||
-          message.toLowerCase().includes('current')) {
-        setErrors(prev => ({
-          ...prev,
-          currentPassword: 'La contraseña actual es incorrecta'
-        }));
+      if (message.toLowerCase().includes('actual') || message.toLowerCase().includes('current')) {
+        setError('currentPassword', {
+          type: 'manual',
+          message: 'La contraseña actual es incorrecta',
+        });
       }
-    }
+    },
   });
 
-  const validateForm = (): boolean => {
-    const newErrors = {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    };
-    let isValid = true;
-
-    // Validate current password
-    if (!formData.currentPassword) {
-      newErrors.currentPassword = 'La contraseña actual es requerida';
-      isValid = false;
-    }
-
-    // Validate new password
-    if (!formData.newPassword) {
-      newErrors.newPassword = 'La nueva contraseña es requerida';
-      isValid = false;
-    } else if (formData.newPassword.length < 8) {
-      newErrors.newPassword = 'La contraseña debe tener al menos 8 caracteres';
-      isValid = false;
-    }
-
-    // Validate confirm password
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Debe confirmar la nueva contraseña';
-      isValid = false;
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user types
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  const onSubmit = (data: ChangePasswordFormData) => {
     // Call the mutation with the form data
     passwordChangeMutation.mutate({
-      currentPassword: formData.currentPassword,
-      newPassword: formData.newPassword
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
     });
   };
 
@@ -136,7 +77,7 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
     <div className={styles.formContainer}>
       <h2 className={styles.formTitle}>Cambiar Contraseña</h2>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
         <div className={styles.formGroup}>
           <label htmlFor="currentPassword" className={styles.formLabel}>
             Contraseña Actual
@@ -144,14 +85,12 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
           <input
             type="password"
             id="currentPassword"
-            name="currentPassword"
-            value={formData.currentPassword}
-            onChange={handleInputChange}
             className={`${styles.formInput} ${errors.currentPassword ? styles.inputError : ''}`}
             disabled={passwordChangeMutation.isPending}
+            {...register('currentPassword')}
           />
           {errors.currentPassword && (
-            <p className={styles.errorText}>{errors.currentPassword}</p>
+            <p className={styles.errorText}>{errors.currentPassword.message}</p>
           )}
         </div>
 
@@ -162,19 +101,13 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
           <input
             type="password"
             id="newPassword"
-            name="newPassword"
-            value={formData.newPassword}
-            onChange={handleInputChange}
             className={`${styles.formInput} ${errors.newPassword ? styles.inputError : ''}`}
             disabled={passwordChangeMutation.isPending}
             data-testid="new-password-input"
+            {...register('newPassword')}
           />
-          {errors.newPassword && (
-            <p className={styles.errorText}>{errors.newPassword}</p>
-          )}
-          <p className={styles.helperText}>
-            La contraseña debe tener al menos 8 caracteres
-          </p>
+          {errors.newPassword && <p className={styles.errorText}>{errors.newPassword.message}</p>}
+          <p className={styles.helperText}>La contraseña debe tener al menos 8 caracteres</p>
         </div>
 
         <div className={styles.formGroup}>
@@ -184,15 +117,13 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
           <input
             type="password"
             id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
             className={`${styles.formInput} ${errors.confirmPassword ? styles.inputError : ''}`}
             disabled={passwordChangeMutation.isPending}
             data-testid="confirm-password-input"
+            {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <p className={styles.errorText}>{errors.confirmPassword}</p>
+            <p className={styles.errorText}>{errors.confirmPassword.message}</p>
           )}
         </div>
 

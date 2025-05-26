@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AxiosError } from 'axios';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { RenewalFormData } from '../../types/application.types';
 
 // Define mock functions for axios methods
@@ -16,10 +17,10 @@ vi.mock('axios', () => {
         get: mockGet,
         post: mockPost,
         put: mockPut,
-        delete: mockDelete
+        delete: mockDelete,
       }),
-      isAxiosError: (error: any): error is AxiosError => !!error?.isAxiosError
-    }
+      isAxiosError: (error: any): error is AxiosError => !!error?.isAxiosError,
+    },
   };
 });
 
@@ -42,18 +43,30 @@ describe('applicationService', () => {
   describe('getApplications', () => {
     it('should fetch applications successfully', async () => {
       const mockApplications = [
-        { id: '1', user_id: '123', status: 'PERMIT_READY', nombre_completo: 'Test User', marca: 'Ford' } as any,
-        { id: '2', user_id: '123', status: 'PENDING_PAYMENT', nombre_completo: 'Test User', marca: 'Toyota' } as any
+        {
+          id: '1',
+          user_id: '123',
+          status: 'PERMIT_READY',
+          nombre_completo: 'Test User',
+          marca: 'Ford',
+        } as any,
+        {
+          id: '2',
+          user_id: '123',
+          status: 'PENDING_PAYMENT',
+          nombre_completo: 'Test User',
+          marca: 'Toyota',
+        } as any,
       ];
 
       const mockResponse = {
         success: true,
         applications: mockApplications,
-        message: 'Applications retrieved successfully'
+        message: 'Applications retrieved successfully',
       };
 
       mockGet.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.getApplications();
@@ -81,17 +94,17 @@ describe('applicationService', () => {
         user_id: '123',
         status: 'PERMIT_READY',
         nombre_completo: 'Test User',
-        marca: 'Ford'
+        marca: 'Ford',
       } as any;
 
       const mockResponse = {
         success: true,
         application: mockApplication,
-        message: 'Application retrieved successfully'
+        message: 'Application retrieved successfully',
       };
 
       mockGet.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.getApplicationById('1');
@@ -116,7 +129,7 @@ describe('applicationService', () => {
     it('should create application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationData = {
@@ -128,39 +141,37 @@ describe('applicationService', () => {
         color: 'Red',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        ano_modelo: 2023
+        ano_modelo: 2023,
       };
 
       const mockResponse = {
         success: true,
         application: { id: '1', ...applicationData, status: 'PENDING_PAYMENT' } as any,
-        message: 'Application created successfully'
+        message: 'Application created successfully',
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.createApplication(applicationData);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications',
-        applicationData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications', applicationData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationData = {
         nombre_completo: 'Test User',
-        curp_rfc: 'TESU123456ABC'
+        curp_rfc: 'TESU123456ABC',
       };
 
       mockPost.mockRejectedValueOnce(new Error('Network error'));
@@ -171,11 +182,9 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Failed to create application. Please try again later.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications',
-        applicationData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications', applicationData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
   });
 
@@ -183,45 +192,43 @@ describe('applicationService', () => {
     it('should update application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
       const updateData = {
         color: 'Blue',
-        domicilio: '456 New St'
+        domicilio: '456 New St',
       };
 
       const mockResponse = {
         success: true,
         application: { id: '1', color: 'Blue', domicilio: '456 New St' } as any,
-        message: 'Application updated successfully'
+        message: 'Application updated successfully',
       };
 
       mockPut.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.updateApplication(applicationId, updateData);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPut).toHaveBeenCalledWith(
-        '/applications/1',
-        updateData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPut).toHaveBeenCalledWith('/applications/1', updateData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
       const updateData = {
-        color: 'Blue'
+        color: 'Blue',
       };
 
       // Mock API error
@@ -232,7 +239,7 @@ describe('applicationService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPut.mockRejectedValueOnce(axiosError);
 
@@ -242,22 +249,20 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Cannot update application in current status');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPut).toHaveBeenCalledWith(
-        '/applications/1',
-        updateData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPut).toHaveBeenCalledWith('/applications/1', updateData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
       const updateData = {
-        color: 'Blue'
+        color: 'Blue',
       };
 
       mockPut.mockRejectedValueOnce(new Error('Network error'));
@@ -268,11 +273,9 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Network error. Please check your connection.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPut).toHaveBeenCalledWith(
-        '/applications/1',
-        updateData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPut).toHaveBeenCalledWith('/applications/1', updateData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
   });
 
@@ -280,7 +283,7 @@ describe('applicationService', () => {
     it('should submit application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -288,11 +291,11 @@ describe('applicationService', () => {
       const mockResponse = {
         success: true,
         application: { id: '1', status: 'PROOF_SUBMITTED' } as any,
-        message: 'Application submitted successfully'
+        message: 'Application submitted successfully',
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.submitApplication(applicationId);
@@ -302,14 +305,14 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/1/submit',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -322,7 +325,7 @@ describe('applicationService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -335,14 +338,14 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/1/submit',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -358,7 +361,7 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/1/submit',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
   });
@@ -367,7 +370,7 @@ describe('applicationService', () => {
     it('should upload payment proof successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -380,29 +383,29 @@ describe('applicationService', () => {
           id: '1',
           status: 'PROOF_SUBMITTED',
           payment_proof_path: '/uploads/payment.jpg',
-          payment_reference: 'REF123'
+          payment_reference: 'REF123',
         } as any,
-        message: 'Payment proof uploaded successfully'
+        message: 'Payment proof uploaded successfully',
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
-      const result = await applicationService.uploadPaymentProof(applicationId, file, paymentReference);
+      const result = await applicationService.uploadPaymentProof(
+        applicationId,
+        file,
+        paymentReference,
+      );
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/payment-proof',
-        expect.any(FormData),
-        {
-          headers: {
-            'X-CSRF-Token': 'test-csrf-token',
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/payment-proof', expect.any(FormData), {
+        headers: {
+          'X-CSRF-Token': 'test-csrf-token',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       // Verify FormData was created correctly
       const formDataArg = mockPost.mock.calls[0][1];
@@ -426,7 +429,7 @@ describe('applicationService', () => {
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -440,16 +443,12 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Failed to upload payment proof. Please try again later.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/payment-proof',
-        expect.any(FormData),
-        {
-          headers: {
-            'X-CSRF-Token': 'test-csrf-token',
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/payment-proof', expect.any(FormData), {
+        headers: {
+          'X-CSRF-Token': 'test-csrf-token',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     });
   });
 
@@ -457,7 +456,7 @@ describe('applicationService', () => {
     it('should download permit successfully with default type', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -465,7 +464,7 @@ describe('applicationService', () => {
 
       // Mock the permit download request
       mockGet.mockResolvedValueOnce({
-        data: mockPdfContent
+        data: mockPdfContent,
       });
 
       const result = await applicationService.downloadPermit(applicationId);
@@ -474,14 +473,14 @@ describe('applicationService', () => {
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
       expect(mockGet).toHaveBeenCalledWith('/applications/1/download/permiso', {
         responseType: 'blob',
-        headers: { 'X-CSRF-Token': 'test-csrf-token' }
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
       });
     });
 
     it('should download specific document type', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -490,7 +489,7 @@ describe('applicationService', () => {
 
       // Mock the permit download request
       mockGet.mockResolvedValueOnce({
-        data: mockPdfContent
+        data: mockPdfContent,
       });
 
       const result = await applicationService.downloadPermit(applicationId, documentType);
@@ -499,14 +498,14 @@ describe('applicationService', () => {
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
       expect(mockGet).toHaveBeenCalledWith('/applications/1/download/recibo', {
         responseType: 'blob',
-        headers: { 'X-CSRF-Token': 'test-csrf-token' }
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
       });
     });
 
     it('should return mock PDF on error', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -534,7 +533,7 @@ describe('applicationService', () => {
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
       expect(mockGet).toHaveBeenCalledWith('/applications/1/permit', {
         responseType: 'blob',
-        headers: { 'X-CSRF-Token': 'test-csrf-token' }
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
       });
     });
   });
@@ -546,11 +545,11 @@ describe('applicationService', () => {
         eligible: true,
         message: 'Permit is eligible for renewal',
         daysUntilExpiration: 10,
-        expirationDate: '2023-12-31'
+        expirationDate: '2023-12-31',
       };
 
       mockGet.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.checkRenewalEligibility(applicationId);
@@ -576,7 +575,7 @@ describe('applicationService', () => {
     it('should create renewal application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -584,7 +583,7 @@ describe('applicationService', () => {
         renewal_reason: 'Need to extend permit',
         renewal_notes: 'Additional notes',
         domicilio: 'New address',
-        color: 'Blue'
+        color: 'Blue',
       };
 
       const mockResponse = {
@@ -595,7 +594,7 @@ describe('applicationService', () => {
           status: 'RENEWAL_PENDING',
           is_renewal: true,
           domicilio: 'New address',
-          color: 'Blue'
+          color: 'Blue',
         } as any,
         message: 'Renewal application created successfully',
         paymentInstructions: {
@@ -603,34 +602,32 @@ describe('applicationService', () => {
           currency: 'MXN',
           reference: 'REF-R1',
           paymentMethods: ['Bank transfer'],
-          nextSteps: ['Make payment']
-        }
+          nextSteps: ['Make payment'],
+        },
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.createRenewalApplication(applicationId, renewalData);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/renew',
-        renewalData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/renew', renewalData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
       const renewalData = {
-        renewal_reason: 'Need to extend permit'
+        renewal_reason: 'Need to extend permit',
       };
 
       // Mock API error
@@ -641,7 +638,7 @@ describe('applicationService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -651,22 +648,20 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Permit not eligible for renewal');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/renew',
-        renewalData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/renew', renewalData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
       const renewalData = {
-        renewal_reason: 'Need to extend permit'
+        renewal_reason: 'Need to extend permit',
       };
 
       mockPost.mockRejectedValueOnce(new Error('Network error'));
@@ -677,11 +672,9 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Network error. Please check your connection.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/renew',
-        renewalData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/renew', renewalData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
   });
 
@@ -689,7 +682,7 @@ describe('applicationService', () => {
     it('should submit renewal application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = 'R1';
@@ -699,13 +692,13 @@ describe('applicationService', () => {
         application: {
           id: 'R1',
           status: 'RENEWAL_SUBMITTED',
-          is_renewal: true
+          is_renewal: true,
         } as any,
-        message: 'Renewal application submitted successfully'
+        message: 'Renewal application submitted successfully',
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.submitRenewalApplication(applicationId);
@@ -715,14 +708,14 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/R1/submit-renewal',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = 'R1';
@@ -735,7 +728,7 @@ describe('applicationService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -748,14 +741,14 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/R1/submit-renewal',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = 'R1';
@@ -771,7 +764,7 @@ describe('applicationService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/applications/R1/submit-renewal',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
   });
@@ -780,34 +773,33 @@ describe('applicationService', () => {
     it('should delete application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
 
       const mockResponse = {
         success: true,
-        message: 'Application deleted successfully'
+        message: 'Application deleted successfully',
       };
 
       mockDelete.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.deleteApplication(applicationId);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockDelete).toHaveBeenCalledWith(
-        '/applications/1',
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockDelete).toHaveBeenCalledWith('/applications/1', {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -819,10 +811,9 @@ describe('applicationService', () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe('Failed to delete application. Please try again later.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockDelete).toHaveBeenCalledWith(
-        '/applications/1',
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockDelete).toHaveBeenCalledWith('/applications/1', {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
   });
 
@@ -830,7 +821,7 @@ describe('applicationService', () => {
     it('should renew application successfully', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -838,7 +829,7 @@ describe('applicationService', () => {
         domicilio: '',
         color: '',
         renewal_reason: 'Renovación regular',
-        renewal_notes: ''
+        renewal_notes: '',
       };
 
       const mockResponse = {
@@ -847,30 +838,28 @@ describe('applicationService', () => {
           id: 'R1',
           parent_application_id: '1',
           status: 'RENEWAL_PENDING',
-          is_renewal: true
+          is_renewal: true,
         } as any,
-        message: 'Application renewed successfully'
+        message: 'Application renewed successfully',
       };
 
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await applicationService.renewApplication(applicationId);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/renew',
-        expectedRenewalData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/renew', expectedRenewalData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       const applicationId = '1';
@@ -878,7 +867,7 @@ describe('applicationService', () => {
         domicilio: '',
         color: '',
         renewal_reason: 'Renovación regular',
-        renewal_notes: ''
+        renewal_notes: '',
       };
 
       mockPost.mockRejectedValueOnce(new Error('Network error'));
@@ -889,11 +878,9 @@ describe('applicationService', () => {
       expect(result.application).toEqual({});
       expect(result.message).toBe('Failed to renew application. Please try again later.');
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/applications/1/renew',
-        expectedRenewalData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/applications/1/renew', expectedRenewalData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
   });
 });

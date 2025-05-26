@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AxiosError } from 'axios';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Define mock functions for axios methods
 const mockGet = vi.fn();
@@ -15,10 +15,10 @@ vi.mock('axios', () => {
         get: mockGet,
         post: mockPost,
         put: mockPut,
-        delete: mockDelete
+        delete: mockDelete,
       }),
-      isAxiosError: (error: any): error is AxiosError => !!error?.isAxiosError
-    }
+      isAxiosError: (error: any): error is AxiosError => !!error?.isAxiosError,
+    },
   };
 });
 
@@ -29,11 +29,11 @@ const mockSessionStorage = {
   removeItem: vi.fn(),
   clear: vi.fn(),
   length: 0,
-  key: vi.fn()
+  key: vi.fn(),
 };
 
 Object.defineProperty(window, 'sessionStorage', {
-  value: mockSessionStorage
+  value: mockSessionStorage,
 });
 
 // Import authService after mocking
@@ -65,7 +65,13 @@ describe('authService', () => {
     });
 
     it('should return user object when user exists in sessionStorage', () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
       mockSessionStorage.getItem.mockReturnValueOnce(JSON.stringify(mockUser));
 
       const result = authService.getCurrentUser();
@@ -86,7 +92,13 @@ describe('authService', () => {
 
   describe('isLoggedIn', () => {
     it('should return true when user exists in sessionStorage', () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
       mockSessionStorage.getItem.mockReturnValueOnce(JSON.stringify(mockUser));
 
       const result = authService.isLoggedIn();
@@ -110,7 +122,7 @@ describe('authService', () => {
     it('should fetch and return CSRF token on success', async () => {
       const mockCsrfToken = 'test-csrf-token';
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: mockCsrfToken }
+        data: { csrfToken: mockCsrfToken },
       });
 
       const result = await authService.getCsrfToken();
@@ -131,17 +143,23 @@ describe('authService', () => {
 
   describe('login', () => {
     it('should fetch CSRF token and login successfully', async () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
       const mockResponse = { success: true, message: 'Login successful', user: mockUser };
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock login request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.login('test@example.com', 'password');
@@ -151,23 +169,29 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/login',
         { email: 'test@example.com', password: 'password' },
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
       expect(mockSessionStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUser));
     });
 
     it('should reuse existing CSRF token if available', async () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
       const mockResponse = { success: true, message: 'Login successful', user: mockUser };
 
       // First call to get CSRF token
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // First login
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       await authService.login('test@example.com', 'password');
@@ -179,7 +203,7 @@ describe('authService', () => {
 
       // Second login should reuse token
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.login('test@example.com', 'password');
@@ -189,14 +213,14 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/login',
         { email: 'test@example.com', password: 'password' },
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock login request with error
@@ -207,7 +231,7 @@ describe('authService', () => {
         status: 401,
         statusText: 'Unauthorized',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -221,7 +245,7 @@ describe('authService', () => {
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock login request with network error
@@ -238,7 +262,7 @@ describe('authService', () => {
     it('should not use development fallback for normal API errors', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock login request with error
@@ -249,7 +273,7 @@ describe('authService', () => {
         status: 401,
         statusText: 'Unauthorized',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -267,29 +291,27 @@ describe('authService', () => {
         first_name: 'Test',
         last_name: 'User',
         email: 'test@example.com',
-        password: 'password'
+        password: 'password',
       };
       const mockResponse = { success: true, message: 'Registration successful' };
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock register request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.register(userData);
 
       expect(result).toEqual(mockResponse);
       expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-      expect(mockPost).toHaveBeenCalledWith(
-        '/auth/register',
-        userData,
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
-      );
+      expect(mockPost).toHaveBeenCalledWith('/auth/register', userData, {
+        headers: { 'X-CSRF-Token': 'test-csrf-token' },
+      });
     });
 
     it('should handle API error and return failure response', async () => {
@@ -297,12 +319,12 @@ describe('authService', () => {
         first_name: 'Test',
         last_name: 'User',
         email: 'existing@example.com',
-        password: 'password'
+        password: 'password',
       };
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock register request with error
@@ -313,7 +335,7 @@ describe('authService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -329,12 +351,12 @@ describe('authService', () => {
         first_name: 'Test',
         last_name: 'User',
         email: 'regular@example.com',
-        password: 'password'
+        password: 'password',
       };
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock register request with network error
@@ -350,10 +372,16 @@ describe('authService', () => {
 
   describe('checkStatus', () => {
     it('should return logged in status and user when authenticated', async () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
 
       mockGet.mockResolvedValueOnce({
-        data: { isLoggedIn: true, user: mockUser }
+        data: { isLoggedIn: true, user: mockUser },
       });
 
       const result = await authService.checkStatus();
@@ -366,7 +394,7 @@ describe('authService', () => {
 
     it('should return not logged in status when not authenticated', async () => {
       mockGet.mockResolvedValueOnce({
-        data: { isLoggedIn: false }
+        data: { isLoggedIn: false },
       });
 
       const result = await authService.checkStatus();
@@ -388,7 +416,13 @@ describe('authService', () => {
     });
 
     it('should use session storage as fallback when API fails but user exists in session', async () => {
-      const mockUser = { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' };
+      const mockUser = {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      };
 
       mockGet.mockRejectedValueOnce(new Error('API error'));
       mockSessionStorage.getItem.mockReturnValueOnce(JSON.stringify(mockUser));
@@ -409,12 +443,12 @@ describe('authService', () => {
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock logout request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.logout();
@@ -424,7 +458,7 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/logout',
         {},
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
       expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('user');
     });
@@ -432,7 +466,7 @@ describe('authService', () => {
     it('should handle API error, remove user from session, and return success response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock logout request with error
@@ -452,12 +486,12 @@ describe('authService', () => {
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock forgot password request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.forgotPassword('test@example.com');
@@ -467,14 +501,14 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/forgot-password',
         { email: 'test@example.com' },
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock forgot password request with error
@@ -485,7 +519,7 @@ describe('authService', () => {
         status: 404,
         statusText: 'Not Found',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -499,7 +533,7 @@ describe('authService', () => {
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock forgot password request with network error
@@ -519,12 +553,12 @@ describe('authService', () => {
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock reset password request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.resetPassword('reset-token-123', 'newpassword');
@@ -534,14 +568,14 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/reset-password',
         { token: 'reset-token-123', password: 'newpassword' },
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should handle API error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock reset password request with error
@@ -552,7 +586,7 @@ describe('authService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
@@ -566,7 +600,7 @@ describe('authService', () => {
     it('should handle network error and return failure response', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock reset password request with network error
@@ -586,12 +620,12 @@ describe('authService', () => {
 
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock change password request
       mockPost.mockResolvedValueOnce({
-        data: mockResponse
+        data: mockResponse,
       });
 
       const result = await authService.changePassword('currentpassword', 'newpassword');
@@ -601,14 +635,14 @@ describe('authService', () => {
       expect(mockPost).toHaveBeenCalledWith(
         '/auth/change-password',
         { currentPassword: 'currentpassword', newPassword: 'newpassword' },
-        { headers: { 'X-CSRF-Token': 'test-csrf-token' } }
+        { headers: { 'X-CSRF-Token': 'test-csrf-token' } },
       );
     });
 
     it('should throw API error when the server returns an error', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock change password request with error
@@ -619,19 +653,18 @@ describe('authService', () => {
         status: 400,
         statusText: 'Bad Request',
         headers: {},
-        config: {} as any
+        config: {} as any,
       };
       mockPost.mockRejectedValueOnce(axiosError);
 
       // The function should now throw the error instead of handling it
-      await expect(authService.changePassword('wrongpassword', 'newpassword'))
-        .rejects.toThrow();
+      await expect(authService.changePassword('wrongpassword', 'newpassword')).rejects.toThrow();
     });
 
     it('should throw network error when there is a connection issue', async () => {
       // Mock CSRF token request
       mockGet.mockResolvedValueOnce({
-        data: { csrfToken: 'test-csrf-token' }
+        data: { csrfToken: 'test-csrf-token' },
       });
 
       // Mock change password request with network error
@@ -639,8 +672,9 @@ describe('authService', () => {
       mockPost.mockRejectedValueOnce(networkError);
 
       // The function should now throw the error instead of handling it
-      await expect(authService.changePassword('currentpassword', 'newpassword'))
-        .rejects.toThrow('Network error');
+      await expect(authService.changePassword('currentpassword', 'newpassword')).rejects.toThrow(
+        'Network error',
+      );
     });
   });
 });

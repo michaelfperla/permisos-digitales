@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, forwardRef } from 'react';
+
 import styles from './Input.module.css';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -20,26 +21,22 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 /**
  * Input component using the "Soft & Trustworthy" design set
  * Enhanced for mobile usability with appropriate input types and input modes
+ * Compatible with React Hook Form's register function
+ *
+ * @example
+ * // With React Hook Form
+ * <Input {...register('email')} error={errors.email?.message} />
  */
-const Input: React.FC<InputProps> = ({
-  error,
-  className,
-  inputMode,
-  ...props
-}) => {
-  const inputClasses = [
-    styles.input,
-    error ? styles.inputError : '',
-    className || ''
-  ].filter(Boolean).join(' ');
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ error, className, inputMode, ...props }, ref) => {
+    const inputClasses = [styles.input, error ? styles.inputError : '', className || '']
+      .filter(Boolean)
+      .join(' ');
 
-  return (
-    <input
-      className={inputClasses}
-      inputMode={inputMode}
-      {...props}
-    />
-  );
-};
+    return <input className={inputClasses} inputMode={inputMode} ref={ref} {...props} />;
+  },
+);
+
+Input.displayName = 'Input';
 
 export default Input;

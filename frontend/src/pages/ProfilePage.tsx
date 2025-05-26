@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
-import { useToast } from '../contexts/ToastContext';
-import userService, { UserProfileUpdateData } from '../services/userService';
+
+import styles from './ProfilePage.module.css';
 import ChangePasswordForm from '../components/auth/ChangePasswordForm';
 import Modal from '../components/ui/Modal';
-import styles from './ProfilePage.module.css';
+import userService, { UserProfileUpdateData } from '../services/userService';
+import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
+import { useToast } from '../shared/hooks/useToast';
 
 const ProfilePage: React.FC = () => {
   const { user, setUser } = useAuth();
@@ -15,7 +16,7 @@ const ProfilePage: React.FC = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     first_name: user?.first_name || '',
-    last_name: user?.last_name || ''
+    last_name: user?.last_name || '',
   });
 
   if (!user) {
@@ -23,7 +24,9 @@ const ProfilePage: React.FC = () => {
       <div className={styles.profileContainer}>
         <div className={styles.profileCard}>
           <p>No se ha encontrado información del usuario. Por favor, inicie sesión nuevamente.</p>
-          <Link to="/login" className={styles.actionButton}>Iniciar Sesión</Link>
+          <Link to="/login" className={styles.actionButton}>
+            Iniciar Sesión
+          </Link>
         </div>
       </div>
     );
@@ -44,7 +47,7 @@ const ProfilePage: React.FC = () => {
   const handleEditClick = () => {
     setFormData({
       first_name: user.first_name || '',
-      last_name: user.last_name || ''
+      last_name: user.last_name || '',
     });
     setIsEditing(true);
   };
@@ -55,9 +58,9 @@ const ProfilePage: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -68,7 +71,7 @@ const ProfilePage: React.FC = () => {
     try {
       const updateData: UserProfileUpdateData = {
         first_name: formData.first_name,
-        last_name: formData.last_name
+        last_name: formData.last_name,
       };
 
       const response = await userService.updateProfile(updateData);
@@ -82,7 +85,7 @@ const ProfilePage: React.FC = () => {
       } else {
         showToast(response.message || 'Error al actualizar el perfil', 'error');
       }
-    } catch (error) {
+    } catch (ignore) { // Changed from _error to ignore
       showToast('Error al actualizar el perfil', 'error');
     } finally {
       setIsLoading(false);
@@ -93,9 +96,7 @@ const ProfilePage: React.FC = () => {
     <div className={styles.profileContainer}>
       <header className={`${styles.profileHeader} page-header-main-content`}>
         <h1 className={`${styles.profileTitle} page-title-h1`}>Perfil de Usuario</h1>
-        <h2 className={`${styles.profileSubtitle} page-subtitle-h2`}>
-          Información de su cuenta
-        </h2>
+        <h2 className={`${styles.profileSubtitle} page-subtitle-h2`}>Información de su cuenta</h2>
       </header>
 
       <div className={styles.profileCard}>
@@ -116,7 +117,9 @@ const ProfilePage: React.FC = () => {
           {isEditing ? (
             <form onSubmit={handleSubmit} className={styles.editForm}>
               <div className={styles.formGroup}>
-                <label htmlFor="first_name" className={styles.formLabel}>Nombre</label>
+                <label htmlFor="first_name" className={styles.formLabel}>
+                  Nombre
+                </label>
                 <input
                   type="text"
                   id="first_name"
@@ -129,7 +132,9 @@ const ProfilePage: React.FC = () => {
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="last_name" className={styles.formLabel}>Apellido</label>
+                <label htmlFor="last_name" className={styles.formLabel}>
+                  Apellido
+                </label>
                 <input
                   type="text"
                   id="last_name"
@@ -142,7 +147,9 @@ const ProfilePage: React.FC = () => {
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="email" className={styles.formLabel}>Correo Electrónico</label>
+                <label htmlFor="email" className={styles.formLabel}>
+                  Correo Electrónico
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -163,11 +170,7 @@ const ProfilePage: React.FC = () => {
                 >
                   Cancelar
                 </button>
-                <button
-                  type="submit"
-                  className={styles.actionButton}
-                  disabled={isLoading}
-                >
+                <button type="submit" className={styles.actionButton} disabled={isLoading}>
                   {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
               </div>
@@ -187,10 +190,13 @@ const ProfilePage: React.FC = () => {
                 <>
                   <div className={styles.profileLabel}>Tipo de Cuenta</div>
                   <div className={styles.profileValue}>
-                    {user.role === 'admin' ? 'Administrador' :
-                     user.role === 'staff' ? 'Personal' :
-                     user.role === 'user' ? 'Usuario' :
-                     user.role}
+                    {user.role === 'admin'
+                      ? 'Administrador'
+                      : user.role === 'staff'
+                        ? 'Personal'
+                        : user.role === 'user'
+                          ? 'Usuario'
+                          : user.role}
                   </div>
                 </>
               )}

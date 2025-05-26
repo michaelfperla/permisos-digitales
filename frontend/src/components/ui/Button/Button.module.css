@@ -4,59 +4,71 @@
  * These classes are identifiers used by Button.tsx to apply global styles.
  * They typically remain empty here as their styling comes from button-styles.css.
  */
-.buttonStandard {}
-.primary {}
-.secondary {}
-.success {}
-.danger {}
-.info {}
-.warning {}
-.text {}
-.small {}
-.large {}
-.icon {} /* For icon-only buttons, still needs .btn-icon global class */
+.buttonStandard {
+}
+.primary {
+}
+.secondary {
+}
+.success {
+}
+.danger {
+}
+.info {
+}
+.warning {
+}
+.text {
+}
+.small {
+}
+.large {
+}
+.icon {
+} /* For icon-only buttons, still needs .btn-icon global class */
 
 /* Container for button content (icon and text) */
 .buttonContent {
-  display: inline-flex;   /* Use inline-flex to allow parent .btn to control overall block/inline behavior */
-  align-items: center;    /* Vertically center icon and text */
-  justify-content: center;/* Horizontally center icon and text group if .btn has extra space */
-  width: 100%;            /* Allow content to fill available space within button padding */
-  height: 100%;           /* Allow content to fill available space within button padding */
-  gap: var(--space-1);    /* Default gap (4px). This is the primary controller of space. */
-  line-height: 1.2;       /* Consistent line height for text */
+  display: inline-flex; /* Use inline-flex to allow parent .btn to control overall block/inline behavior */
+  align-items: center; /* Vertically center icon and text */
+  justify-content: center; /* Horizontally center icon and text group if .btn has extra space */
+  width: 100%; /* Allow content to fill available space within button padding */
+  height: 100%; /* Allow content to fill available space within button padding */
+  gap: var(--space-1); /* Default gap (4px). This is the primary controller of space. */
+  line-height: 1.2; /* Consistent line height for text */
 }
 
 /* Styles for the span wrapping the icon */
 .buttonIcon {
-  display: inline-flex;   /* For alignment of the icon itself if it's complex */
+  display: inline-flex; /* For alignment of the icon itself if it's complex */
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;         /* Prevent icon from shrinking */
-  font-size: 1em;         /* Icon size relative to button's font-size */
-  line-height: 1;         /* Crucial for tight vertical fit */
-  height: 1em;            /* Define a consistent box for the icon */
-  width: 1em;             /* Define a consistent box for the icon */
+  flex-shrink: 0; /* Prevent icon from shrinking */
+  font-size: 1em; /* Icon size relative to button's font-size */
+  line-height: 1; /* Crucial for tight vertical fit */
+  height: 1em; /* Define a consistent box for the icon */
+  width: 1em; /* Define a consistent box for the icon */
   /* No margin or padding here; use gap on .buttonContent */
 }
 
 /* Ensure SVGs within the icon span behave predictably */
 .buttonIcon svg {
-  display: block;         /* Remove extra space below inline SVGs */
-  width: 100%;            /* Make SVG fill the .buttonIcon container */
-  height: 100%;           /* Make SVG fill the .buttonIcon container */
+  display: block; /* Remove extra space below inline SVGs */
+  width: 100%; /* Make SVG fill the .buttonIcon container */
+  height: 100%; /* Make SVG fill the .buttonIcon container */
   vertical-align: middle; /* Good practice, though flex alignment should handle it */
 }
 
 /* Styles for the span wrapping the text */
 .buttonText {
-  display: inline-block;  /* Or inline-flex if it ever contains more than just text */
-  line-height: inherit;   /* Inherit from .buttonContent or .btn */
+  display: inline-block; /* Or inline-flex if it ever contains more than just text */
+  line-height: inherit; /* Inherit from .buttonContent or .btn */
   vertical-align: middle; /* Good practice for aligning with icons */
 }
 
 /* --- Responsive Adjustments for very small screens --- */
-@media (max-width: var(--breakpoint-xs)) { /* 360px and below */
+@media (max-width: var(--breakpoint-xs)) {
+  /* 360px and below */
   .buttonContent {
     gap: 3px; /* Tighter gap for very small screens */
   }
@@ -69,7 +81,8 @@
 /* Special styling for icon-only buttons (where no children/text is provided) */
 /* This assumes Button.tsx adds styles.iconOnly to the main button element if size="icon" and no children */
 /* This also assumes button-styles.css defines .btn-icon for padding/aspect-ratio */
-.iconOnly .buttonContent { /* If the main button has styles.iconOnly */
+.iconOnly .buttonContent {
+  /* If the main button has styles.iconOnly */
   gap: 0;
 }
 

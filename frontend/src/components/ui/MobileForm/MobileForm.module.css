@@ -5,6 +5,8 @@
   width: 100%;
   margin-bottom: var(--space-4);
   /* max-width removed as ResponsiveContainer handles width constraints */
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Form Title */
@@ -53,7 +55,9 @@
   border-radius: 8px;
   background-color: var(--color-white);
   color: var(--color-neutral-900);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   -webkit-appearance: none; /* Remove default iOS styling */
   appearance: none;
 }
@@ -80,7 +84,9 @@
   background-position: right 14px center;
   background-size: 16px;
   padding-right: 40px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .formSelect:focus {
@@ -100,7 +106,9 @@
   background-color: var(--color-white);
   color: var(--color-neutral-900);
   resize: vertical;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   -webkit-appearance: none; /* Remove default iOS styling */
   appearance: none;
 }
@@ -130,7 +138,9 @@
   border-radius: 4px;
   appearance: none;
   background-color: var(--color-white);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
   position: relative;
   flex-shrink: 0;
 }
@@ -226,13 +236,25 @@
 
 /* Extra small devices (360px and below) */
 @media (max-width: 360px) {
+  .mobileForm {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
   .formGroup {
     margin-bottom: 14px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .formInput,
   .formSelect {
     font-size: 15px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .checkboxInput {
@@ -249,5 +271,15 @@
 
   .formTitle {
     font-size: 1.2rem;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  .formActions {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }

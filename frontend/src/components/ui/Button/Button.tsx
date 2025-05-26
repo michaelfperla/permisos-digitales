@@ -1,6 +1,8 @@
 import React, { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from 'react';
 import { Link, LinkProps } from 'react-router-dom';
+
 import styles from './Button.module.css';
+import Icon from '../../../shared/components/ui/Icon';
 
 // Type for props that are common to all button types
 type CommonButtonProps = {
@@ -102,22 +104,41 @@ const Button: React.FC<ButtonProps> = (props) => {
   const combinedClasses = [
     'btn', // Apply the global base button class
     globalVariantClass, // Apply the global variant class (e.g., 'btn-primary')
-    globalSizeClass,    // Apply the global size class (e.g., 'btn-sm')
+    globalSizeClass, // Apply the global size class (e.g., 'btn-sm')
     styles.buttonStandard, // Keep for any component-specific structural styles
     moduleVariantClass, // Keep for any component-specific variant styles
-    moduleSizeClass,    // Keep for any component-specific size styles
+    moduleSizeClass, // Keep for any component-specific size styles
     size === 'icon' && !children ? styles.iconOnly : '', // Special class for icon-only buttons
-    className || ''     // User-provided additional classes
-  ].filter(Boolean).join(' ');
+    className || '', // User-provided additional classes
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   // Prepare content with icon
   // Using only our component-specific buttonContent class
   // The spacing between icon and text is now handled by the gap property in the parent .btn class
+
+  // Wrap icon with Icon component if it's not already wrapped
+  const processedIcon =
+    icon &&
+    React.isValidElement(icon) &&
+    // Check if the icon is already an Icon component
+    icon.type !== Icon &&
+    // Check if it's not a span that might be wrapping an Icon component
+    (typeof icon.type !== 'string' || icon.type !== 'span') ? (
+      <Icon
+        IconComponent={() => icon}
+        size={size === 'small' ? 'sm' : size === 'large' ? 'lg' : 'md'}
+      />
+    ) : (
+      icon
+    );
+
   const content = (
     <span className={styles.buttonContent}>
-      {icon && !iconAfter && <span className={styles.buttonIcon}>{icon}</span>}
+      {processedIcon && !iconAfter && <span className={styles.buttonIcon}>{processedIcon}</span>}
       {children && <span className={styles.buttonText}>{children}</span>}
-      {icon && iconAfter && <span className={styles.buttonIcon}>{icon}</span>}
+      {processedIcon && iconAfter && <span className={styles.buttonIcon}>{processedIcon}</span>}
     </span>
   );
 
@@ -127,7 +148,10 @@ const Button: React.FC<ButtonProps> = (props) => {
       <Link
         className={combinedClasses}
         to={props.to}
-        {...(rest as Omit<LinkElementProps, 'variant' | 'size' | 'children' | 'className' | 'to' | 'icon' | 'iconAfter'>)}
+        {...(rest as Omit<
+          LinkElementProps,
+          'variant' | 'size' | 'children' | 'className' | 'to' | 'icon' | 'iconAfter'
+        >)}
       >
         {content}
       </Link>
@@ -140,7 +164,10 @@ const Button: React.FC<ButtonProps> = (props) => {
       <a
         className={combinedClasses}
         href={props.href}
-        {...(rest as Omit<AnchorElementProps, 'variant' | 'size' | 'children' | 'className' | 'href' | 'icon' | 'iconAfter'>)}
+        {...(rest as Omit<
+          AnchorElementProps,
+          'variant' | 'size' | 'children' | 'className' | 'href' | 'icon' | 'iconAfter'
+        >)}
       >
         {content}
       </a>
@@ -154,7 +181,10 @@ const Button: React.FC<ButtonProps> = (props) => {
     <button
       className={combinedClasses}
       type={htmlType}
-      {...(buttonProps as Omit<ButtonElementProps, 'variant' | 'size' | 'children' | 'className' | 'htmlType' | 'icon' | 'iconAfter'>)}
+      {...(buttonProps as Omit<
+        ButtonElementProps,
+        'variant' | 'size' | 'children' | 'className' | 'htmlType' | 'icon' | 'iconAfter'
+      >)}
     >
       {content}
     </button>

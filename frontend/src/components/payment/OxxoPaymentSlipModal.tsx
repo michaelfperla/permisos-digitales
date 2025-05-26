@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { FaBarcode, FaMoneyBill, FaCalendarAlt, FaCopy, FaPrint, FaExclamationTriangle } from 'react-icons/fa';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button/Button';
-import { useToast } from '../../contexts/ToastContext';
+import {
+  FaBarcode,
+  FaMoneyBill,
+  FaCalendarAlt,
+  FaCopy,
+  FaPrint,
+  FaExclamationTriangle,
+} from 'react-icons/fa';
+
 import styles from './OxxoPaymentSlipModal.module.css';
+import Icon from '../../shared/components/ui/Icon';
+import { useToast } from '../../shared/hooks/useToast';
+import Button from '../ui/Button/Button';
+import Modal from '../ui/Modal';
 
 interface OxxoPaymentSlipModalProps {
   isOpen: boolean;
@@ -24,7 +33,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
   currency,
   expiresAt,
   permitFolio,
-  barcodeUrl
+  barcodeUrl,
 }) => {
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -35,7 +44,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
 
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: currency || 'MXN'
+      currency: currency || 'MXN',
     }).format(numericAmount);
   };
 
@@ -49,7 +58,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   };
 
@@ -71,14 +80,12 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Instrucciones para Pago en OXXO">
       <div className={styles.oxxoSlipContainer}>
-        {permitFolio && (
-          <h4 className={styles.permitFolio}>Pago para Permiso Nº: {permitFolio}</h4>
-        )}
+        {permitFolio && <h4 className={styles.permitFolio}>Pago para Permiso Nº: {permitFolio}</h4>}
 
         {/* Reference Number Block */}
         <div className={styles.oxxoDetailBlock}>
           <div className={styles.oxxoDetailHeader}>
-            <FaBarcode className={styles.oxxoDetailIcon} />
+            <Icon IconComponent={FaBarcode} className={styles.oxxoDetailIcon} size="md" />
             <span className={styles.oxxoDetailLabel}>Referencia OXXO:</span>
           </div>
           <div className={styles.oxxoReferenceWrapper}>
@@ -89,7 +96,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
               onClick={() => handleCopyReference(oxxoReference)}
               aria-label="Copiar referencia"
               className={styles.copyButtonSmall}
-              icon={<FaCopy />}
+              icon={<Icon IconComponent={FaCopy} size="sm" />}
               iconAfter={true}
             >
               {copied ? 'Copiado' : 'Copiar'}
@@ -100,7 +107,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
         {/* Amount Block */}
         <div className={styles.oxxoDetailBlock}>
           <div className={styles.oxxoDetailHeader}>
-            <FaMoneyBill className={styles.oxxoDetailIcon} />
+            <Icon IconComponent={FaMoneyBill} className={styles.oxxoDetailIcon} size="md" />
             <span className={styles.oxxoDetailLabel}>Monto a Pagar:</span>
           </div>
           <span className={styles.oxxoAmountValue}>{formatCurrency(amount)}</span>
@@ -110,7 +117,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
         {expiresAt && (
           <div className={styles.oxxoDetailBlock}>
             <div className={styles.oxxoDetailHeader}>
-              <FaCalendarAlt className={styles.oxxoDetailIcon} />
+              <Icon IconComponent={FaCalendarAlt} className={styles.oxxoDetailIcon} size="md" />
               <span className={styles.oxxoDetailLabel}>Pagar antes del:</span>
             </div>
             <span className={styles.oxxoDateValue}>{formatDate(expiresAt)}</span>
@@ -120,7 +127,12 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
         {/* Instructions Block */}
         <div className={styles.oxxoInstructions}>
           <div className={styles.oxxoInstructionsHeader}>
-            <FaExclamationTriangle className={styles.oxxoInstructionsIcon} />
+            <Icon
+              IconComponent={FaExclamationTriangle}
+              className={styles.oxxoInstructionsIcon}
+              size="md"
+              color="var(--color-warning)"
+            />
             <h4>Instrucciones de Pago</h4>
           </div>
           <ol className={styles.instructionsList}>
@@ -136,7 +148,7 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
         {barcodeUrl && (
           <div className={styles.oxxoBarcodeBlock}>
             <div className={styles.oxxoDetailHeader}>
-              <FaBarcode className={styles.oxxoDetailIcon} />
+              <Icon IconComponent={FaBarcode} className={styles.oxxoDetailIcon} size="md" />
               <span className={styles.oxxoDetailLabel}>Código de Barras:</span>
             </div>
             <div className={styles.oxxoBarcodeWrapper}>
@@ -154,16 +166,12 @@ const OxxoPaymentSlipModal: React.FC<OxxoPaymentSlipModalProps> = ({
           <Button
             variant="secondary"
             onClick={handlePrint}
-            icon={<FaPrint />}
+            icon={<Icon IconComponent={FaPrint} size="sm" />}
             className={styles.printButton}
           >
             Imprimir Instrucciones
           </Button>
-          <Button
-            variant="danger"
-            onClick={onClose}
-            className={styles.closeButtonModal}
-          >
+          <Button variant="danger" onClick={onClose} className={styles.closeButtonModal}>
             Cerrar
           </Button>
         </div>

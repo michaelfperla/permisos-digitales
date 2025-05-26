@@ -1,12 +1,8 @@
 import axios from 'axios';
+
 import { debugLog, errorLog } from '../utils/debug';
 
 // Define types for our API responses and requests
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
 interface RegisterRequest {
   first_name: string;
   last_name: string;
@@ -36,19 +32,15 @@ interface StatusResponse {
   user?: User;
 }
 
-interface CsrfResponse {
-  csrfToken: string;
-}
-
 // Create axios instance with default config
 const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    Accept: 'application/json',
   },
   withCredentials: true, // Important for cookies
-  timeout: 5000 // 5 second timeout for all requests
+  timeout: 5000, // 5 second timeout for all requests
 });
 
 // Store CSRF token
@@ -114,13 +106,14 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     // Log the request details
     debugLog('authService', 'Login request payload', { email, password: '***REDACTED***' });
 
-    const response = await api.post<{ success: boolean; data: { user: User }; message: string }>('/auth/login',
+    const response = await api.post<{ success: boolean; data: { user: User }; message: string }>(
+      '/auth/login',
       { email, password },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     debugLog('authService', 'Login response received', response.data);
@@ -137,7 +130,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
       return {
         success: response.data.success,
         message: response.data.message,
-        user: user
+        user: user,
       };
     } else {
       debugLog('authService', 'No user data in response', response.data);
@@ -145,7 +138,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
       // Return success but no user
       return {
         success: response.data.success,
-        message: response.data.message
+        message: response.data.message,
       };
     }
   } catch (error) {
@@ -155,11 +148,15 @@ export const login = async (email: string, password: string): Promise<AuthRespon
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        errorLog('authService', `Server responded with status ${error.response.status}`, error.response.data);
+        errorLog(
+          'authService',
+          `Server responded with status ${error.response.status}`,
+          error.response.data,
+        );
 
         return {
           success: false,
-          message: error.response.data.message || 'Login failed. Please check your credentials.'
+          message: error.response.data.message || 'Login failed. Please check your credentials.',
         };
       } else if (error.request) {
         // The request was made but no response was received
@@ -172,7 +169,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
     return {
       success: false,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -197,18 +194,15 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
     const sanitizedUserData = {
       ...userData,
       password: '***REDACTED***',
-      confirmPassword: userData.confirmPassword ? '***REDACTED***' : undefined
+      confirmPassword: userData.confirmPassword ? '***REDACTED***' : undefined,
     };
     debugLog('authService', 'Registration request payload', sanitizedUserData);
 
-    const response = await api.post<AuthResponse>('/auth/register',
-      userData,
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
-    );
+    const response = await api.post<AuthResponse>('/auth/register', userData, {
+      headers: {
+        'X-CSRF-Token': csrfToken,
+      },
+    });
 
     debugLog('authService', 'Registration response received', response.data);
 
@@ -220,11 +214,15 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        errorLog('authService', `Server responded with status ${error.response.status}`, error.response.data);
+        errorLog(
+          'authService',
+          `Server responded with status ${error.response.status}`,
+          error.response.data,
+        );
 
         return {
           success: false,
-          message: error.response.data.message || 'Registration failed. Please try again.'
+          message: error.response.data.message || 'Registration failed. Please try again.',
         };
       } else if (error.request) {
         // The request was made but no response was received
@@ -237,7 +235,7 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 
     return {
       success: false,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -247,7 +245,7 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
  * @param signal Optional AbortSignal to cancel the request
  */
 export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse> => {
-  console.log('[checkStatus] Starting API call to /api/auth/status...');
+  console.info('[checkStatus] Starting API call to /api/auth/status...');
   try {
     const response = await api.get<StatusResponse>('/auth/status', { signal });
 
@@ -258,7 +256,7 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
       sessionStorage.removeItem('user');
     }
 
-    console.log('[checkStatus] API call successful, response:', response.data);
+    console.info('[checkStatus] API call successful, response:', response.data);
 
     // Return the *nested* data object which matches the StatusResponse type
     if (response.data.success && response.data.data) {
@@ -271,8 +269,13 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
     }
   } catch (error) {
     // IMMEDIATELY check for cancellation and re-throw if found
-    if (axios.isAxiosError(error) && (error.name === 'AbortError' || error.name === 'CanceledError' || error.code === 'ERR_CANCELED')) {
-      console.log('[checkStatus] Request cancelled/aborted. Rethrowing...');
+    if (
+      axios.isAxiosError(error) &&
+      (error.name === 'AbortError' ||
+        error.name === 'CanceledError' ||
+        error.code === 'ERR_CANCELED')
+    ) {
+      console.info('[checkStatus] Request cancelled/aborted. Rethrowing...');
       throw error; // Exit catch block immediately
     }
 
@@ -290,14 +293,17 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
       try {
         const user = JSON.parse(userJson);
         const fallbackResponse = { isLoggedIn: true, user };
-        console.log('[checkStatus] API failed, returning fallback from sessionStorage:', fallbackResponse);
+        console.info(
+          '[checkStatus] API failed, returning fallback from sessionStorage:',
+          fallbackResponse,
+        );
         return fallbackResponse;
       } catch {
         // Invalid JSON, ignore
       }
     }
 
-    console.log('[checkStatus] API failed, returning fallback:', { isLoggedIn: false });
+    console.info('[checkStatus] API failed, returning fallback:', { isLoggedIn: false });
     return { isLoggedIn: false };
   }
 };
@@ -312,13 +318,14 @@ export const logout = async (): Promise<AuthResponse> => {
       await getCsrfToken();
     }
 
-    const response = await api.post<AuthResponse>('/auth/logout',
+    const response = await api.post<AuthResponse>(
+      '/auth/logout',
       {},
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     // Clear user from session storage
@@ -334,7 +341,7 @@ export const logout = async (): Promise<AuthResponse> => {
     // and consider the logout successful from the client's perspective
     return {
       success: true,
-      message: 'Logout successful. You have been logged out locally.'
+      message: 'Logout successful. You have been logged out locally.',
     };
   }
 };
@@ -372,13 +379,14 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
       await getCsrfToken();
     }
 
-    const response = await api.post<AuthResponse>('/auth/forgot-password',
+    const response = await api.post<AuthResponse>(
+      '/auth/forgot-password',
       { email },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -389,12 +397,13 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
       // Return the error message from the API
       return {
         success: false,
-        message: error.response.data.message || 'Failed to send password reset email. Please try again.'
+        message:
+          error.response.data.message || 'Failed to send password reset email. Please try again.',
       };
     }
     return {
       success: false,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -411,13 +420,14 @@ export const resetPassword = async (token: string, password: string): Promise<Au
       await getCsrfToken();
     }
 
-    const response = await api.post<AuthResponse>('/auth/reset-password',
+    const response = await api.post<AuthResponse>(
+      '/auth/reset-password',
       { token, password },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -428,12 +438,14 @@ export const resetPassword = async (token: string, password: string): Promise<Au
       // Return the error message from the API
       return {
         success: false,
-        message: error.response.data.message || 'Failed to reset password. The token may be invalid or expired.'
+        message:
+          error.response.data.message ||
+          'Failed to reset password. The token may be invalid or expired.',
       };
     }
     return {
       success: false,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -443,7 +455,10 @@ export const resetPassword = async (token: string, password: string): Promise<Au
  * @param currentPassword Current password
  * @param newPassword New password
  */
-export const changePassword = async (currentPassword: string, newPassword: string): Promise<AuthResponse> => {
+export const changePassword = async (
+  currentPassword: string,
+  newPassword: string,
+): Promise<AuthResponse> => {
   // Ensure we have a CSRF token
   if (!csrfToken) {
     await getCsrfToken();
@@ -452,17 +467,18 @@ export const changePassword = async (currentPassword: string, newPassword: strin
   // Log the request (without exposing sensitive data)
   debugLog('authService', 'Changing password', {
     currentPassword: '***REDACTED***',
-    newPassword: '***REDACTED***'
+    newPassword: '***REDACTED***',
   });
 
   // Make the API call and let Axios errors propagate naturally
-  const response = await api.post<AuthResponse>('/auth/change-password',
+  const response = await api.post<AuthResponse>(
+    '/auth/change-password',
     { currentPassword, newPassword },
     {
       headers: {
-        'X-CSRF-Token': csrfToken
-      }
-    }
+        'X-CSRF-Token': csrfToken,
+      },
+    },
   );
 
   // Log success (without sensitive data)
@@ -476,7 +492,9 @@ export const changePassword = async (currentPassword: string, newPassword: strin
  * Resend verification email
  * @param email User email
  */
-export const resendVerificationEmail = async (email: string): Promise<{ success: boolean; message: string }> => {
+export const resendVerificationEmail = async (
+  email: string,
+): Promise<{ success: boolean; message: string }> => {
   debugLog('authService', `Resending verification email for: ${email}`);
 
   try {
@@ -493,16 +511,16 @@ export const resendVerificationEmail = async (email: string): Promise<{ success:
       { email },
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     debugLog('authService', 'Resend verification email response received', response.data);
 
     return {
       success: response.data.success,
-      message: response.data.message || 'Correo de verificación reenviado exitosamente.'
+      message: response.data.message || 'Correo de verificación reenviado exitosamente.',
     };
   } catch (error) {
     errorLog('authService', 'Resend verification email error', error);
@@ -511,11 +529,15 @@ export const resendVerificationEmail = async (email: string): Promise<{ success:
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        errorLog('authService', `Server responded with status ${error.response.status}`, error.response.data);
+        errorLog(
+          'authService',
+          `Server responded with status ${error.response.status}`,
+          error.response.data,
+        );
 
         return {
           success: false,
-          message: error.response.data.message || 'Error al reenviar el correo de verificación.'
+          message: error.response.data.message || 'Error al reenviar el correo de verificación.',
         };
       } else if (error.request) {
         // The request was made but no response was received
@@ -528,7 +550,7 @@ export const resendVerificationEmail = async (email: string): Promise<{ success:
 
     return {
       success: false,
-      message: 'Error de red. Por favor, verifica tu conexión.'
+      message: 'Error de red. Por favor, verifica tu conexión.',
     };
   }
 };
@@ -537,19 +559,21 @@ export const resendVerificationEmail = async (email: string): Promise<{ success:
  * Verify email token
  * @param token Email verification token
  */
-export const verifyEmailToken = async (token: string): Promise<{ success: boolean; message: string }> => {
+export const verifyEmailToken = async (
+  token: string,
+): Promise<{ success: boolean; message: string }> => {
   debugLog('authService', `Verifying email token: ${token.substring(0, 8)}...`);
 
   try {
     const response = await api.get<{ success: boolean; message: string }>(
-      `/auth/verify-email/${token}`
+      `/auth/verify-email/${token}`,
     );
 
     debugLog('authService', 'Verify email token response received', response.data);
 
     return {
       success: response.data.success,
-      message: response.data.message || 'Correo electrónico verificado exitosamente.'
+      message: response.data.message || 'Correo electrónico verificado exitosamente.',
     };
   } catch (error) {
     errorLog('authService', 'Verify email token error', error);
@@ -558,11 +582,15 @@ export const verifyEmailToken = async (token: string): Promise<{ success: boolea
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        errorLog('authService', `Server responded with status ${error.response.status}`, error.response.data);
+        errorLog(
+          'authService',
+          `Server responded with status ${error.response.status}`,
+          error.response.data,
+        );
 
         return {
           success: false,
-          message: error.response.data.message || 'Error al verificar el correo electrónico.'
+          message: error.response.data.message || 'Error al verificar el correo electrónico.',
         };
       } else if (error.request) {
         // The request was made but no response was received
@@ -575,7 +603,7 @@ export const verifyEmailToken = async (token: string): Promise<{ success: boolea
 
     return {
       success: false,
-      message: 'Error de red. Por favor, verifica tu conexión.'
+      message: 'Error de red. Por favor, verifica tu conexión.',
     };
   }
 };
@@ -593,7 +621,7 @@ const authService = {
   resetPassword,
   changePassword,
   resendVerificationEmail,
-  verifyEmailToken
+  verifyEmailToken,
 };
 
 export default authService;

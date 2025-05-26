@@ -1016,7 +1016,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background-color: var(--color-primary, #a72b31); /* Updated from var(--rojo) to canonical var(--color-primary) */
+  background-color: var(
+    --color-primary,
+    #a72b31
+  ); /* Updated from var(--rojo) to canonical var(--color-primary) */
   color: white;
   border: none;
   border-radius: var(--border-radius);
@@ -1026,7 +1029,10 @@
 }
 
 .downloadButton:hover {
-  background-color: var(--color-primary-dark, #852d2d); /* Updated from var(--rojofuerte) to canonical var(--color-primary-dark) */
+  background-color: var(
+    --color-primary-dark,
+    #852d2d
+  ); /* Updated from var(--rojofuerte) to canonical var(--color-primary-dark) */
   color: white; /* Explicitly set text color on hover to ensure visibility */
   transform: translateY(-1px);
   box-shadow: 0 5px 12px rgba(167, 43, 49, 0.3); /* Add box-shadow for visual consistency with standard buttons */
@@ -1081,7 +1087,10 @@
   .downloadButton {
     width: 100%;
     justify-content: center;
-    background-color: var(--color-primary, #a72b31); /* Explicitly set for mobile to ensure it's applied */
+    background-color: var(
+      --color-primary,
+      #a72b31
+    ); /* Explicitly set for mobile to ensure it's applied */
     color: white; /* Ensure text is visible */
   }
 
@@ -1105,7 +1114,8 @@
     gap: 16px;
   }
 
-  .leftColumn, .rightColumn {
+  .leftColumn,
+  .rightColumn {
     width: 100%;
   }
 

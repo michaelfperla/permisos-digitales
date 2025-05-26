@@ -17,13 +17,43 @@ class UserRepository extends BaseRepository {
    * @returns {Promise<Object|null>} - User object or null
    */
   async findByEmail(email) {
+    logger.debug(`[User Repository] findByEmail called for email: ${email}`);
     const query = 'SELECT * FROM users WHERE email = $1';
+    logger.debug(`[User Repository] Executing SQL query: ${query}`);
 
     try {
-      const { rows } = await db.query(query, [email]);
-      return rows[0] || null;
+      logger.debug(`[User Repository] About to execute database query for email: ${email}`);
+      const result = await db.query(query, [email]);
+
+      const rowCount = result.rows.length;
+      logger.debug(`[User Repository] Query returned ${rowCount} rows for email: ${email}`);
+
+      if (rowCount > 0) {
+        const user = result.rows[0];
+        logger.debug(`[User Repository] User found with ID: ${user.id}`);
+
+        // Verify presence of critical fields
+        const criticalFields = ['id', 'password_hash', 'is_email_verified', 'role'];
+        const missingFields = criticalFields.filter(field => user[field] === undefined);
+
+        if (missingFields.length > 0) {
+          logger.warn(`[User Repository] User record for ${email} is missing critical fields: ${missingFields.join(', ')}`);
+        } else {
+          logger.debug(`[User Repository] All critical fields present for user ${email}: id=${user.id}, is_email_verified=${user.is_email_verified}, role=${user.role}, password_hash=${!!user.password_hash}`);
+        }
+
+        return user;
+      }
+
+      logger.debug(`[User Repository] No user found with email: ${email}`);
+      return null;
     } catch (error) {
-      logger.error('Error in findByEmail:', error);
+      logger.error(`[User Repository] Error in findByEmail for ${email}:`, {
+        error: error,
+        stack: error.stack,
+        query: query,
+        parameters: [email]
+      });
       throw error;
     }
   }
@@ -44,7 +74,7 @@ class UserRepository extends BaseRepository {
     // Build base query
     let countQuery = 'SELECT COUNT(*) FROM users WHERE 1=1';
     let query = `
-      SELECT id, email, first_name, last_name, account_type, is_admin_portal, is_active, created_at, updated_at
+      SELECT id, email, first_name, last_name, account_type, is_admin_portal, created_at, updated_at
       FROM users
       WHERE 1=1
     `;
@@ -216,7 +246,7 @@ class UserRepository extends BaseRepository {
     const query = `
       SELECT
         u.id, u.email, u.first_name, u.last_name,
-        u.account_type, u.is_admin_portal, u.is_active, u.created_at, u.updated_at,
+        u.account_type, u.is_admin_portal, u.created_at, u.updated_at,
         u.role, u.created_by,
         creator.first_name as created_by_first_name,
         creator.last_name as created_by_last_name
@@ -247,25 +277,14 @@ class UserRepository extends BaseRepository {
 
   /**
    * Set user active status
+   * Note: This method is deprecated as the is_active column no longer exists
    * @param {number} userId - User ID
    * @param {boolean} isActive - Active status to set
-   * @returns {Promise<boolean>} - True if updated successfully
+   * @returns {Promise<boolean>} - Always returns true for backward compatibility
    */
   async setUserStatus(userId, isActive) {
-    const query = `
-      UPDATE users
-      SET is_active = $2, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $1
-      RETURNING id
-    `;
-
-    try {
-      const { rowCount } = await db.query(query, [userId, isActive]);
-      return rowCount > 0;
-    } catch (error) {
-      logger.error('Error in setUserStatus:', error);
-      throw error;
-    }
+    logger.warn(`setUserStatus called for user ${userId} but is_active column no longer exists`);
+    return true;
   }
 }
 

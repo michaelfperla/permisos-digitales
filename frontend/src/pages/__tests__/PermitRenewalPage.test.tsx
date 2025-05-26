@@ -1,7 +1,15 @@
-import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+
+// Import components and mocked services after mocks are defined
+import { AuthProvider } from '../../contexts/AuthContext';
+import { ToastProvider } from '../../contexts/ToastContext';
+import applicationService, { Application } from '../../services/applicationService';
+import authService from '../../services/authService';
+import PermitRenewalPage from '../PermitRenewalPage';
+import styles from '../PermitRenewalPage.module.css';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -31,15 +39,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
   };
 });
 
-// Import components and mocked services after mocks are defined
-import PermitRenewalPage from '../PermitRenewalPage';
-import { AuthProvider } from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
-import applicationService from '../../services/applicationService';
-import authService from '../../services/authService';
-import { Application } from '../../services/applicationService';
-import styles from '../PermitRenewalPage.module.css';
-
 // Create mock application data
 const mockOriginalApplication: Application = {
   id: '123',
@@ -56,10 +55,10 @@ const mockOriginalApplication: Application = {
   numero_serie: 'ABC123456789',
   numero_motor: 'M123456',
   ano_modelo: 2023,
-  importe: 1500.00,
+  importe: 1500.0,
   folio: 'PD-2023-123',
   fecha_expedicion: '2023-01-15T00:00:00Z',
-  fecha_vencimiento: '2023-02-15T00:00:00Z'
+  fecha_vencimiento: '2023-02-15T00:00:00Z',
 };
 
 // Create mock renewal application data
@@ -78,11 +77,11 @@ const mockRenewalApplication: Application = {
   numero_serie: 'ABC123456789',
   numero_motor: 'M123456',
   ano_modelo: 2023,
-  importe: 1500.00,
+  importe: 1500.0,
   parent_application_id: '123',
   renewal_count: 1,
   renewal_reason: 'Renovación regular',
-  renewal_notes: 'Notas adicionales para la renovación'
+  renewal_notes: 'Notas adicionales para la renovación',
 };
 
 // Mock payment instructions
@@ -90,16 +89,12 @@ const mockPaymentInstructions = {
   amount: 1500,
   currency: 'MXN',
   reference: 'REF-456',
-  paymentMethods: [
-    'Transferencia bancaria',
-    'Pago en ventanilla bancaria',
-    'Pago en línea'
-  ],
+  paymentMethods: ['Transferencia bancaria', 'Pago en ventanilla bancaria', 'Pago en línea'],
   nextSteps: [
     'Realice el pago utilizando la referencia proporcionada',
     'Suba el comprobante de pago en la sección de detalles del permiso',
-    'Espere la verificación del pago (1-2 días hábiles)'
-  ]
+    'Espere la verificación del pago (1-2 días hábiles)',
+  ],
 };
 
 // Helper function for standard rendering
@@ -111,7 +106,7 @@ const renderPermitRenewalPage = () => {
           <PermitRenewalPage />
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
@@ -130,14 +125,14 @@ describe('PermitRenewalPage', () => {
         email: 'test@example.com',
         first_name: 'Test',
         last_name: 'User',
-        accountType: 'citizen'
-      }
+        accountType: 'citizen',
+      },
     });
 
     // Default mock for getApplicationById
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: mockOriginalApplication
+      application: mockOriginalApplication,
     });
 
     // Default mock for checkRenewalEligibility
@@ -145,7 +140,7 @@ describe('PermitRenewalPage', () => {
       eligible: true,
       message: 'Su permiso es elegible para renovación',
       daysUntilExpiration: 5,
-      expirationDate: '2023-02-15T00:00:00Z'
+      expirationDate: '2023-02-15T00:00:00Z',
     });
 
     // Default mock for createRenewalApplication
@@ -153,7 +148,7 @@ describe('PermitRenewalPage', () => {
       success: true,
       application: mockRenewalApplication,
       paymentInstructions: mockPaymentInstructions,
-      message: 'Solicitud de renovación creada exitosamente'
+      message: 'Solicitud de renovación creada exitosamente',
     });
   });
 
@@ -169,15 +164,20 @@ describe('PermitRenewalPage', () => {
   }, 10000);
 
   test('displays application details and form when data is fetched successfully', async () => {
-    const { container } = renderPermitRenewalPage();
+    const { container: _container } = renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for page title and application ID
-    expect(screen.getByRole('heading', { name: /Renovación de Permiso/i, level: 1 })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Renovación de Permiso/i, level: 1 }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Permiso #123/i)).toBeInTheDocument();
 
     // Check that form is pre-filled with original application data
@@ -188,7 +188,11 @@ describe('PermitRenewalPage', () => {
     expect(colorInput.value).toBe('Azul');
 
     // Check for form description
-    expect(screen.getByText(/Por favor, revise y actualice la información necesaria para la renovación de su permiso/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Por favor, revise y actualice la información necesaria para la renovación de su permiso/i,
+      ),
+    ).toBeInTheDocument();
 
     // Check for buttons
     expect(screen.getByRole('button', { name: /Cancelar/i })).toBeInTheDocument();
@@ -200,18 +204,23 @@ describe('PermitRenewalPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: false,
       application: null as any,
-      message: 'Error al cargar la solicitud'
+      message: 'Error al cargar la solicitud',
     });
 
     renderPermitRenewalPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for error message
-    expect(screen.getByText(/No se pudo obtener la información del permiso original/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No se pudo obtener la información del permiso original/i),
+    ).toBeInTheDocument();
 
     // Check for retry and back buttons
     expect(screen.getByRole('button', { name: /Reintentar/i })).toBeInTheDocument();
@@ -223,16 +232,17 @@ describe('PermitRenewalPage', () => {
 
   test('displays error state when network error occurs during fetch', async () => {
     // Mock network error
-    vi.mocked(applicationService.getApplicationById).mockRejectedValue(
-      new Error('Network Error')
-    );
+    vi.mocked(applicationService.getApplicationById).mockRejectedValue(new Error('Network Error'));
 
     renderPermitRenewalPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for error message
     expect(screen.getByText(/Error al cargar la información del permiso/i)).toBeInTheDocument();
@@ -247,15 +257,18 @@ describe('PermitRenewalPage', () => {
       eligible: false,
       message: 'Su permiso vence en 20 días. Podrá renovarlo 7 días antes de su vencimiento.',
       daysUntilExpiration: 20,
-      expirationDate: '2023-02-15T00:00:00Z'
+      expirationDate: '2023-02-15T00:00:00Z',
     });
 
     const { container } = renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for ineligible message
     const ineligibleContainer = container.querySelector('.' + styles.ineligibleContainer);
@@ -266,20 +279,25 @@ describe('PermitRenewalPage', () => {
     // Check that toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Su permiso vence en 20 días. Podrá renovarlo 7 días antes de su vencimiento.',
-      'warning'
+      'warning',
     );
 
     // Check for back button
-    expect(screen.getByRole('button', { name: /Volver a Detalles del Permiso/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Volver a Detalles del Permiso/i }),
+    ).toBeInTheDocument();
   }, 10000);
 
   test('handles form input changes correctly', async () => {
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Get form inputs
     const domicilioInput = screen.getByLabelText(/Domicilio/i) as HTMLInputElement;
@@ -334,7 +352,7 @@ describe('PermitRenewalPage', () => {
       domicilio: '',
       color: '',
       renewal_reason: 'Renovación regular',
-      renewal_notes: ''
+      renewal_notes: '',
     };
 
     const showToast = mockShowToast;
@@ -343,10 +361,7 @@ describe('PermitRenewalPage', () => {
     formSubmitSpy({ preventDefault: vi.fn() });
 
     // Verify that the toast was shown with the correct error message
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'El domicilio es obligatorio',
-      'error'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('El domicilio es obligatorio', 'error');
 
     // Verify that createRenewalApplication was not called
     expect(applicationService.createRenewalApplication).not.toHaveBeenCalled();
@@ -362,10 +377,7 @@ describe('PermitRenewalPage', () => {
     formSubmitSpy({ preventDefault: vi.fn() });
 
     // Verify that the toast was shown with the correct error message
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'El color del vehículo es obligatorio',
-      'error'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('El color del vehículo es obligatorio', 'error');
 
     // Verify that createRenewalApplication was still not called
     expect(applicationService.createRenewalApplication).not.toHaveBeenCalled();
@@ -381,26 +393,20 @@ describe('PermitRenewalPage', () => {
     formSubmitSpy({ preventDefault: vi.fn() });
 
     // Verify that no validation error toast was shown
-    expect(mockShowToast).not.toHaveBeenCalledWith(
-      expect.stringMatching(/obligatorio/i),
-      'error'
-    );
+    expect(mockShowToast).not.toHaveBeenCalledWith(expect.stringMatching(/obligatorio/i), 'error');
 
     // Verify that createRenewalApplication was called with the correct parameters
-    expect(applicationService.createRenewalApplication).toHaveBeenCalledWith(
-      '123',
-      {
-        domicilio: '456 New St, Newtown, CA 54321',
-        color: 'Verde',
-        renewal_reason: 'Renovación regular',
-        renewal_notes: ''
-      }
-    );
+    expect(applicationService.createRenewalApplication).toHaveBeenCalledWith('123', {
+      domicilio: '456 New St, Newtown, CA 54321',
+      color: 'Verde',
+      renewal_reason: 'Renovación regular',
+      renewal_notes: '',
+    });
 
     // Verify that success toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Solicitud de renovación creada exitosamente',
-      'success'
+      'success',
     );
   }, 10000);
 
@@ -408,9 +414,12 @@ describe('PermitRenewalPage', () => {
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Update form inputs
     const domicilioInput = screen.getByLabelText(/Domicilio/i) as HTMLInputElement;
@@ -429,25 +438,25 @@ describe('PermitRenewalPage', () => {
     await user.click(screen.getByRole('button', { name: /Solicitar Renovación/i }));
 
     // Wait for submission to complete and success state to be shown
-    await waitFor(() => {
-      expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that createRenewalApplication was called with the correct parameters
-    expect(applicationService.createRenewalApplication).toHaveBeenCalledWith(
-      '123',
-      {
-        domicilio: '456 New St, Newtown, CA 54321',
-        color: 'Verde',
-        renewal_reason: 'Renovación regular',
-        renewal_notes: 'Notas adicionales para la renovación'
-      }
-    );
+    expect(applicationService.createRenewalApplication).toHaveBeenCalledWith('123', {
+      domicilio: '456 New St, Newtown, CA 54321',
+      color: 'Verde',
+      renewal_reason: 'Renovación regular',
+      renewal_notes: 'Notas adicionales para la renovación',
+    });
 
     // Check that success toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Solicitud de renovación creada exitosamente',
-      'success'
+      'success',
     );
 
     // Check that success state shows payment instructions
@@ -465,28 +474,34 @@ describe('PermitRenewalPage', () => {
     vi.mocked(applicationService.createRenewalApplication).mockResolvedValue({
       success: false,
       application: {} as Application,
-      message: 'Error al crear la solicitud de renovación'
+      message: 'Error al crear la solicitud de renovación',
     });
 
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Submit the form (the form is already pre-filled with valid data)
     await user.click(screen.getByRole('button', { name: /Solicitar Renovación/i }));
 
     // Wait for submission to complete
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Solicitar Renovación/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('button', { name: /Solicitar Renovación/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that error toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Error al crear la solicitud de renovación',
-      'error'
+      'error',
     );
 
     // Check that we're still on the form page (not in success state)
@@ -496,28 +511,34 @@ describe('PermitRenewalPage', () => {
   test('handles network error during form submission', async () => {
     // Mock network error for renewal
     vi.mocked(applicationService.createRenewalApplication).mockRejectedValue(
-      new Error('Network Error')
+      new Error('Network Error'),
     );
 
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Submit the form (the form is already pre-filled with valid data)
     await user.click(screen.getByRole('button', { name: /Solicitar Renovación/i }));
 
     // Wait for submission to complete
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Solicitar Renovación/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('button', { name: /Solicitar Renovación/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that error toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Error al crear la solicitud de renovación',
-      'error'
+      'error',
     );
 
     // Check that we're still on the form page (not in success state)
@@ -528,9 +549,12 @@ describe('PermitRenewalPage', () => {
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the cancel button
     await user.click(screen.getByRole('button', { name: /Cancelar/i }));
@@ -544,15 +568,18 @@ describe('PermitRenewalPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: false,
       application: null as any,
-      message: 'Error al cargar la solicitud'
+      message: 'Error al cargar la solicitud',
     });
 
     renderPermitRenewalPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the back button
     await user.click(screen.getByRole('button', { name: /Volver al Dashboard/i }));
@@ -566,29 +593,37 @@ describe('PermitRenewalPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValueOnce({
       success: false,
       application: null as any,
-      message: 'Error al cargar la solicitud'
+      message: 'Error al cargar la solicitud',
     });
 
     // Mock success response for second call
     vi.mocked(applicationService.getApplicationById).mockResolvedValueOnce({
       success: true,
-      application: mockOriginalApplication
+      application: mockOriginalApplication,
     });
 
     renderPermitRenewalPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the retry button
     await user.click(screen.getByRole('button', { name: /Reintentar/i }));
 
     // Wait for application data to load and form to be displayed
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Renovación de Permiso/i, level: 1 })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole('heading', { name: /Renovación de Permiso/i, level: 1 }),
+        ).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Verify that getApplicationById was called twice
     expect(applicationService.getApplicationById).toHaveBeenCalledTimes(2);
@@ -598,17 +633,23 @@ describe('PermitRenewalPage', () => {
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Submit the form
     await user.click(screen.getByRole('button', { name: /Solicitar Renovación/i }));
 
     // Wait for submission to complete and success state to be shown
-    await waitFor(() => {
-      expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the "Ver Detalles del Permiso" button
     await user.click(screen.getByRole('button', { name: /Ver Detalles del Permiso/i }));
@@ -622,17 +663,23 @@ describe('PermitRenewalPage', () => {
     renderPermitRenewalPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByText(/Cargando información del permiso/i)).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Submit the form
     await user.click(screen.getByRole('button', { name: /Solicitar Renovación/i }));
 
     // Wait for submission to complete and success state to be shown
-    await waitFor(() => {
-      expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Renovación Exitosa/i)).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the "Ir al Dashboard" button
     await user.click(screen.getByRole('button', { name: /Ir al Dashboard/i }));

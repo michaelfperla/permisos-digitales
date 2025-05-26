@@ -471,51 +471,34 @@ exports.getDashboardStats = async (req, res, next) => {
       ORDER BY status
     `;
 
-    // Get today's verification counts
-    const todayVerificationsQuery = `
-      SELECT action, COUNT(*) as count
-      FROM payment_verification_log
-      WHERE created_at::date = CURRENT_DATE
-      GROUP BY action
-    `;
-
-    // Get pending verifications count
+    // Get pending verifications count - using AWAITING_OXXO_PAYMENT status instead of PROOF_SUBMITTED
     const pendingVerificationsQuery = `
       SELECT COUNT(*) as count
       FROM permit_applications
-      WHERE status = 'PROOF_SUBMITTED'
+      WHERE status = 'AWAITING_OXXO_PAYMENT'
     `;
 
-    // Run all queries in parallel
-    const [statusResults, todayResults, pendingResults] = await Promise.all([
+    // Run queries in parallel
+    const [statusResults, pendingResults] = await Promise.all([
       db.query(statusCountQuery),
-      db.query(todayVerificationsQuery),
       db.query(pendingVerificationsQuery)
     ]);
 
-    // Format today's verification counts
-    const todayVerifications = {
-      approved: 0,
-      rejected: 0
-    };
-
-    todayResults.rows.forEach(row => {
-      if (row.action === 'approved') {
-        todayVerifications.approved = parseInt(row.count);
-      } else if (row.action === 'rejected') {
-        todayVerifications.rejected = parseInt(row.count);
-      }
-    });
-
     // Map database status values to frontend status values if needed
     const statusMap = {
-      'PENDING_PAYMENT': 'PENDING',
-      'PROOF_SUBMITTED': 'PROOF_SUBMITTED',
+      'AWAITING_OXXO_PAYMENT': 'PENDING_PAYMENT',
+      'PAYMENT_PROCESSING': 'PAYMENT_PROCESSING',
+      'PAYMENT_FAILED': 'PAYMENT_FAILED',
       'PAYMENT_RECEIVED': 'PAYMENT_VERIFIED',
-      'PROOF_REJECTED': 'PAYMENT_REJECTED',
+      'GENERATING_PERMIT': 'GENERATING_PERMIT',
+      'ERROR_GENERATING_PERMIT': 'ERROR_GENERATING_PERMIT',
       'PERMIT_READY': 'PERMIT_GENERATED',
       'COMPLETED': 'COMPLETED',
-      'CANCELLED': 'CANCELLED'
+      'CANCELLED': 'CANCELLED',
+      'EXPIRED': 'EXPIRED',
+      'RENEWAL_PENDING': 'RENEWAL_PENDING',
+      'RENEWAL_APPROVED': 'RENEWAL_APPROVED',
+      'RENEWAL_REJECTED': 'RENEWAL_REJECTED'
     };
 
     // Format status counts to match frontend expectations
@@ -524,10 +507,16 @@ exports.getDashboardStats = async (req, res, next) => {
       count: parseInt(row.count)
     }));
 
+    // Since payment_verification_log table no longer exists, we'll return zeros for today's verifications
+    const todayVerifications = {
+      approved: 0,
+      rejected: 0
+    };
+
     ApiResponse.success(res, {
       statusCounts: formattedStatusCounts,
       todayVerifications,
-      pendingVerifications: parseInt(pendingResults.rows[0].count)
+      pendingVerifications: parseInt(pendingResults.rows[0]?.count || 0)
     });
   } catch (error) {
     logger.error('Error getting dashboard stats:', error);
@@ -565,16 +554,8 @@ exports.getApplicationDetails = async (req, res, next) => {
       return ApiResponse.notFound(res, 'Application not found');
     }
 
-    // Get verification history for this application
-    const { rows: historyRows } = await db.query(
-      `SELECT vl.id, vl.verified_by, vl.action, vl.notes, vl.created_at,
-              u.first_name, u.last_name, u.email
-       FROM payment_verification_log vl
-       JOIN users u ON vl.verified_by = u.id
-       WHERE vl.application_id = $1
-       ORDER BY vl.created_at DESC`,
-      [applicationId]
-    );
+    // Payment verification history is no longer available
+    const historyRows = [];
 
     // Map database status to frontend status
     const statusMap = {
