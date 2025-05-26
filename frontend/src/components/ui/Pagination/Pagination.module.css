@@ -23,7 +23,7 @@
   transition: all 0.2s ease;
 }
 
-.paginationItem:hover:not(.disabled):not(.active) {
+.paginationItem:hover:not(.disabled, .active) {
   background-color: var(--color-neutral-100);
   border-color: var(--color-neutral-400);
 }
@@ -57,7 +57,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pagination {
     flex-wrap: wrap;
   }
@@ -69,7 +69,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .pagination {
     gap: var(--space-1);
   }

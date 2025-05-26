@@ -4,7 +4,7 @@
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
 }
 
 .formTitle {
@@ -44,7 +44,7 @@
 .input:focus {
   outline: none;
   border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  box-shadow: 0 0 0 2px rgb(74 144 226 / 20%);
 }
 
 .error {
@@ -70,7 +70,7 @@
 }
 
 .submitButton:disabled {
-  background-color: #cccccc;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
@@ -80,7 +80,7 @@
   font-weight: 600;
   font-size: 1rem;
   padding: 0.75rem 1.5rem;
-  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.25);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
   transition: all 0.3s ease;
   background-color: var(--color-primary);
   color: white;
@@ -101,14 +101,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(to right, rgb(255 255 255 / 10%), transparent);
   transform: translateX(-100%);
   transition: transform 0.6s ease;
 }
 
 .authButton:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 12px rgba(167, 43, 49, 0.3);
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%);
   background-color: var(--color-primary-dark);
   color: white;
   text-decoration: none;
@@ -120,7 +120,7 @@
 
 .authButton:active {
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.25);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
 }
 
 .linkContainer {
@@ -321,6 +321,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -346,7 +347,7 @@
   text-align: center;
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .buttonContainer {
     margin-top: 1rem;
   }
@@ -385,7 +386,7 @@
 }
 
 .timeInfo {
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: rgb(0 0 0 / 3%);
   padding: 1rem;
   border-radius: 4px;
   margin-top: 1rem;
@@ -410,7 +411,7 @@
 }
 
 /* Responsive styles for mobile */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* General form styles for mobile */
   .formTitle {
     font-size: 1.5rem;
@@ -543,7 +544,7 @@
 }
 
 /* Small mobile devices */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .compactForm {
     padding: 1rem;
   }
@@ -574,7 +575,7 @@
 }
 
 /* Extra small devices - optimized for 360px width (common in Mexico) */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .compactForm {
     padding: 0.75rem;
   }
@@ -643,7 +644,7 @@
 }
 
 /* Responsive styles for alerts on mobile */
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .alertContent {
     gap: 0.75rem;
   }
@@ -690,7 +691,7 @@
   width: 100%;
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .compactForm {
     padding: 1rem;
   }

@@ -1,10 +1,11 @@
 {
   "extends": "stylelint-config-standard",
-  "plugins": [],
   "rules": {
-    "selector-class-pattern": null,
+    "indentation": 2,
+    "string-quotes": "single",
+    "selector-class-pattern": "^[a-z]+([A-Z][a-z0-9]+)*(-[a-z0-9]+)*$",
     "custom-property-pattern": null,
-    "keyframes-name-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+    "keyframes-name-pattern": "^([a-z]+([A-Z][a-z0-9]+)*(-[a-z0-9]+)*$)|(^[a-z][a-z0-9]*(-[a-z0-9]+)*$)",
     "selector-pseudo-class-no-unknown": [
       true,
       {
@@ -19,18 +20,15 @@
         "ignoreAtRules": ["else"]
       }
     ],
+    "media-query-no-invalid": null,
+    "no-descending-specificity": null,
+    "font-family-no-missing-generic-family-keyword": null,
     "declaration-property-value-no-unknown": true,
     "block-no-empty": true,
     "value-keyword-case": ["lower", {
       "ignoreKeywords": ["currentColor", "inherit", "initial", "unset"]
-    }],
-    "media-query-no-invalid": null,
-    "no-descending-specificity": null,
-    "font-family-no-missing-generic-family-keyword": null,
-    "indentation": 2,
-    "string-quotes": "single"
+    }]
   },
-  "defaultSeverity": "warning",
   "ignoreFiles": [
     "**/node_modules/**",
     "**/dist/**",

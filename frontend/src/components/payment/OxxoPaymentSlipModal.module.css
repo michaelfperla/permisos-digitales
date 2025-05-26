@@ -19,7 +19,7 @@
   padding: var(--space-3);
   background-color: var(--color-neutral-50);
   border-radius: var(--border-radius);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
 .oxxoDetailHeader {
@@ -108,8 +108,8 @@
 
 /* Instructions Block */
 .oxxoInstructions {
-  background-color: rgba(var(--color-warning-rgb), 0.1);
-  border: 1px solid rgba(var(--color-warning-rgb), 0.3);
+  background-color: rgb(var(--color-warning-rgb), 0.1);
+  border: 1px solid rgb(var(--color-warning-rgb), 0.3);
   border-radius: var(--border-radius);
   padding: var(--space-3);
   margin-bottom: var(--space-4);
@@ -121,7 +121,7 @@
   padding: var(--space-3);
   background-color: var(--color-neutral-50);
   border-radius: var(--border-radius);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
 .oxxoBarcodeWrapper {
@@ -221,19 +221,19 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.25);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
   min-height: 44px; /* WCAG touch target size */
 }
 
 .closeButtonModal:hover {
   background-color: var(--color-primary-dark);
   transform: translateY(-3px);
-  box-shadow: 0 5px 12px rgba(167, 43, 49, 0.3);
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%);
 }
 
 .closeButtonModal:active {
   transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(167, 43, 49, 0.25);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
 }
 
 /* Print-specific styles */
@@ -264,7 +264,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .modalActions {
     flex-direction: column;
   }
@@ -279,7 +279,7 @@
 }
 
 /* Small mobile styles */
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .oxxoSlipContainer {
     padding: var(--space-2);
     padding-bottom: var(--space-4); /* Extra padding at bottom for navigation bar */
@@ -335,7 +335,7 @@
 }
 
 /* Very small mobile styles */
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .oxxoSlipContainer {
     padding: var(--space-1);
     padding-bottom: var(

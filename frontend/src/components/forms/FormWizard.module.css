@@ -152,7 +152,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .progressContainer {
     overflow-x: auto;
     padding-bottom: var(--space-2);

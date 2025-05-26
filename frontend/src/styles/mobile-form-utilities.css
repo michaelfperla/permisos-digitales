@@ -128,7 +128,7 @@
 }
 
 /* Responsive Adjustments - Apply mobile-specific styles only at appropriate breakpoints */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Tablet breakpoint - Start applying some mobile optimizations */
   .mobile-button {
     width: 100%;
@@ -150,7 +150,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   /* Mobile breakpoint - Apply full mobile optimizations */
   .mobile-form-links {
     margin-top: var(--space-3);
@@ -195,7 +195,7 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (width <= 360px) {
   /* Small mobile breakpoint - Further optimizations for small screens */
   .mobile-form-links {
     margin-top: var(--space-2);

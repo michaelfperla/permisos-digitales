@@ -51,6 +51,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -84,7 +85,6 @@
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  -webkit-appearance: none;
   appearance: none;
   box-sizing: border-box;
 }
@@ -92,7 +92,7 @@
 .input:focus {
   outline: none;
   border-color: var(--color-primary, #a72b31);
-  box-shadow: 0 0 0 3px rgba(167, 43, 49, 0.15); /* Accent shadow on focus */
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%); /* Accent shadow on focus */
 }
 
 /* Error text (associated with MobileFormInput's error prop) */
@@ -119,6 +119,7 @@
 .errorMessage {
   /* Class for the <Alert> message */
   margin-bottom: 1rem;
+
   /* Alert component likely has its own styling, this could be for additional text */
 }
 
@@ -132,6 +133,7 @@
 }
 
 /* Specific styling for the "Siguiente" button in Step 1 if needed */
+
 /* It uses MobileFormActions, which handles flex layout.
    Button variant="primary" should handle most styling.
    To make it full-width within MobileFormActions (which is flex-column on mobile): */
@@ -139,10 +141,13 @@
   /* Target the button element if Button component allows className pass-through */
   width: 100%;
 }
+
 /* .nextButton, .backButton, .registerButton - These can be applied as classNames to the Button component if it supports it */
+
 /* For example, if Button component passes className to its root element: */
 .nextButton {
   /* Primary button styles usually suffice */
+
   /* If Button is inline-block/inline-flex by default, make it full width for Step 1 */
   width: 100%; /* Ensure it takes full width in MobileFormActions */
 }

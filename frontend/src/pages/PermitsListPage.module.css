@@ -10,6 +10,7 @@
 /* Breadcrumbs */
 .breadcrumbs {
   margin-bottom: var(--space-4);
+
   /* Default display handled by ClientBreadcrumbs component or global styles */
 }
 
@@ -36,6 +37,7 @@
 
 .newPermitButton {
   min-width: 220px; /* Slightly larger for prominence */
+
   /* Button component handles its own height and touch target size */
 }
 
@@ -89,7 +91,7 @@
   color: var(--color-white);
   border-color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
 }
 
 .filterButton.active:hover {
@@ -188,14 +190,17 @@
   background-color: var(--status-success-bg);
   color: var(--status-success);
 }
+
 .statusExpiring_soon {
   background-color: var(--status-warning-bg);
   color: var(--status-warning-hover); /* Darker yellow for text */
 }
+
 .statusNeeds_attention {
   background-color: var(--status-critical-bg);
   color: var(--status-critical);
 }
+
 .statusArchived {
   background-color: var(--status-neutral-bg);
   color: var(--status-neutral);
@@ -245,6 +250,7 @@
   flex: 1 1 auto; /* Allow buttons to grow and shrink, auto basis */
   min-width: 130px; /* Minimum width for each button */
 }
+
 .ctaIcon {
   font-size: var(--text-md); /* Ensure consistency with button component */
 }
@@ -270,13 +276,16 @@
   margin-bottom: var(--space-4);
   color: var(--color-neutral-500);
 }
+
 .loadingIcon {
   color: var(--color-primary);
   animation: spin 1.5s linear infinite;
 }
+
 .errorIcon {
   color: var(--status-critical);
 }
+
 .emptyIcon {
   color: var(--color-neutral-400);
 }
@@ -285,6 +294,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -305,7 +315,7 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   /* Tablet and below */
   .permitsGrid {
     grid-template-columns: 1fr; /* Single column on smaller tablets */
@@ -317,9 +327,11 @@
     align-items: stretch; /* Make title and button full width */
     gap: var(--space-3);
   }
+
   .pageTitle {
     text-align: center;
   }
+
   .newPermitButton {
     width: 100%; /* Full width button on mobile */
   }
@@ -333,7 +345,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   /* Mobile */
   .pageTitle {
     font-size: 1.5rem; /* Smaller title on mobile */
@@ -354,13 +366,16 @@
     align-items: stretch; /* Make badge full width if needed */
     gap: var(--space-2);
   }
+
   .statusBadge {
     align-self: flex-start; /* Align badge to start when stacked */
     margin-left: 0;
   }
+
   .vehicleIcon {
     font-size: 1.5rem;
   }
+
   .vehicleMakeModel {
     font-size: var(--text-md);
   }
@@ -373,6 +388,7 @@
     padding: var(--space-3);
     flex-direction: column; /* Stack buttons */
   }
+
   .ctaButton {
     width: 100%;
   }
@@ -380,9 +396,11 @@
   .stateText {
     font-size: var(--text-md);
   }
+
   .stateSubText {
     font-size: var(--text-sm);
   }
+
   .stateIcon {
     font-size: 2.5rem;
   }

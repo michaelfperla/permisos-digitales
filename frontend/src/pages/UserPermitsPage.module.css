@@ -24,7 +24,7 @@
   font-size: 1.75rem;
   font-weight: 600;
   color: var(--color-neutral-900, #343a40);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
 }
 
 .pageSubtitle {
@@ -64,7 +64,7 @@
   background-color: var(--color-neutral-100);
   border-radius: var(--border-radius-pill);
   padding: var(--space-1);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 5%);
   overflow-x: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
@@ -134,7 +134,7 @@
 .searchInput:focus {
   outline: none;
   border-color: var(--color-primary, #a72b31);
-  box-shadow: 0 0 0 0.2rem rgba(167, 43, 49, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(167 43 49 / 25%);
 }
 
 /* Status Badge Styles */
@@ -242,7 +242,7 @@
   border: 1px solid var(--color-neutral-200, #e9ecef);
   border-radius: var(--border-radius, 0.25rem);
   text-align: center;
-  box-shadow: var(--box-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--box-shadow-sm, 0 1px 3px rgb(0 0 0 / 10%));
 }
 
 .emptyIcon {
@@ -255,7 +255,7 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-neutral-900, #343a40);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.5rem;
 }
 
 .emptyMessage {
@@ -281,7 +281,7 @@
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 4px solid rgb(0 0 0 / 10%);
   border-radius: 50%;
   border-top-color: var(--color-primary, #a72b31);
   animation: spin 1s ease-in-out infinite;
@@ -305,7 +305,7 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pageHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -333,7 +333,7 @@
   /* Pagination styles removed as we're using the built-in pagination from MobileTable */
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .actionButtons {
     display: flex;
     gap: 0.75rem;
@@ -351,7 +351,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .pageTitle {
     font-size: 1.5rem;
     margin-bottom: var(--space-2);
@@ -399,7 +399,7 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (width <= 360px) {
   .pillFilterButton {
     padding: var(--space-1) var(--space-2);
     font-size: 0.75rem;
