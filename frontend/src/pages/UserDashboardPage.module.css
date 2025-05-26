@@ -261,7 +261,7 @@
 .statusName {
   font-size: 0.8rem; /* Smaller status name */
   color: var(--color-neutral-600);
-  word-break: break-word;
+  overflow-wrap: break-word;
   line-height: 1.3;
   margin-top: 2px;
 }

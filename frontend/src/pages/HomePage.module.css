@@ -320,7 +320,7 @@
   margin-right: var(--space-3);
   flex: 1; /* Allow title to take available space */
   white-space: normal; /* Allow text to wrap */
-  word-break: break-word; /* Break long words */
+  overflow-wrap: break-word; /* Break long words */
 }
 
 .accordionIcon {
@@ -362,7 +362,7 @@
   color: var(--color-neutral-700);
   line-height: 1.7;
   white-space: normal;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* --- Security Section --- */
