@@ -530,26 +530,26 @@ const handleWebhook = async (req, res) => {
 
         // Process different event types
         switch (event.type) {
-          case 'order.paid':
-            await handleOrderPaid(event.data);
-            break;
-          case 'order.expired':
-            await handleOrderExpired(event.data);
-            break;
-          case 'order.canceled':
-            await handleOrderCanceled(event.data);
-            break;
-          case 'charge.created':
-            await handleChargeCreated(event.data);
-            break;
-          case 'charge.paid':
-            await handleChargePaid(event.data);
-            break;
-          case 'charge.failed':
-            await handleChargeFailed(event.data);
-            break;
-          default:
-            logger.debug(`Unhandled webhook event type: ${event.type}`);
+        case 'order.paid':
+          await handleOrderPaid(event.data);
+          break;
+        case 'order.expired':
+          await handleOrderExpired(event.data);
+          break;
+        case 'order.canceled':
+          await handleOrderCanceled(event.data);
+          break;
+        case 'charge.created':
+          await handleChargeCreated(event.data);
+          break;
+        case 'charge.paid':
+          await handleChargePaid(event.data);
+          break;
+        case 'charge.failed':
+          await handleChargeFailed(event.data);
+          break;
+        default:
+          logger.debug(`Unhandled webhook event type: ${event.type}`);
         }
 
         logger.info(`Completed asynchronous processing of webhook event ${event.type}`, {

@@ -288,7 +288,7 @@ exports.createApplication = async (req, res, next) => {
           token: payment_token,
           name: validatedData.nombre_completo || userName,
           email: userEmail || email, // Use email from request if available
-          phone: "+525555555555", // Default phone number in Mexico format (required by Conekta)
+          phone: '+525555555555', // Default phone number in Mexico format (required by Conekta)
           amount: amount,
           currency: currency,
           description: `Permiso de Circulación - ${validatedData.marca} ${validatedData.linea} ${validatedData.ano_modelo}`,
