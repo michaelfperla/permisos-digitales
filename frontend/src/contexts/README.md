@@ -8,16 +8,17 @@ Context provides a way to pass data through the component tree without having to
 
 ## Key Contexts
 
-*   **`AuthContext.tsx`**:
-    *   Manages user authentication state, including the current user object, authentication status (e.g., logged in/out), and potentially authentication tokens.
-    *   Provides functions for login, logout, and registration.
-    *   Wraps parts of the application (or the entire app) that require access to authentication information.
-    *   Often consumed via the `useAuth` custom hook.
+- **`AuthContext.tsx`**:
 
-*   **`ToastContext.tsx`**:
-    *   Manages the display of toast notifications (small, temporary messages) across the application.
-    *   Provides functions to show success, error, warning, or informational toasts.
-    *   Allows any component to trigger a toast message without complex prop drilling.
+  - Manages user authentication state, including the current user object, authentication status (e.g., logged in/out), and potentially authentication tokens.
+  - Provides functions for login, logout, and registration.
+  - Wraps parts of the application (or the entire app) that require access to authentication information.
+  - Often consumed via the `useAuth` custom hook.
+
+- **`ToastContext.tsx`**:
+  - Manages the display of toast notifications (small, temporary messages) across the application.
+  - Provides functions to show success, error, warning, or informational toasts.
+  - Allows any component to trigger a toast message without complex prop drilling.
 
 ## Usage
 
@@ -45,4 +46,5 @@ function SubmitButton() {
   return <button onClick={handleSubmit}>Submit</button>;
 }
 ```
+
 The admin portal (`frontend/src/admin/contexts/`) may have its own separate contexts, such as an `AuthContext` specific to admin users.

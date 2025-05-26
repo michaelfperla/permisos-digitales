@@ -60,12 +60,12 @@
   .reviewItem {
     flex-direction: column;
   }
-  
+
   .reviewLabel {
     flex: 0 0 100%;
     margin-bottom: var(--space-1);
   }
-  
+
   .reviewValue {
     flex: 0 0 100%;
   }

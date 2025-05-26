@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { render, screen, waitFor } from '../../test/test-utils';
 import RenewalEligibility from '../RenewalEligibility';
 
@@ -6,9 +7,9 @@ import RenewalEligibility from '../RenewalEligibility';
 vi.mock('../../services/applicationService', () => {
   return {
     default: {
-      checkRenewalEligibility: vi.fn()
+      checkRenewalEligibility: vi.fn(),
     },
-    checkRenewalEligibility: vi.fn()
+    checkRenewalEligibility: vi.fn(),
   };
 });
 
@@ -34,7 +35,7 @@ describe('RenewalEligibility', () => {
     folio: 'F123',
     importe: 1000,
     fecha_expedicion: '2023-01-01T00:00:00.000Z',
-    fecha_vencimiento: '2023-12-31T00:00:00.000Z'
+    fecha_vencimiento: '2023-12-31T00:00:00.000Z',
   };
 
   beforeEach(() => {
@@ -44,13 +45,13 @@ describe('RenewalEligibility', () => {
   it('should show loading state initially', async () => {
     // Mock a delayed response
     applicationService.checkRenewalEligibility = vi.fn().mockImplementation(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           resolve({
             eligible: true,
             message: 'Eligible for renewal',
             daysUntilExpiration: 30,
-            expirationDate: '2023-12-31T00:00:00.000Z'
+            expirationDate: '2023-12-31T00:00:00.000Z',
           });
         }, 100);
       });
@@ -68,7 +69,7 @@ describe('RenewalEligibility', () => {
       eligible: true,
       message: 'Su permiso vence en 5 días. Puede renovarlo ahora.',
       daysUntilExpiration: 5,
-      expirationDate: '2023-12-31T00:00:00.000Z'
+      expirationDate: '2023-12-31T00:00:00.000Z',
     });
 
     render(<RenewalEligibility application={mockApplication} />);
@@ -79,7 +80,9 @@ describe('RenewalEligibility', () => {
     });
 
     // Check if the message is displayed
-    expect(screen.getByText(/Su permiso vence en 5 días. Puede renovarlo ahora./i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Su permiso vence en 5 días. Puede renovarlo ahora./i),
+    ).toBeInTheDocument();
 
     // Check if the renewal button is displayed
     expect(screen.getByText(/Renovar Permiso/i)).toBeInTheDocument();
@@ -94,7 +97,7 @@ describe('RenewalEligibility', () => {
       eligible: false,
       message: 'Su permiso vence en 20 días. Podrá renovarlo 7 días antes de su vencimiento.',
       daysUntilExpiration: 20,
-      expirationDate: '2023-12-31T00:00:00.000Z'
+      expirationDate: '2023-12-31T00:00:00.000Z',
     });
 
     render(<RenewalEligibility application={mockApplication} />);
@@ -105,7 +108,11 @@ describe('RenewalEligibility', () => {
     });
 
     // Check if the message is displayed
-    expect(screen.getByText(/Su permiso vence en 20 días. Podrá renovarlo 7 días antes de su vencimiento./i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Su permiso vence en 20 días. Podrá renovarlo 7 días antes de su vencimiento./i,
+      ),
+    ).toBeInTheDocument();
 
     // Check if the renewal button is NOT displayed
     expect(screen.queryByText(/Renovar Permiso/i)).not.toBeInTheDocument();
@@ -113,13 +120,17 @@ describe('RenewalEligibility', () => {
 
   it('should show error message when eligibility check fails', async () => {
     // Mock error response
-    applicationService.checkRenewalEligibility = vi.fn().mockRejectedValue(new Error('Network error'));
+    applicationService.checkRenewalEligibility = vi
+      .fn()
+      .mockRejectedValue(new Error('Network error'));
 
     render(<RenewalEligibility application={mockApplication} />);
 
     // Wait for eligibility check to fail
     await waitFor(() => {
-      expect(screen.getByText(/Error al verificar la elegibilidad para renovación/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Error al verificar la elegibilidad para renovación/i),
+      ).toBeInTheDocument();
     });
 
     // Check if retry button is displayed
@@ -132,7 +143,7 @@ describe('RenewalEligibility', () => {
       eligible: false,
       message: 'Su permiso venció hace más de 15 días. Debe solicitar un nuevo permiso.',
       daysUntilExpiration: -20,
-      expirationDate: '2023-11-15T00:00:00.000Z'
+      expirationDate: '2023-11-15T00:00:00.000Z',
     });
 
     render(<RenewalEligibility application={mockApplication} />);

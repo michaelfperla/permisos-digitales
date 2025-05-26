@@ -1,7 +1,14 @@
-import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+
+// Import components and mocked services after mocks
+import { AuthProvider } from '../../contexts/AuthContext';
+import { ToastProvider } from '../../contexts/ToastContext';
+import applicationService, { Application, ApplicationStatus } from '../../services/applicationService';
+import authService from '../../services/authService';
+import DashboardPage from '../DashboardPage';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -12,14 +19,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
   const actual = await importOriginal();
   return { ...actual, useNavigate: () => mockNavigate };
 });
-
-// Import components and mocked services after mocks
-import DashboardPage from '../DashboardPage';
-import { AuthProvider } from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
-import applicationService from '../../services/applicationService';
-import authService from '../../services/authService';
-import { Application, ApplicationStatus } from '../../services/applicationService';
 
 // Mock application data
 const mockApplications: Application[] = [
@@ -39,7 +38,7 @@ const mockApplications: Application[] = [
     numero_motor: 'M123456',
     ano_modelo: 2023,
     folio: 'PD-2025-001',
-    importe: 1500.00,
+    importe: 1500.0,
     fecha_expedicion: '2025-01-15',
     fecha_vencimiento: '2026-01-15',
   },
@@ -58,7 +57,7 @@ const mockApplications: Application[] = [
     numero_serie: 'XYZ987654321',
     numero_motor: 'T987654',
     ano_modelo: 2022,
-  }
+  },
 ];
 
 // Render helper
@@ -70,7 +69,7 @@ const renderDashboardPage = () => {
           <DashboardPage />
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
@@ -89,8 +88,8 @@ describe('DashboardPage', () => {
         email: 'test@test.com',
         first_name: 'Test',
         last_name: 'User',
-        accountType: 'citizen'
-      }
+        accountType: 'citizen',
+      },
     });
   });
 
@@ -114,7 +113,7 @@ describe('DashboardPage', () => {
     // Mock successful response
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: mockApplications
+      applications: mockApplications,
     });
 
     renderDashboardPage();
@@ -144,7 +143,7 @@ describe('DashboardPage', () => {
     // Mock empty response
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: []
+      applications: [],
     });
 
     renderDashboardPage();
@@ -167,7 +166,7 @@ describe('DashboardPage', () => {
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: false,
       applications: [],
-      message: errorMessage
+      message: errorMessage,
     });
 
     renderDashboardPage();
@@ -195,7 +194,9 @@ describe('DashboardPage', () => {
 
     // Wait for error message to appear
     await waitFor(() => {
-      expect(screen.getByText(/Error de red. Por favor, verifique su conexión/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Error de red. Por favor, verifique su conexión/i),
+      ).toBeInTheDocument();
     });
 
     // Check for retry button
@@ -213,13 +214,13 @@ describe('DashboardPage', () => {
     vi.mocked(applicationService.getApplications).mockResolvedValueOnce({
       success: false,
       applications: [],
-      message: 'Error al cargar las solicitudes'
+      message: 'Error al cargar las solicitudes',
     });
 
     // Mock successful response for the retry
     vi.mocked(applicationService.getApplications).mockResolvedValueOnce({
       success: true,
-      applications: mockApplications
+      applications: mockApplications,
     });
 
     renderDashboardPage();
@@ -252,7 +253,7 @@ describe('DashboardPage', () => {
     // Mock successful response
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: mockApplications
+      applications: mockApplications,
     });
 
     renderDashboardPage();
@@ -279,7 +280,7 @@ describe('DashboardPage', () => {
     // Mock successful response
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: mockApplications
+      applications: mockApplications,
     });
 
     renderDashboardPage();
@@ -302,21 +303,24 @@ describe('DashboardPage', () => {
 
     const expiringPermit = {
       ...mockApplications[0],
-      fecha_vencimiento: expirationDate.toISOString()
+      fecha_vencimiento: expirationDate.toISOString(),
     };
 
     // Mock successful response with expiring permit
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: [expiringPermit, mockApplications[1]]
+      applications: [expiringPermit, mockApplications[1]],
     });
 
     renderDashboardPage();
 
     // Wait for applications to load and expiring permits section to appear
-    await waitFor(() => {
-      expect(screen.getByText(/Permisos por Expirar/i)).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Permisos por Expirar/i)).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that the expiring permit is displayed in the section with days remaining
     // Use a more flexible regex to match different ways of displaying days
@@ -334,13 +338,13 @@ describe('DashboardPage', () => {
 
     const expiringPermit = {
       ...mockApplications[0],
-      fecha_vencimiento: expirationDate.toISOString()
+      fecha_vencimiento: expirationDate.toISOString(),
     };
 
     // Mock successful response with expiring permit
     vi.mocked(applicationService.getApplications).mockResolvedValue({
       success: true,
-      applications: [expiringPermit, mockApplications[1]]
+      applications: [expiringPermit, mockApplications[1]],
     });
 
     renderDashboardPage();

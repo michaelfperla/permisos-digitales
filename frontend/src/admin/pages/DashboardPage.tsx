@@ -1,6 +1,5 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import {
   FaClipboardCheck,
   FaExclamationTriangle,
@@ -8,11 +7,14 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaChartBar,
-  FaInfoCircle
+  FaInfoCircle,
 } from 'react-icons/fa';
-import adminService from '../services/adminService';
-import { useToast } from '../contexts/ToastContext';
+import { Link } from 'react-router-dom';
+
 import styles from './DashboardPage.module.css';
+import Icon from '../../shared/components/ui/Icon';
+import { useToast } from '../../shared/hooks/useToast';
+import adminService from '../services/adminService';
 
 const DashboardPage: React.FC = () => {
   const { showToast } = useToast();
@@ -23,42 +25,42 @@ const DashboardPage: React.FC = () => {
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: adminService.getDashboardStats,
     onError: (err: Error) => {
       showToast(`Error al cargar estadísticas: ${err.message}`, 'error');
-    }
+    },
   });
 
   // Status mapping object to translate backend status codes to user-friendly Spanish display names
   const statusDisplayMap: Record<string, string> = {
     // New payment flow statuses
-    'AWAITING_OXXO_PAYMENT': 'Pagos OXXO Pendientes',
-    'PAYMENT_RECEIVED': 'Pagos Recibidos',
+    AWAITING_OXXO_PAYMENT: 'Pagos OXXO Pendientes',
+    PAYMENT_RECEIVED: 'Pagos Recibidos',
 
     // Permit generation statuses
-    'GENERATING_PERMIT': 'Generando Permisos',
-    'ERROR_GENERATING_PERMIT': 'Error al Generar Permisos',
-    'PERMIT_READY': 'Permisos Listos',
+    GENERATING_PERMIT: 'Generando Permisos',
+    ERROR_GENERATING_PERMIT: 'Error al Generar Permisos',
+    PERMIT_READY: 'Permisos Listos',
 
     // Completion statuses
-    'COMPLETED': 'Completados',
-    'CANCELLED': 'Cancelados',
-    'EXPIRED': 'Permisos Vencidos',
+    COMPLETED: 'Completados',
+    CANCELLED: 'Cancelados',
+    EXPIRED: 'Permisos Vencidos',
 
     // Renewal statuses
-    'RENEWAL_PENDING': 'Renovaciones Pendientes',
-    'RENEWAL_APPROVED': 'Renovaciones Aprobadas',
-    'RENEWAL_REJECTED': 'Renovaciones Rechazadas',
+    RENEWAL_PENDING: 'Renovaciones Pendientes',
+    RENEWAL_APPROVED: 'Renovaciones Aprobadas',
+    RENEWAL_REJECTED: 'Renovaciones Rechazadas',
 
     // Legacy statuses - kept for backward compatibility
-    'PENDING': 'Pendientes de Pago (Legacy)',
-    'PROOF_SUBMITTED': 'Comprobantes Enviados (Legacy)',
-    'PAYMENT_VERIFIED': 'Pagos Verificados (Legacy)',
-    'PAYMENT_REJECTED': 'Comprobantes Rechazados (Legacy)',
-    'PERMIT_GENERATED': 'Permisos Generados (Legacy)'
+    PENDING: 'Pendientes de Pago (Legacy)',
+    PROOF_SUBMITTED: 'Comprobantes Enviados (Legacy)',
+    PAYMENT_VERIFIED: 'Pagos Verificados (Legacy)',
+    PAYMENT_REJECTED: 'Comprobantes Rechazados (Legacy)',
+    PERMIT_GENERATED: 'Permisos Generados (Legacy)',
   };
 
   // Helper function to get status display name using the mapping
@@ -71,40 +73,40 @@ const DashboardPage: React.FC = () => {
     switch (status) {
       // New payment flow statuses
       case 'AWAITING_OXXO_PAYMENT':
-        return <FaHourglassHalf className={styles.iconPending} />;
+        return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'PAYMENT_RECEIVED':
-        return <FaCheckCircle className={styles.iconVerified} />;
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconVerified} size="md" />;
 
       // Permit generation statuses
       case 'GENERATING_PERMIT':
-        return <FaHourglassHalf className={styles.iconPending} />;
+        return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'ERROR_GENERATING_PERMIT':
-        return <FaTimesCircle className={styles.iconRejected} />;
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconRejected} size="md" />;
       case 'PERMIT_READY':
-        return <FaCheckCircle className={styles.iconGenerated} />;
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconGenerated} size="md" />;
 
       // Completion statuses
       case 'COMPLETED':
-        return <FaCheckCircle className={styles.iconCompleted} />;
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconCompleted} size="md" />;
       case 'CANCELLED':
-        return <FaTimesCircle className={styles.iconCancelled} />;
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} size="md" />;
       case 'EXPIRED':
-        return <FaTimesCircle className={styles.iconCancelled} />;
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} size="md" />;
 
       // Legacy statuses
       case 'PENDING':
-        return <FaHourglassHalf className={styles.iconPending} />;
+        return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'PROOF_SUBMITTED':
-        return <FaClipboardCheck className={styles.iconSubmitted} />;
+        return <Icon IconComponent={FaClipboardCheck} className={styles.iconSubmitted} size="md" />;
       case 'PAYMENT_VERIFIED':
-        return <FaCheckCircle className={styles.iconVerified} />;
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconVerified} size="md" />;
       case 'PAYMENT_REJECTED':
-        return <FaTimesCircle className={styles.iconRejected} />;
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconRejected} size="md" />;
       case 'PERMIT_GENERATED':
-        return <FaCheckCircle className={styles.iconGenerated} />;
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconGenerated} size="md" />;
 
       default:
-        return <FaChartBar className={styles.iconDefault} />;
+        return <Icon IconComponent={FaChartBar} className={styles.iconDefault} size="md" />;
     }
   };
 
@@ -120,7 +122,12 @@ const DashboardPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Error al cargar estadísticas</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
         <button type="button" className={styles.retryButton} onClick={() => refetch()}>
@@ -146,7 +153,7 @@ const DashboardPage: React.FC = () => {
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats?.oxxoPaymentsPending || 0}</div>
             <div className={styles.statIcon}>
-              <FaHourglassHalf />
+              <Icon IconComponent={FaHourglassHalf} size="lg" />
             </div>
           </div>
           <div className={styles.statFooter}>
@@ -161,11 +168,9 @@ const DashboardPage: React.FC = () => {
             <h2 className={styles.statTitle}>Permisos Generados Hoy</h2>
           </div>
           <div className={styles.statContent}>
-            <div className={styles.statValue}>
-              {stats?.todayPermits || 0}
-            </div>
+            <div className={styles.statValue}>{stats?.todayPermits || 0}</div>
             <div className={styles.statIcon}>
-              <FaCheckCircle />
+              <Icon IconComponent={FaCheckCircle} size="lg" />
             </div>
           </div>
           <div className={styles.statFooter}>
@@ -184,21 +189,17 @@ const DashboardPage: React.FC = () => {
           <div className={styles.statusGrid}>
             {stats.statusCounts.map((statusItem) => (
               <div key={statusItem.status} className={styles.statusCard}>
-                <div className={styles.statusIcon}>
-                  {getStatusIcon(statusItem.status)}
-                </div>
+                <div className={styles.statusIcon}>{getStatusIcon(statusItem.status)}</div>
                 <div className={styles.statusContent}>
                   <div className={styles.statusCount}>{statusItem.count}</div>
-                  <div className={styles.statusName}>
-                    {getStatusDisplayName(statusItem.status)}
-                  </div>
+                  <div className={styles.statusName}>{getStatusDisplayName(statusItem.status)}</div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className={styles.emptyStatusMessage}>
-            <FaInfoCircle className={styles.emptyStatusIcon} />
+            <Icon IconComponent={FaInfoCircle} className={styles.emptyStatusIcon} size="lg" />
             <p>No hay datos de estado de solicitudes disponibles.</p>
           </div>
         )}
@@ -211,21 +212,21 @@ const DashboardPage: React.FC = () => {
         <div className={styles.linksGrid}>
           <Link to="/applications" className={styles.linkCard}>
             <div className={styles.linkIcon}>
-              <FaChartBar />
+              <Icon IconComponent={FaChartBar} size="lg" />
             </div>
             <div className={styles.linkText}>Ver Todas las Solicitudes</div>
           </Link>
 
           <Link to="/applications?status=AWAITING_OXXO_PAYMENT" className={styles.linkCard}>
             <div className={styles.linkIcon}>
-              <FaHourglassHalf />
+              <Icon IconComponent={FaHourglassHalf} size="lg" />
             </div>
             <div className={styles.linkText}>Pagos OXXO Pendientes</div>
           </Link>
 
           <Link to="/applications?status=PERMIT_READY" className={styles.linkCard}>
             <div className={styles.linkIcon}>
-              <FaCheckCircle />
+              <Icon IconComponent={FaCheckCircle} size="lg" />
             </div>
             <div className={styles.linkText}>Permisos Listos</div>
           </Link>

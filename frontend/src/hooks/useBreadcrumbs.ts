@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { clientRoutes, adminRoutes, BreadcrumbConfigItem, IconType } from '../utils/breadcrumbsConfig';
-import { BreadcrumbItem } from '../components/navigation/Breadcrumbs/Breadcrumbs';
+
+import {
+  clientRoutes,
+  adminRoutes,
+} from '../utils/breadcrumbsConfig';
 
 interface UseBreadcrumbsOptions {
   isAdmin?: boolean;
@@ -35,12 +38,10 @@ const useBreadcrumbs = (options: UseBreadcrumbsOptions = {}) => {
       const routePatterns = Object.keys(routeConfig);
 
       // Find a matching pattern
-      const matchingPattern = routePatterns.find(pattern => {
+      const matchingPattern = routePatterns.find((pattern) => {
         // Convert route pattern to regex
         // e.g., '/permits/:id' -> /^\/permits\/[^/]+$/
-        const regexPattern = pattern
-          .replace(/:[^/]+/g, '[^/]+')
-          .replace(/\//g, '\\/');
+        const regexPattern = pattern.replace(/:[^/]+/g, '[^/]+').replace(/\//g, '\\/');
 
         const regex = new RegExp(`^${regexPattern}$`);
         return regex.test(pathname);
@@ -50,7 +51,7 @@ const useBreadcrumbs = (options: UseBreadcrumbsOptions = {}) => {
         matchedRoute = routeConfig[matchingPattern];
 
         // Replace parameter placeholders with actual values
-        matchedRoute = matchedRoute.map(item => {
+        matchedRoute = matchedRoute.map((item) => {
           // Create a new item to avoid mutating the original
           const newItem = { ...item };
 
@@ -85,10 +86,10 @@ const useBreadcrumbs = (options: UseBreadcrumbsOptions = {}) => {
     }
 
     // Convert BreadcrumbConfigItem[] to BreadcrumbItem[] by passing the iconType
-    return matchedRoute.map(item => ({
+    return matchedRoute.map((item) => ({
       label: item.label,
       path: item.path,
-      iconType: item.iconType
+      iconType: item.iconType,
     }));
   }, [location, params, isAdmin]);
 

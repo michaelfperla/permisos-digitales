@@ -790,7 +790,7 @@ class PaymentService {
         const charge = order.charges.data[0];
 
         // Determine payment status
-        let paymentStatus = ApplicationStatus.PENDING_PAYMENT;
+        let paymentStatus = ApplicationStatus.AWAITING_PAYMENT;
 
         // Add detailed logging for payment status
         logger.debug('Conekta payment response:', {
@@ -815,12 +815,12 @@ class PaymentService {
               newStatus: paymentStatus
             });
           } else {
-            // In production, keep as PENDING_PAYMENT
-            paymentStatus = ApplicationStatus.PENDING_PAYMENT;
+            // In production, use PAYMENT_PROCESSING
+            paymentStatus = ApplicationStatus.PAYMENT_PROCESSING;
           }
           this.metrics.successfulPayments++; // Count as successful since it's a normal flow
         } else if (charge.status === 'declined') {
-          paymentStatus = ApplicationStatus.PAYMENT_DECLINED;
+          paymentStatus = ApplicationStatus.PAYMENT_FAILED;
           this.metrics.failedPayments++;
         }
 
@@ -1348,15 +1348,15 @@ class PaymentService {
         });
 
         // Determine application status based on payment status
-        let applicationStatus = ApplicationStatus.PENDING_PAYMENT;
+        let applicationStatus = ApplicationStatus.AWAITING_PAYMENT;
         if (order.payment_status === 'paid') {
           applicationStatus = ApplicationStatus.PAYMENT_RECEIVED;
         } else if (order.payment_status === 'declined') {
-          applicationStatus = ApplicationStatus.PAYMENT_DECLINED;
+          applicationStatus = ApplicationStatus.PAYMENT_FAILED;
         } else if (order.payment_status === 'expired') {
-          applicationStatus = ApplicationStatus.PAYMENT_EXPIRED;
+          applicationStatus = ApplicationStatus.PAYMENT_FAILED;
         } else if (order.payment_status === 'canceled') {
-          applicationStatus = ApplicationStatus.PAYMENT_CANCELED;
+          applicationStatus = ApplicationStatus.PAYMENT_FAILED;
         } else if (order.payment_status === 'pending_payment') {
           // Check if we're in test mode
           const isTestMode = config.nodeEnv !== 'production';
@@ -1377,9 +1377,8 @@ class PaymentService {
                   newStatus: applicationStatus
                 });
               } else {
-                // In production, keep as PENDING_PAYMENT
-                applicationStatus = ApplicationStatus.PENDING_PAYMENT;
-                logger.info(`Payment for order ${order.id} is in pending state`);
+                applicationStatus = ApplicationStatus.PAYMENT_PROCESSING;
+                logger.info(`Payment for order ${order.id} is in processing state`);
               }
             }
           }

@@ -1,0 +1,129 @@
+.legalPageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+.desktopHeader {
+  background-color: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 1rem 2rem;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.headerLinks {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.headerLink {
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.headerLink:hover {
+  color: var(--color-primary);
+}
+
+.legalContent {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.legalTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.legalDate {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.legalSection {
+  margin-bottom: 2rem;
+}
+
+.legalSection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 1rem;
+}
+
+.legalSection p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.legalIndent {
+  padding-left: 1.5rem;
+}
+
+.legalSection a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.legalSection a:hover {
+  text-decoration: underline;
+}
+
+.legalList {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.legalList li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.legalFootnote {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .legalTitle {
+    font-size: 1.5rem;
+  }
+
+  .legalSection h2 {
+    font-size: 1.125rem;
+  }
+
+  .legalContent {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .legalIndent {
+    padding-left: 1rem;
+  }
+}

@@ -1,97 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { FaUser, FaIdCard, FaMapMarkerAlt, FaCheck, FaTimes, FaInfoCircle, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import React from 'react';
+import { useFormContext } from 'react-hook-form';
+import {
+  FaUser,
+  FaIdCard,
+  FaMapMarkerAlt,
+  FaCheck,
+  FaTimes,
+  FaInfoCircle,
+  FaArrowLeft,
+  FaArrowRight,
+} from 'react-icons/fa';
+
 import styles from './CompleteForm.module.css';
-import Button from '../../components/ui/Button/Button';
+import Icon from '../../shared/components/ui/Icon';
+import { CompletePermitFormData } from '../../shared/schemas/permit.schema';
+import Button from "../ui/Button/Button";
 
 interface PersonalInfoStepProps {
-  formData: {
-    nombre_completo: string;
-    curp_rfc: string;
-    domicilio: string;
-  };
-  errors: Record<string, string>;
-  updateFormData: (data: Partial<typeof formData>) => void;
   onNext: () => void;
   onPrevious: () => void;
 }
 
-const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
-  formData,
-  errors,
-  updateFormData,
-  onNext,
-  onPrevious
-}) => {
-  // Local state for validation
-  const [touched, setTouched] = useState({
-    nombre_completo: false,
-    curp_rfc: false,
-    domicilio: false
-  });
+const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ onNext, onPrevious }) => {
+  // Get form methods from React Hook Form context
+  const {
+    register,
+    formState: { errors, touchedFields },
+    trigger,
+  } = useFormContext<CompletePermitFormData>();
 
-  // Local state for field validity
-  const [fieldValidity, setFieldValidity] = useState({
-    nombre_completo: false,
-    curp_rfc: false,
-    domicilio: false
-  });
+  // Handle next button click with validation
+  const handleNext = async () => {
+    // Validate only the personal info fields
+    const isStepValid = await trigger(['nombre_completo', 'curp_rfc', 'domicilio']);
 
-  // Validate fields on mount and when formData changes
-  useEffect(() => {
-    validateFields();
-  }, [formData]);
-
-  // Validate all fields
-  const validateFields = () => {
-    const validity = {
-      nombre_completo: formData.nombre_completo.trim().length >= 3,
-      curp_rfc: validateCurpRfc(formData.curp_rfc),
-      domicilio: formData.domicilio.trim().length >= 10
-    };
-
-    setFieldValidity(validity);
-  };
-
-  // Validate CURP or RFC
-  const validateCurpRfc = (value: string) => {
-    const trimmed = value.trim();
-    return trimmed.length === 18 || trimmed.length === 12 || trimmed.length === 13;
-  };
-
-  // Handle input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    // Update form data
-    updateFormData({ [name]: value });
-
-    // Mark field as touched
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }));
-  };
-
-  // Handle input blur
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-
-    // Mark field as touched
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }));
-  };
-
-  // Check if all fields are valid
-  const isFormValid = () => {
-    return fieldValidity.nombre_completo && fieldValidity.curp_rfc && fieldValidity.domicilio;
+    if (isStepValid) {
+      onNext();
+    }
   };
 
   return (
     <div className={styles.formSection}>
       <div className={styles.formSectionHeader}>
-        <FaUser className={styles.formSectionIcon} />
+        <Icon IconComponent={FaUser} className={styles.formSectionIcon} size="lg" />
         <h2 className={styles.formSectionTitle}>Información Personal</h2>
       </div>
 
@@ -102,31 +53,33 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
               Nombre completo
             </label>
             <div className={styles.inputWithIcon}>
-              <FaUser className={styles.inputIcon} />
+              <Icon IconComponent={FaUser} className={styles.inputIcon} size="sm" />
               <input
                 type="text"
                 id="nombre_completo"
-                name="nombre_completo"
-                className={`${styles.formInput} ${touched.nombre_completo && (fieldValidity.nombre_completo ? styles.valid : styles.invalid)}`}
-                value={formData.nombre_completo}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
+                className={`${styles.formInput} ${touchedFields.nombre_completo && (errors.nombre_completo ? styles.invalid : styles.valid)}`}
                 placeholder="Ej. Juan Pérez González"
                 autoComplete="name"
                 inputMode="text"
+                {...register('nombre_completo')}
               />
-              {touched.nombre_completo && (
-                fieldValidity.nombre_completo ? (
-                  <FaCheck className={`${styles.validationIcon} ${styles.validIcon}`} />
+              {touchedFields.nombre_completo &&
+                (!errors.nombre_completo ? (
+                  <Icon
+                    IconComponent={FaCheck}
+                    className={`${styles.validationIcon} ${styles.validIcon}`}
+                    size="sm"
+                  />
                 ) : (
-                  <FaTimes className={`${styles.validationIcon} ${styles.invalidIcon}`} />
-                )
-              )}
+                  <Icon
+                    IconComponent={FaTimes}
+                    className={`${styles.validationIcon} ${styles.invalidIcon}`}
+                    size="sm"
+                  />
+                ))}
             </div>
-            {touched.nombre_completo && !fieldValidity.nombre_completo && (
-              <span className={styles.formErrorText}>
-                {errors.nombre_completo || 'El nombre completo debe tener al menos 3 caracteres'}
-              </span>
+            {errors.nombre_completo && (
+              <span className={styles.formErrorText}>{errors.nombre_completo.message}</span>
             )}
           </div>
 
@@ -135,32 +88,34 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
               CURP o RFC
             </label>
             <div className={styles.inputWithIcon}>
-              <FaIdCard className={styles.inputIcon} />
+              <Icon IconComponent={FaIdCard} className={styles.inputIcon} size="sm" />
               <input
                 type="text"
                 id="curp_rfc"
-                name="curp_rfc"
-                className={`${styles.formInput} ${touched.curp_rfc && (fieldValidity.curp_rfc ? styles.valid : styles.invalid)}`}
-                value={formData.curp_rfc}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
+                className={`${styles.formInput} ${touchedFields.curp_rfc && (errors.curp_rfc ? styles.invalid : styles.valid)}`}
                 placeholder="Ej. PEGJ800101HDFRZN08"
                 autoComplete="off"
                 inputMode="text"
                 autoCapitalize="characters"
+                {...register('curp_rfc')}
               />
-              {touched.curp_rfc && (
-                fieldValidity.curp_rfc ? (
-                  <FaCheck className={`${styles.validationIcon} ${styles.validIcon}`} />
+              {touchedFields.curp_rfc &&
+                (!errors.curp_rfc ? (
+                  <Icon
+                    IconComponent={FaCheck}
+                    className={`${styles.validationIcon} ${styles.validIcon}`}
+                    size="sm"
+                  />
                 ) : (
-                  <FaTimes className={`${styles.validationIcon} ${styles.invalidIcon}`} />
-                )
-              )}
+                  <Icon
+                    IconComponent={FaTimes}
+                    className={`${styles.validationIcon} ${styles.invalidIcon}`}
+                    size="sm"
+                  />
+                ))}
             </div>
-            {touched.curp_rfc && !fieldValidity.curp_rfc ? (
-              <span className={styles.formErrorText}>
-                {errors.curp_rfc || 'Formato inválido. CURP (18 caracteres) o RFC (12-13 caracteres)'}
-              </span>
+            {errors.curp_rfc ? (
+              <span className={styles.formErrorText}>{errors.curp_rfc.message}</span>
             ) : (
               <span className={styles.formHelperText}>
                 CURP (18 caracteres) o RFC (12-13 caracteres)
@@ -173,40 +128,42 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
               Dirección completa
             </label>
             <div className={styles.inputWithIcon}>
-              <FaMapMarkerAlt className={styles.inputIcon} />
+              <Icon IconComponent={FaMapMarkerAlt} className={styles.inputIcon} size="sm" />
               <input
                 type="text"
                 id="domicilio"
-                name="domicilio"
-                className={`${styles.formInput} ${touched.domicilio && (fieldValidity.domicilio ? styles.valid : styles.invalid)}`}
-                value={formData.domicilio}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
+                className={`${styles.formInput} ${touchedFields.domicilio && (errors.domicilio ? styles.invalid : styles.valid)}`}
                 placeholder="Ej. Calle Principal #123, Colonia Centro, Ciudad"
                 autoComplete="street-address"
                 inputMode="text"
+                {...register('domicilio')}
               />
-              {touched.domicilio && (
-                fieldValidity.domicilio ? (
-                  <FaCheck className={`${styles.validationIcon} ${styles.validIcon}`} />
+              {touchedFields.domicilio &&
+                (!errors.domicilio ? (
+                  <Icon
+                    IconComponent={FaCheck}
+                    className={`${styles.validationIcon} ${styles.validIcon}`}
+                    size="sm"
+                  />
                 ) : (
-                  <FaTimes className={`${styles.validationIcon} ${styles.invalidIcon}`} />
-                )
-              )}
+                  <Icon
+                    IconComponent={FaTimes}
+                    className={`${styles.validationIcon} ${styles.invalidIcon}`}
+                    size="sm"
+                  />
+                ))}
             </div>
-            {touched.domicilio && !fieldValidity.domicilio && (
-              <span className={styles.formErrorText}>
-                {errors.domicilio || 'La dirección debe ser completa (mínimo 10 caracteres)'}
-              </span>
+            {errors.domicilio && (
+              <span className={styles.formErrorText}>{errors.domicilio.message}</span>
             )}
           </div>
         </div>
 
         <div className={styles.infoBox}>
-          <FaInfoCircle className={styles.infoIcon} />
+          <Icon IconComponent={FaInfoCircle} className={styles.infoIcon} size="md" />
           <p className={styles.infoText}>
-            La información personal es necesaria para la emisión de su permiso digital.
-            Todos los datos son tratados de acuerdo a nuestra política de privacidad.
+            La información personal es necesaria para la emisión de su permiso digital. Todos los
+            datos son tratados de acuerdo a nuestra política de privacidad.
           </p>
         </div>
 
@@ -214,7 +171,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
           <Button
             variant="secondary"
             onClick={onPrevious}
-            icon={<FaArrowLeft />}
+            icon={<Icon IconComponent={FaArrowLeft} size="sm" />}
             className={styles.navigationButton}
           >
             Anterior
@@ -222,10 +179,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
 
           <Button
             variant="primary"
-            onClick={onNext}
-            disabled={!isFormValid()}
+            onClick={handleNext}
             className={styles.navigationButton}
-            icon={<FaArrowRight />}
+            icon={<Icon IconComponent={FaArrowRight} size="sm" />}
             iconAfter
           >
             Continuar

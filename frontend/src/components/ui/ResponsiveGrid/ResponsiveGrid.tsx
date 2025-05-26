@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+
 import styles from './ResponsiveGrid.module.css';
 
 interface ResponsiveGridProps {
@@ -6,12 +7,12 @@ interface ResponsiveGridProps {
    * The content to be rendered inside the grid
    */
   children: ReactNode;
-  
+
   /**
    * Additional CSS class names to apply to the grid
    */
   className?: string;
-  
+
   /**
    * Number of columns at different breakpoints
    * @default { xs: 1, sm: 2, md: 3, lg: 4, xl: 4 }
@@ -23,7 +24,7 @@ interface ResponsiveGridProps {
     lg?: number;
     xl?: number;
   };
-  
+
   /**
    * Gap between grid items at different breakpoints
    * @default { xs: 'sm', sm: 'sm', md: 'md', lg: 'md', xl: 'md' }
@@ -39,7 +40,7 @@ interface ResponsiveGridProps {
 
 /**
  * ResponsiveGrid component for creating responsive grid layouts
- * 
+ *
  * This component provides a standardized grid with responsive behavior
  * based on the design system breakpoints.
  */

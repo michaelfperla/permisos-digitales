@@ -1,6 +1,7 @@
 import React from 'react';
-import { ApplicationStatus } from '../../../services/applicationService';
+
 import styles from './StatusBadge.module.css';
+import { ApplicationStatus } from '../../../services/applicationService';
 
 interface StatusBadgeProps {
   status: ApplicationStatus;
@@ -12,37 +13,41 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'default', cla
   // Map status to display text
   const getStatusText = (status: ApplicationStatus): string => {
     switch (status) {
-      // Payment flow statuses
+      // Payment-related statuses
+      case 'AWAITING_PAYMENT':
+        return 'Pendiente de Pago';
       case 'AWAITING_OXXO_PAYMENT':
-        return 'Pago OXXO Pendiente';
+        return 'Pendiente de Pago (OXXO)';
+      case 'PAYMENT_PROCESSING':
+        return 'Pago en Proceso';
+      case 'PAYMENT_FAILED':
+        return 'Pago Fallido';
       case 'PAYMENT_RECEIVED':
-        return 'Pago recibido';
+        return 'Pago Recibido';
 
       // Permit generation statuses
       case 'GENERATING_PERMIT':
-        return 'Preparando permiso';
+        return 'Generando Permiso';
       case 'ERROR_GENERATING_PERMIT':
-        return 'No se pudo generar el permiso';
+        return 'Error al Generar';
       case 'PERMIT_READY':
-        return 'Permiso listo';
+        return 'Permiso Listo';
 
-      // Completion statuses
+      // Final statuses
       case 'COMPLETED':
         return 'Completado';
       case 'CANCELLED':
         return 'Cancelado';
       case 'EXPIRED':
-        return 'Vencido';
+        return 'Expirado';
 
       // Renewal statuses
       case 'RENEWAL_PENDING':
-        return 'Falta renovar';
-      case 'RENEWAL_SUBMITTED':
-        return 'Renovación enviada';
+        return 'Renovación Pendiente';
       case 'RENEWAL_APPROVED':
-        return 'Renovación aprobada';
+        return 'Renovación Aprobada';
       case 'RENEWAL_REJECTED':
-        return 'Renovación rechazada';
+        return 'Renovación Rechazada';
 
       default:
         return status;
@@ -53,12 +58,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'default', cla
   const getStatusClass = (status: ApplicationStatus): string => {
     switch (status) {
       // Action needed statuses
+      case 'AWAITING_PAYMENT':
       case 'AWAITING_OXXO_PAYMENT':
         return styles.statusActionNeeded;
 
       // Rejected/Error statuses
       case 'ERROR_GENERATING_PERMIT':
       case 'CANCELLED':
+      case 'PAYMENT_FAILED':
       case 'RENEWAL_REJECTED':
         return styles.statusRejected;
 
@@ -70,8 +77,8 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'default', cla
         return styles.statusApproved;
 
       // Processing statuses
+      case 'PAYMENT_PROCESSING':
       case 'GENERATING_PERMIT':
-      case 'RENEWAL_SUBMITTED':
         return styles.statusPending;
 
       // Warning statuses
@@ -85,7 +92,9 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'default', cla
   };
 
   return (
-    <span className={`${styles.statusBadge} ${getStatusClass(status)} ${size === 'large' ? styles.statusBadgeLarge : ''} ${className}`}>
+    <span
+      className={`${styles.statusBadge} ${getStatusClass(status)} ${size === 'large' ? styles.statusBadgeLarge : ''} ${className}`}
+    >
       {getStatusText(status)}
     </span>
   );

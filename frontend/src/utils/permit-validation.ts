@@ -42,7 +42,7 @@ export const validateFullName = (value: string): ValidationResult => {
   if (!nameRegex.test(trimmedValue)) {
     return {
       isValid: false,
-      error: 'El nombre contiene caracteres no permitidos'
+      error: 'El nombre contiene caracteres no permitidos',
     };
   }
 
@@ -65,7 +65,7 @@ export const validateCurpRfc = (value: string): ValidationResult => {
   if (trimmedValue.length < 10 || trimmedValue.length > 50) {
     return {
       isValid: false,
-      error: 'El CURP o RFC debe tener entre 10 y 50 caracteres'
+      error: 'El CURP o RFC debe tener entre 10 y 50 caracteres',
     };
   }
 
@@ -73,7 +73,7 @@ export const validateCurpRfc = (value: string): ValidationResult => {
   if (!/^[A-Z0-9]+$/i.test(trimmedValue)) {
     return {
       isValid: false,
-      error: 'El CURP o RFC solo debe contener letras y números'
+      error: 'El CURP o RFC solo debe contener letras y números',
     };
   }
 
@@ -160,7 +160,7 @@ export const validateVehicleSerialNumber = (value: string): ValidationResult => 
   if (value.trim().length < 5 || value.trim().length > 50) {
     return {
       isValid: false,
-      error: 'El número de serie debe tener entre 5 y 50 caracteres'
+      error: 'El número de serie debe tener entre 5 y 50 caracteres',
     };
   }
 
@@ -168,7 +168,7 @@ export const validateVehicleSerialNumber = (value: string): ValidationResult => 
   if (!/^[A-Z0-9]+$/i.test(value.trim())) {
     return {
       isValid: false,
-      error: 'El número de serie solo debe contener letras y números'
+      error: 'El número de serie solo debe contener letras y números',
     };
   }
 
@@ -215,7 +215,7 @@ export const validateVehicleModelYear = (value: string | number): ValidationResu
     if (value < 1900 || value > currentYear + 2) {
       return {
         isValid: false,
-        error: `El año debe estar entre 1900 y ${currentYear + 2}`
+        error: `El año debe estar entre 1900 y ${currentYear + 2}`,
       };
     }
     return { isValid: true, error: '' };
@@ -239,7 +239,7 @@ export const validateVehicleModelYear = (value: string | number): ValidationResu
   if (year < 1900 || year > currentYear + 2) {
     return {
       isValid: false,
-      error: `El año debe estar entre 1900 y ${currentYear + 2}`
+      error: `El año debe estar entre 1900 y ${currentYear + 2}`,
     };
   }
 

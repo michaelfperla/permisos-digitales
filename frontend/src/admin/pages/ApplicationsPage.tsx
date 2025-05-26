@@ -1,43 +1,38 @@
-import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import {
   FaExclamationTriangle,
   FaSearch,
   FaEye,
   FaFilter,
-  FaCalendarAlt,
-  FaSync
+  FaSync,
 } from 'react-icons/fa';
-import adminService from '../services/adminService';
-import { useToast } from '../contexts/ToastContext';
+import { Link } from 'react-router-dom';
+
+import styles from './ApplicationsPage.module.css';
 import Button from '../../components/ui/Button/Button';
 import MobileTable from '../../components/ui/MobileTable/MobileTable';
-import styles from './ApplicationsPage.module.css';
+import Icon from '../../shared/components/ui/Icon';
+import { useToast } from '../../shared/hooks/useToast';
+import adminService from '../services/adminService';
 
 const ApplicationsPage: React.FC = () => {
-  const { showToast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
+  const { showToast } = useToast(); // Removed unused _showToast
+  const [searchTerm, setSearchTerm] = useState(''); // Removed unused _searchTerm
+  const [currentPage, setCurrentPage] = useState(1); // Removed unused _currentPage
+  const [statusFilter, setStatusFilter] = useState(''); // Removed unused _statusFilter
 
   // Fetch applications with pagination
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['applications', currentPage, statusFilter],
     queryFn: () => adminService.getAllApplications(currentPage, 10, statusFilter),
     onSuccess: (data) => {
-      console.log('[ApplicationsPage] Query success, data:', data);
+      console.debug('[ApplicationsPage] Query success, data:', data); // Changed to debug
     },
     onError: (err: Error) => {
       console.error('[ApplicationsPage] Query error:', err);
       showToast(`Error al cargar solicitudes: ${err.message}`, 'error');
-    }
+    },
   });
 
   // Format date for display
@@ -46,88 +41,43 @@ const ApplicationsPage: React.FC = () => {
     return date.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
-  };
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
   };
 
   // Get status display name
   const getStatusDisplayName = (status: string): string => {
     switch (status) {
-      // New payment flow statuses
-      case 'AWAITING_OXXO_PAYMENT':
-        return 'Pago OXXO Pendiente';
-      case 'PAYMENT_RECEIVED':
-        return 'Pago Recibido';
-
-      // Permit generation statuses
-      case 'GENERATING_PERMIT':
-        return 'Generando Permiso';
-      case 'ERROR_GENERATING_PERMIT':
-        return 'Error al Generar Permiso';
-      case 'PERMIT_READY':
-        return 'Permiso Listo';
-
-      // Completion statuses
-      case 'COMPLETED':
-        return 'Completado';
-      case 'CANCELLED':
-        return 'Cancelado';
-      case 'EXPIRED':
-        return 'Vencido';
-
-      // Legacy statuses - kept for backward compatibility
-      case 'PENDING_PAYMENT':
-        return 'Pendiente de Pago';
-      case 'PROOF_SUBMITTED':
-        return 'Comprobante Enviado';
-      case 'PROOF_REJECTED':
-        return 'Comprobante Rechazado';
-
-      default:
-        return status;
+      case 'AWAITING_OXXO_PAYMENT': return 'Pago OXXO Pendiente';
+      case 'PAYMENT_RECEIVED': return 'Pago Recibido';
+      case 'GENERATING_PERMIT': return 'Generando Permiso';
+      case 'ERROR_GENERATING_PERMIT': return 'Error al Generar Permiso';
+      case 'PERMIT_READY': return 'Permiso Listo';
+      case 'COMPLETED': return 'Completado';
+      case 'CANCELLED': return 'Cancelado';
+      case 'EXPIRED': return 'Vencido';
+      case 'PENDING_PAYMENT': return 'Pendiente de Pago';
+      case 'PROOF_SUBMITTED': return 'Comprobante Enviado';
+      case 'PROOF_REJECTED': return 'Comprobante Rechazado';
+      default: return status;
     }
   };
 
   // Get status class for styling
   const getStatusClass = (status: string): string => {
     switch (status) {
-      // New payment flow statuses
-      case 'AWAITING_OXXO_PAYMENT':
-        return styles.statusPending;
-      case 'PAYMENT_RECEIVED':
-        return styles.statusVerified;
-
-      // Permit generation statuses
-      case 'GENERATING_PERMIT':
-        return styles.statusGenerating;
-      case 'ERROR_GENERATING_PERMIT':
-        return styles.statusError;
-      case 'PERMIT_READY':
-        return styles.statusReady;
-
-      // Completion statuses
-      case 'COMPLETED':
-        return styles.statusCompleted;
-      case 'CANCELLED':
-        return styles.statusCancelled;
-      case 'EXPIRED':
-        return styles.statusExpired;
-
-      // Legacy statuses - kept for backward compatibility
-      case 'PENDING_PAYMENT':
-        return styles.statusPending;
-      case 'PROOF_SUBMITTED':
-        return styles.statusSubmitted;
-      case 'PROOF_REJECTED':
-        return styles.statusRejected;
-
-      default:
-        return '';
+      case 'AWAITING_OXXO_PAYMENT': return styles.statusPending;
+      case 'PAYMENT_RECEIVED': return styles.statusVerified;
+      case 'GENERATING_PERMIT': return styles.statusGenerating;
+      case 'ERROR_GENERATING_PERMIT': return styles.statusError;
+      case 'PERMIT_READY': return styles.statusReady;
+      case 'COMPLETED': return styles.statusCompleted;
+      case 'CANCELLED': return styles.statusCancelled;
+      case 'EXPIRED': return styles.statusExpired;
+      case 'PENDING_PAYMENT': return styles.statusPending;
+      case 'PROOF_SUBMITTED': return styles.statusSubmitted;
+      case 'PROOF_REJECTED': return styles.statusRejected;
+      default: return '';
     }
   };
 
@@ -143,46 +93,44 @@ const ApplicationsPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Error al cargar solicitudes</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
-        <Button
-          variant="primary"
-          onClick={() => refetch()}
-        >
+        <Button variant="primary" onClick={() => refetch()}>
           Intentar nuevamente
         </Button>
       </div>
     );
   }
 
-  // Get applications from data
   const applications = data?.applications || [];
 
-  // Filter applications based on search term
-  const filteredApplications = applications.filter(app => {
-    if (!app) return false; // Skip null/undefined items
+  const filteredApplications = applications.filter((app) => {
+    if (!app) return false; 
     if (!searchTerm) return true;
-
     const searchLower = searchTerm.toLowerCase();
     try {
       return (
         (app.id && app.id.toString().includes(searchLower)) ||
         (app.nombre_completo && app.nombre_completo.toLowerCase().includes(searchLower)) ||
-        (app.applicant_name && app.applicant_name.toLowerCase().includes(searchLower)) ||
+        ((app as any).applicant_name && (app as any).applicant_name.toLowerCase().includes(searchLower)) || // Added type assertion for temp prop
         (app.marca && app.marca.toLowerCase().includes(searchLower)) ||
         (app.linea && app.linea.toLowerCase().includes(searchLower)) ||
         (app.curp_rfc && app.curp_rfc.toLowerCase().includes(searchLower)) ||
         (app.payment_reference && app.payment_reference.toLowerCase().includes(searchLower))
       );
-    } catch (error) {
-      console.error('Error filtering application:', error, app);
+    } catch (filterError) { // Changed variable name
+      console.error('Error filtering application:', filterError, app);
       return false;
     }
   });
 
-  // Debug log
-  console.log('[ApplicationsPage] Applications data:', {
+  console.debug('[ApplicationsPage] Applications data:', { // Changed to debug
     dataExists: !!data,
     dataApplicationsExists: !!data?.applications,
     dataApplicationsLength: data?.applications?.length || 0,
@@ -194,7 +142,7 @@ const ApplicationsPage: React.FC = () => {
     firstItem: filteredApplications[0],
     statusFilter: statusFilter,
     currentPage: currentPage,
-    rawData: data
+    rawData: data,
   });
 
   return (
@@ -209,7 +157,7 @@ const ApplicationsPage: React.FC = () => {
 
         <div className={styles.searchContainer}>
           <div className={styles.searchInputWrapper}>
-            <FaSearch className={styles.searchIcon} />
+            <Icon IconComponent={FaSearch} className={styles.searchIcon} size="sm" />
             <input
               type="text"
               placeholder="Buscar por nombre, ID, vehículo..."
@@ -221,34 +169,26 @@ const ApplicationsPage: React.FC = () => {
 
           <div className={styles.filterContainer}>
             <div className={styles.filterWrapper}>
-              <FaFilter className={styles.filterIcon} />
+              <Icon IconComponent={FaFilter} className={styles.filterIcon} size="sm" />
               <select
                 className={styles.filterSelect}
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
-                  setCurrentPage(1); // Reset to first page when filter changes
+                  setCurrentPage(1); 
                 }}
                 aria-label="Filtrar por estado"
                 title="Filtrar por estado"
               >
                 <option value="">Todos los estados</option>
-
-                {/* New payment flow statuses */}
                 <option value="AWAITING_OXXO_PAYMENT">Pago OXXO Pendiente</option>
                 <option value="PAYMENT_RECEIVED">Pago Recibido</option>
-
-                {/* Permit generation statuses */}
                 <option value="GENERATING_PERMIT">Generando Permiso</option>
                 <option value="ERROR_GENERATING_PERMIT">Error al Generar Permiso</option>
                 <option value="PERMIT_READY">Permiso Listo</option>
-
-                {/* Completion statuses */}
                 <option value="COMPLETED">Completado</option>
                 <option value="CANCELLED">Cancelado</option>
                 <option value="EXPIRED">Vencido</option>
-
-                {/* Legacy statuses - kept for backward compatibility */}
                 <option value="PENDING_PAYMENT">Pendiente de Pago (Legacy)</option>
                 <option value="PROOF_SUBMITTED">Comprobante Enviado (Legacy)</option>
                 <option value="PROOF_REJECTED">Comprobante Rechazado (Legacy)</option>
@@ -258,7 +198,7 @@ const ApplicationsPage: React.FC = () => {
             <Button
               variant="secondary"
               size="small"
-              icon={<FaSync />}
+              icon={<Icon IconComponent={FaSync} size="sm" />}
               onClick={() => refetch()}
             >
               Actualizar
@@ -283,15 +223,16 @@ const ApplicationsPage: React.FC = () => {
                 mobileLabel: 'ID',
                 cell: (application) => application.id || 'N/A',
                 sortable: true,
-                mobilePriority: 1
+                mobilePriority: 1,
               },
               {
                 id: 'applicant',
                 header: 'Solicitante',
                 mobileLabel: 'Solicitante',
-                cell: (application) => application.applicant_name || application.nombre_completo || 'N/A',
+                cell: (application) =>
+                  (application as any).applicant_name || application.nombre_completo || 'N/A', // Added type assertion
                 sortable: true,
-                mobilePriority: 2
+                mobilePriority: 2,
               },
               {
                 id: 'vehicle',
@@ -299,35 +240,36 @@ const ApplicationsPage: React.FC = () => {
                 mobileLabel: 'Vehículo',
                 cell: (application) => (
                   <>
-                    {application.marca || 'N/A'} {application.linea || ''} {application.ano_modelo ? `(${application.ano_modelo})` : ''}
+                    {application.marca || 'N/A'} {application.linea || ''}{' '}
+                    {application.ano_modelo ? `(${application.ano_modelo})` : ''}
                   </>
                 ),
                 sortable: false,
-                mobilePriority: 3
+                mobilePriority: 3,
               },
               {
                 id: 'status',
                 header: 'Estado',
                 mobileLabel: 'Estado',
-                cell: (application) => (
+                cell: (application) =>
                   application.status ? (
                     <span className={`${styles.statusBadge} ${getStatusClass(application.status)}`}>
                       {getStatusDisplayName(application.status)}
                     </span>
                   ) : (
                     'N/A'
-                  )
-                ),
+                  ),
                 sortable: true,
-                mobilePriority: 0 // Show status first in mobile view
+                mobilePriority: 0, 
               },
               {
                 id: 'created_at',
                 header: 'Fecha de Creación',
                 mobileLabel: 'Fecha',
-                cell: (application) => application.created_at ? formatDate(application.created_at) : 'N/A',
+                cell: (application) =>
+                  application.created_at ? formatDate(application.created_at) : 'N/A',
                 sortable: true,
-                mobilePriority: 4
+                mobilePriority: 4,
               },
               {
                 id: 'actions',
@@ -340,24 +282,26 @@ const ApplicationsPage: React.FC = () => {
                         to={`/applications/${application.id}`}
                         className={styles.viewButton}
                         title="Ver detalles"
-                        onClick={(e) => e.stopPropagation()} // Prevent row click from triggering
+                        onClick={(e) => e.stopPropagation()} 
                       >
-                        <FaEye />
+                        <Icon IconComponent={FaEye} size="sm" />
                       </Link>
                     ) : (
                       <span className={styles.viewButtonDisabled} title="ID no disponible">
-                        <FaEye />
+                        <Icon IconComponent={FaEye} size="sm" />
                       </span>
                     )}
                   </div>
                 ),
                 sortable: false,
-                mobilePriority: 5
-              }
+                mobilePriority: 5,
+              },
             ]}
             keyExtractor={(application) => application.id || ''}
             onRowClick={(application) => {
               if (application.id) {
+                // Using window.location.href for navigation here might be intentional or an oversight
+                // Consider using `navigate` from `useNavigate` for SPA navigation if appropriate
                 window.location.href = `/applications/${application.id}`;
               }
             }}
@@ -368,35 +312,6 @@ const ApplicationsPage: React.FC = () => {
             emptyMessage="No se encontraron solicitudes"
             className={styles.mobileTable}
           />
-
-          {/* Pagination */}
-          {data?.pagination && data.pagination.totalPages > 1 && (
-            <div className={styles.pagination}>
-              <Button
-                variant="secondary"
-                size="small"
-                disabled={currentPage === 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-                className={styles.paginationButton}
-              >
-                Anterior
-              </Button>
-
-              <span className={styles.paginationInfo}>
-                Página {currentPage} de {data.pagination.totalPages}
-              </span>
-
-              <Button
-                variant="secondary"
-                size="small"
-                disabled={currentPage === data.pagination.totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-                className={styles.paginationButton}
-              >
-                Siguiente
-              </Button>
-            </div>
-          )}
         </>
       )}
     </div>

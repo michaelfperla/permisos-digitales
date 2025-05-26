@@ -1,8 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import Toast from '../Toast';
 import ToastContainer from '../ToastContainer';
-import styles from '../Toast.module.css';
+
+// Mock the Icon component
+vi.mock('../../../../shared/components/ui/Icon', () => ({
+  default: ({ IconComponent, className, color }: any) => {
+    const Icon = IconComponent();
+    return (
+      <span className={className} style={{ color }}>
+        {Icon}
+      </span>
+    );
+  },
+}));
 
 // Mock the Button component
 vi.mock('../../Button/Button', () => ({
@@ -30,7 +42,7 @@ vi.mock('../Toast.module.css', () => ({
     closeButton: 'closeButton',
     icon: 'icon',
     progressBar: 'progressBar',
-  }
+  },
 }));
 
 // Mock react-icons
@@ -44,7 +56,7 @@ vi.mock('react-icons/fa', () => ({
 
 describe('Toast New Implementation', () => {
   const mockOnClose = vi.fn();
-  
+
   beforeEach(() => {
     mockOnClose.mockClear();
   });
@@ -56,14 +68,14 @@ describe('Toast New Implementation', () => {
         message="¡Bienvenido! Iniciaste sesión"
         type="success"
         onClose={mockOnClose}
-      />
+      />,
     );
 
     // Check that all elements are present
     expect(screen.getByTestId('success-icon')).toBeInTheDocument();
     expect(screen.getByText('¡Bienvenido! Iniciaste sesión')).toBeInTheDocument();
     expect(screen.getByTestId('close-icon')).toBeInTheDocument();
-    
+
     // Check that the close button has the correct class
     const closeButton = screen.getByRole('button', { name: /cerrar notificación/i });
     expect(closeButton).toHaveClass('closeButton');
@@ -76,7 +88,7 @@ describe('Toast New Implementation', () => {
         message="Este es un mensaje de prueba muy largo que debería ajustarse correctamente en pantallas pequeñas sin que el botón de cierre ocupe demasiado espacio. El texto debe fluir naturalmente en múltiples líneas."
         type="warning"
         onClose={mockOnClose}
-      />
+      />,
     );
 
     // Check that the message is rendered
@@ -97,17 +109,14 @@ describe('Toast New Implementation', () => {
       },
     ];
 
-    render(
-      <ToastContainer
-        toasts={toasts}
-        onClose={mockOnClose}
-      />
-    );
+    render(<ToastContainer toasts={toasts} onClose={mockOnClose} />);
 
     // Check that both toasts are rendered
     expect(screen.getByText('Primer mensaje de notificación')).toBeInTheDocument();
-    expect(screen.getByText('Segundo mensaje de notificación con texto más largo para probar el ajuste')).toBeInTheDocument();
-    
+    expect(
+      screen.getByText('Segundo mensaje de notificación con texto más largo para probar el ajuste'),
+    ).toBeInTheDocument();
+
     // Check that the container has the correct class
     const container = screen.getByRole('region', { name: /notificaciones/i });
     expect(container).toHaveClass('toastContainer');

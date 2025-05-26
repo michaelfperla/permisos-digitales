@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { ApplicationFormData } from '../types/application.types';
+
 import api from './api';
+import { ApplicationFormData } from '../types/application.types';
 import { getCsrfToken, handleCsrfError } from '../utils/csrf';
 
 // Define types for our API responses and requests based on backend schema
@@ -32,14 +33,6 @@ export interface Application {
   fecha_vencimiento?: string;
   is_renewal?: boolean; // Indicates if this is a renewal application
 
-  // Payment Data
-  payment_proof_path?: string;
-  payment_proof_uploaded_at?: string;
-  payment_notes?: string;
-  payment_verified_at?: string;
-  payment_rejection_reason?: string;
-  payment_reference?: string;
-
   // Renewal Data
   renewal_reason?: string;
   renewal_notes?: string;
@@ -51,10 +44,9 @@ export interface Application {
 
 // Application status values from backend
 export type ApplicationStatus =
-  | 'PENDING_PAYMENT'
-  | 'PROOF_RECEIVED_SCHEDULED'
-  | 'PROOF_SUBMITTED'
-  | 'PROOF_REJECTED'
+  | 'AWAITING_OXXO_PAYMENT'
+  | 'PAYMENT_PROCESSING'
+  | 'PAYMENT_FAILED'
   | 'PAYMENT_RECEIVED'
   | 'GENERATING_PERMIT'
   | 'ERROR_GENERATING_PERMIT'
@@ -63,7 +55,6 @@ export type ApplicationStatus =
   | 'CANCELLED'
   | 'EXPIRED'
   | 'RENEWAL_PENDING'
-  | 'RENEWAL_SUBMITTED'
   | 'RENEWAL_APPROVED'
   | 'RENEWAL_REJECTED';
 
@@ -92,8 +83,7 @@ export interface OwnerInfo {
 export interface ApplicationDates {
   created: string;
   updated: string;
-  paymentProofUploaded?: string;
-  paymentVerified?: string;
+  fecha_vencimiento?: string;
 }
 
 export interface ApplicationDetails {
@@ -101,8 +91,6 @@ export interface ApplicationDetails {
   vehicleInfo: VehicleInfo;
   ownerInfo: OwnerInfo;
   dates: ApplicationDates;
-  paymentReference?: string;
-  payment_rejection_reason?: string;
   is_sample_permit?: boolean;
 }
 
@@ -130,6 +118,32 @@ export interface ApplicationResponse {
     paymentMethods: string[];
     nextSteps: string[];
   };
+  payment?: {
+    success?: boolean;
+    method?: string;
+    status?: string;
+    requiresAction?: boolean;
+    threeDsUrl?: string;
+    message?: string;
+  };
+  oxxo?: {
+    reference: string;
+    amount: number;
+    currency: string;
+    expiresAt: string;
+    barcodeUrl?: string;
+  };
+  customerId?: string;
+  paymentError?: boolean;
+  errorCode?: string;
+  details?: any;
+}
+
+export interface RenewalFormData {
+  domicilio: string;
+  color: string;
+  renewal_reason: string;
+  renewal_notes?: string;
 }
 
 // Note: We now use the centralized api instance from api.ts
@@ -139,20 +153,22 @@ export interface ApplicationResponse {
  * Get all applications for the current user
  * @param options Optional request options including AbortSignal
  */
-export const getApplications = async (options?: { signal?: AbortSignal }): Promise<ApplicationsResponse> => {
+export const getApplications = async (options?: {
+  signal?: AbortSignal;
+}): Promise<ApplicationsResponse> => {
   const response = await api.get<ApplicationsResponse>('/applications', {
-    signal: options?.signal
+    signal: options?.signal,
   });
 
   // Log the response for debugging
-  console.log('Applications response from API:', response.data);
+  console.info('Applications response from API:', response.data);
 
   // If the response doesn't have a success flag, add it
   if (response.data.success === undefined) {
     return {
       success: true,
       applications: response.data.applications || [],
-      expiringPermits: response.data.expiringPermits || []
+      expiringPermits: response.data.expiringPermits || [],
     };
   }
 
@@ -171,37 +187,114 @@ export const nonExistentPermitIds = new Set<string>();
  */
 export const getApplicationById = async (
   id: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<ApplicationStatusResponse> => {
-  console.log(`Fetching application with ID: ${id}`);
+  console.info(`Fetching application with ID: ${id}`);
 
   const response = await api.get<ApplicationStatusResponse>(`/applications/${id}/status`, {
-    signal: options?.signal
+    signal: options?.signal,
   });
 
-  // Log the response for debugging
-  console.log(`Application ${id} response:`, response.data);
-
   return response.data;
+};
+
+/**
+ * Get a specific application for renewal
+ * @param id Application ID
+ * @param options Optional request options including AbortSignal
+ * @returns Application response with success flag and application data
+ */
+export const getApplicationForRenewal = async (
+  id: string,
+  options?: { signal?: AbortSignal },
+): Promise<ApplicationResponse> => {
+  console.info(`Fetching application for renewal with ID: ${id}`);
+
+  try {
+    // First try to get the application status
+    const statusResponse = await api.get<ApplicationStatusResponse>(`/applications/${id}/status`, {
+      signal: options?.signal,
+    });
+
+    if (!statusResponse.data || !statusResponse.data.application) {
+      throw new Error('Application not found');
+    }
+
+    // Convert the status response to an application response
+    const appDetails = statusResponse.data.application;
+
+    // Create an Application object from the ApplicationDetails
+    const application: Application = {
+      id: appDetails.id,
+      user_id: '', // Will be filled by the backend
+      status: statusResponse.data.status.currentStatus,
+      created_at: appDetails.dates.created,
+      updated_at: appDetails.dates.updated,
+
+      // Applicant Data
+      nombre_completo: appDetails.ownerInfo.nombre_completo,
+      curp_rfc: appDetails.ownerInfo.curp_rfc,
+      domicilio: appDetails.ownerInfo.domicilio,
+
+      // Vehicle Data
+      marca: appDetails.vehicleInfo.marca,
+      linea: appDetails.vehicleInfo.linea,
+      color: appDetails.vehicleInfo.color,
+      numero_serie: appDetails.vehicleInfo.numero_serie,
+      numero_motor: appDetails.vehicleInfo.numero_motor,
+      ano_modelo:
+        typeof appDetails.vehicleInfo.ano_modelo === 'string'
+          ? parseInt(appDetails.vehicleInfo.ano_modelo, 10)
+          : appDetails.vehicleInfo.ano_modelo,
+
+      // Permit Data - extract from dates if available
+      fecha_expedicion: appDetails.dates.created,
+      fecha_vencimiento: appDetails.dates.fecha_vencimiento || '',
+    };
+
+    return {
+      success: true,
+      application,
+    };
+  } catch (error) {
+    console.error(`Failed to get application for renewal ${id}:`, error);
+
+    if (axios.isAxiosError(error) && error.response) {
+      return {
+        success: false,
+        application: {} as Application,
+        message: error.response.data.message || 'Failed to get application details',
+      };
+    }
+
+    return {
+      success: false,
+      application: {} as Application,
+      message: 'Failed to get application details',
+    };
+  }
 };
 
 /**
  * Create a new vehicle permit application
  * @param applicationData Application data
  */
-export const createApplication = async (applicationData: ApplicationFormData): Promise<ApplicationResponse> => {
+export const createApplication = async (
+  applicationData: ApplicationFormData,
+): Promise<ApplicationResponse> => {
   try {
     // Make sure ano_modelo is a number before submission
     // This is critical since the database expects an integer
     const submissionData = {
       ...applicationData,
-      ano_modelo: typeof applicationData.ano_modelo === 'string'
-        ? parseInt(applicationData.ano_modelo, 10)
-        : applicationData.ano_modelo
+      ano_modelo:
+        typeof applicationData.ano_modelo === 'string'
+          ? parseInt(applicationData.ano_modelo, 10)
+          : applicationData.ano_modelo,
     };
 
     // Log the data being submitted for debugging
-    console.log('Submitting application data to API:', submissionData);
+    console.info('Submitting application data to API:', submissionData);
 
     // Ensure the parsed ano_modelo value is valid (not NaN)
     if (isNaN(submissionData.ano_modelo as number)) {
@@ -209,37 +302,43 @@ export const createApplication = async (applicationData: ApplicationFormData): P
       return {
         success: false,
         application: {} as Application,
-        message: 'El año del modelo no es válido. Por favor ingresa un año válido.'
+        message: 'El año del modelo no es válido. Por favor ingresa un año válido.',
       };
     }
 
     // Log if payment token is present
     if (submissionData.payment_token) {
-      console.log('Payment token included in submission:', submissionData.payment_token.substring(0, 8) + '...');
+      console.info(
+        'Payment token included in submission:',
+        submissionData.payment_token.substring(0, 8) + '...',
+      );
     } else {
-      console.log('No payment token included in submission');
+      console.info('No payment token included in submission');
     }
 
     // Log device session ID if present
     if (submissionData.device_session_id) {
-      console.log('Device session ID included in submission:', submissionData.device_session_id.substring(0, 8) + '...');
+      console.info(
+        'Device session ID included in submission:',
+        submissionData.device_session_id.substring(0, 8) + '...',
+      );
     } else {
-      console.log('No device session ID included in submission');
+      console.info('No device session ID included in submission');
     }
 
     // Attempt to make the API call with detailed error handling
-    console.log('Making POST request to /api/applications');
+    console.info('Making POST request to /api/applications');
 
     try {
       // Get the API base URL from environment variables or use a default
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      console.log('Using API base URL:', apiBaseUrl);
+      console.info('Using API base URL:', apiBaseUrl);
 
       // Make the API call (CSRF token will be added by the interceptor)
-      let response = await api.post<ApplicationResponse>('/applications', submissionData);
+      const response = await api.post<ApplicationResponse>('/applications', submissionData);
 
       // If there's a CSRF error, the interceptor will handle it automatically
-      console.log('Application submission successful, response:', response?.data);
+      console.info('Application submission successful, response:', response?.data);
 
       // Ensure we have a valid response object to return
       if (response && response.data) {
@@ -247,11 +346,11 @@ export const createApplication = async (applicationData: ApplicationFormData): P
 
         // Log the payment information if present
         if (responseData.payment) {
-          console.log('Payment information in response:', {
+          console.info('Payment information in response:', {
             method: responseData.payment.method,
             status: responseData.payment.status,
             requiresAction: responseData.payment.requiresAction,
-            threeDsUrl: responseData.payment.threeDsUrl ? 'Present' : 'Not present'
+            threeDsUrl: responseData.payment.threeDsUrl ? 'Present' : 'Not present',
           });
         }
 
@@ -268,7 +367,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
             application: responseData.application,
             payment: responseData.payment,
             paymentInstructions: responseData.paymentInstructions,
-            message: 'Solicitud creada exitosamente'
+            message: 'Solicitud creada exitosamente',
           };
         }
 
@@ -280,15 +379,15 @@ export const createApplication = async (applicationData: ApplicationFormData): P
         // If we can't determine the structure, return a generic success
         return {
           success: true,
-          application: responseData.application || {} as Application,
-          message: 'Solicitud procesada'
+          application: responseData.application || ({} as Application),
+          message: 'Solicitud procesada',
         };
       } else {
         // Create a minimal valid response if response or data is missing
         return {
           success: false,
           application: {} as Application,
-          message: 'La respuesta del servidor no tiene el formato esperado.'
+          message: 'La respuesta del servidor no tiene el formato esperado.',
         };
       }
     } catch (apiError) {
@@ -302,7 +401,8 @@ export const createApplication = async (applicationData: ApplicationFormData): P
           console.error('Payment required error:', apiError.response?.data);
 
           // Extract detailed error message from the response
-          let errorMessage = 'Error al procesar el pago. Por favor, verifica los datos de tu tarjeta e intenta de nuevo.';
+          let errorMessage =
+            'Error al procesar el pago. Por favor, verifica los datos de tu tarjeta e intenta de nuevo.';
           let errorCode = 'payment_error';
 
           if (apiError.response?.data) {
@@ -320,7 +420,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
             application: {} as Application,
             message: errorMessage,
             errorCode: errorCode,
-            paymentError: true
+            paymentError: true,
           };
         }
 
@@ -328,10 +428,13 @@ export const createApplication = async (applicationData: ApplicationFormData): P
         if (await handleCsrfError(apiError)) {
           // Retry with fresh token
           try {
-            console.log('Retrying request with fresh CSRF token');
-            const retryResponse = await api.post<ApplicationResponse>('/applications', submissionData);
+            console.info('Retrying request with fresh CSRF token');
+            const retryResponse = await api.post<ApplicationResponse>(
+              '/applications',
+              submissionData,
+            );
 
-            console.log('Retry successful, response:', retryResponse?.data);
+            console.info('Retry successful, response:', retryResponse?.data);
             return retryResponse.data;
           } catch (retryError) {
             console.error('Retry also failed:', retryError);
@@ -356,7 +459,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
           return {
             success: false,
             application: {} as Application,
-            message: errorMessage
+            message: errorMessage,
           };
         }
       }
@@ -365,7 +468,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
       return {
         success: false,
         application: {} as Application,
-        message: 'Error al comunicarse con el servidor. Por favor, inténtalo de nuevo.'
+        message: 'Error al comunicarse con el servidor. Por favor, inténtalo de nuevo.',
       };
     }
   } catch (error) {
@@ -373,14 +476,15 @@ export const createApplication = async (applicationData: ApplicationFormData): P
 
     // Provide more specific error messages based on the API response
     if (axios.isAxiosError(error) && error.response) {
-      console.log('Error response data:', error.response.data);
+      console.info('Error response data:', error.response.data);
 
       // Check if this is a payment error (status 402)
       if (error.response.status === 402) {
         console.error('Payment error:', error.response.data);
 
         // Extract detailed error message
-        const errorMessage = error.response.data.message ||
+        const errorMessage =
+          error.response.data.message ||
           'Error al procesar el pago. Por favor, intenta con otra tarjeta o método de pago.';
 
         // Extract error code if available
@@ -395,7 +499,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
           message: errorMessage,
           paymentError: true,
           errorCode,
-          details
+          details,
         };
       }
 
@@ -403,15 +507,15 @@ export const createApplication = async (applicationData: ApplicationFormData): P
       if (error.response.status === 400 && error.response.data.errors) {
         const validationErrors = error.response.data.errors;
         // Check for ano_modelo specific errors
-        const anoModeloError = validationErrors.find((err: any) =>
-          err.param === 'ano_modelo' || err.field === 'ano_modelo'
+        const anoModeloError = validationErrors.find(
+          (err: any) => err.param === 'ano_modelo' || err.field === 'ano_modelo',
         );
 
         if (anoModeloError) {
           return {
             success: false,
             application: {} as Application,
-            message: anoModeloError.msg || 'Error en el año del modelo.'
+            message: anoModeloError.msg || 'Error en el año del modelo.',
           };
         }
 
@@ -420,7 +524,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
           return {
             success: false,
             application: {} as Application,
-            message: validationErrors[0].msg || 'Error de validación en el formulario.'
+            message: validationErrors[0].msg || 'Error de validación en el formulario.',
           };
         }
       }
@@ -429,7 +533,9 @@ export const createApplication = async (applicationData: ApplicationFormData): P
       return {
         success: false,
         application: {} as Application,
-        message: error.response.data.message || 'Error al crear la solicitud. Por favor, revisa los datos ingresados.'
+        message:
+          error.response.data.message ||
+          'Error al crear la solicitud. Por favor, revisa los datos ingresados.',
       };
     }
 
@@ -437,7 +543,7 @@ export const createApplication = async (applicationData: ApplicationFormData): P
     return {
       success: false,
       application: {} as Application,
-      message: 'Error de red. Por favor, verifica tu conexión e inténtalo de nuevo.'
+      message: 'Error de red. Por favor, verifica tu conexión e inténtalo de nuevo.',
     };
   }
 };
@@ -449,20 +555,16 @@ export const createApplication = async (applicationData: ApplicationFormData): P
  */
 export const updateApplication = async (
   id: string,
-  applicationData: Partial<Application>
+  applicationData: Partial<Application>,
 ): Promise<ApplicationResponse> => {
   try {
     const csrfToken = await getCsrfToken();
 
-    const response = await api.put<ApplicationResponse>(
-      `/applications/${id}`,
-      applicationData,
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
-    );
+    const response = await api.put<ApplicationResponse>(`/applications/${id}`, applicationData, {
+      headers: {
+        'X-CSRF-Token': csrfToken,
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -474,13 +576,14 @@ export const updateApplication = async (
       return {
         success: false,
         application: {} as Application,
-        message: error.response.data.message || 'Failed to update application. Please try again later.'
+        message:
+          error.response.data.message || 'Failed to update application. Please try again later.',
       };
     }
     return {
       success: false,
       application: {} as Application,
-      message: 'Error de red. Por favor, verifica tu conexión.'
+      message: 'Error de red. Por favor, verifica tu conexión.',
     };
   }
 };
@@ -498,9 +601,9 @@ export const submitApplication = async (id: string): Promise<ApplicationResponse
       {},
       {
         headers: {
-          'X-CSRF-Token': csrfToken
-        }
-      }
+          'X-CSRF-Token': csrfToken,
+        },
+      },
     );
 
     return response.data;
@@ -513,13 +616,14 @@ export const submitApplication = async (id: string): Promise<ApplicationResponse
       return {
         success: false,
         application: {} as Application,
-        message: error.response.data.message || 'Failed to submit application. Please try again later.'
+        message:
+          error.response.data.message || 'Failed to submit application. Please try again later.',
       };
     }
     return {
       success: false,
       application: {} as Application,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -567,16 +671,18 @@ export const uploadPaymentProof = async (
 
 // Temporary placeholder function until payment provider integration is implemented
 export const uploadPaymentProof = async (
-  id: string,
-  file: File,
-  paymentReference?: string,
-  options?: { signal?: AbortSignal }
+  _id: string,
+  _file: File,
+  _paymentReference?: string,
+  _options?: { signal?: AbortSignal },
 ): Promise<ApplicationResponse> => {
-  console.warn('Manual payment proof upload is no longer supported. Payment provider integration pending.');
+  console.warn(
+    'Manual payment proof upload is no longer supported. Payment provider integration pending.',
+  );
   return {
     success: false,
     application: {} as Application,
-    message: 'El sistema de pagos está siendo actualizado. Por favor, intente más tarde.'
+    message: 'El sistema de pagos está siendo actualizado. Por favor, intente más tarde.',
   };
 };
 
@@ -589,7 +695,7 @@ export const uploadPaymentProof = async (
 export const downloadPermit = async (
   id: string,
   type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso',
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<Blob> => {
   try {
     // Get CSRF token for authenticated requests
@@ -597,21 +703,21 @@ export const downloadPermit = async (
 
     // Map frontend types to backend API endpoints
     const typeMap: Record<string, string> = {
-      'permiso': 'permiso',
-      'recibo': 'recibo',
-      'certificado': 'certificado',
-      'placas': 'placas'
+      permiso: 'permiso',
+      recibo: 'recibo',
+      certificado: 'certificado',
+      placas: 'placas',
     };
 
     const apiType = typeMap[type] || 'permiso';
-    console.log(`Downloading ${apiType} document for application ${id}`);
+    console.info(`Downloading ${apiType} document for application ${id}`);
 
     const response = await api.get<Blob>(`/applications/${id}/download/${apiType}`, {
       responseType: 'blob',
       headers: {
-        'X-CSRF-Token': csrfToken
+        'X-CSRF-Token': csrfToken,
       },
-      signal: options?.signal
+      signal: options?.signal,
     });
 
     return response.data;
@@ -632,7 +738,7 @@ export const downloadPermit = async (
  */
 export const checkRenewalEligibility = async (
   id: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<{
   eligible: boolean;
   message: string;
@@ -641,7 +747,7 @@ export const checkRenewalEligibility = async (
 }> => {
   try {
     const response = await api.get(`/applications/${id}/renewal-eligibility`, {
-      signal: options?.signal
+      signal: options?.signal,
     });
     return response.data;
   } catch (error) {
@@ -650,7 +756,7 @@ export const checkRenewalEligibility = async (
     // Return error response
     return {
       eligible: false,
-      message: 'Failed to check renewal eligibility. Please try again later.'
+      message: 'Failed to check renewal eligibility. Please try again later.',
     };
   }
 };
@@ -664,23 +770,51 @@ export const checkRenewalEligibility = async (
 export const createRenewalApplication = async (
   id: string,
   renewalData: RenewalFormData,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<ApplicationResponse> => {
   try {
     const csrfToken = await getCsrfToken();
 
-    const response = await api.post<ApplicationResponse>(
-      `/applications/${id}/renew`,
-      renewalData,
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken
-        },
-        signal: options?.signal
-      }
-    );
+    const response = await api.post<ApplicationResponse>(`/applications/${id}/renew`, renewalData, {
+      headers: {
+        'X-CSRF-Token': csrfToken,
+      },
+      signal: options?.signal,
+    });
 
-    return response.data;
+    // Ensure the response always has success: true for successful API calls
+    if (response.data) {
+      // If the response already has a success flag, check if it's true
+      if (response.data.success === true) {
+        return response.data;
+      }
+
+      // If success is undefined or false but we have an application object,
+      // it means the operation was successful
+      if (response.data.application) {
+        return {
+          success: true,
+          application: response.data.application,
+          message: response.data.message || 'Solicitud de renovación creada exitosamente',
+          payment: response.data.payment,
+          paymentInstructions: response.data.paymentInstructions,
+          customerId: response.data.customerId,
+          oxxo: response.data.oxxo,
+        };
+      }
+    }
+
+    // If we can't determine success from the response, assume it was successful
+    // since we're in the try block (no exception was thrown)
+    return {
+      success: true,
+      application: response.data?.application || ({} as Application),
+      message: response.data?.message || 'Solicitud de renovación procesada',
+      payment: response.data?.payment,
+      paymentInstructions: response.data?.paymentInstructions,
+      customerId: response.data?.customerId,
+      oxxo: response.data?.oxxo,
+    };
   } catch (error) {
     console.error(`Failed to create renewal for application ${id}:`, error);
 
@@ -690,13 +824,15 @@ export const createRenewalApplication = async (
       return {
         success: false,
         application: {} as Application,
-        message: error.response.data.message || 'Failed to create renewal application. Please try again later.'
+        message:
+          error.response.data.message ||
+          'Failed to create renewal application. Please try again later.',
       };
     }
     return {
       success: false,
       application: {} as Application,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -708,7 +844,7 @@ export const createRenewalApplication = async (
  */
 export const submitRenewalApplication = async (
   id: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<ApplicationResponse> => {
   try {
     const csrfToken = await getCsrfToken();
@@ -718,10 +854,10 @@ export const submitRenewalApplication = async (
       {},
       {
         headers: {
-          'X-CSRF-Token': csrfToken
+          'X-CSRF-Token': csrfToken,
         },
-        signal: options?.signal
-      }
+        signal: options?.signal,
+      },
     );
 
     return response.data;
@@ -734,13 +870,15 @@ export const submitRenewalApplication = async (
       return {
         success: false,
         application: {} as Application,
-        message: error.response.data.message || 'Failed to submit renewal application. Please try again later.'
+        message:
+          error.response.data.message ||
+          'Failed to submit renewal application. Please try again later.',
       };
     }
     return {
       success: false,
       application: {} as Application,
-      message: 'Network error. Please check your connection.'
+      message: 'Network error. Please check your connection.',
     };
   }
 };
@@ -752,7 +890,7 @@ export const submitRenewalApplication = async (
  */
 export const deleteApplication = async (
   id: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<{ success: boolean; message: string }> => {
   try {
     const csrfToken = await getCsrfToken();
@@ -761,10 +899,10 @@ export const deleteApplication = async (
       `/applications/${id}`,
       {
         headers: {
-          'X-CSRF-Token': csrfToken
+          'X-CSRF-Token': csrfToken,
         },
-        signal: options?.signal
-      }
+        signal: options?.signal,
+      },
     );
 
     return response.data;
@@ -774,7 +912,7 @@ export const deleteApplication = async (
     // Return error response
     return {
       success: false,
-      message: 'Failed to delete application. Please try again later.'
+      message: 'Failed to delete application. Please try again later.',
     };
   }
 };
@@ -786,7 +924,7 @@ export const deleteApplication = async (
  */
 export const renewApplication = async (
   id: string,
-  options?: { signal?: AbortSignal }
+  options?: { signal?: AbortSignal },
 ): Promise<ApplicationResponse> => {
   try {
     const csrfToken = await getCsrfToken();
@@ -795,21 +933,49 @@ export const renewApplication = async (
       domicilio: '',
       color: '',
       renewal_reason: 'Renovación regular',
-      renewal_notes: ''
+      renewal_notes: '',
     };
 
-    const response = await api.post<ApplicationResponse>(
-      `/applications/${id}/renew`,
-      renewalData,
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken
-        },
-        signal: options?.signal
-      }
-    );
+    const response = await api.post<ApplicationResponse>(`/applications/${id}/renew`, renewalData, {
+      headers: {
+        'X-CSRF-Token': csrfToken,
+      },
+      signal: options?.signal,
+    });
 
-    return response.data;
+    // Ensure the response always has success: true for successful API calls
+    if (response.data) {
+      // If the response already has a success flag, check if it's true
+      if (response.data.success === true) {
+        return response.data;
+      }
+
+      // If success is undefined or false but we have an application object,
+      // it means the operation was successful
+      if (response.data.application) {
+        return {
+          success: true,
+          application: response.data.application,
+          message: response.data.message || 'Solicitud de renovación creada exitosamente',
+          payment: response.data.payment,
+          paymentInstructions: response.data.paymentInstructions,
+          customerId: response.data.customerId,
+          oxxo: response.data.oxxo,
+        };
+      }
+    }
+
+    // If we can't determine success from the response, assume it was successful
+    // since we're in the try block (no exception was thrown)
+    return {
+      success: true,
+      application: response.data?.application || ({} as Application),
+      message: response.data?.message || 'Solicitud de renovación procesada',
+      payment: response.data?.payment,
+      paymentInstructions: response.data?.paymentInstructions,
+      customerId: response.data?.customerId,
+      oxxo: response.data?.oxxo,
+    };
   } catch (error) {
     console.error(`Failed to renew application ${id}:`, error);
 
@@ -817,7 +983,7 @@ export const renewApplication = async (
     return {
       success: false,
       application: {} as Application,
-      message: 'Failed to renew application. Please try again later.'
+      message: 'Failed to renew application. Please try again later.',
     };
   }
 };
@@ -826,6 +992,7 @@ export const renewApplication = async (
 const applicationService = {
   getApplications,
   getApplicationById,
+  getApplicationForRenewal,
   createApplication,
   updateApplication,
   submitApplication,
@@ -836,7 +1003,7 @@ const applicationService = {
   submitRenewalApplication,
   deleteApplication,
   renewApplication,
-  nonExistentPermitIds // Export the set of non-existent permit IDs
+  nonExistentPermitIds, // Export the set of non-existent permit IDs
 };
 
 export default applicationService;

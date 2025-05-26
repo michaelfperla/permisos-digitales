@@ -1,36 +1,64 @@
-import React, { useState, FormEvent, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaUser, FaLock, FaExclamationTriangle, FaCheckCircle, FaSignInAlt } from 'react-icons/fa';
-import api from '../services/api';
-import { getCsrfToken as fetchCsrfToken } from '../services/authService';
-import { useAuth, AdminUser } from '../contexts/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { FaUser, FaLock, FaExclamationTriangle, FaCheckCircle, FaSignInAlt } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 import styles from './LoginPage.module.css';
 import Button from '../../components/ui/Button/Button';
+import Icon from '../../shared/components/ui/Icon';
+import { AdminUser } from '../../shared/contexts/AuthContext';
+import { useAdminAuth as useAuth } from '../../shared/hooks/useAuth';
+import { adminLoginSchema, AdminLoginFormData } from '../../shared/schemas/auth.schema';
+import api from '../services/api';
+import { getCsrfToken as fetchCsrfToken } from '../services/authService';
 
 // Set this to true to use a simplified rendering for debugging
 const USE_SIMPLE_RENDERING = false;
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [csrfToken, setCsrfToken] = useState<string>('');
+
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AdminLoginFormData>({
+    resolver: zodResolver(adminLoginSchema),
+    mode: 'onBlur',
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated, isLoading: isAuthLoading, error: authError } = useAuth(); // Get auth context values
 
   // Log on every render to track state changes
-  console.log('[LoginPage Render] isAuthenticated:', isAuthenticated, 'isAuthLoading:', isAuthLoading, 'Error State:', error, 'Auth Error:', authError);
+  console.debug(
+    '[LoginPage Render] isAuthenticated:',
+    isAuthenticated,
+    'isAuthLoading:',
+    isAuthLoading,
+    'Error State:',
+    error,
+    'Auth Error:',
+    authError,
+  );
 
   // Add useEffect for navigation after successful login
   useEffect(() => {
-    console.log('[LoginPage useEffect] Running effect. isAuthenticated:', isAuthenticated, 'isAuthLoading:', isAuthLoading);
+    console.debug(
+      '[LoginPage useEffect] Running effect. isAuthenticated:',
+      isAuthenticated,
+      'isAuthLoading:',
+      isAuthLoading,
+    );
 
     if (isAuthenticated && !isAuthLoading) {
-      console.log('[LoginPage useEffect] Condition met. Calling navigate...');
+      console.debug('[LoginPage useEffect] Condition met. Calling navigate...');
       // Navigate to the intended destination or dashboard
       navigate(location.state?.from?.pathname || '/', { replace: true });
     }
@@ -44,7 +72,7 @@ const LoginPage: React.FC = () => {
         const token = await fetchCsrfToken();
         if (token) {
           setCsrfToken(token);
-          console.log('CSRF token fetched successfully:', token);
+          console.info('CSRF token fetched successfully:', token);
         } else {
           console.error('CSRF token is undefined or empty');
           setError('Error al obtener token de seguridad. Intente nuevamente.');
@@ -78,14 +106,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!email || !password) {
-      setError('Por favor ingrese su correo electrónico y contraseña');
-      return;
-    }
-
+  const onSubmit = async (data: AdminLoginFormData) => {
     try {
       setIsLoading(true);
       setError('');
@@ -103,33 +124,34 @@ const LoginPage: React.FC = () => {
         }
       }
 
-      console.log('Using CSRF token for login:', tokenToUse);
+      console.info('Using CSRF token for login:', tokenToUse);
 
       // Attempt login with admin portal flag
-      const response = await api.post('/auth/login',
-        { email, password },
+      const response = await api.post(
+        '/auth/login',
+        { email: data.email, password: data.password },
         {
           headers: {
             'X-CSRF-Token': tokenToUse,
-            'X-Portal-Type': 'admin'
-          }
-        }
+            'X-Portal-Type': 'admin',
+          },
+        },
       );
 
-      console.log('Login response:', response.data);
+      console.info('Login response:', response.data);
 
       // Check if response has the expected structure
       const hasData = !!response.data;
       const hasSuccess = !!response.data?.success;
       const hasUser = !!response.data?.user;
 
-      console.log('[LoginPage handleSubmit] Response structure:', {
+      console.debug('[LoginPage handleSubmit] Response structure:', {
         hasData,
         hasSuccess,
         hasUser,
         userObject: response.data?.user,
         responseKeys: hasData ? Object.keys(response.data) : [],
-        dataType: hasData ? typeof response.data : 'undefined'
+        dataType: hasData ? typeof response.data : 'undefined',
       });
 
       // Try to handle potential data structure issues
@@ -137,7 +159,7 @@ const LoginPage: React.FC = () => {
         try {
           // Try to parse if the response is a JSON string
           const parsedData = JSON.parse(response.data);
-          console.log('[LoginPage handleSubmit] Parsed string response:', parsedData);
+          console.debug('[LoginPage handleSubmit] Parsed string response:', parsedData);
           response.data = parsedData;
         } catch (e) {
           console.error('[LoginPage handleSubmit] Failed to parse string response:', e);
@@ -146,21 +168,23 @@ const LoginPage: React.FC = () => {
 
       // Check for success AND user data in the response
       if (response.data && response.data.success) {
-        console.log('Login successful, checking for user data...');
+        console.info('Login successful, checking for user data...');
 
         // Look for user data in different possible locations
         let userData = response.data.user;
 
         // If no user data directly in response.data.user, check other common locations
         if (!userData) {
-          console.log('[LoginPage handleSubmit] No user data in response.data.user, checking alternatives...');
+          console.debug(
+            '[LoginPage handleSubmit] No user data in response.data.user, checking alternatives...',
+          );
 
           if (response.data.data && response.data.data.user) {
             userData = response.data.data.user;
-            console.log('[LoginPage handleSubmit] Found user data in response.data.data.user');
+            console.debug('[LoginPage handleSubmit] Found user data in response.data.data.user');
           } else if (response.data.data) {
             userData = response.data.data;
-            console.log('[LoginPage handleSubmit] Using response.data.data as user data');
+            console.debug('[LoginPage handleSubmit] Using response.data.data as user data');
           }
         }
 
@@ -172,25 +196,30 @@ const LoginPage: React.FC = () => {
 
         // Verify user object has required fields
         if (!userData.id || !userData.email) {
-          console.error('[LoginPage handleSubmit] User object is missing required fields:', userData);
+          console.error(
+            '[LoginPage handleSubmit] User object is missing required fields:',
+            userData,
+          );
           setError('Error: Datos de usuario incompletos');
           return;
         }
 
-        console.log('[LoginPage handleSubmit] Calling authContext.login with user data:', userData);
+        console.debug('[LoginPage handleSubmit] Calling authContext.login with user data:', userData);
 
         // Call the context login function, passing the user data
         // This will trigger the useEffect for navigation
         login(userData as AdminUser);
 
-        console.log('[LoginPage handleSubmit] Called authContext.login. State update should be queued.');
-        console.log('AuthContext updated, navigation will happen via useEffect');
+        console.debug(
+          '[LoginPage handleSubmit] Called authContext.login. State update should be queued.',
+        );
+        console.debug('AuthContext updated, navigation will happen via useEffect');
       } else {
         // Handle case where response is successful status-code wise, but login failed logically OR user data missing
         setError(
           response.data?.message ||
-          response.data?.error ||
-          'Error al iniciar sesión. Verifique sus credenciales o faltan datos del usuario.'
+            response.data?.error ||
+            'Error al iniciar sesión. Verifique sus credenciales o faltan datos del usuario.',
         );
       }
     } catch (err: any) {
@@ -208,15 +237,17 @@ const LoginPage: React.FC = () => {
         }
 
         // Check for CSRF token error specifically if applicable
-        if (err.response.data?.error?.includes('CSRF') ||
-            (typeof err.response.data === 'string' && err.response.data.includes('CSRF')) ||
-            err.response.status === 403) {
-          console.log('Potential CSRF error, attempting to refresh token...');
+        if (
+          err.response.data?.error?.includes('CSRF') ||
+          (typeof err.response.data === 'string' && err.response.data.includes('CSRF')) ||
+          err.response.status === 403
+        ) {
+          console.info('Potential CSRF error, attempting to refresh token...');
           try {
             const newToken = await fetchCsrfToken();
             if (newToken) {
               setCsrfToken(newToken);
-              console.log('Got new CSRF token after error:', newToken);
+              console.info('Got new CSRF token after error:', newToken);
             }
           } catch (tokenErr) {
             console.error('Failed to get new CSRF token:', tokenErr);
@@ -239,30 +270,23 @@ const LoginPage: React.FC = () => {
         <h1>Login Page Test</h1>
         <p>Authentication Status: {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</p>
         <p>Loading Status: {isAuthLoading ? 'Loading' : 'Not Loading'}</p>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-          />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+        >
+          <input type="email" placeholder="Email" required {...register('email')} />
+          <input type="password" placeholder="Password" required {...register('password')} />
           <Button
             variant="primary"
             htmlType="submit"
             disabled={isLoading}
-            icon={<FaSignInAlt />}
+            icon={<Icon IconComponent={FaSignInAlt} size="sm" />}
           >
             {isLoading ? 'Processing...' : 'Login'}
           </Button>
-          {error && <div style={{ color: error.includes('successful') ? 'green' : 'red' }}>{error}</div>}
+          {error && (
+            <div style={{ color: error.includes('successful') ? 'green' : 'red' }}>{error}</div>
+          )}
         </form>
       </div>
     );
@@ -278,39 +302,45 @@ const LoginPage: React.FC = () => {
             <h1 className={styles.loginTitle}>Portal Administrativo</h1>
           </div>
 
-          <form className={styles.loginForm} onSubmit={handleSubmit}>
+          <form className={styles.loginForm} onSubmit={handleSubmit(onSubmit)}>
             <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.formLabel}>Correo Electrónico</label>
+              <label htmlFor="email" className={styles.formLabel}>
+                Correo Electrónico
+              </label>
               <div className={styles.inputWrapper}>
-                <FaUser className={styles.inputIcon} />
+                <Icon IconComponent={FaUser} className={styles.inputIcon} size="sm" />
                 <input
                   type="email"
                   id="email"
-                  className={styles.formInput}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  className={`${styles.formInput} ${errors.email ? styles.inputError : ''}`}
                   placeholder="Ingrese su correo electrónico"
                   autoComplete="username"
                   required
+                  {...register('email')}
                 />
               </div>
+              {errors.email && <div className={styles.fieldError}>{errors.email.message}</div>}
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.formLabel}>Contraseña</label>
+              <label htmlFor="password" className={styles.formLabel}>
+                Contraseña
+              </label>
               <div className={styles.inputWrapper}>
-                <FaLock className={styles.inputIcon} />
+                <Icon IconComponent={FaLock} className={styles.inputIcon} size="sm" />
                 <input
                   type="password"
                   id="password"
-                  className={styles.formInput}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${styles.formInput} ${errors.password ? styles.inputError : ''}`}
                   placeholder="Ingrese su contraseña"
                   autoComplete="current-password"
                   required
+                  {...register('password')}
                 />
               </div>
+              {errors.password && (
+                <div className={styles.fieldError}>{errors.password.message}</div>
+              )}
             </div>
 
             <Button
@@ -318,21 +348,35 @@ const LoginPage: React.FC = () => {
               htmlType="submit"
               className={styles.loginButton}
               disabled={isLoading}
-              icon={<FaSignInAlt />}
+              icon={<Icon IconComponent={FaSignInAlt} size="sm" />}
             >
               {isLoading ? 'Procesando...' : 'Iniciar Sesión'}
             </Button>
 
             {error && (
-              <div className={error.includes('successful') ? styles.successMessage : styles.errorMessage}>
+              <div
+                className={
+                  error.includes('successful') ? styles.successMessage : styles.errorMessage
+                }
+              >
                 {error.includes('successful') ? (
                   <>
-                    <FaCheckCircle className={styles.successIcon} />
+                    <Icon
+                      IconComponent={FaCheckCircle}
+                      className={styles.successIcon}
+                      size="sm"
+                      color="var(--color-success)"
+                    />
                     <span>{error}</span>
                   </>
                 ) : (
                   <>
-                    <FaExclamationTriangle className={styles.errorIcon} />
+                    <Icon
+                      IconComponent={FaExclamationTriangle}
+                      className={styles.errorIcon}
+                      size="sm"
+                      color="var(--color-danger)"
+                    />
                     <span>{error}</span>
                   </>
                 )}

@@ -1,7 +1,15 @@
-import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+
+// Import components and mocked services after mocks are defined
+import { AuthProvider } from '../../contexts/AuthContext';
+import { ToastProvider } from '../../contexts/ToastContext';
+import applicationService, { Application } from '../../services/applicationService';
+import authService from '../../services/authService';
+import PermitDetailsPage from '../PermitDetailsPage';
+import styles from '../PermitDetailsPage.module.css';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -35,15 +43,6 @@ vi.mock('react-router-dom', async (importOriginal) => {
 global.URL.createObjectURL = vi.fn(() => 'mock-url');
 global.URL.revokeObjectURL = vi.fn();
 
-// Import components and mocked services after mocks are defined
-import PermitDetailsPage from '../PermitDetailsPage';
-import { AuthProvider } from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
-import applicationService from '../../services/applicationService';
-import authService from '../../services/authService';
-import { Application } from '../../services/applicationService';
-import styles from '../PermitDetailsPage.module.css';
-
 // Create mock application data for different statuses
 const createMockApplication = (status: string, overrides = {}): Application => ({
   id: '123',
@@ -60,8 +59,8 @@ const createMockApplication = (status: string, overrides = {}): Application => (
   numero_serie: 'ABC123456789',
   numero_motor: 'M123456',
   ano_modelo: 2023,
-  importe: 1500.00,
-  ...overrides
+  importe: 1500.0,
+  ...overrides,
 });
 
 // Helper function for standard rendering
@@ -73,7 +72,7 @@ const renderPermitDetailsPage = () => {
           <PermitDetailsPage />
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
@@ -92,8 +91,8 @@ describe('PermitDetailsPage', () => {
         email: 'test@example.com',
         first_name: 'Test',
         last_name: 'User',
-        accountType: 'citizen'
-      }
+        accountType: 'citizen',
+      },
     });
 
     // Default mock for getApplicationById
@@ -105,13 +104,13 @@ describe('PermitDetailsPage', () => {
         fecha_vencimiento: '2023-02-15T00:00:00Z',
         payment_proof_path: '/uploads/payment-proof.jpg',
         payment_proof_uploaded_at: '2023-01-02T00:00:00Z',
-        payment_verified_at: '2023-01-03T00:00:00Z'
-      })
+        payment_verified_at: '2023-01-03T00:00:00Z',
+      }),
     });
 
     // Default mock for downloadPermit
     vi.mocked(applicationService.downloadPermit).mockResolvedValue(
-      new Blob(['mock pdf content'], { type: 'application/pdf' })
+      new Blob(['mock pdf content'], { type: 'application/pdf' }),
     );
 
     // Default mock for checkRenewalEligibility
@@ -119,7 +118,7 @@ describe('PermitDetailsPage', () => {
       eligible: true,
       message: 'Su permiso es elegible para renovación',
       daysUntilExpiration: 5,
-      expirationDate: '2023-02-15T00:00:00Z'
+      expirationDate: '2023-02-15T00:00:00Z',
     });
   });
 
@@ -136,25 +135,36 @@ describe('PermitDetailsPage', () => {
   }, 10000);
 
   test('displays application details when data is fetched successfully', async () => {
-    const { container } = renderPermitDetailsPage();
+    const { container: _container } = renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for page title and application ID
-    expect(screen.getByRole('heading', { name: /Detalles de la Solicitud/i, level: 1 })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Detalles de la Solicitud/i, level: 1 }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Solicitud #123/i)).toBeInTheDocument();
 
     // Check for applicant details section
-    const applicantSection = screen.getByRole('heading', { name: /Información del Solicitante/i }).parentElement;
+    const applicantSection = screen.getByRole('heading', {
+      name: /Información del Solicitante/i,
+    }).parentElement;
     expect(within(applicantSection).getByText(/Test User/i)).toBeInTheDocument();
     expect(within(applicantSection).getByText(/TESU123456ABC/i)).toBeInTheDocument();
-    expect(within(applicantSection).getByText(/123 Main St, Anytown, CA 12345/i)).toBeInTheDocument();
+    expect(
+      within(applicantSection).getByText(/123 Main St, Anytown, CA 12345/i),
+    ).toBeInTheDocument();
 
     // Check for vehicle details section
-    const vehicleSection = screen.getByRole('heading', { name: /Información del Vehículo/i }).parentElement;
+    const vehicleSection = screen.getByRole('heading', {
+      name: /Información del Vehículo/i,
+    }).parentElement;
     expect(within(vehicleSection).getByText(/Toyota/i)).toBeInTheDocument();
     expect(within(vehicleSection).getByText(/Corolla/i)).toBeInTheDocument();
     expect(within(vehicleSection).getByText(/Azul/i)).toBeInTheDocument();
@@ -162,14 +172,16 @@ describe('PermitDetailsPage', () => {
     expect(within(vehicleSection).getByText(/M123456/i)).toBeInTheDocument();
 
     // Find the año modelo field specifically
-    const yearModelItem = Array.from(vehicleSection.querySelectorAll('div')).find(
-      div => div.textContent.includes('Año Modelo')
+    const yearModelItem = Array.from(vehicleSection.querySelectorAll('div')).find((div) =>
+      div.textContent.includes('Año Modelo'),
     );
     expect(yearModelItem).toBeTruthy();
     expect(yearModelItem.textContent).toContain('2023');
 
     // Check for permit details section
-    const permitSection = screen.getByRole('heading', { name: /Información del Permiso/i }).parentElement;
+    const permitSection = screen.getByRole('heading', {
+      name: /Información del Permiso/i,
+    }).parentElement;
     expect(within(permitSection).getByText(/PD-2023-123/i)).toBeInTheDocument();
     expect(within(permitSection).getByText(/\$1,500.00/i)).toBeInTheDocument();
 
@@ -188,15 +200,18 @@ describe('PermitDetailsPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: false,
       application: null as any,
-      message: 'Error al cargar la solicitud'
+      message: 'Error al cargar la solicitud',
     });
 
     renderPermitDetailsPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for error message
     expect(screen.getByText(/Error al cargar la solicitud/i)).toBeInTheDocument();
@@ -205,24 +220,22 @@ describe('PermitDetailsPage', () => {
     expect(screen.getByRole('button', { name: /Volver al Panel de Control/i })).toBeInTheDocument();
 
     // Check that toast was shown
-    expect(mockShowToast).toHaveBeenCalledWith(
-      'Error al cargar la solicitud',
-      'error'
-    );
+    expect(mockShowToast).toHaveBeenCalledWith('Error al cargar la solicitud', 'error');
   }, 10000);
 
   test('displays error state when network error occurs during fetch', async () => {
     // Mock network error
-    vi.mocked(applicationService.getApplicationById).mockRejectedValue(
-      new Error('Network Error')
-    );
+    vi.mocked(applicationService.getApplicationById).mockRejectedValue(new Error('Network Error'));
 
     renderPermitDetailsPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check for error message
     expect(screen.getByText(/Error de red. Por favor, verifique su conexión/i)).toBeInTheDocument();
@@ -230,7 +243,7 @@ describe('PermitDetailsPage', () => {
     // Check that toast was shown
     expect(mockShowToast).toHaveBeenCalledWith(
       'Error de red. Por favor, verifique su conexión',
-      'error'
+      'error',
     );
   }, 10000);
 
@@ -240,16 +253,19 @@ describe('PermitDetailsPage', () => {
       success: true,
       application: createMockApplication('PERMIT_READY', {
         folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z'
-      })
+        fecha_expedicion: '2023-01-15T00:00:00Z',
+      }),
     });
 
     renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that download button is present
     const downloadButton = screen.getByRole('button', { name: /Descargar Permiso/i });
@@ -259,27 +275,30 @@ describe('PermitDetailsPage', () => {
     await user.click(downloadButton);
 
     // Check that success toast was shown after the timeout
-    await waitFor(() => {
-      expect(mockShowToast).toHaveBeenCalledWith(
-        'Permiso descargado exitosamente',
-        'success'
-      );
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(mockShowToast).toHaveBeenCalledWith('Permiso descargado exitosamente', 'success');
+      },
+      { timeout: 6000 },
+    );
   }, 15000);
 
   test('shows upload payment proof link for PENDING_PAYMENT status', async () => {
     // Mock application with PENDING_PAYMENT status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PENDING_PAYMENT')
+      application: createMockApplication('PENDING_PAYMENT'),
     });
 
     const { container } = renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that upload payment proof link is present
     const headerActions = container.querySelector('.' + styles.headerActions);
@@ -295,22 +314,27 @@ describe('PermitDetailsPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
       application: createMockApplication('PROOF_REJECTED', {
-        payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.'
-      })
+        payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.',
+      }),
     });
 
     const { container } = renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that rejection reason is displayed
     const statusSection = container.querySelector('.' + styles.statusSection);
     expect(statusSection).toBeTruthy();
     expect(statusSection.textContent).toContain('Motivo de Rechazo');
-    expect(statusSection.textContent).toContain('Comprobante ilegible. Por favor, suba una imagen más clara.');
+    expect(statusSection.textContent).toContain(
+      'Comprobante ilegible. Por favor, suba una imagen más clara.',
+    );
 
     // Check that upload new payment proof link is present
     const headerActions = container.querySelector('.' + styles.headerActions);
@@ -325,16 +349,19 @@ describe('PermitDetailsPage', () => {
       application: createMockApplication('PERMIT_READY', {
         folio: 'PD-2023-123',
         fecha_expedicion: '2023-01-15T00:00:00Z',
-        fecha_vencimiento: '2023-02-15T00:00:00Z'
-      })
+        fecha_vencimiento: '2023-02-15T00:00:00Z',
+      }),
     });
 
     const { container } = renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that renewal section is displayed
     const statusSection = container.querySelector('.' + styles.statusSection);
@@ -348,16 +375,19 @@ describe('PermitDetailsPage', () => {
       success: true,
       application: createMockApplication('PERMIT_READY', {
         folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z'
-      })
+        fecha_expedicion: '2023-01-15T00:00:00Z',
+      }),
     });
 
     renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that download button is present
     const downloadButton = screen.getByRole('button', { name: /Descargar Permiso/i });
@@ -369,15 +399,18 @@ describe('PermitDetailsPage', () => {
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: false,
       application: null as any,
-      message: 'Error al cargar la solicitud'
+      message: 'Error al cargar la solicitud',
     });
 
     renderPermitDetailsPage();
 
     // Wait for error message to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('heading', { name: /Error/i })).toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Click the back button
     await user.click(screen.getByRole('button', { name: /Volver al Panel de Control/i }));
@@ -390,9 +423,12 @@ describe('PermitDetailsPage', () => {
     renderPermitDetailsPage();
 
     // Wait for application data to load
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
-    }, { timeout: 6000 });
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      },
+      { timeout: 6000 },
+    );
 
     // Check that the back link exists (we can't test navigation with Link directly)
     expect(screen.getByRole('link', { name: /Volver al Panel/i })).toBeInTheDocument();

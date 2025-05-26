@@ -1,118 +1,176 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  FaTachometerAlt,
-  FaClipboardList,
-  FaFileAlt,
-  FaUserCircle,
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
-  FaCar,
-  FaPlus,
-  FaChevronLeft,
-  FaChevronRight
+  FaTachometerAlt, FaClipboardList, FaUserCircle, FaSignOutAlt,
+  FaTimes, FaPlus, FaChevronLeft, FaChevronRight // FaCar removed from here
 } from 'react-icons/fa';
-import useAuth from '../hooks/useAuth';
-import useResponsive from '../hooks/useResponsive';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+
 import styles from './UserLayout.module.css';
+import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
 import Button from '../components/ui/Button/Button';
-import MobileHeader from '../components/navigation/MobileHeader';
 import TextLogo from '../components/ui/TextLogo/TextLogo';
+import useResponsive from '../hooks/useResponsive';
+import Icon from '../shared/components/ui/Icon';
+import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
 
 const UserLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { isMdDown } = useResponsive(); // Check if we're on mobile (below 768px)
-  const [sidebarOpen, setSidebarOpen] = useState(!isMdDown); // Open by default on desktop, closed on mobile
+  const { isMdDown } = useResponsive();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMdDown); 
   const [showOverlay, setShowOverlay] = useState(false);
 
-  // Update sidebar state when screen size changes
+  const sidebarCloseButtonRef = useRef<HTMLButtonElement>(null);
+  const userSidebarRef = useRef<HTMLElement>(null); 
+
   useEffect(() => {
-    setSidebarOpen(!isMdDown);
+    setSidebarOpen(!isMdDown); 
   }, [isMdDown]);
 
-  // Show/hide overlay with slight delay for animation
   useEffect(() => {
     if (isMdDown) {
       if (sidebarOpen) {
         setShowOverlay(true);
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => sidebarCloseButtonRef.current?.focus(), 100);
       } else {
-        // Delay hiding the overlay to allow for animation
-        const timer = setTimeout(() => {
-          setShowOverlay(false);
-        }, 300); // Match transition duration
+        document.body.style.overflow = '';
+        const timer = setTimeout(() => setShowOverlay(false), 300);
         return () => clearTimeout(timer);
       }
-    } else {
-      setShowOverlay(false);
+    } else { 
+      setShowOverlay(false); 
+      document.body.style.overflow = ''; 
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [sidebarOpen, isMdDown]);
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+    setSidebarOpen(prev => !prev);
+  };
+
+  const closeSidebarAndFocusHamburger = () => {
+    setSidebarOpen(false);
   };
 
   const handleLogout = async () => {
+    if (isMdDown && sidebarOpen) setSidebarOpen(false); 
     await logout();
-    // Redirect to login page
     navigate('/login');
   };
 
-  // Close sidebar when clicking on a link (mobile only)
   const handleNavLinkClick = () => {
     if (isMdDown) {
       setSidebarOpen(false);
     }
   };
 
-  // Determine if we should show the initials-only logo (PD)
+  useEffect(() => {
+    if (sidebarOpen && isMdDown && userSidebarRef.current) {
+      const focusableElements = Array.from(
+        userSidebarRef.current.querySelectorAll(
+          'a[href]:not([disabled]), button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(el => el instanceof HTMLElement && el.offsetParent !== null) as HTMLElement[];
+
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0]; 
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      const trapFocus = (e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) { 
+            if (document.activeElement === firstElement) {
+              e.preventDefault();
+              lastElement.focus();
+            }
+          } else { 
+            if (document.activeElement === lastElement) {
+              e.preventDefault();
+              firstElement.focus();
+            }
+          }
+        } else if (e.key === 'Escape') {
+            closeSidebarAndFocusHamburger();
+        }
+      };
+
+      document.addEventListener('keydown', trapFocus);
+      return () => {
+        document.removeEventListener('keydown', trapFocus);
+      };
+    }
+  }, [sidebarOpen, isMdDown, closeSidebarAndFocusHamburger]); // Added closeSidebarAndFocusHamburger to deps
+
   const isDesktopCollapsed = !sidebarOpen && !isMdDown;
+
+  const userNavItems: NavLinkItem[] = [
+    { to: "/dashboard", label: "Dashboard", icon: <Icon IconComponent={FaTachometerAlt} className={styles.navIcon} /> },
+    { to: "/permits", label: "Mis Permisos", icon: <Icon IconComponent={FaClipboardList} className={styles.navIcon} /> },
+    { to: "/permits/complete", label: "Nuevo Permiso", icon: <Icon IconComponent={FaPlus} className={styles.navIcon} /> },
+    { to: "/profile", label: "Mi Perfil", icon: <Icon IconComponent={FaUserCircle} className={styles.navIcon} /> },
+  ];
+
 
   return (
     <div className={styles.userLayout}>
-      {/* Mobile Header - Only visible on mobile */}
       {isMdDown && (
-        <MobileHeader
-          onMenuToggle={toggleSidebar}
+        <AppHeaderMobile
           logoPath="/dashboard"
+          navLinks={[]} 
+          externalPanelControl={true}
+          onExternalPanelToggle={toggleSidebar}
+          isExternalPanelOpen={sidebarOpen}
         />
       )}
 
-      {/* Overlay - Only visible on mobile when sidebar is open */}
-      {showOverlay && (
+      {showOverlay && isMdDown && (
         <div
           className={`${styles.overlay} ${sidebarOpen ? styles.overlayVisible : ''}`}
-          onClick={toggleSidebar}
+          onClick={closeSidebarAndFocusHamburger}
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''} ${isMdDown ? styles.mobile : ''}`}>
+      <aside
+        ref={userSidebarRef}
+        className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''} ${isMdDown ? styles.mobile : ''}`}
+        aria-hidden={isMdDown ? !sidebarOpen : undefined} 
+        role={isMdDown ? "dialog" : undefined}
+        aria-modal={isMdDown ? sidebarOpen : undefined}
+        aria-label={isMdDown ? "Menú de usuario" : undefined}
+      >
         <div className={styles.sidebarHeader}>
-          <div className={styles.sidebarLogo}>
-            <TextLogo
-              to="/dashboard"
-              className={styles.textLogo}
-              variant="light"
-              compact={isDesktopCollapsed}
-              initialsOnly={isDesktopCollapsed}
-            />
-          </div>
+          {!isMdDown && (
+            <div className={styles.sidebarLogo}>
+              <TextLogo
+                to="/dashboard"
+                className={styles.textLogoInSidebar} 
+                variant="light"
+                compact={isDesktopCollapsed}
+                initialsOnly={isDesktopCollapsed}
+              />
+            </div>
+          )}
           {isMdDown && (
-            <Button
-              variant="text"
-              size="icon"
-              className={styles.sidebarCloseButton}
-              onClick={toggleSidebar}
-              icon={<FaTimes />}
-              aria-label="Cerrar menú"
-            />
+            <>
+              <div className={styles.panelLogoContainerInSidebar}>
+                <TextLogo to="/dashboard" variant="light" />
+              </div >
+              <button
+                ref={sidebarCloseButtonRef}
+                className={styles.sidebarPanelCloseButton}
+                onClick={closeSidebarAndFocusHamburger}
+                aria-label="Cerrar menú"
+              >
+                <FaTimes /> 
+              </button>
+            </>
           )}
         </div>
-
-
 
         <div className={styles.sidebarUser}>
           <div className={styles.userInfo}>
@@ -122,73 +180,42 @@ const UserLayout: React.FC = () => {
         </div>
 
         <nav className={styles.sidebarNav}>
-          <NavLink
-            to="/dashboard"
-            end
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <FaTachometerAlt className={styles.navIcon} />
-            <span className={styles.navText}>Dashboard</span>
-          </NavLink>
-
-          <NavLink
-            to="/permits"
-            end
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <FaClipboardList className={styles.navIcon} />
-            <span className={styles.navText}>Mis Permisos</span>
-          </NavLink>
-
-          <NavLink
-            to="/permits/complete"
-            end
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <FaPlus className={styles.navIcon} />
-            <span className={styles.navText}>Nuevo Permiso</span>
-          </NavLink>
-
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <FaUserCircle className={styles.navIcon} />
-            <span className={styles.navText}>Mi Perfil</span>
-          </NavLink>
+          {userNavItems.map(item => (
+            <NavLink
+              key={item.to.toString()}
+              to={item.to}
+              end={item.to === "/dashboard"} 
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.active : ''}`
+              }
+              onClick={handleNavLinkClick}
+            >
+              {item.icon}
+              <span className={styles.navText}>{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
 
         <div className={styles.sidebarFooter}>
           <div className={styles.footerActions}>
-            {/* Desktop Toggle Button - Only visible on desktop */}
-            {!isMdDown && (
+            {!isMdDown && ( 
               <Button
-                variant="text"
+                variant="text" 
                 size="icon"
                 className={styles.sidebarToggleButton}
                 onClick={toggleSidebar}
-                icon={sidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
+                icon={sidebarOpen ?
+                  <Icon IconComponent={FaChevronLeft} size="sm" color="rgba(255, 255, 255, 0.7)" /> :
+                  <Icon IconComponent={FaChevronRight} size="sm" color="rgba(255, 255, 255, 0.7)" />
+                }
                 aria-label={sidebarOpen ? "Contraer menú" : "Expandir menú"}
               />
             )}
-
             <Button
-              variant="danger"
+              variant="danger" 
               className={styles.logoutButton}
               onClick={handleLogout}
-              icon={<FaSignOutAlt className={styles.logoutIcon} />}
+              icon={<Icon IconComponent={FaSignOutAlt} size="md" />} 
             >
               <span className={styles.logoutText}>Cerrar Sesión</span>
             </Button>
@@ -196,11 +223,10 @@ const UserLayout: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className={`
         ${styles.mainContent}
-        ${sidebarOpen && !isMdDown ? '' : styles.expanded}
-        ${isMdDown ? styles.mobileContent : ''}
+        ${!isMdDown && !sidebarOpen ? styles.expanded : ''}
+        ${isMdDown ? styles.mobileContentPadded : ''}
       `}>
         <Outlet />
       </main>

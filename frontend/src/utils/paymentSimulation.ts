@@ -15,7 +15,7 @@ export enum SimulatedPaymentOutcome {
   SUCCESS = 'success',
   FAILURE = 'failure',
   PENDING = 'pending',
-  OXXO_PENDING = 'oxxo_pending'
+  OXXO_PENDING = 'oxxo_pending',
 }
 
 // Default simulation delay in milliseconds
@@ -31,12 +31,14 @@ export const DEFAULT_SIMULATION_DELAY = 1500;
 export const simulatePaymentProcess = async (
   applicationId: string,
   outcome: SimulatedPaymentOutcome = SimulatedPaymentOutcome.SUCCESS,
-  delay: number = DEFAULT_SIMULATION_DELAY
+  delay: number = DEFAULT_SIMULATION_DELAY,
 ): Promise<void> => {
-  console.log(`SIMULATION: Processing payment for application ${applicationId} with outcome: ${outcome}`);
+  console.debug( // Changed to debug
+    `SIMULATION: Processing payment for application ${applicationId} with outcome: ${outcome}`,
+  );
 
   // Simulate processing delay
-  await new Promise(resolve => setTimeout(resolve, delay));
+  await new Promise((resolve) => setTimeout(resolve, delay));
 
   // Determine redirect URL based on outcome
   let redirectUrl: string;
@@ -44,19 +46,21 @@ export const simulatePaymentProcess = async (
   switch (outcome) {
     case SimulatedPaymentOutcome.SUCCESS:
       redirectUrl = `/permits/${applicationId}?from_payment=true&status=success`;
-      console.log('SIMULATION: Card payment successful, redirecting to permit details with success status');
+      console.debug( // Changed to debug
+        'SIMULATION: Card payment successful, redirecting to permit details with success status',
+      );
       break;
     case SimulatedPaymentOutcome.FAILURE:
       redirectUrl = `/permits/complete?step=payment&error=true&message=Simulated payment failure`;
-      console.log('SIMULATION: Card payment failed, redirecting back to payment form with error');
+      console.debug('SIMULATION: Card payment failed, redirecting back to payment form with error'); // Changed to debug
       break;
     case SimulatedPaymentOutcome.PENDING:
       redirectUrl = `/permits/${applicationId}?from_payment=true&status=pending`;
-      console.log('SIMULATION: Payment pending, redirecting back to permit details');
+      console.debug('SIMULATION: Payment pending, redirecting back to permit details'); // Changed to debug
       break;
     case SimulatedPaymentOutcome.OXXO_PENDING:
       redirectUrl = `/permits/complete?step=oxxo-confirmation&applicationId=${applicationId}`;
-      console.log('SIMULATION: OXXO payment initiated, redirecting to OXXO confirmation step');
+      console.debug('SIMULATION: OXXO payment initiated, redirecting to OXXO confirmation step'); // Changed to debug
       break;
     default:
       redirectUrl = `/permits/${applicationId}`;
@@ -76,7 +80,7 @@ export const getRandomOutcome = (includeOxxo: boolean = true): SimulatedPaymentO
   const outcomes = [
     SimulatedPaymentOutcome.SUCCESS,
     SimulatedPaymentOutcome.FAILURE,
-    SimulatedPaymentOutcome.PENDING
+    SimulatedPaymentOutcome.PENDING,
   ];
 
   // Include OXXO outcome if requested
@@ -93,5 +97,5 @@ export default {
   isSimulationMode,
   simulatePaymentProcess,
   getRandomOutcome,
-  SimulatedPaymentOutcome
+  SimulatedPaymentOutcome,
 };
