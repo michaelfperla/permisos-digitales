@@ -98,32 +98,25 @@ class PaymentService {
    * @private
    * @returns {Promise<boolean>} - Whether initialization was successful
    */
-  async initializeConekta() {
-    // If already initializing, return the existing promise
+  async initializeConekta() { // This outer `async` is fine
     if (this.initPromise) {
       return this.initPromise;
     }
 
-    // Create a new initialization promise
-    this.initPromise = new Promise(async (resolve, reject) => {
+    this.initPromise = new Promise((resolve, reject) => { // REMOVED `async` here
       try {
-        // If already initialized, resolve immediately
         if (this.initialized && this.conekta) {
           resolve(true);
           return;
         }
 
         logger.info('Initializing Conekta in payment service...');
-
-        // Get the Conekta instance from the configuration
         this.conekta = conektaConfig.getInstance();
 
-        // Verify the Conekta instance is valid
         if (!this.conekta) {
           throw new Error('Failed to get Conekta instance from configuration');
         }
 
-        // Log the available methods for debugging
         logger.debug('Conekta instance methods:', {
           hasCreateCustomer: typeof this.conekta.createCustomer === 'function',
           hasFindCustomerByEmail: typeof this.conekta.findCustomerByEmail === 'function',
@@ -139,7 +132,9 @@ class PaymentService {
         logger.error('Failed to initialize Conekta SDK in payment service:', error);
         this.initialized = false;
         this.conekta = null;
-        this.initPromise = null;
+        // Resetting initPromise here means if initialization fails,
+        // a subsequent call to initializeConekta will try again. This might be intended.
+        this.initPromise = null; 
         reject(error);
       }
     });
@@ -403,7 +398,7 @@ class PaymentService {
 
     // Initialization errors are retryable
     if (error.message && (
-        error.message.includes('not properly initialized') ||
+      error.message.includes('not properly initialized') ||
         error.message.includes('not available') ||
         error.message.includes('Failed to get Conekta instance'))) {
       return true;
@@ -522,7 +517,7 @@ class PaymentService {
 
         // Extract card BIN if available
         const cardBin = sanitizedData.token && sanitizedData.token.length >= 6 ?
-                       sanitizedData.token.substring(0, 6) : null;
+          sanitizedData.token.substring(0, 6) : null;
 
         // Prepare payment data for fraud check
         const fraudCheckData = {
@@ -964,7 +959,7 @@ class PaymentService {
    * @param {string} paymentData.description - Payment description
    * @param {string} paymentData.referenceId - Application reference ID
    * @param {string} paymentData.device_session_id - Device session ID for fraud prevention
-   * @param {string} paymentData.idempotencyKey - Custom idempotency key (optional)
+   * @param {string} paymentData.idempotencyKey - Custom idempotency key (optional, from caller)
    * @param {Object} options - Additional options
    * @param {number} options.maxRetries - Maximum number of retries (default: 1)
    * @param {number} options.retryDelay - Delay between retries in ms (default: 1000)
@@ -988,12 +983,10 @@ class PaymentService {
       logger.error('Missing customerId for OXXO payment');
       throw new Error('Customer ID is required for OXXO payment');
     }
-
     if (!paymentData.amount) {
       logger.error('Missing amount for OXXO payment');
       throw new Error('Payment amount is required for OXXO payment');
     }
-
     if (!paymentData.referenceId) {
       logger.error('Missing referenceId for OXXO payment');
       throw new Error('Reference ID is required for OXXO payment');
@@ -1007,11 +1000,16 @@ class PaymentService {
       description: paymentData.description || 'Permiso de Circulación',
       referenceId: paymentData.referenceId,
       device_session_id: paymentData.device_session_id,
-      idempotencyKey: paymentData.idempotencyKey || null,
+      // Note: paymentData.idempotencyKey is used below to initialize orderIdempotencyKey
       phone: paymentData.phone ? this.formatPhoneNumber(String(paymentData.phone).trim()) : '+525555555555'
     };
 
-    logger.debug('Processing OXXO payment for:', sanitizedData.referenceId);
+    // Generate the idempotency key ONCE for this entire operation, use it for all retries.
+    // If the caller provides one, use it. Otherwise, generate one.
+    const orderIdempotencyKey = paymentData.idempotencyKey || 
+                                `oxxo-${sanitizedData.referenceId}-${Date.now()}`;
+
+    logger.debug('Processing OXXO payment for:', sanitizedData.referenceId, 'with idempotency key:', orderIdempotencyKey);
 
     // Retry loop
     while (attempts <= maxRetries) {
@@ -1029,7 +1027,7 @@ class PaymentService {
         const expiresAt = Math.floor(Date.now() / 1000) + (expirationDays * 24 * 60 * 60);
 
         // Create order with OXXO payment - use safe copies to avoid circular references
-        const orderRequest = {
+        const orderRequest = { // This is the request for the older SDK method, if used as fallback
           currency: String(sanitizedData.currency),
           customer_info: {
             customer_id: String(sanitizedData.customerId)
@@ -1041,10 +1039,9 @@ class PaymentService {
           }],
           charges: [{
             payment_method: {
-              type: 'cash',
+              type: 'cash', // For older SDK, this might be oxxo_cash directly
               expires_at: Number(expiresAt)
             },
-            // Always include device_fingerprint if available
             device_fingerprint: sanitizedData.device_session_id ? String(sanitizedData.device_session_id) : undefined
           }],
           metadata: {
@@ -1055,106 +1052,81 @@ class PaymentService {
           }
         };
 
-        // Declare order variable at this scope
-        let order;
+        let order; // Declare order variable at this scope
 
-        // In development mode, log that we're using the real Conekta API with test credentials
         if (config.nodeEnv === 'development') {
           logger.info('Development mode: Using Conekta API with test credentials for OXXO payment');
         }
 
-        // Generate idempotency key for the order if not provided
-        // This ensures that even if the same request is sent multiple times, only one OXXO reference will be created
-        const orderIdempotencyKey = sanitizedData.idempotencyKey ||
-                                   `oxxo-${sanitizedData.referenceId}-${Date.now()}`;
+        logger.debug('Creating OXXO order with effective idempotency key:', orderIdempotencyKey);
 
-        // Create order in Conekta
-        logger.debug('Creating OXXO order with request:', JSON.stringify(orderRequest, null, 2));
-
-        // Use the new Conekta SDK helper method with circuit breaker protection
         try {
-          // Use circuit breaker to protect against Conekta API failures
           order = await this.circuitBreakers.oxxoPayment.execute(async () => {
-            // Create the order data object
-            const orderData = {
+            const orderDataForHelper = { // Data for the conektaConfig helper method
               customerId: sanitizedData.customerId,
+              customerName: paymentData.customerName || 'Usuario OXXO', // Ensure these are passed or defaulted
+              customerEmail: paymentData.customerEmail || `${sanitizedData.referenceId}@example.com`, // Ensure these are passed or defaulted
               amount: sanitizedData.amount,
               currency: sanitizedData.currency,
               description: sanitizedData.description,
-              // Standardized approach for device fingerprint
               deviceFingerprint: sanitizedData.device_session_id || undefined,
-              metadata: {
+              metadata: { // Pass relevant metadata to the helper
                 reference_id: String(sanitizedData.referenceId),
                 environment: String(config.nodeEnv),
                 application_version: String(process.env.npm_package_version || 'unknown'),
-                payment_type: 'oxxo'
-              }
+                payment_type: 'oxxo',
+                application_id: paymentData.applicationId || 'unknown' // Ensure applicationId is passed
+              },
+              applicationId: paymentData.applicationId || 'unknown' // Ensure applicationId is passed
             };
 
-            // Add detailed logging for device fingerprint
-            logger.debug('OXXO payment request device fingerprint:', {
-              deviceFingerprint: sanitizedData.device_session_id ? 'Present' : 'Not provided'
+            logger.debug('OXXO payment request device fingerprint (for helper):', {
+              deviceFingerprint: orderDataForHelper.deviceFingerprint ? 'Present' : 'Not provided'
             });
-
-            // Use the new createOrderWithOxxo helper method
-            const result = await this.conekta.createOrderWithOxxo(orderData, {
-              idempotencyKey: orderIdempotencyKey
+            
+            const result = await this.conekta.createOrderWithOxxo(orderDataForHelper, {
+              idempotencyKey: orderIdempotencyKey // Use the consistent idempotency key
             });
-
-            logger.debug('OXXO order created with idempotency key:', orderIdempotencyKey);
+            logger.debug('OXXO order created via helper with idempotency key:', orderIdempotencyKey);
             return result;
           });
         } catch (orderError) {
-          // Check if this is a circuit breaker error
           if (orderError.code === 'CIRCUIT_OPEN') {
-            logger.error('Circuit breaker is open for OXXO payments', {
-              message: orderError.message,
-              remainingTimeMs: orderError.remainingTimeMs
-            });
-
-            // Create a user-friendly error
-            const circuitError = new Error('El servicio de pagos está temporalmente no disponible. Por favor, intenta de nuevo más tarde.');
-            circuitError.code = 'service_unavailable';
-            circuitError.details = [{
-              message: 'Servicio de pagos no disponible temporalmente',
-              code: 'service_unavailable'
-            }];
-            throw circuitError;
+            logger.error('Circuit breaker is open for OXXO payments', { /* ... */ });
+            const circuitError = new Error('El servicio de pagos está temporalmente no disponible...');
+            circuitError.code = 'service_unavailable'; /* ... */ throw circuitError;
           }
 
-          logger.error('Error using direct API for OXXO order creation:', {
-            error: orderError,
-            idempotencyKey: orderIdempotencyKey
-          });
+          logger.error('Error using Conekta helper for OXXO order creation:', { error: orderError, idempotencyKey: orderIdempotencyKey });
 
-          // Fallback to old method if available
+          // Fallback to old SDK method if available (this.conekta.Order.create)
           if (this.conekta.Order && typeof this.conekta.Order.create === 'function') {
+            logger.info('Falling back to legacy this.conekta.Order.create for OXXO');
+            // Ensure orderRequest is correctly formatted for the legacy method
+            // The legacy method might expect payment_method.type = 'oxxo_cash'
+            const legacyOrderRequest = JSON.parse(JSON.stringify(orderRequest)); // Deep clone
+            if (legacyOrderRequest.charges && legacyOrderRequest.charges[0] && legacyOrderRequest.charges[0].payment_method) {
+              legacyOrderRequest.charges[0].payment_method.type = 'oxxo_cash'; // Adjust for legacy if needed
+            }
             try {
-              order = await this.conekta.Order.create(orderRequest, {
-                idempotencyKey: orderIdempotencyKey
+              order = await this.conekta.Order.create(legacyOrderRequest, { // Use legacyOrderRequest here
+                idempotencyKey: orderIdempotencyKey // Use the consistent key
               });
+              logger.info('OXXO order created via legacy fallback with idempotency key:', orderIdempotencyKey);
             } catch (fallbackError) {
-              logger.error('Fallback also failed for OXXO order creation:', {
-                error: fallbackError,
-                idempotencyKey: orderIdempotencyKey
-              });
-              throw fallbackError;
+              logger.error('Legacy fallback also failed for OXXO order creation:', { error: fallbackError, idempotencyKey: orderIdempotencyKey });
+              throw fallbackError; // Re-throw the error from the fallback
             }
           } else {
-            throw new Error('No compatible method found for creating OXXO orders');
+            // If no fallback, re-throw the original error from the helper
+            throw orderError;
           }
         }
 
-
-        // Get charge information
-        logger.debug('OXXO order created successfully:', {
-          orderId: order.id,
-          idempotencyKey: orderIdempotencyKey
-        });
+        logger.debug('OXXO order created successfully:', { orderId: order.id, idempotencyKey: orderIdempotencyKey });
         const charge = order.charges.data[0];
         const paymentMethod = charge.payment_method;
 
-        // Log performance metrics
         const duration = Date.now() - startTime;
         logger.info('OXXO payment reference created:', {
           orderId: order.id,
@@ -1164,16 +1136,8 @@ class PaymentService {
           idempotencyKey: orderIdempotencyKey
         });
 
-        // Update metrics
-        this.updateMetrics(
-          sanitizedData,
-          'oxxo',
-          true,
-          duration,
-          null
-        );
+        this.updateMetrics(sanitizedData, 'oxxo', true, duration, null);
 
-        // Create payment result
         const paymentResult = {
           success: true,
           status: 'pending_payment',
@@ -1185,19 +1149,17 @@ class PaymentService {
           barcodeUrl: paymentMethod.barcode_url,
           amount: sanitizedData.amount,
           currency: sanitizedData.currency,
-          paymentMethod: 'oxxo_cash',
+          paymentMethod: 'oxxo_cash', // or paymentMethod.type
           paymentStatus: ApplicationStatus.AWAITING_OXXO_PAYMENT,
           created_at: new Date().toISOString(),
           processingTime: duration,
           idempotencyKey: orderIdempotencyKey
         };
+        return paymentResult; // Success, exit loop and function
 
-        return paymentResult;
       } catch (error) {
         attempts++;
         lastError = error;
-
-        // Determine if we should retry based on the error type
         const isRetryableError = this.isRetryableError(error);
 
         if (attempts <= maxRetries && isRetryableError) {
@@ -1206,22 +1168,13 @@ class PaymentService {
             retrying: true,
             delay: retryDelay
           });
-
-          // Wait before retrying
           await new Promise(resolve => setTimeout(resolve, retryDelay));
-
-          // Reset Conekta instance if there was an initialization problem
           if (error.message.includes('not properly initialized') || error.message.includes('not available')) {
             logger.debug('Resetting Conekta instance before retry');
-            this.initialized = false;
-            this.conekta = null;
-            this.initPromise = null;
+            this.initialized = false; this.conekta = null; this.initPromise = null;
           }
         } else {
-          // If we've exhausted retries or it's not a retryable error, format the error
           this.metrics.failedPayments++;
-
-          // Enhanced error logging with more context for OXXO payments
           logger.error('Error processing OXXO payment in Conekta:', {
             error: error.message,
             stack: error.stack,
@@ -1229,34 +1182,22 @@ class PaymentService {
               customerId: sanitizedData.customerId,
               referenceId: sanitizedData.referenceId,
               amount: sanitizedData.amount,
-              idempotencyKey: orderIdempotencyKey
+              idempotencyKey: orderIdempotencyKey // Now this is defined and correct
             },
             conektaErrorCode: error.details?.code || error.code || 'unknown',
             attempts,
             retryable: isRetryableError
           });
 
-          // Use the error mapper to get a user-friendly error message
           const mappedError = mapConektaErrorToUserMessage(error);
-          const errorMessage = mappedError.message;
-          const errorCode = mappedError.code;
-
-          // Update metrics for failed payment
           const duration = Date.now() - startTime;
-          this.updateMetrics(
-            sanitizedData,
-            'oxxo',
-            false,
-            duration,
-            errorCode
-          );
+          this.updateMetrics(sanitizedData, 'oxxo', false, duration, mappedError.code);
 
-          // Return error result
-          return {
+          return { // Return error object, exiting loop and function
             success: false,
             status: 'error',
-            errorCode: errorCode,
-            failureMessage: errorMessage,
+            errorCode: mappedError.code,
+            failureMessage: mappedError.message,
             attempts: attempts,
             processingTime: duration
           };
@@ -1264,23 +1205,25 @@ class PaymentService {
       }
     }
 
-    // If we've exhausted retries, format the error
+    // This part is reached if the loop finishes due to maxRetries without returning from the 'else' block in catch
+    // (which shouldn't happen with the current return statements in the else block)
+    // However, to be safe, if it's ever reached, log and return/throw.
     this.metrics.failedPayments++;
+    const finalErrorMessage = mapConektaErrorToUserMessage(lastError).message || 
+                              'Error al generar referencia para pago en OXXO después de múltiples intentos';
+    
+    logger.error('Exhausted retries for OXXO payment. Final error:', { 
+      message: lastError.message, 
+      idempotencyKey: orderIdempotencyKey 
+    });
 
-    // Format error message for client
-    let errorMessage = 'Error al generar referencia para pago en OXXO después de múltiples intentos';
-    if (lastError.details && lastError.details.length > 0) {
-      errorMessage = lastError.details[0].message;
-    } else if (lastError.message) {
-      errorMessage = lastError.message;
-    }
-
-    // Return error result
-    return {
+    return { // Return final error object
       success: false,
       status: 'error',
-      failureMessage: errorMessage,
-      attempts: attempts
+      failureMessage: finalErrorMessage,
+      errorCode: mapConektaErrorToUserMessage(lastError).code,
+      attempts: attempts,
+      processingTime: Date.now() - startTime
     };
   }
 
@@ -1643,7 +1586,7 @@ class PaymentService {
     if (totalPayments > 10) {
       const failureRate = this.metrics.failedPayments / totalPayments;
       if (failureRate > this.metrics.alertThresholds.failureRate) {
-        logger.warn(`High payment failure rate detected`, {
+        logger.warn('High payment failure rate detected', {
           failureRate: failureRate.toFixed(2),
           threshold: this.metrics.alertThresholds.failureRate.toFixed(2),
           successfulPayments: this.metrics.successfulPayments,
@@ -1657,7 +1600,7 @@ class PaymentService {
     if (!success && errorCode) {
       const errorCount = this.metrics.errorsByType[errorCode] || 0;
       if (errorCount >= this.metrics.alertThresholds.consecutiveFailures) {
-        logger.warn(`Multiple payment failures with the same error code`, {
+        logger.warn('Multiple payment failures with the same error code', {
           errorCode,
           count: errorCount,
           threshold: this.metrics.alertThresholds.consecutiveFailures
