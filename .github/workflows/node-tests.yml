@@ -18,20 +18,30 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18.x
-        cache: 'npm'
+        # Cache npm dependencies for both root and frontend
+        cache: 'npm' 
+        cache-dependency-path: |
+          package-lock.json
+          frontend/package-lock.json # Add this line
 
-    - name: Install dependencies
+    - name: Install root dependencies
       run: npm ci
 
-    - name: Check for high and critical severity vulnerabilities
+    - name: Install frontend dependencies
+      run: npm ci --prefix frontend # Or: cd frontend && npm ci
+
+    - name: Check for high and critical severity vulnerabilities (root)
       run: npm audit --audit-level=high
 
-    - name: Run ESLint
-      run: npm run lint:js
+    # Optional: Audit frontend dependencies too
+    # - name: Check for high and critical severity vulnerabilities (frontend)
+    #   run: npm audit --audit-level=high --prefix frontend
+
+    - name: Run ESLint (Backend & Frontend)
+      run: npm run lint:js # This is your "eslint src/ && (cd frontend && npm run lint)"
 
     - name: Run Stylelint
       run: npm run lint:css
-
   test:
     name: Test
     runs-on: ubuntu-latest
