@@ -1,12 +1,21 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FaArrowLeft, FaExclamationTriangle, FaCar, FaLock, FaLockOpen, FaRedo } from 'react-icons/fa';
-import adminService, { Application, SecurityEvent } from '../services/adminService';
-import { useToast } from '../contexts/ToastContext';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
+import {
+  FaArrowLeft,
+  FaExclamationTriangle,
+  FaCar,
+  FaLock,
+  FaLockOpen,
+  FaRedo,
+} from 'react-icons/fa';
+import { useParams, Link } from 'react-router-dom';
+
 import styles from './UserDetailsPage.module.css';
 import Button from '../../components/ui/Button/Button';
+import Icon from '../../shared/components/ui/Icon';
+import { useAdminAuth as useAuth } from '../../shared/hooks/useAuth';
+import { useToast } from '../../shared/hooks/useToast';
+import adminService, { Application, SecurityEvent } from '../services/adminService';
 
 const UserDetailsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -15,16 +24,10 @@ const UserDetailsPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Fetch user details
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['adminUserDetails', userId],
     queryFn: () => adminService.getUserDetails(userId as string),
-    enabled: !!userId // Only run the query if userId is present
+    enabled: !!userId, // Only run the query if userId is present
   });
 
   // Enable user mutation
@@ -37,7 +40,7 @@ const UserDetailsPage: React.FC = () => {
     },
     onError: (error: Error) => {
       showToast(`Error al activar usuario: ${error.message}`, 'error');
-    }
+    },
   });
 
   // Disable user mutation
@@ -50,7 +53,7 @@ const UserDetailsPage: React.FC = () => {
     },
     onError: (error: Error) => {
       showToast(`Error al desactivar usuario: ${error.message}`, 'error');
-    }
+    },
   });
 
   // Handle user details error
@@ -66,17 +69,20 @@ const UserDetailsPage: React.FC = () => {
     isLoading: appsLoading,
     isError: appsError,
     error: appsErrorDetails,
-    refetch: refetchApps
+    refetch: refetchApps,
   } = useQuery({
     queryKey: ['userApplications', userId],
     queryFn: () => adminService.getUserApplications(userId as string),
-    enabled: !!userId // Only run the query if userId is present
+    enabled: !!userId, // Only run the query if userId is present
   });
 
   // Handle applications error
   React.useEffect(() => {
     if (appsError && appsErrorDetails) {
-      showToast(`Error al cargar solicitudes del usuario: ${appsErrorDetails instanceof Error ? appsErrorDetails.message : 'Error desconocido'}`, 'error');
+      showToast(
+        `Error al cargar solicitudes del usuario: ${appsErrorDetails instanceof Error ? appsErrorDetails.message : 'Error desconocido'}`,
+        'error',
+      );
     }
   }, [appsError, appsErrorDetails, showToast]);
 
@@ -90,7 +96,7 @@ const UserDetailsPage: React.FC = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -106,14 +112,19 @@ const UserDetailsPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Error al cargar detalles del usuario</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
         <Button
           variant="primary"
           onClick={() => refetch()}
           className={styles.retryButton}
-          icon={<FaRedo />}
+          icon={<Icon IconComponent={FaRedo} size="sm" />}
         >
           Intentar nuevamente
         </Button>
@@ -126,11 +137,16 @@ const UserDetailsPage: React.FC = () => {
   if (!user) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Usuario no encontrado</h2>
         <p>No se encontró información para el usuario solicitado.</p>
         <Link to="/users" className={styles.backButton}>
-          <FaArrowLeft className={styles.backIcon} />
+          <Icon IconComponent={FaArrowLeft} className={styles.backIcon} size="sm" />
           Volver a la lista de usuarios
         </Link>
       </div>
@@ -142,12 +158,10 @@ const UserDetailsPage: React.FC = () => {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Detalles del Usuario</h1>
-          <p className={styles.pageSubtitle}>
-            ID: {user.id}
-          </p>
+          <p className={styles.pageSubtitle}>ID: {user.id}</p>
         </div>
         <Link to="/users" className={styles.backButton}>
-          <FaArrowLeft className={styles.backIcon} />
+          <Icon IconComponent={FaArrowLeft} className={styles.backIcon} size="sm" />
           Volver a la lista de usuarios
         </Link>
       </header>
@@ -169,12 +183,14 @@ const UserDetailsPage: React.FC = () => {
                   }
 
                   // Confirm before disabling
-                  if (window.confirm('¿Estás seguro que deseas desactivar esta cuenta de usuario?')) {
+                  if (
+                    window.confirm('¿Estás seguro que deseas desactivar esta cuenta de usuario?')
+                  ) {
                     disableMutation.mutate(userId as string);
                   }
                 }}
                 disabled={disableMutation.isPending || loggedInUser?.id === userId}
-                icon={<FaLock className={styles.actionIcon} />}
+                icon={<Icon IconComponent={FaLock} className={styles.actionIcon} size="sm" />}
               >
                 Desactivar Cuenta
               </Button>
@@ -189,7 +205,7 @@ const UserDetailsPage: React.FC = () => {
                   }
                 }}
                 disabled={enableMutation.isPending}
-                icon={<FaLockOpen className={styles.actionIcon} />}
+                icon={<Icon IconComponent={FaLockOpen} className={styles.actionIcon} size="sm" />}
               >
                 Activar Cuenta
               </Button>
@@ -206,21 +222,27 @@ const UserDetailsPage: React.FC = () => {
 
             <dt className={styles.definitionTerm}>Tipo de Cuenta</dt>
             <dd className={styles.definitionDetail}>
-              <span className={user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge}>
+              <span
+                className={user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge}
+              >
                 {user.account_type === 'admin' ? 'Administrador' : 'Cliente'}
               </span>
             </dd>
 
             <dt className={styles.definitionTerm}>Acceso Admin</dt>
             <dd className={styles.definitionDetail}>
-              <span className={`${styles.booleanBadge} ${user.is_admin_portal ? styles.trueBadge : styles.falseBadge}`}>
+              <span
+                className={`${styles.booleanBadge} ${user.is_admin_portal ? styles.trueBadge : styles.falseBadge}`}
+              >
                 {user.is_admin_portal ? 'Sí' : 'No'}
               </span>
             </dd>
 
             <dt className={styles.definitionTerm}>Estado de la Cuenta</dt>
             <dd className={styles.definitionDetail}>
-              <span className={`${styles.statusBadge} ${user.is_active !== false ? styles.statusActive : styles.statusInactive}`}>
+              <span
+                className={`${styles.statusBadge} ${user.is_active !== false ? styles.statusActive : styles.statusInactive}`}
+              >
                 {user.is_active !== false ? 'Activa' : 'Desactivada'}
               </span>
             </dd>
@@ -297,14 +319,21 @@ const UserDetailsPage: React.FC = () => {
 
         {appsError && (
           <div className={styles.errorContainer}>
-            <FaExclamationTriangle className={styles.errorIcon} />
+            <Icon
+              IconComponent={FaExclamationTriangle}
+              className={styles.errorIcon}
+              size="xl"
+              color="var(--color-danger)"
+            />
             <h3>Error al cargar solicitudes</h3>
-            <p>{appsErrorDetails instanceof Error ? appsErrorDetails.message : 'Error desconocido'}</p>
+            <p>
+              {appsErrorDetails instanceof Error ? appsErrorDetails.message : 'Error desconocido'}
+            </p>
             <Button
               variant="primary"
               onClick={() => refetchApps()}
               className={styles.retryButton}
-              icon={<FaRedo />}
+              icon={<Icon IconComponent={FaRedo} size="sm" />}
             >
               Intentar nuevamente
             </Button>
@@ -314,9 +343,7 @@ const UserDetailsPage: React.FC = () => {
         {!appsLoading && !appsError && appsData?.applications && (
           <>
             {appsData.applications.length === 0 ? (
-              <div className={styles.noEvents}>
-                Este usuario no tiene solicitudes de permisos.
-              </div>
+              <div className={styles.noEvents}>Este usuario no tiene solicitudes de permisos.</div>
             ) : (
               <table className={styles.applicationsTable}>
                 <thead>
@@ -343,7 +370,8 @@ const UserDetailsPage: React.FC = () => {
                       <td>{formatDate(app.fecha_vencimiento)}</td>
                       <td>
                         <Link to={`/applications/${app.id}`} className={styles.viewButton}>
-                          <FaCar className={styles.viewIcon} /> Ver Detalles
+                          <Icon IconComponent={FaCar} className={styles.viewIcon} size="sm" /> Ver
+                          Detalles
                         </Link>
                       </td>
                     </tr>

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import {
   validateFullName,
   validateCurpRfc,
@@ -8,7 +9,7 @@ import {
   validateVehicleColor,
   validateVehicleSerialNumber,
   validateVehicleEngineNumber,
-  validateVehicleModelYear
+  validateVehicleModelYear,
 } from '../permitValidation';
 
 describe('Permit Validation Functions', () => {

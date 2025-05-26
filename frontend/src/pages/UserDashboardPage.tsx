@@ -1,6 +1,5 @@
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import {
   FaClipboardCheck,
   FaClipboardList,
@@ -11,104 +10,93 @@ import {
   FaChartBar,
   FaInfoCircle,
   FaPlus,
-  FaFileAlt,
-  FaDownload,
-  FaCar
+  // FaFileAlt, // Not used directly here, but can be for empty states
+  // FaDownload, // Not used directly here
+  // FaCar // Not used directly here
 } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+
+import styles from './UserDashboardPage.module.css'; // Ensure this path is correct
 import applicationService from '../services/applicationService';
-import { useToast } from '../contexts/ToastContext';
-import styles from './UserDashboardPage.module.css';
-import Button from '../components/ui/Button/Button';
-import useAuth from '../hooks/useAuth';
+import Icon from '../shared/components/ui/Icon'; // For consistency if you use Icon component
+import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
+import { useToast } from '../shared/hooks/useToast';
+// import Button from '../components/ui/Button/Button'; // Button not directly used here, links are used
 
 const UserDashboardPage: React.FC = () => {
   const { showToast } = useToast();
   const { user } = useAuth();
 
-  // Fetch user applications
   const {
     data: dashboardData,
     isLoading,
     isError,
     error,
-    refetch
+    refetch,
   } = useQuery({
-    queryKey: ['applications'],
+    queryKey: ['applications'], // Query key for TanStack Query
     queryFn: applicationService.getApplications,
     onError: (err: Error) => {
       showToast(`Error al cargar permisos: ${err.message}`, 'error');
-    }
+    },
   });
 
-  // Status mapping object to translate backend status codes to user-friendly Spanish display names
   const statusDisplayMap: Record<string, string> = {
-    // New payment flow statuses
-    'AWAITING_OXXO_PAYMENT': 'Pendiente de Pago OXXO',
-    'PAYMENT_RECEIVED': 'Pago Recibido',
-    'PROCESSING_PAYMENT': 'Procesando Pago',
-
-    // Permit generation statuses
-    'GENERATING_PERMIT': 'Generando Permiso',
-    'ERROR_GENERATING_PERMIT': 'Error al Generar',
-    'PERMIT_READY': 'Permiso Listo',
-
-    // Completion statuses
-    'COMPLETED': 'Completado',
-    'CANCELLED': 'Cancelado',
-    'EXPIRED': 'Vencido',
-
-    // Legacy statuses - kept for backward compatibility
-    'PENDING': 'Pendiente de Pago',
-    'PROOF_SUBMITTED': 'Comprobante Enviado',
-    'PAYMENT_VERIFIED': 'Pago Verificado',
-    'PAYMENT_REJECTED': 'Comprobante Rechazado',
-    'PERMIT_GENERATED': 'Permiso Generado'
+    AWAITING_PAYMENT: 'Pendiente de Pago',
+    AWAITING_OXXO_PAYMENT: 'Pendiente de Pago (OXXO)',
+    PAYMENT_PROCESSING: 'Pago en Proceso',
+    PAYMENT_FAILED: 'Pago Fallido',
+    PAYMENT_RECEIVED: 'Pago Recibido',
+    GENERATING_PERMIT: 'Generando Permiso',
+    ERROR_GENERATING_PERMIT: 'Error al Generar',
+    PERMIT_READY: 'Permiso Listo',
+    COMPLETED: 'Completado',
+    CANCELLED: 'Cancelado',
+    EXPIRED: 'Expirado',
+    RENEWAL_PENDING: 'Renovación Pendiente',
+    RENEWAL_APPROVED: 'Renovación Aprobada',
+    RENEWAL_REJECTED: 'Renovación Rechazada',
+    PENDING: 'Pendiente de Pago',
+    PROOF_SUBMITTED: 'Comprobante Enviado',
+    PAYMENT_VERIFIED: 'Pago Verificado',
+    PAYMENT_REJECTED: 'Comprobante Rechazado',
+    PERMIT_GENERATED: 'Permiso Generado',
   };
 
-  // Helper function to get status display name using the mapping
   const getStatusDisplayName = (status: string): string => {
     return statusDisplayMap[status] || status;
   };
 
-  // Helper function to get status icon
   const getStatusIcon = (status: string): React.ReactNode => {
     switch (status) {
-      // New payment flow statuses
-      case 'AWAITING_OXXO_PAYMENT':
-        return <FaHourglassHalf className={styles.iconPending} />;
-      case 'PAYMENT_RECEIVED':
-        return <FaCheckCircle className={styles.iconVerified} />;
-
-      // Permit generation statuses
-      case 'GENERATING_PERMIT':
-        return <FaHourglassHalf className={styles.iconPending} />;
-      case 'ERROR_GENERATING_PERMIT':
-        return <FaTimesCircle className={styles.iconRejected} />;
-      case 'PERMIT_READY':
-        return <FaCheckCircle className={styles.iconGenerated} />;
-
-      // Completion statuses
-      case 'COMPLETED':
-        return <FaCheckCircle className={styles.iconCompleted} />;
-      case 'CANCELLED':
-        return <FaTimesCircle className={styles.iconCancelled} />;
-      case 'EXPIRED':
-        return <FaTimesCircle className={styles.iconCancelled} />;
-
-      // Legacy statuses
+      case 'AWAITING_PAYMENT':
       case 'PENDING':
-        return <FaHourglassHalf className={styles.iconPending} />;
-      case 'PROOF_SUBMITTED':
-        return <FaClipboardCheck className={styles.iconSubmitted} />;
-      case 'PAYMENT_VERIFIED':
-        return <FaCheckCircle className={styles.iconVerified} />;
+      case 'AWAITING_OXXO_PAYMENT':
+      case 'PAYMENT_PROCESSING':
+      case 'GENERATING_PERMIT':
+      case 'RENEWAL_PENDING':
+        return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} />;
+      case 'PAYMENT_FAILED':
+      case 'ERROR_GENERATING_PERMIT':
+      case 'RENEWAL_REJECTED':
       case 'PAYMENT_REJECTED':
-        return <FaTimesCircle className={styles.iconRejected} />;
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconRejected} />;
+      case 'PAYMENT_RECEIVED':
+      case 'PAYMENT_VERIFIED':
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconVerified} />;
+      case 'PERMIT_READY':
       case 'PERMIT_GENERATED':
-        return <FaCheckCircle className={styles.iconGenerated} />;
-
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconGenerated} />;
+      case 'COMPLETED':
+      case 'RENEWAL_APPROVED':
+        return <Icon IconComponent={FaCheckCircle} className={styles.iconCompleted} />;
+      case 'CANCELLED':
+      case 'EXPIRED':
+        return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} />;
+      case 'PROOF_SUBMITTED':
+        return <Icon IconComponent={FaClipboardCheck} className={styles.iconSubmitted} />;
       default:
-        return <FaChartBar className={styles.iconDefault} />;
+        return <Icon IconComponent={FaChartBar} className={styles.iconDefault} />;
     }
   };
 
@@ -124,7 +112,7 @@ const UserDashboardPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon IconComponent={FaExclamationTriangle} className={styles.errorIcon} />
         <h2>Error al cargar información</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
         <button type="button" className={styles.retryButton} onClick={() => refetch()}>
@@ -134,125 +122,120 @@ const UserDashboardPage: React.FC = () => {
     );
   }
 
-  // Group applications by status
   const statusGroups: Record<string, number> = {};
-
   if (dashboardData?.applications) {
     dashboardData.applications.forEach((app: any) => {
-      if (statusGroups[app.status]) {
-        statusGroups[app.status]++;
-      } else {
-        statusGroups[app.status] = 1;
-      }
+      statusGroups[app.status] = (statusGroups[app.status] || 0) + 1;
     });
   }
 
-  // Count active permits (PERMIT_READY, COMPLETED)
-  const activePermits = (dashboardData?.applications || []).filter((app: any) =>
-    app.status === 'PERMIT_READY' || app.status === 'COMPLETED'
+  const activePermits = (dashboardData?.applications || []).filter(
+    (app: any) => app.status === 'PERMIT_READY' || app.status === 'COMPLETED',
   ).length;
 
-  // Count pending payments
-  const pendingPayments = (dashboardData?.applications || []).filter((app: any) =>
-    app.status === 'AWAITING_OXXO_PAYMENT' || app.status === 'PENDING'
+  const pendingPayments = (dashboardData?.applications || []).filter(
+    (app: any) =>
+      app.status === 'AWAITING_PAYMENT' ||
+      app.status === 'AWAITING_OXXO_PAYMENT' ||
+      app.status === 'PAYMENT_PROCESSING' ||
+      app.status === 'PENDING',
   ).length;
 
   return (
     <div className={styles.dashboardPage}>
-      <header className={`${styles.pageHeader} page-header-main-content`}>
-        <h1 className={`${styles.pageTitle} page-title-h1`}>Dashboard</h1>
-        <h2 className={`${styles.pageSubtitle} page-subtitle-h2`}>
-          Bienvenido, {user?.first_name}. Aquí está el resumen de tus permisos.
-        </h2>
-      </header>
+      {/* Wrapper for centering content */}
+      <div className={styles.dashboardContentWrapper}>
+        <header className={`${styles.pageHeader} page-header-main-content ${styles.centeredText}`}>
+          <h1 className={`${styles.pageTitle} page-title-h1`}>Dashboard</h1>
+          <h2 className={`${styles.pageSubtitle} page-subtitle-h2`}>
+            Bienvenido, {user?.first_name || 'Usuario'}. Aquí está el resumen de tus permisos.
+          </h2>
+        </header>
 
-      {/* Stats Overview */}
-      <section className={styles.statsOverview}>
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <h2 className={styles.statTitle}>Permisos Activos</h2>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{activePermits}</div>
-            <div className={styles.statIcon}>
-              <FaCheckCircle />
+        <section className={styles.statsOverview}>
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <h3 className={styles.statTitle}>Permisos Activos</h3>
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statValue}>{activePermits}</div>
+              <div className={styles.statIcon}>
+                <Icon IconComponent={FaCheckCircle} />
+              </div>
+            </div>
+            <div className={styles.statFooter}>
+              <Link to="/permits?status=active" className={styles.statLink}>
+                Ver permisos activos
+              </Link>
             </div>
           </div>
-          <div className={styles.statFooter}>
-            <Link to="/permits?status=active" className={styles.statLink}>
-              Ver permisos activos
-            </Link>
-          </div>
-        </div>
 
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <h2 className={styles.statTitle}>Pagos Pendientes</h2>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>
-              {pendingPayments}
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <h3 className={styles.statTitle}>Pagos Pendientes</h3>
             </div>
-            <div className={styles.statIcon}>
-              <FaHourglassHalf />
+            <div className={styles.statContent}>
+              <div className={styles.statValue}>{pendingPayments}</div>
+              <div className={styles.statIcon}>
+                <Icon IconComponent={FaHourglassHalf} />
+              </div>
+            </div>
+            <div className={styles.statFooter}>
+              <Link to="/permits?status=pending" className={styles.statLink}>
+                Ver pagos pendientes
+              </Link>
             </div>
           </div>
-          <div className={styles.statFooter}>
-            <Link to="/permits?status=pending" className={styles.statLink}>
-              Ver pagos pendientes
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Status Counts */}
-      <section className={styles.statusSection}>
-        <h2 className={styles.sectionTitle}>Estado de Mis Permisos</h2>
-
-        {Object.keys(statusGroups).length > 0 ? (
-          <div className={styles.statusGrid}>
-            {Object.entries(statusGroups).map(([status, count]) => (
-              <div key={status} className={styles.statusCard}>
-                <div className={styles.statusIcon}>
-                  {getStatusIcon(status)}
-                </div>
-                <div className={styles.statusContent}>
-                  <div className={styles.statusCount}>{count}</div>
-                  <div className={styles.statusName}>
-                    {getStatusDisplayName(status)}
+        <section className={styles.statusSection}>
+          <h3 className={styles.sectionTitle}>Estado de Mis Permisos</h3>
+          {Object.keys(statusGroups).length > 0 ? (
+            <div className={styles.statusGrid}>
+              {Object.entries(statusGroups).map(([status, count]) => (
+                <div key={status} className={styles.statusCard}>
+                  <div className={styles.statusIconWrapper}>
+                    {' '}
+                    {/* Added wrapper for icon styling */}
+                    {getStatusIcon(status)}
+                  </div>
+                  <div className={styles.statusContent}>
+                    <div className={styles.statusCount}>{count}</div>
+                    <div className={styles.statusName}>{getStatusDisplayName(status)}</div>
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyStatusMessage}>
+              <Icon IconComponent={FaInfoCircle} className={styles.emptyStatusIcon} />
+              <p>No tienes permisos registrados. ¡Solicita tu primer permiso ahora!</p>
+            </div>
+          )}
+        </section>
+
+        <section className={styles.quickLinks}>
+          <h3 className={styles.sectionTitle}>Acciones Rápidas</h3>
+          <div className={styles.linksGrid}>
+            <Link to="/permits/new" className={styles.linkCard}>
+              <div className={styles.linkIconWrapper}>
+                {' '}
+                {/* Added wrapper for icon styling */}
+                <Icon IconComponent={FaPlus} />
               </div>
-            ))}
+              <div className={styles.linkText}>Solicitar Nuevo Permiso</div>
+            </Link>
+            <Link to="/permits" className={styles.linkCard}>
+              <div className={styles.linkIconWrapper}>
+                {' '}
+                {/* Added wrapper for icon styling */}
+                <Icon IconComponent={FaClipboardList} />
+              </div>
+              <div className={styles.linkText}>Ver Todos Mis Permisos</div>
+            </Link>
           </div>
-        ) : (
-          <div className={styles.emptyStatusMessage}>
-            <FaInfoCircle className={styles.emptyStatusIcon} />
-            <p>No tienes permisos registrados. ¡Solicita tu primer permiso ahora!</p>
-          </div>
-        )}
-      </section>
-
-      {/* Quick Links */}
-      <section className={styles.quickLinks}>
-        <h2 className={styles.sectionTitle}>Acciones Rápidas</h2>
-
-        <div className={styles.linksGrid}>
-          <Link to="/permits/new" className={styles.linkCard}>
-            <div className={styles.linkIcon}>
-              <FaPlus />
-            </div>
-            <div className={styles.linkText}>Solicitar Nuevo Permiso</div>
-          </Link>
-
-          <Link to="/permits" className={styles.linkCard}>
-            <div className={styles.linkIcon}>
-              <FaClipboardList />
-            </div>
-            <div className={styles.linkText}>Ver Todos Mis Permisos</div>
-          </Link>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

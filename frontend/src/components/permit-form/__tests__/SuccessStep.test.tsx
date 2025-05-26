@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+
 import SuccessStep from '../SuccessStep';
 
 describe('SuccessStep', () => {
@@ -8,16 +9,20 @@ describe('SuccessStep', () => {
     render(
       <BrowserRouter>
         <SuccessStep applicationId="TEST123" />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText(/Solicitud Enviada Exitosamente/i)).toBeInTheDocument();
     // Use a more specific selector for the application ID
-    expect(screen.getByText((content, element) => {
-      return element?.tagName.toLowerCase() === 'p' &&
-             content.includes('TEST123') &&
-             element.textContent?.includes('Número de Solicitud');
-    })).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return (
+          element?.tagName.toLowerCase() === 'p' &&
+          content.includes('TEST123') &&
+          element.textContent?.includes('Número de Solicitud')
+        );
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/\$1,500.00 MXN/)).toBeInTheDocument();
   });
 
@@ -27,13 +32,13 @@ describe('SuccessStep', () => {
       currency: 'MXN',
       reference: 'REF123',
       paymentMethods: ['Transferencia Bancaria', 'Pago en Línea'],
-      nextSteps: ['Realice el pago', 'Guarde su comprobante']
+      nextSteps: ['Realice el pago', 'Guarde su comprobante'],
     };
 
     render(
       <BrowserRouter>
         <SuccessStep applicationId="TEST123" paymentInstructions={paymentInstructions} />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     expect(screen.getByText(/Solicitud Enviada Exitosamente/i)).toBeInTheDocument();
@@ -51,13 +56,13 @@ describe('SuccessStep', () => {
       currency: '', // Empty currency
       reference: 'REF123',
       paymentMethods: ['Transferencia Bancaria'],
-      nextSteps: ['Realice el pago']
+      nextSteps: ['Realice el pago'],
     };
 
     render(
       <BrowserRouter>
         <SuccessStep applicationId="TEST123" paymentInstructions={paymentInstructions} />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // Should still render without errors
@@ -73,13 +78,13 @@ describe('SuccessStep', () => {
       currency: undefined as unknown as string, // Undefined currency
       reference: 'REF123',
       paymentMethods: ['Transferencia Bancaria'],
-      nextSteps: ['Realice el pago']
+      nextSteps: ['Realice el pago'],
     };
 
     render(
       <BrowserRouter>
         <SuccessStep applicationId="TEST123" paymentInstructions={paymentInstructions} />
-      </BrowserRouter>
+      </BrowserRouter>,
     );
 
     // Should still render without errors

@@ -135,54 +135,76 @@ exports.login = async (req, res, next) => {
   if (!password) { return ApiResponse.badRequest(res, 'Password is required'); }
 
   try {
-    logger.debug(`Login attempt for email: ${email}`);
+    logger.debug(`[Login Controller] Login attempt started for email: ${email}`);
 
     // Check account lockout
+    logger.debug(`[Login Controller] Checking account lockout status for email: ${email}`);
     const lockStatus = await authSecurity.checkLockStatus(email);
+    logger.debug(`[Login Controller] Lock status for ${email}: ${JSON.stringify(lockStatus)}`);
+
     if (lockStatus.locked) {
-      logger.warn(`Login attempt for locked account: ${email}. Remaining lockout time: ${lockStatus.remainingSeconds} seconds`);
+      logger.warn(`[Login Controller] Login attempt for locked account: ${email}. Remaining lockout time: ${lockStatus.remainingSeconds} seconds`);
       await securityService.logActivity( null, 'login_account_locked', req.ip, req.headers['user-agent'], { email, remainingSeconds: lockStatus.remainingSeconds });
       // Return structured error data for frontend if needed
       return ApiResponse.tooManyRequests(res, `Cuenta bloqueada temporalmente. Intente nuevamente en ${lockStatus.remainingSeconds} segundos.`, { locked: true, remainingSeconds: lockStatus.remainingSeconds });
     }
 
     // Check rate limiting
+    logger.debug(`[Login Controller] Checking rate limiting for IP: ${req.ip}`);
     const isLimited = await securityService.isRateLimitExceeded( req.ip, 'failed_login', 5, 15 );
+    logger.debug(`[Login Controller] Rate limit check result for IP ${req.ip}: ${isLimited ? 'limited' : 'not limited'}`);
+
     if (isLimited) {
+      logger.warn(`[Login Controller] Login rate limit exceeded for IP: ${req.ip}`);
       await securityService.logActivity( null, 'login_rate_limited', req.ip, req.headers['user-agent'], { email });
       return ApiResponse.tooManyRequests(res, 'Too many failed login attempts. Please try again later.');
     }
 
     // Check portal type
     const isAdminPortal = req.get('X-Portal-Type') === 'admin';
-    logger.info(`Login attempt from ${isAdminPortal ? 'ADMIN PORTAL' : 'CLIENT PORTAL'} for user: ${email}`);
+    logger.info(`[Login Controller] Login attempt from ${isAdminPortal ? 'ADMIN PORTAL' : 'CLIENT PORTAL'} for user: ${email}`);
 
     // Get user
+    logger.debug(`[Login Controller] Retrieving user data for email: ${email}`);
     const findUserQuery = `
-      SELECT id, email, password_hash, first_name, last_name, account_type, role, is_admin_portal, is_active,
+      SELECT id, email, password_hash, first_name, last_name, account_type, role, is_admin_portal,
              is_email_verified, email_verification_token, email_verification_expires
       FROM users
       WHERE email = $1
     `;
-    const { rows } = await db.query(findUserQuery, [email]);
+    logger.debug(`[Login Controller] Executing SQL query: ${findUserQuery.replace(/\s+/g, ' ')}`);
+
+    let queryResult;
+    try {
+      queryResult = await db.query(findUserQuery, [email]);
+      logger.debug(`[Login Controller] Database query completed for ${email}, rows returned: ${queryResult.rows.length}`);
+    } catch (dbError) {
+      logger.error(`[Login Controller] Database error during user lookup for ${email}: ${dbError.message}`, {
+        error: dbError,
+        stack: dbError.stack,
+        query: findUserQuery
+      });
+      throw dbError;
+    }
+
+    const { rows } = queryResult;
     if (rows.length === 0) {
-      logger.warn(`Login attempt failed: User not found for email ${email}`);
+      logger.warn(`[Login Controller] Login attempt failed: User not found for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( null, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'user_not_found' });
       return ApiResponse.unauthorized(res, 'Invalid email or password.');
     }
-    const user = rows[0];
 
-    // Check if user account is disabled
-    if (user.is_active === false) {
-      logger.warn(`Login attempt failed: Account ${email} is disabled`);
-      await securityService.logActivity(user.id, 'login_disabled_account', req.ip, req.headers['user-agent'], { email });
-      return ApiResponse.forbidden(res, 'Account is disabled. Please contact an administrator.');
-    }
+    const user = rows[0];
+    logger.debug(`[Login Controller] User found for email ${email}: ID=${user.id}, is_email_verified=${user.is_email_verified}, role=${user.role}`);
+    logger.debug(`[Login Controller] Password hash exists: ${!!user.password_hash}`);
+
+    // Note: is_active check removed as the column no longer exists in the database
 
     // Check if email is verified
+    logger.debug(`[Login Controller] Checking if email is verified for user ${email}`);
     if (user.is_email_verified === false) {
-      logger.warn(`Login attempt failed: Email ${email} is not verified`);
+      logger.warn(`[Login Controller] Login attempt failed: Email ${email} is not verified`);
       await securityService.logActivity(user.id, 'login_unverified_email', req.ip, req.headers['user-agent'], { email });
 
       // If verification token is expired, generate a new one and send a new verification email
@@ -228,12 +250,18 @@ exports.login = async (req, res, next) => {
     }
 
     // Verify password
+    logger.debug(`[Login Controller] About to verify password for user ${email}`);
     let isMatch = false;
     try {
+      logger.debug(`[Login Controller] Calling verifyPassword function for user ${email}`);
       isMatch = await verifyPassword(password, user.password_hash);
-      logger.debug(`Password comparison result for ${email}: ${isMatch}`);
+      logger.debug(`[Login Controller] Password comparison result for ${email}: ${isMatch}`);
     } catch (verificationError) {
-      logger.error(`Error comparing passwords for ${email}: ${verificationError.message}`);
+      logger.error(`[Login Controller] Error comparing passwords for ${email}: ${verificationError.message}`, {
+        error: verificationError,
+        stack: verificationError.stack,
+        userId: user.id
+      });
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity(user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'password_verify_error' });
       // Return generic unauthorized for security, don't expose internal error details
@@ -241,35 +269,74 @@ exports.login = async (req, res, next) => {
     }
 
     if (!isMatch) {
-      logger.warn(`Login attempt failed: Invalid password for email ${email}`);
+      logger.warn(`[Login Controller] Login attempt failed: Invalid password for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'invalid_password' });
       return ApiResponse.unauthorized(res, 'Invalid email or password.');
     }
 
+    logger.debug(`[Login Controller] Password verified successfully for user ${email}`);
+
     // Reset failed attempts on successful login
+    logger.debug(`[Login Controller] Resetting failed login attempts for user ${email}`);
     await authSecurity.resetAttempts(email);
+    logger.debug(`[Login Controller] Failed login attempts reset completed for user ${email}`);
 
     // Password matches - Regenerate session and store user data
+    logger.debug(`[Login Controller] About to regenerate session for user ${email}`);
     req.session.regenerate(err => {
       if (err) {
-        logger.error('Error regenerating session during login:', err);
+        logger.error(`[Login Controller] Error regenerating session during login for ${email}:`, {
+          error: err,
+          stack: err.stack,
+          userId: user.id,
+          sessionId: req.session?.id
+        });
         // Destroy potentially partially populated session data if regenerate fails
         for (let key in req.session) { if (key !== 'cookie') delete req.session[key]; }
         return next(createError('Session initialization failed during login.', 500)); // Use createError helper
       }
 
-      // Set session data *after* successful regeneration
-      req.session.userId = user.id;
-      req.session.userEmail = user.email;
-      req.session.userName = user.first_name || ''; // Store consistently
-      req.session.userLastName = user.last_name || ''; // Store consistently
-      req.session.accountType = user.account_type || 'client';
-      req.session.isAdminPortal = isAdminPortal && user.account_type === 'admin'; // Ensure boolean
+      logger.debug(`[Login Controller] Session regenerated successfully for user ${email}, new session ID: ${req.session.id}`);
 
-      logger.info(`${isAdminPortal ? '🔐 ADMIN LOGIN SUCCESS' : '👤 USER LOGIN SUCCESS'}: ${user.email} (ID: ${user.id}) SessionID: ${req.session.id}`);
+      // Set session data *after* successful regeneration
+      logger.debug(`[Login Controller] Setting session data for user ${email}`);
+      req.session.userId = user.id;
+      logger.debug(`[Login Controller] Set req.session.userId = ${user.id}`);
+
+      req.session.userEmail = user.email;
+      logger.debug(`[Login Controller] Set req.session.userEmail = ${user.email}`);
+
+      req.session.userName = user.first_name || ''; // Store consistently
+      logger.debug(`[Login Controller] Set req.session.userName = ${user.first_name || ''}`);
+
+      req.session.userLastName = user.last_name || ''; // Store consistently
+      logger.debug(`[Login Controller] Set req.session.userLastName = ${user.last_name || ''}`);
+
+      req.session.accountType = user.account_type || 'client';
+      logger.debug(`[Login Controller] Set req.session.accountType = ${user.account_type || 'client'}`);
+
+      req.session.isAdminPortal = isAdminPortal && user.account_type === 'admin'; // Ensure boolean
+      logger.debug(`[Login Controller] Set req.session.isAdminPortal = ${isAdminPortal && user.account_type === 'admin'}`);
+
+      logger.debug(`[Login Controller] About to save session with ID: ${req.session.id}`);
+
+      // Explicitly save the session to ensure it's persisted
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          logger.error(`[Login Controller] Error saving session for user ${email}:`, {
+            error: saveErr,
+            stack: saveErr.stack,
+            sessionId: req.session.id
+          });
+        } else {
+          logger.debug(`[Login Controller] Session saved successfully for user ${email}, session ID: ${req.session.id}`);
+        }
+      });
+
+      logger.info(`[Login Controller] ${isAdminPortal ? '🔐 ADMIN LOGIN SUCCESS' : '👤 USER LOGIN SUCCESS'}: ${user.email} (ID: ${user.id}) SessionID: ${req.session.id}`);
       if (isAdminPortal) {
-        logger.info(`Admin login details: account_type=${user.account_type}, is_admin_portal=${user.is_admin_portal}`);
+        logger.info(`[Login Controller] Admin login details: account_type=${user.account_type}, is_admin_portal=${user.is_admin_portal}`);
       }
 
       // Log activity after session is confirmed stable
@@ -304,7 +371,14 @@ exports.login = async (req, res, next) => {
     });
   } catch (error) {
     // Catch errors from DB queries, security checks etc. before regenerate
-    logger.error(`Caught error in login controller before session regeneration for ${email}: ${error.message}`);
+    logger.error(`[Login Controller] Caught error in login controller for ${email}: ${error.message}`, {
+      error: error,
+      stack: error.stack,
+      email: email,
+      requestId: req.id,
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    });
     handleControllerError(error, 'login', req, res, next);
   }
 };

@@ -1,9 +1,13 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+
+// Import components and mocked services after mocks are defined
+import applicationService from '../../services/applicationService';
+import PaymentUploadPage from '../PaymentUploadPage';
 
 // Mock URL.createObjectURL for file previews
 global.URL.createObjectURL = vi.fn(() => 'mock-url');
@@ -15,26 +19,22 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useParams: () => ({ id: '123' }),
-    useNavigate: () => vi.fn()
+    useNavigate: () => vi.fn(),
   };
 });
 
 vi.mock('../../contexts/ToastContext', () => ({
   useToast: () => ({
-    showToast: vi.fn()
-  })
+    showToast: vi.fn(),
+  }),
 }));
 
 vi.mock('../../services/applicationService', () => ({
   default: {
     getApplicationById: vi.fn(),
-    uploadPaymentProof: vi.fn()
-  }
+    uploadPaymentProof: vi.fn(),
+  },
 }));
-
-// Import components and mocked services after mocks are defined
-import PaymentUploadPage from '../PaymentUploadPage';
-import applicationService from '../../services/applicationService';
 
 // Create mock application data
 const mockApplication = {
@@ -43,7 +43,7 @@ const mockApplication = {
   status: {
     currentStatus: 'PENDING_PAYMENT',
     statusText: 'Pendiente de Pago',
-    rejectionReason: null
+    rejectionReason: null,
   },
   created_at: '2023-01-01T00:00:00Z',
   updated_at: '2023-01-01T00:00:00Z',
@@ -52,8 +52,8 @@ const mockApplication = {
     marca: 'Toyota',
     linea: 'Corolla',
     modelo: 2023,
-    color: 'Azul'
-  }
+    color: 'Azul',
+  },
 };
 
 // Helper function for standard rendering
@@ -61,9 +61,9 @@ const renderPaymentUploadPage = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: false
-      }
-    }
+        retry: false,
+      },
+    },
   });
 
   return render(
@@ -71,15 +71,15 @@ const renderPaymentUploadPage = () => {
       <QueryClientProvider client={queryClient}>
         <PaymentUploadPage />
       </QueryClientProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
 describe('PaymentUploadPage', () => {
-  let user: ReturnType<typeof userEvent.setup>;
+  let _user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
-    user = userEvent.setup();
+    _user = userEvent.setup();
 
     // Mock getApplicationById to return our mock application
     vi.mocked(applicationService.getApplicationById).mockResolvedValue(mockApplication);
@@ -92,11 +92,11 @@ describe('PaymentUploadPage', () => {
         status: {
           currentStatus: 'PROOF_SUBMITTED',
           statusText: 'Comprobante Enviado',
-          rejectionReason: null
+          rejectionReason: null,
         },
         payment_proof_path: '/uploads/payment-proof.jpg',
-        payment_proof_uploaded_at: '2023-01-02T00:00:00Z'
-      }
+        payment_proof_uploaded_at: '2023-01-02T00:00:00Z',
+      },
     });
   });
 
@@ -127,7 +127,9 @@ describe('PaymentUploadPage', () => {
       expect(screen.getByText(/Instrucciones/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/Asegúrate que sean visibles la fecha, monto y referencia/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Asegúrate que sean visibles la fecha, monto y referencia/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Formatos aceptados: JPG, PNG y PDF/i)).toBeInTheDocument();
   });
 

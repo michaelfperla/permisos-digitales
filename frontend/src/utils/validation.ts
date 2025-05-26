@@ -38,7 +38,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
       isValid: false,
       error: 'Falta tu contraseña',
       strength: 'weak',
-      strengthText: 'Débil'
+      strengthText: 'Débil',
     };
   }
 
@@ -47,7 +47,7 @@ export const validatePassword = (password: string): PasswordValidationResult => 
       isValid: false,
       error: 'Tu contraseña debe tener mínimo 8 caracteres',
       strength: 'weak',
-      strengthText: 'Débil'
+      strengthText: 'Débil',
     };
   }
 
@@ -59,9 +59,11 @@ export const validatePassword = (password: string): PasswordValidationResult => 
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
 
-  const criteriaCount = [hasUppercase, hasLowercase, hasNumber, hasSpecialChar].filter(Boolean).length;
+  const criteriaCount = [hasUppercase, hasLowercase, hasNumber, hasSpecialChar].filter(
+    Boolean,
+  ).length;
 
   if (password.length >= 8) {
     if (criteriaCount >= 3) {
@@ -86,7 +88,10 @@ export const validatePassword = (password: string): PasswordValidationResult => 
  * @param fieldName Name of the field for error message
  * @returns Object with validation result and error message
  */
-export const validateName = (name: string, fieldName: string = 'nombre'): { isValid: boolean; error: string } => {
+export const validateName = (
+  name: string,
+  fieldName: string = 'nombre',
+): { isValid: boolean; error: string } => {
   if (!name.trim()) {
     return { isValid: false, error: `Falta tu ${fieldName}` };
   }
@@ -102,7 +107,7 @@ export const validateName = (name: string, fieldName: string = 'nombre'): { isVa
  */
 export const validatePasswordMatch = (
   password: string,
-  confirmPassword: string
+  confirmPassword: string,
 ): { isValid: boolean; error: string } => {
   if (!confirmPassword) {
     return { isValid: false, error: 'Confirma tu contraseña' };

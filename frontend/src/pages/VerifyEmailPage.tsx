@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { FaCheckCircle, FaExclamationTriangle, FaSpinner, FaArrowRight } from 'react-icons/fa';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
-import { debugLog, errorLog } from '../utils/debug';
+
 import styles from './VerifyEmailPage.module.css';
 import Button from '../components/ui/Button/Button';
 import Card from '../components/ui/Card/Card';
-import { FaCheckCircle, FaExclamationTriangle, FaSpinner, FaArrowRight } from 'react-icons/fa';
+import authService from '../services/authService';
+import Icon from '../shared/components/ui/Icon';
+import { debugLog, errorLog } from '../utils/debug';
 
 const VerifyEmailPage: React.FC = () => {
   const navigate = useNavigate();
@@ -37,7 +39,9 @@ const VerifyEmailPage: React.FC = () => {
         }
       } catch (error) {
         errorLog('VerifyEmailPage', 'Error verifying email', error);
-        setError('Error al verificar el correo electrónico. Por favor, intenta nuevamente más tarde.');
+        setError(
+          'Error al verificar el correo electrónico. Por favor, intenta nuevamente más tarde.',
+        );
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +63,7 @@ const VerifyEmailPage: React.FC = () => {
         {isLoading && (
           <div className={styles.loadingContainer}>
             <div className={styles.spinnerWrapper}>
-              <FaSpinner className={styles.spinner} />
+              <Icon IconComponent={FaSpinner} className={styles.spinner} size="xl" />
             </div>
             <p className={styles.loadingText}>Verificando tu correo electrónico...</p>
           </div>
@@ -68,12 +72,17 @@ const VerifyEmailPage: React.FC = () => {
         {!isLoading && isSuccess && (
           <div className={styles.successContainer}>
             <div className={styles.successIconWrapper}>
-              <FaCheckCircle className={styles.successIcon} />
+              <Icon
+                IconComponent={FaCheckCircle}
+                className={styles.successIcon}
+                size="xl"
+                color="var(--color-success)"
+              />
             </div>
             <h2 className={styles.successTitle}>¡Correo verificado exitosamente!</h2>
             <p className={styles.successMessage}>
-              Tu dirección de correo electrónico ha sido verificada.
-              ¡Ya puedes iniciar sesión en tu cuenta y comenzar a usar todos nuestros servicios!
+              Tu dirección de correo electrónico ha sido verificada. ¡Ya puedes iniciar sesión en tu
+              cuenta y comenzar a usar todos nuestros servicios!
             </p>
             <Button
               type="button"
@@ -81,7 +90,8 @@ const VerifyEmailPage: React.FC = () => {
               className={styles.loginButton}
               onClick={() => navigate('/login')}
             >
-              Ir a iniciar sesión <FaArrowRight className={styles.buttonIcon} />
+              Ir a iniciar sesión{' '}
+              <Icon IconComponent={FaArrowRight} className={styles.buttonIcon} size="sm" />
             </Button>
           </div>
         )}
@@ -89,13 +99,18 @@ const VerifyEmailPage: React.FC = () => {
         {!isLoading && !isSuccess && error && (
           <div className={styles.errorContainer}>
             <div className={styles.errorIconWrapper}>
-              <FaExclamationTriangle className={styles.errorIcon} />
+              <Icon
+                IconComponent={FaExclamationTriangle}
+                className={styles.errorIcon}
+                size="xl"
+                color="var(--color-danger)"
+              />
             </div>
             <h2 className={styles.errorTitle}>Error de verificación</h2>
             <p className={styles.errorMessage}>{error}</p>
             <div className={styles.errorNote}>
-              El enlace puede ser inválido o haber expirado.
-              Los enlaces de verificación son válidos por 24 horas.
+              El enlace puede ser inválido o haber expirado. Los enlaces de verificación son válidos
+              por 24 horas.
             </div>
             <div className={styles.errorActions}>
               <Button

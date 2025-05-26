@@ -1,7 +1,19 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import Toast from '../Toast';
-import { ToastType } from '../Toast';
+
+// Mock the Icon component
+vi.mock('../../../../shared/components/ui/Icon', () => ({
+  default: ({ IconComponent, className, color }: any) => {
+    const Icon = IconComponent();
+    return (
+      <span className={className} style={{ color }}>
+        {Icon}
+      </span>
+    );
+  },
+}));
 
 // Mock the Button component
 vi.mock('../../Button/Button', () => ({
@@ -31,7 +43,7 @@ vi.mock('../Toast.module.css', () => ({
     progressBar: 'progressBar',
     paused: 'paused',
     toastSwiping: 'toastSwiping',
-  }
+  },
 }));
 
 describe('Toast Component', () => {
@@ -47,12 +59,7 @@ describe('Toast Component', () => {
     const mockOnClose = vi.fn();
 
     render(
-      <Toast
-        id="test-toast"
-        message="Mensaje de prueba"
-        type="success"
-        onClose={mockOnClose}
-      />
+      <Toast id="test-toast" message="Mensaje de prueba" type="success" onClose={mockOnClose} />,
     );
 
     expect(screen.getByText('Mensaje de prueba')).toBeInTheDocument();
@@ -70,7 +77,7 @@ describe('Toast Component', () => {
         onClose={mockOnClose}
         // Attempt to set a different duration, which should be ignored
         duration={5000}
-      />
+      />,
     );
 
     // Advance timer by 3300ms (standardized duration)
@@ -94,12 +101,7 @@ describe('Toast Component', () => {
     const mockOnClose = vi.fn();
 
     render(
-      <Toast
-        id="test-toast"
-        message="Mensaje de prueba"
-        type="success"
-        onClose={mockOnClose}
-      />
+      <Toast id="test-toast" message="Mensaje de prueba" type="success" onClose={mockOnClose} />,
     );
 
     // Find and click the close button
@@ -122,12 +124,7 @@ describe('Toast Component', () => {
     const mockOnClose = vi.fn();
 
     render(
-      <Toast
-        id="test-toast"
-        message="Mensaje de prueba"
-        type="success"
-        onClose={mockOnClose}
-      />
+      <Toast id="test-toast" message="Mensaje de prueba" type="success" onClose={mockOnClose} />,
     );
 
     // Advance timer by 1000ms
@@ -159,9 +156,9 @@ describe('Toast Component', () => {
         onClose={mockOnClose}
         action={{
           label: 'Acción',
-          onClick: mockActionClick
+          onClick: mockActionClick,
         }}
-      />
+      />,
     );
 
     // Find and click the action button

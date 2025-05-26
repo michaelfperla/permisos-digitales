@@ -15,7 +15,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem; /* Further reduced from 1.25rem to match dashboard, for more natural spacing */
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -189,7 +189,8 @@
   justify-content: center;
 }
 
-.viewButton, .downloadButton {
+.viewButton,
+.downloadButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -228,54 +229,7 @@
   opacity: 0.6;
 }
 
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: var(--space-4);
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  background-color: var(--color-white);
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow-sm);
-  border-top: 1px solid var(--color-neutral-200);
-}
-
-.paginationButton {
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: var(--border-radius-pill);
-  transition: all 0.2s ease;
-  padding: var(--space-2) var(--space-3);
-}
-
-.paginationButton:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--box-shadow-md);
-}
-
-.paginationButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: var(--color-neutral-200);
-  color: var(--color-neutral-500);
-  border-color: var(--color-neutral-300);
-  box-shadow: none;
-}
-
-.paginationInfo {
-  margin: 0 var(--space-3);
-  color: var(--color-neutral-600);
-  font-size: 0.9rem;
-  font-weight: var(--font-weight-medium);
-  background-color: var(--color-neutral-50);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--border-radius-pill);
-}
+/* Pagination styles removed as we're using the built-in pagination from MobileTable */
 
 /* Empty State */
 .emptyState {
@@ -376,25 +330,7 @@
     max-width: none;
   }
 
-  .pagination {
-    flex-wrap: nowrap;
-    gap: 0.5rem;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .paginationButton {
-    min-width: auto;
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--font-size-sm);
-  }
-
-  .paginationInfo {
-    margin: 0;
-    font-size: var(--font-size-xs);
-    padding: var(--space-1) var(--space-2);
-    white-space: nowrap;
-  }
+  /* Pagination styles removed as we're using the built-in pagination from MobileTable */
 }
 
 @media (max-width: 576px) {
@@ -403,7 +339,9 @@
     gap: 0.75rem;
   }
 
-  .viewButton, .downloadButton, .viewButtonDisabled {
+  .viewButton,
+  .downloadButton,
+  .viewButtonDisabled {
     width: 36px;
     height: 36px;
   }
@@ -468,24 +406,5 @@
     flex-shrink: 0;
   }
 
-  .pagination {
-    flex-direction: row;
-    gap: 0.25rem;
-    padding: var(--space-2);
-    justify-content: space-between;
-  }
-
-  .paginationInfo {
-    order: 0;
-    margin: 0;
-    text-align: center;
-    padding: var(--space-1);
-    font-size: 0.7rem;
-  }
-
-  .paginationButton {
-    min-width: auto;
-    margin: 0;
-    padding: var(--space-1);
-  }
+  /* Pagination styles removed as we're using the built-in pagination from MobileTable */
 }

@@ -1,4 +1,5 @@
 import React, { useState, ReactNode } from 'react';
+
 import styles from './FormWizard.module.css';
 import FormDebugger from '../debug/FormDebugger';
 import Button from '../ui/Button/Button';
@@ -6,22 +7,22 @@ import Button from '../ui/Button/Button';
 export interface Step {
   id: string;
   title: string;
-  content: ReactNode | ((props: any) => ReactNode);
-  validate?: (formData: any) => boolean | Promise<boolean>;
+  content: ReactNode | ((_props: any) => ReactNode);
+  validate?: (_formData: any) => boolean | Promise<boolean>;
 }
 
 interface FormWizardProps {
   steps: Step[];
-  onComplete: (data: any) => void;
+  onComplete: (_data: any) => void;
   initialData: any;
-  onDataChange?: (data: any) => void;
+  onDataChange?: (_data: any) => void;
 }
 
 const FormWizard: React.FC<FormWizardProps> = ({
   steps,
   onComplete,
   initialData,
-  onDataChange
+  onDataChange,
 }) => {
   // Single source of truth - FormWizard manages form state
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -29,7 +30,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Calculate progress percentage
-  const progressPercentage = ((currentStepIndex) / (steps.length - 1)) * 100;
+  const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
 
   // Update form data with change detection
   const updateFormData = (newData: any) => {
@@ -37,10 +38,10 @@ const FormWizard: React.FC<FormWizardProps> = ({
       return;
     }
 
-    setFormData(prevData => {
+    setFormData((prevData) => {
       const updatedData = {
         ...prevData,
-        ...newData
+        ...newData,
       };
 
       // Notify parent of the change if needed
@@ -55,7 +56,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
   // Handle next step
   const handleNext = async () => {
     const currentStep = steps[currentStepIndex];
-    console.log('Attempting to move to next step from:', currentStep.id);
+    console.debug('Attempting to move to next step from:', currentStep.id);
 
     // Validate current step if validation function exists
     if (currentStep.validate) {
@@ -86,7 +87,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
 
   // Handle form submission
   const handleSubmit = async () => {
-    console.log('Attempting to submit form with data:', formData);
+    console.debug('Attempting to submit form with data:', formData);
     const finalStep = steps[currentStepIndex];
 
     // Validate final step if validation function exists
@@ -117,10 +118,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
   const renderStepIndicator = () => {
     return (
       <div className={styles.progressContainer}>
-        <div
-          className={styles.progressBar}
-          style={{ width: `${progressPercentage}%` }}
-        />
+        <div className={styles.progressBar} style={{ width: `${progressPercentage}%` }} />
         {steps.map((step, index) => (
           <div
             key={step.id}
@@ -132,9 +130,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
                   : ''
             }`}
           >
-            <div className={styles.stepCircle}>
-              {index < currentStepIndex ? '✓' : index + 1}
-            </div>
+            <div className={styles.stepCircle}>{index < currentStepIndex ? '✓' : index + 1}</div>
             <div className={styles.stepLabel}>{step.title}</div>
           </div>
         ))}
@@ -146,27 +142,26 @@ const FormWizard: React.FC<FormWizardProps> = ({
   const currentStep = steps[currentStepIndex];
 
   // Render the current step content with necessary props
-  const stepContent = typeof currentStep.content === 'function'
-    ? currentStep.content({
-        formData,
-        updateFormData,
-        isLastStep: currentStepIndex === steps.length - 1
-      })
-    : React.isValidElement(currentStep.content)
-      ? React.cloneElement(currentStep.content as React.ReactElement, {
+  const stepContent =
+    typeof currentStep.content === 'function'
+      ? currentStep.content({
           formData,
           updateFormData,
-          isLastStep: currentStepIndex === steps.length - 1
+          isLastStep: currentStepIndex === steps.length - 1,
         })
-      : currentStep.content;
+      : React.isValidElement(currentStep.content)
+        ? React.cloneElement(currentStep.content as React.ReactElement, {
+            formData,
+            updateFormData,
+            isLastStep: currentStepIndex === steps.length - 1,
+          })
+        : currentStep.content;
 
   return (
     <div className={styles.wizardContainer}>
       <div className={styles.wizardHeader}>
         <h1 className={styles.wizardTitle}>Solicitud de Permiso</h1>
-        <p className={styles.wizardSubtitle}>
-          Complete todos los pasos para enviar su solicitud
-        </p>
+        <p className={styles.wizardSubtitle}>Complete todos los pasos para enviar su solicitud</p>
       </div>
 
       <FormDebugger
@@ -174,16 +169,14 @@ const FormWizard: React.FC<FormWizardProps> = ({
           currentStepIndex,
           currentStepId: steps[currentStepIndex].id,
           formData,
-          isSubmitting
+          isSubmitting,
         }}
         title="FormWizard Debug"
       />
 
       {renderStepIndicator()}
 
-      <div className={styles.stepContent}>
-        {stepContent}
-      </div>
+      <div className={styles.stepContent}>{stepContent}</div>
 
       <div className={styles.navigationButtons}>
         {currentStepIndex > 0 && (
@@ -200,11 +193,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
         {currentStepIndex === 0 && <div />}
 
         {currentStepIndex < steps.length - 1 ? (
-          <Button
-            variant="primary"
-            onClick={handleNext}
-            className={styles.navigationButton}
-          >
+          <Button variant="primary" onClick={handleNext} className={styles.navigationButton}>
             Siguiente
           </Button>
         ) : (

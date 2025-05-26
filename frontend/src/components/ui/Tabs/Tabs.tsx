@@ -1,4 +1,5 @@
 import React, { useState, ReactNode } from 'react';
+
 import styles from './Tabs.module.css';
 import Button from '../Button/Button';
 
@@ -14,12 +15,10 @@ interface TabsProps {
   className?: string;
 }
 
-const Tabs: React.FC<TabsProps> = ({
-  tabs,
-  defaultActiveTab,
-  className = ''
-}) => {
-  const [activeTab, setActiveTab] = useState<string>(defaultActiveTab || (tabs.length > 0 ? tabs[0].id : ''));
+const Tabs: React.FC<TabsProps> = ({ tabs, defaultActiveTab, className = '' }) => {
+  const [activeTab, setActiveTab] = useState<string>(
+    defaultActiveTab || (tabs.length > 0 ? tabs[0].id : ''),
+  );
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);

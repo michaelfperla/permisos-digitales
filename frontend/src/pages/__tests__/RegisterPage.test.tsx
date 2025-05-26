@@ -1,7 +1,13 @@
-import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
+import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+
+// Import components and mocked service after mocks are defined
+import { AuthProvider } from '../../contexts/AuthContext'; // Adjust path if needed
+import { ToastProvider } from '../../contexts/ToastContext'; // Adjust path if needed
+import authService from '../../services/authService'; // Import the mocked service
+import RegisterPage from '../RegisterPage';
 
 // --- Mocking Dependencies ---
 
@@ -29,12 +35,6 @@ vi.mock('../../contexts/ToastContext', async (importOriginal) => {
     }),
   };
 });
-
-// Import components and mocked service after mocks are defined
-import RegisterPage from '../RegisterPage';
-import { AuthProvider } from '../../contexts/AuthContext'; // Adjust path if needed
-import { ToastProvider } from '../../contexts/ToastContext'; // Adjust path if needed
-import authService from '../../services/authService'; // Import the mocked service
 // No longer importing useAuth directly in the test file
 
 // Helper function for standard rendering (used by most tests)
@@ -46,7 +46,7 @@ const renderRegisterPage = () => {
           <RegisterPage />
         </ToastProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </BrowserRouter>,
   );
 };
 
@@ -61,8 +61,8 @@ describe('RegisterPage', () => {
   });
 
   afterEach(() => {
-     // Ensure fake timers are always cleaned up if used in a test
-     vi.useRealTimers();
+    // Ensure fake timers are always cleaned up if used in a test
+    vi.useRealTimers();
   });
 
   test('renders the registration form correctly', () => {
@@ -97,14 +97,18 @@ describe('RegisterPage', () => {
     renderRegisterPage();
     await user.type(screen.getByLabelText(/correo electrónico/i), 'invalid-email');
     await user.click(screen.getByRole('button', { name: /registrarse|registrando/i }));
-    expect(await screen.findByText(/por favor, ingrese un correo electrónico válido/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/por favor, ingrese un correo electrónico válido/i),
+    ).toBeInTheDocument();
   });
 
   test('validates password length', async () => {
     renderRegisterPage();
     await user.type(screen.getByLabelText(/^contraseña$/i), 'short');
     await user.click(screen.getByRole('button', { name: /registrarse|registrando/i }));
-    expect(await screen.findByText(/la contraseña debe tener al menos 8 caracteres/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/la contraseña debe tener al menos 8 caracteres/i),
+    ).toBeInTheDocument();
   });
 
   test('validates password confirmation', async () => {
@@ -116,7 +120,8 @@ describe('RegisterPage', () => {
   });
 
   test('submits valid data, calls service, shows success toast, and navigates', async () => {
-    const actualSuccessMessage = 'Registro exitoso. Por favor, revise su correo electrónico para verificar su cuenta.';
+    const actualSuccessMessage =
+      'Registro exitoso. Por favor, revise su correo electrónico para verificar su cuenta.';
     const expectedUserData = {
       first_name: 'Test',
       last_name: 'User',
@@ -198,13 +203,13 @@ describe('RegisterPage', () => {
   }, 10000);
 
   test('handles network error during registration and does not navigate', async () => {
-     const expectedUserData = {
+    const expectedUserData = {
       first_name: 'Test',
       last_name: 'User',
       email: 'test@example.com',
       password: 'Password123!',
     };
-    const networkErrorMessage = 'Network error. Please check your connection.';
+    const _networkErrorMessage = 'Network error. Please check your connection.';
 
     // Mock service rejection
     vi.mocked(authService.register).mockRejectedValue(new Error('Network Failure'));
@@ -239,7 +244,13 @@ describe('RegisterPage', () => {
     // Mock user is already authenticated via checkStatus
     vi.mocked(authService.checkStatus).mockResolvedValue({
       isLoggedIn: true,
-      user: { id: '123', email: 'test@example.com', first_name: 'Test', last_name: 'User', accountType: 'citizen' },
+      user: {
+        id: '123',
+        email: 'test@example.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      },
     });
 
     renderRegisterPage();
@@ -249,5 +260,4 @@ describe('RegisterPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
     });
   });
-
 });

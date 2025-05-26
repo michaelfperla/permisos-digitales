@@ -1,10 +1,11 @@
 import React from 'react';
+
 import styles from './SkeletonTable.module.css';
 
 const SkeletonTable: React.FC = () => {
   // Number of placeholder rows to display
   const rowCount = 5;
-  
+
   return (
     <div className={styles.skeletonContainer}>
       <table className={styles.skeletonTable}>

@@ -11,15 +11,13 @@ let isConektaLoaded = false;
  * @returns Promise that resolves when Conekta is loaded
  */
 export const loadConektaScript = (): Promise<void> => {
-  // If already loaded, return resolved promise
   if (isConektaLoaded && window.Conekta) {
-    console.log('[ConektaLoader] Conekta already loaded');
+    console.debug('[ConektaLoader] Conekta already loaded'); // Changed to debug
     return Promise.resolve();
   }
 
-  // If currently loading, return a promise that waits for loading to complete
   if (isConektaLoading) {
-    console.log('[ConektaLoader] Conekta already loading, waiting...');
+    console.debug('[ConektaLoader] Conekta already loading, waiting...'); // Changed to debug
     return new Promise((resolve) => {
       const checkInterval = setInterval(() => {
         if (isConektaLoaded && window.Conekta) {
@@ -30,21 +28,18 @@ export const loadConektaScript = (): Promise<void> => {
     });
   }
 
-  // Start loading
   isConektaLoading = true;
-  console.log('[ConektaLoader] Loading Conekta.js...');
+  console.info('[ConektaLoader] Loading Conekta.js...'); // Changed to info
 
   return new Promise((resolve, reject) => {
     try {
-      // Create script element
       const script = document.createElement('script');
       script.type = 'text/javascript';
       script.src = 'https://cdn.conekta.io/js/latest/conekta.js';
       script.async = true;
 
-      // Set up load and error handlers
       script.onload = () => {
-        console.log('[ConektaLoader] Conekta.js loaded successfully');
+        console.info('[ConektaLoader] Conekta.js loaded successfully'); // Changed to info
         isConektaLoaded = true;
         isConektaLoading = false;
         resolve();
@@ -56,7 +51,6 @@ export const loadConektaScript = (): Promise<void> => {
         reject(new Error('Failed to load Conekta.js'));
       };
 
-      // Add script to document
       document.head.appendChild(script);
     } catch (error) {
       console.error('[ConektaLoader] Error setting up Conekta.js script:', error);
@@ -73,13 +67,14 @@ export const loadConektaScript = (): Promise<void> => {
  */
 export const initializeConekta = async (publicKey: string): Promise<void> => {
   try {
-    // First, load the script if not already loaded
     await loadConektaScript();
 
-    // Then set the public key
     if (window.Conekta) {
       window.Conekta.setPublicKey(publicKey);
-      console.log('[ConektaLoader] Conekta initialized with public key:', publicKey.substring(0, 8) + '...');
+      console.info( // Changed to info
+        '[ConektaLoader] Conekta initialized with public key:',
+        publicKey.substring(0, 8) + '...',
+      );
     } else {
       throw new Error('Conekta not available after loading');
     }
@@ -100,12 +95,10 @@ export const getDeviceFingerprint = (): string | null => {
   }
 
   try {
-    // Standardized approach: Use deviceData.getDeviceId as the primary method
-    // This is the most reliable method according to Conekta's latest documentation
     if (window.Conekta.deviceData && typeof window.Conekta.deviceData.getDeviceId === 'function') {
       const deviceId = window.Conekta.deviceData.getDeviceId();
       if (deviceId && typeof deviceId === 'string' && deviceId.length > 10) {
-        console.log('[ConektaLoader] Got device fingerprint:', deviceId.substring(0, 8) + '...');
+        console.info('[ConektaLoader] Got device fingerprint:', deviceId.substring(0, 8) + '...'); // Changed to info
         return deviceId;
       }
     }
@@ -121,5 +114,5 @@ export const getDeviceFingerprint = (): string | null => {
 export default {
   loadConektaScript,
   initializeConekta,
-  getDeviceFingerprint
+  getDeviceFingerprint,
 };

@@ -1,29 +1,42 @@
-import React, { useState, FormEvent, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+
 import styles from './Form.module.css';
-import { useToast } from '../../contexts/ToastContext';
 import authService from '../../services/authService';
+import { useToast } from '../../shared/hooks/useToast';
+import { resetPasswordSchema, ResetPasswordFormData } from '../../shared/schemas/auth.schema';
 import { validatePassword } from '../../utils/validation';
-import Button from '../../components/ui/Button/Button';
-import Alert from '../../components/ui/Alert/Alert';
+import Button from "../ui/Button/Button";
 import MobileForm, {
   MobileFormGroup,
   MobileFormLabel,
   MobileFormInput,
-  MobileFormActions
-} from '../../components/ui/MobileForm/MobileForm';
+  MobileFormActions,
+} from "../ui/MobileForm/MobileForm";
 
 const ResetPasswordForm: React.FC = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: 'onChange',
+  });
+
+  // Watch password for strength indicator
+  const password = watch('password');
 
   // Extract token from URL query parameters
   useEffect(() => {
@@ -37,35 +50,7 @@ const ResetPasswordForm: React.FC = () => {
     }
   }, [location.search, showToast]);
 
-  const validateConfirmPassword = (confirmPassword: string): boolean => {
-    if (!confirmPassword) {
-      setConfirmPasswordError('Confirma tu contraseña');
-      return false;
-    } else if (confirmPassword !== password) {
-      setConfirmPasswordError('Las contraseñas no son iguales');
-      return false;
-    }
-
-    setConfirmPasswordError('');
-    return true;
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    // Validate form
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setPasswordError(passwordValidation.error);
-      return;
-    }
-
-    const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
-
-    if (!passwordValidation.isValid || !isConfirmPasswordValid) {
-      return;
-    }
-
+  const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
       showToast('Este link no es válido o ya expiró', 'error');
       return;
@@ -74,7 +59,7 @@ const ResetPasswordForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await authService.resetPassword(token, password);
+      const response = await authService.resetPassword(token, data.password);
 
       if (response.success) {
         setIsSubmitted(true);
@@ -97,17 +82,16 @@ const ResetPasswordForm: React.FC = () => {
 
   if (isSubmitted) {
     return (
-      <MobileForm
-        title="¡Contraseña cambiada!"
-        onSubmit={(e) => e.preventDefault()}
-      >
+      <MobileForm title="¡Contraseña cambiada!" onSubmit={(e) => e.preventDefault()}>
         <p className="mobile-success-text">
           Cambiamos tu contraseña. Te redirigimos a la página de inicio en unos segundos.
         </p>
         <div className="mobile-form-links">
           <div className="mobile-form-links-section">
             <p>
-              <Link to="/login" className="mobile-link-minor touch-target">Ir a inicio de sesión</Link>
+              <Link to="/login" className="mobile-link-minor touch-target">
+                Ir a inicio de sesión
+              </Link>
             </p>
           </div>
         </div>
@@ -118,7 +102,7 @@ const ResetPasswordForm: React.FC = () => {
   return (
     <MobileForm
       title="Cambiar contraseña"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       description="Escribe tu nueva contraseña."
     >
       <MobileFormGroup>
@@ -128,20 +112,17 @@ const ResetPasswordForm: React.FC = () => {
         <MobileFormInput
           type="password"
           id="password"
-          error={passwordError}
-          value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setPassword(e.target.value);
-            const validation = validatePassword(e.target.value);
-            setPasswordError(validation.isValid ? '' : validation.error);
-          }}
+          error={errors.password?.message}
+          {...register('password')}
           required
           autoComplete="new-password"
         />
 
-        {password && !passwordError && (
+        {password && !errors.password && (
           <div className={styles.passwordStrength}>
-            <div className={`${styles.passwordStrengthBar} ${styles[`strength-${validatePassword(password).strength}`]}`}></div>
+            <div
+              className={`${styles.passwordStrengthBar} ${styles[`strength-${validatePassword(password).strength}`]}`}
+            ></div>
             <span className={styles.passwordStrengthText}>
               Seguridad: {validatePassword(password).strengthText}
             </span>
@@ -156,16 +137,8 @@ const ResetPasswordForm: React.FC = () => {
         <MobileFormInput
           type="password"
           id="confirmPassword"
-          error={confirmPasswordError}
-          value={confirmPassword}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setConfirmPassword(e.target.value);
-            if (e.target.value) {
-              validateConfirmPassword(e.target.value);
-            } else {
-              setConfirmPasswordError('');
-            }
-          }}
+          error={errors.confirmPassword?.message}
+          {...register('confirmPassword')}
           required
           autoComplete="new-password"
         />
@@ -192,7 +165,9 @@ const ResetPasswordForm: React.FC = () => {
       <div className="mobile-form-links">
         <div className="mobile-form-links-section">
           <p>
-            <Link to="/login" className="mobile-link-minor touch-target">Regresar a inicio de sesión</Link>
+            <Link to="/login" className="mobile-link-minor touch-target">
+              Regresar a inicio de sesión
+            </Link>
           </p>
         </div>
       </div>

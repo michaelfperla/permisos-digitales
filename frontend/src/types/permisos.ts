@@ -7,21 +7,20 @@
  * Permit status values from backend
  */
 export enum PermitStatus {
-  PENDING_PAYMENT = 'PENDING_PAYMENT',
-  PROCESSING_PAYMENT = 'PROCESSING_PAYMENT',
-  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
+  AWAITING_PAYMENT = 'AWAITING_PAYMENT',
   AWAITING_OXXO_PAYMENT = 'AWAITING_OXXO_PAYMENT',
+  PAYMENT_PROCESSING = 'PAYMENT_PROCESSING',
   PAYMENT_FAILED = 'PAYMENT_FAILED',
+  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
   GENERATING_PERMIT = 'GENERATING_PERMIT',
   ERROR_GENERATING_PERMIT = 'ERROR_GENERATING_PERMIT',
   PERMIT_READY = 'PERMIT_READY',
-  PERMIT_DELIVERED = 'PERMIT_DELIVERED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
   EXPIRED = 'EXPIRED',
   RENEWAL_PENDING = 'RENEWAL_PENDING',
   RENEWAL_APPROVED = 'RENEWAL_APPROVED',
   RENEWAL_REJECTED = 'RENEWAL_REJECTED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
 }
 
 /**
@@ -120,7 +119,8 @@ export interface CtaProps {
 }
 
 /**
- * Interface for focus item props used in TodaysFocus component
+ * Interface for focus item props (deprecated - kept for reference)
+ * @deprecated This interface was used by the removed TodaysFocus component
  */
 export interface FocusItemProps {
   type: 'critical_action' | 'warning_action' | 'info_action' | 'all_clear';
@@ -131,7 +131,8 @@ export interface FocusItemProps {
 }
 
 /**
- * Interface for permit card props used in PermitsOverview component
+ * Interface for permit card props (deprecated - kept for reference)
+ * @deprecated This interface was used by the removed PermitsOverview component
  */
 export interface PermitCardProps {
   id: string;

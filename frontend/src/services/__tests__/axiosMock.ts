@@ -17,14 +17,14 @@ vi.mock('axios', () => ({
       put: mockPut,
       defaults: {
         headers: {
-          common: {}
-        }
+          common: {},
+        },
       },
       interceptors: {
         request: { use: vi.fn(), eject: vi.fn() },
-        response: { use: vi.fn(), eject: vi.fn() }
-      }
+        response: { use: vi.fn(), eject: vi.fn() },
+      },
     }),
-    isAxiosError: mockIsAxiosError
-  }
+    isAxiosError: mockIsAxiosError,
+  },
 }));

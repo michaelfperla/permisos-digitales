@@ -1,4 +1,5 @@
 import React from 'react';
+
 import styles from './Alert.module.css';
 
 export interface AlertProps {
@@ -19,22 +20,10 @@ export interface AlertProps {
 /**
  * Alert component using the "Soft & Trustworthy" design set
  */
-const Alert: React.FC<AlertProps> = ({
-  variant,
-  children,
-  className,
-}) => {
-  const alertClasses = [
-    styles.alert,
-    styles[variant],
-    className || ''
-  ].filter(Boolean).join(' ');
-  
-  return (
-    <div className={alertClasses}>
-      {children}
-    </div>
-  );
+const Alert: React.FC<AlertProps> = ({ variant, children, className }) => {
+  const alertClasses = [styles.alert, styles[variant], className || ''].filter(Boolean).join(' ');
+
+  return <div className={alertClasses}>{children}</div>;
 };
 
 export default Alert;

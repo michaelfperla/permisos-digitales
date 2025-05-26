@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+
 import styles from './TextLogo.module.css';
 
 interface TextLogoProps {
@@ -50,7 +51,7 @@ const TextLogo: React.FC<TextLogoProps> = ({
   onClick,
   variant = 'default',
   compact = false,
-  initialsOnly = false
+  initialsOnly = false,
 }) => {
   const variantClass = variant === 'light' ? styles.light : '';
   const initialsClass = initialsOnly ? styles.initialsLogo : '';
@@ -68,11 +69,7 @@ const TextLogo: React.FC<TextLogoProps> = ({
   }
 
   return (
-    <Link
-      to={to}
-      className={`${styles.textLogo} ${variantClass} ${className}`}
-      onClick={onClick}
-    >
+    <Link to={to} className={`${styles.textLogo} ${variantClass} ${className}`} onClick={onClick}>
       Permisos{!compact && <span className={styles.secondWord}> Digitales</span>}
     </Link>
   );

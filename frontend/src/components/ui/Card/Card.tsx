@@ -1,4 +1,5 @@
 import React from 'react';
+
 import styles from './Card.module.css';
 
 export interface CardProps {
@@ -67,7 +68,10 @@ const Card: React.FC<CardProps> = ({
           {typeof title === 'string' ? <h3 className={styles.cardTitle}>{title}</h3> : title}
         </div>
       )}
-      <div className={`${styles.cardBody} ${variant === 'auth' ? styles.cardBodyAuth : ''}`} style={bodyInlineStyles}>
+      <div
+        className={`${styles.cardBody} ${variant === 'auth' ? styles.cardBodyAuth : ''}`}
+        style={bodyInlineStyles}
+      >
         {children}
       </div>
       {footerContent && (

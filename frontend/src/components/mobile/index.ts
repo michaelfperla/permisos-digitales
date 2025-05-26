@@ -1,20 +1,15 @@
 /**
  * Mobile Components Index
- * 
+ *
  * This file exports all mobile-optimized components for easy importing.
- * 
+ *
  * Usage:
  * import { MobileForm, MobileTable, MobileNavigation } from '@/components/mobile';
  */
 
 // Mobile Navigation
 import MobileNavigation from '../navigation/MobileNavigation/MobileNavigation';
-
 // Mobile Table
-import MobileTable from '../ui/MobileTable/MobileTable';
-import type { Column as MobileTableColumn } from '../ui/MobileTable/MobileTable';
-
-// Mobile Form
 import MobileForm, {
   MobileFormGroup,
   MobileFormLabel,
@@ -22,16 +17,29 @@ import MobileForm, {
   MobileFormSelect,
   MobileFormTextarea,
   MobileFormCheckbox,
-  MobileFormActions
+  MobileFormActions,
 } from '../ui/MobileForm/MobileForm';
+import {
+  RHFMobileFormInput,
+  RHFMobileFormSelect,
+  RHFMobileFormTextarea,
+  RHFMobileFormCheckbox,
+} from '../ui/MobileForm/RHFAdapters';
+import MobileTable from '../ui/MobileTable/MobileTable';
+
+import type { Column as MobileTableColumn } from '../ui/MobileTable/MobileTable';
+
+// Mobile Form
+
+// React Hook Form Adapters
 
 export {
   // Navigation
   MobileNavigation,
-  
+
   // Table
   MobileTable,
-  
+
   // Form
   MobileForm,
   MobileFormGroup,
@@ -40,9 +48,13 @@ export {
   MobileFormSelect,
   MobileFormTextarea,
   MobileFormCheckbox,
-  MobileFormActions
+  MobileFormActions,
+
+  // React Hook Form Adapters
+  RHFMobileFormInput,
+  RHFMobileFormSelect,
+  RHFMobileFormTextarea,
+  RHFMobileFormCheckbox,
 };
 
-export type {
-  MobileTableColumn
-};
+export type { MobileTableColumn };

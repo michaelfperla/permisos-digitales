@@ -4,27 +4,18 @@
   padding: var(--space-3);
 }
 
-.pageTitle {
-  font-size: 2rem;
-  font-weight: var(--font-weight-bold);
-  margin-bottom: var(--space-2);
-  color: var(--color-neutral-900);
-}
-
-.pageSubtitle {
-  font-size: 1rem;
-  color: var(--color-neutral-700);
-  margin-bottom: var(--space-4);
-  max-width: 800px;
-}
+/* Page styles now use shared styles from UserDashboardPage.module.css */
 
 /* Mobile Optimizations */
 @media (max-width: 480px) {
-  .pageTitle, .pageSubtitle {
-    display: none; /* Hide title and subtitle on mobile */
-  }
-  
   .pageContainer {
     padding: var(--space-2);
   }
+}
+
+/* Override for removing divider in page header */
+.pageContainer :global(.pageHeader) {
+  border-bottom: none;
+  padding-bottom: 0; /* Remove bottom padding if border is gone */
+  margin-bottom: 1.25rem; /* Standardize spacing after header */
 }

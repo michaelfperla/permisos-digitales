@@ -338,7 +338,9 @@
 @media (max-width: 360px) {
   .oxxoSlipContainer {
     padding: var(--space-1);
-    padding-bottom: var(--space-5); /* Extra padding at bottom for navigation bar on very small screens */
+    padding-bottom: var(
+      --space-5
+    ); /* Extra padding at bottom for navigation bar on very small screens */
   }
 
   .oxxoReferenceWrapper {

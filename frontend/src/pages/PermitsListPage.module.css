@@ -1,4 +1,3 @@
-
 /* PermitsListPage.module.css */
 
 /* Page Container */
@@ -90,7 +89,7 @@
   color: var(--color-white);
   border-color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .filterButton.active:hover {
@@ -117,7 +116,9 @@
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--color-neutral-200);
@@ -200,7 +201,6 @@
   color: var(--status-neutral);
 }
 
-
 .cardBody {
   padding: var(--space-3) var(--space-4);
   flex-grow: 1;
@@ -282,8 +282,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .stateText {
@@ -300,9 +304,9 @@
   line-height: 1.6;
 }
 
-
 /* Responsive adjustments */
-@media (max-width: 768px) { /* Tablet and below */
+@media (max-width: 768px) {
+  /* Tablet and below */
   .permitsGrid {
     grid-template-columns: 1fr; /* Single column on smaller tablets */
     gap: var(--space-4);
@@ -329,7 +333,8 @@
   }
 }
 
-@media (max-width: 480px) { /* Mobile */
+@media (max-width: 480px) {
+  /* Mobile */
   .pageTitle {
     font-size: 1.5rem; /* Smaller title on mobile */
   }

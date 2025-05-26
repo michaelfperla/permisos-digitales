@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { FaCreditCard, FaArrowLeft } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaCreditCard, FaArrowLeft, FaStore } from 'react-icons/fa';
+
 import styles from '../components/permit-form/CompleteForm.module.css';
-import applicationService from '../services/applicationService';
 import PaymentFormStep from '../components/permit-form/PaymentFormStep';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { useToast } from '../contexts/ToastContext';
+import applicationService from '../services/applicationService';
+import { useToast } from '../shared/hooks/useToast';
 
 const PermitPaymentPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showToast } = useToast();
+  const { showToast: _showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicationData, setApplicationData] = useState<any>(null);
@@ -46,7 +47,11 @@ const PermitPaymentPage: React.FC = () => {
     navigate(`/permits/${id}`);
   };
 
-  const handlePaymentToken = (token: string | null, paymentMethod: 'card' | 'oxxo', deviceSessionId: string) => {
+  const handlePaymentToken = (
+    _token: string | null,
+    _paymentMethod: 'card' | 'oxxo',
+    _deviceSessionId: string,
+  ) => {
     setIsSubmitting(true);
 
     // Here you would implement the payment processing logic

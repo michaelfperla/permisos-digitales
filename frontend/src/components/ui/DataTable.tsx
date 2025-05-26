@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import styles from './DataTable.module.css';
+
 import Button from './Button/Button';
+import styles from './DataTable.module.css';
 
 export interface Column<T> {
   header: string;
@@ -24,7 +25,7 @@ function DataTable<T>({
   keyField,
   emptyMessage = 'No data available',
   pageSize = 10,
-  onRowClick
+  onRowClick,
 }: DataTableProps<T>) {
   const [sortField, setSortField] = useState<keyof T | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -64,9 +65,7 @@ function DataTable<T>({
       if (aValue === null || aValue === undefined) return sortDirection === 'asc' ? -1 : 1;
       if (bValue === null || bValue === undefined) return sortDirection === 'asc' ? 1 : -1;
 
-      return sortDirection === 'asc'
-        ? aValue > bValue ? 1 : -1
-        : aValue < bValue ? 1 : -1;
+      return sortDirection === 'asc' ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
     });
   }, [data, sortField, sortDirection]);
 
@@ -133,14 +132,16 @@ function DataTable<T>({
 
   // Render sort icon
   const renderSortIcon = (column: Column<T>) => {
-    if (!column.sortable || (typeof column.accessor === 'function')) return null;
+    if (!column.sortable || typeof column.accessor === 'function') return null;
 
     if (sortField !== column.accessor) {
       return null;
     }
 
     return (
-      <span className={`${styles.sortIcon} ${sortDirection === 'asc' ? styles.sortAsc : styles.sortDesc}`} />
+      <span
+        className={`${styles.sortIcon} ${sortDirection === 'asc' ? styles.sortAsc : styles.sortDesc}`}
+      />
     );
   };
 
@@ -184,8 +185,16 @@ function DataTable<T>({
                 {columns.map((column, index) => (
                   <th
                     key={index}
-                    onClick={() => column.sortable && typeof column.accessor !== 'function' && handleSort(column.accessor)}
-                    className={column.sortable && typeof column.accessor !== 'function' ? styles.sortableColumn : styles.nonSortableColumn}
+                    onClick={() =>
+                      column.sortable &&
+                      typeof column.accessor !== 'function' &&
+                      handleSort(column.accessor)
+                    }
+                    className={
+                      column.sortable && typeof column.accessor !== 'function'
+                        ? styles.sortableColumn
+                        : styles.nonSortableColumn
+                    }
                   >
                     {column.header}
                     {renderSortIcon(column)}
@@ -201,10 +210,7 @@ function DataTable<T>({
                   className={onRowClick ? styles.clickableRow : styles.nonClickableRow}
                 >
                   {columns.map((column, index) => (
-                    <td
-                      key={index}
-                      data-label={column.header}
-                    >
+                    <td key={index} data-label={column.header}>
                       {renderCell(row, column)}
                     </td>
                   ))}

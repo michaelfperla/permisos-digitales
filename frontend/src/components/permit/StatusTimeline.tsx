@@ -10,9 +10,11 @@
  */
 
 import React from 'react';
-import { FaCheck, FaTimes, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
+import { FaCheck, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
+
 import styles from './StatusTimeline.module.css';
 import { ApplicationStatus } from '../../services/applicationService';
+import Icon from '../../shared/components/ui/Icon';
 
 // Define the step status types
 type StepStatus = 'completed' | 'current' | 'pending' | 'rejected' | 'expired';
@@ -38,10 +40,7 @@ interface StatusTimelineProps {
   };
 }
 
-const StatusTimeline: React.FC<StatusTimelineProps> = ({
-  currentStatus,
-  applicationDates
-}) => {
+const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicationDates }) => {
   // Helper function to format dates
   const formatDate = (dateString?: string): string => {
     if (!dateString) return 'Pendiente';
@@ -51,12 +50,32 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   // Generate steps based on the current status
   const getTimelineSteps = (): TimelineStep[] => {
+    // Special case for AWAITING_PAYMENT
+    if (currentStatus === 'AWAITING_PAYMENT') {
+      return [
+        {
+          id: 'created',
+          label: 'Solicitud Creada',
+          description: formatDate(applicationDates.created_at),
+          status: 'completed',
+          icon: <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />,
+        },
+        {
+          id: 'awaiting-payment',
+          label: 'Pendiente de Pago',
+          description: 'Por favor realice el pago para continuar con el proceso.',
+          status: 'current',
+          icon: <Icon IconComponent={FaCircle} size="xs" />,
+        },
+      ];
+    }
+
     // Special case for OXXO payment
     if (currentStatus === 'AWAITING_OXXO_PAYMENT') {
       return [
@@ -65,15 +84,16 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
           label: 'Solicitud Creada',
           description: formatDate(applicationDates.created_at),
           status: 'completed',
-          icon: <FaCheck />
+          icon: <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />,
         },
         {
           id: 'awaiting-oxxo',
           label: 'Pago OXXO Pendiente',
-          description: 'Esperando confirmación de pago en OXXO. Por favor, realice el pago con la referencia proporcionada.',
+          description:
+            'Esperando confirmación de pago en OXXO. Por favor, realice el pago con la referencia proporcionada.',
           status: 'current',
-          icon: <FaCircle size={12} />
-        }
+          icon: <Icon IconComponent={FaCircle} size="xs" />,
+        },
       ];
     }
 
@@ -85,54 +105,68 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
           label: 'Permiso Emitido',
           description: formatDate(applicationDates.fecha_expedicion),
           status: 'completed',
-          icon: <FaCheck />
+          icon: <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />,
         },
         {
           id: 'permit-expired',
           label: 'Permiso Expirado',
-          description: 'Este permiso ha expirado. Si necesita continuar utilizando el vehículo, deberá solicitar un nuevo permiso.',
+          description:
+            'Este permiso ha expirado. Si necesita continuar utilizando el vehículo, deberá solicitar un nuevo permiso.',
           status: 'expired',
-          icon: <FaExclamationTriangle />
-        }
+          icon: (
+            <Icon IconComponent={FaExclamationTriangle} size="sm" color="var(--color-warning)" />
+          ),
+        },
       ];
     }
 
     // Define all possible status steps in order for the new payment flow
-    const allSteps: { status: ApplicationStatus; label: string; description: string; date?: string }[] = [
+    const allSteps: {
+      status: ApplicationStatus;
+      label: string;
+      description: string;
+      date?: string;
+    }[] = [
       {
-        status: 'SUBMITTED',
+        status: 'AWAITING_PAYMENT',
         label: 'Solicitud Creada',
-        description: 'Solicitud creada',
-        date: applicationDates.created_at
+        description: 'Solicitud creada, pendiente de pago',
+        date: applicationDates.created_at,
+      },
+      {
+        status: 'PAYMENT_PROCESSING',
+        label: 'Pago en Proceso',
+        description: 'Pago en proceso de verificación',
+        date: undefined,
       },
       {
         status: 'PAYMENT_RECEIVED',
         label: 'Pago Recibido',
         description: 'Pago procesado y confirmado',
-        date: applicationDates.payment_verified_at
+        date: applicationDates.payment_verified_at,
       },
       {
         status: 'GENERATING_PERMIT',
         label: 'Generando Permiso',
         description: 'Procesando y generando el permiso',
-        date: undefined
+        date: undefined,
       },
       {
         status: 'PERMIT_READY',
         label: 'Permiso Listo',
         description: 'Permiso generado y listo para descargar',
-        date: applicationDates.fecha_expedicion
+        date: applicationDates.fecha_expedicion,
       },
       {
         status: 'COMPLETED',
         label: 'Completado',
         description: 'Proceso completado',
-        date: undefined
-      }
+        date: undefined,
+      },
     ];
 
     // Find the index of the current status
-    const currentStatusIndex = allSteps.findIndex(step => step.status === currentStatus);
+    const currentStatusIndex = allSteps.findIndex((step) => step.status === currentStatus);
 
     // If status not found in our defined steps, show a simplified timeline
     if (currentStatusIndex === -1) {
@@ -142,15 +176,15 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
           label: 'Solicitud Creada',
           description: formatDate(applicationDates.created_at),
           status: 'completed',
-          icon: <FaCheck />
+          icon: <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />,
         },
         {
           id: 'current-status',
           label: getStatusText(currentStatus),
           description: 'Estado actual de la solicitud',
           status: 'current',
-          icon: <FaCircle size={12} />
-        }
+          icon: <Icon IconComponent={FaCircle} size="xs" />,
+        },
       ];
     }
 
@@ -165,7 +199,12 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
         label: step.label,
         description: step.date ? formatDate(step.date) : step.description,
         status: i < currentStatusIndex ? 'completed' : 'current',
-        icon: i < currentStatusIndex ? <FaCheck /> : <FaCircle size={12} />
+        icon:
+          i < currentStatusIndex ? (
+            <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />
+          ) : (
+            <Icon IconComponent={FaCircle} size="xs" />
+          ),
       });
     }
 
@@ -177,7 +216,7 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
         label: nextStep.label,
         description: nextStep.description,
         status: 'pending',
-        icon: null
+        icon: null,
       });
     }
 
@@ -190,14 +229,12 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
   return (
     <div className={styles.timelineContainer}>
       <div className={styles.timeline}>
-        {steps.map((step, index) => (
+        {steps.map((step, _index) => (
           <div
             key={step.id}
             className={`${styles.stepItem} ${styles[`step${step.status.charAt(0).toUpperCase() + step.status.slice(1)}`]}`}
           >
-            <div className={styles.stepIndicator}>
-              {step.icon}
-            </div>
+            <div className={styles.stepIndicator}>{step.icon}</div>
             <div className={styles.stepContent}>
               <h3 className={styles.stepTitle}>{step.label}</h3>
               <p className={styles.stepDescription}>{step.description}</p>
@@ -212,9 +249,15 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({
 // Helper function to get status text
 const getStatusText = (status: ApplicationStatus): string => {
   switch (status) {
-    // New payment flow statuses
+    // Payment-related statuses
+    case 'AWAITING_PAYMENT':
+      return 'Pendiente de Pago';
     case 'AWAITING_OXXO_PAYMENT':
-      return 'Pago OXXO Pendiente';
+      return 'Pendiente de Pago (OXXO)';
+    case 'PAYMENT_PROCESSING':
+      return 'Pago en Proceso';
+    case 'PAYMENT_FAILED':
+      return 'Pago Fallido';
     case 'PAYMENT_RECEIVED':
       return 'Pago Recibido';
 
@@ -226,7 +269,7 @@ const getStatusText = (status: ApplicationStatus): string => {
     case 'PERMIT_READY':
       return 'Permiso Listo';
 
-    // Completion statuses
+    // Final statuses
     case 'COMPLETED':
       return 'Completado';
     case 'CANCELLED':
@@ -234,9 +277,17 @@ const getStatusText = (status: ApplicationStatus): string => {
     case 'EXPIRED':
       return 'Expirado';
 
+    // Renewal statuses
+    case 'RENEWAL_PENDING':
+      return 'Renovación Pendiente';
+    case 'RENEWAL_APPROVED':
+      return 'Renovación Aprobada';
+    case 'RENEWAL_REJECTED':
+      return 'Renovación Rechazada';
+
     // Legacy statuses - kept for backward compatibility
     case 'PENDING_PAYMENT':
-      return 'Pago Pendiente';
+      return 'Pendiente de Pago';
     case 'PROOF_RECEIVED_SCHEDULED':
       return 'Comprobante Recibido';
     case 'PROOF_SUBMITTED':

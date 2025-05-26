@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
+
 import DataTable, { Column } from '../DataTable';
 
 // Define a test data type
@@ -26,35 +27,33 @@ const testColumns: Column<TestData>[] = [
   { header: 'ID', accessor: 'id', sortable: true },
   { header: 'Name', accessor: 'name', sortable: true },
   { header: 'Age', accessor: 'age', sortable: true },
-  { header: 'Status', accessor: 'active', sortable: true, cell: (data) => data.active ? 'Active' : 'Inactive' },
-  { header: 'Created', accessor: 'createdAt', sortable: true, cell: (data) => data.createdAt.toLocaleDateString() },
+  {
+    header: 'Status',
+    accessor: 'active',
+    sortable: true,
+    cell: (data) => (data.active ? 'Active' : 'Inactive'),
+  },
+  {
+    header: 'Created',
+    accessor: 'createdAt',
+    sortable: true,
+    cell: (data) => data.createdAt.toLocaleDateString(),
+  },
   { header: 'Actions', accessor: (data) => <button>View {data.id}</button> },
 ];
 
 describe('DataTable Component', () => {
   it('renders the table with correct headers', () => {
-    render(
-      <DataTable
-        data={testData}
-        columns={testColumns}
-        keyField="id"
-      />
-    );
+    render(<DataTable data={testData} columns={testColumns} keyField="id" />);
 
     // Check that all headers are rendered
-    testColumns.forEach(column => {
+    testColumns.forEach((column) => {
       expect(screen.getByText(column.header)).toBeInTheDocument();
     });
   });
 
   it('renders the table with correct data', () => {
-    render(
-      <DataTable
-        data={testData}
-        columns={testColumns}
-        keyField="id"
-      />
-    );
+    render(<DataTable data={testData} columns={testColumns} keyField="id" />);
 
     // Check that data is rendered correctly
     expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -71,20 +70,14 @@ describe('DataTable Component', () => {
         columns={testColumns}
         keyField="id"
         emptyMessage="No data available for testing"
-      />
+      />,
     );
 
     expect(screen.getByText('No data available for testing')).toBeInTheDocument();
   });
 
   it('sorts data when clicking on sortable column headers', () => {
-    render(
-      <DataTable
-        data={testData}
-        columns={testColumns}
-        keyField="id"
-      />
-    );
+    render(<DataTable data={testData} columns={testColumns} keyField="id" />);
 
     // Get the Age header and click it to sort
     const ageHeader = screen.getByText('Age');
@@ -94,7 +87,7 @@ describe('DataTable Component', () => {
     const rows = screen.getAllByRole('row').slice(1); // Skip header row
 
     // Extract age values from the sorted rows
-    const ageValues = rows.map(row => {
+    const ageValues = rows.map((row) => {
       const cells = within(row).getAllByRole('cell');
       return Number(cells[2].textContent); // Age is in the third column (index 2)
     });
@@ -110,13 +103,15 @@ describe('DataTable Component', () => {
     const rowsAfterSecondClick = screen.getAllByRole('row').slice(1);
 
     // Extract age values again
-    const ageValuesAfterSecondClick = rowsAfterSecondClick.map(row => {
+    const ageValuesAfterSecondClick = rowsAfterSecondClick.map((row) => {
       const cells = within(row).getAllByRole('cell');
       return Number(cells[2].textContent);
     });
 
     // Check that ages are in descending order
-    const isSortedDesc = ageValuesAfterSecondClick.every((val, i) => i === 0 || val <= ageValuesAfterSecondClick[i - 1]);
+    const isSortedDesc = ageValuesAfterSecondClick.every(
+      (val, i) => i === 0 || val <= ageValuesAfterSecondClick[i - 1],
+    );
     expect(isSortedDesc).toBe(true);
   });
 
@@ -124,12 +119,7 @@ describe('DataTable Component', () => {
     const handleRowClick = vi.fn();
 
     render(
-      <DataTable
-        data={testData}
-        columns={testColumns}
-        keyField="id"
-        onRowClick={handleRowClick}
-      />
+      <DataTable data={testData} columns={testColumns} keyField="id" onRowClick={handleRowClick} />,
     );
 
     // Find a row and click it
@@ -149,17 +139,10 @@ describe('DataTable Component', () => {
       name: `Person ${i + 1}`,
       age: 20 + i,
       active: i % 2 === 0,
-      createdAt: new Date(`2023-01-${i + 1}`)
+      createdAt: new Date(`2023-01-${i + 1}`),
     }));
 
-    render(
-      <DataTable
-        data={manyItems}
-        columns={testColumns}
-        keyField="id"
-        pageSize={5}
-      />
-    );
+    render(<DataTable data={manyItems} columns={testColumns} keyField="id" pageSize={5} />);
 
     // Check that pagination controls are rendered
     expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
@@ -185,16 +168,10 @@ describe('DataTable Component', () => {
 
   it('handles special cell values correctly', () => {
     const specialData = [
-      { id: 1, name: null, age: undefined, active: true, createdAt: new Date() }
+      { id: 1, name: null, age: undefined, active: true, createdAt: new Date() },
     ];
 
-    render(
-      <DataTable
-        data={specialData}
-        columns={testColumns}
-        keyField="id"
-      />
-    );
+    render(<DataTable data={specialData} columns={testColumns} keyField="id" />);
 
     // Check that null and undefined values are displayed as '-'
     const cells = screen.getAllByRole('cell');

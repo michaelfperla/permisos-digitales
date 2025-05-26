@@ -174,29 +174,29 @@
     height: 56px;
     padding: 4px 0;
   }
-  
+
   .bottomNavItem {
     padding: 6px 8px;
     min-width: 48px;
   }
-  
+
   .navIcon {
     font-size: 18px;
     margin-bottom: 2px;
   }
-  
+
   .bottomNavLabel {
     font-size: 10px;
   }
-  
+
   .drawer {
     width: 260px;
   }
-  
+
   .drawerNavLink {
     padding: 14px;
   }
-  
+
   .drawerNavLabel {
     font-size: 14px;
   }

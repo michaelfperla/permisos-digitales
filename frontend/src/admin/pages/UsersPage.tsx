@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { FaExclamationTriangle, FaSearch, FaFilter, FaSync } from 'react-icons/fa';
-import adminService, { AdminUserListItem, PaginatedUsers } from '../services/adminService';
-import { useToast } from '../contexts/ToastContext';
-import Button from '../../components/ui/Button/Button';
+import { useNavigate } from 'react-router-dom';
+
 import styles from './UsersPage.module.css';
+import Button from '../../components/ui/Button/Button';
+import Icon from '../../shared/components/ui/Icon';
+import { useToast } from '../../shared/hooks/useToast';
+import adminService, { AdminUserListItem, PaginatedUsers } from '../services/adminService';
 
 const UsersPage: React.FC = () => {
   const { showToast } = useToast();
@@ -16,25 +18,22 @@ const UsersPage: React.FC = () => {
   const [filteredUsers, setFilteredUsers] = useState<AdminUserListItem[]>([]);
 
   // Fetch users with pagination
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useQuery<PaginatedUsers>({
+  const { data, isLoading, isError, error, refetch } = useQuery<PaginatedUsers>({
     queryKey: ['adminUsers', { page: currentPage, limit: 10, role: roleFilter }],
     queryFn: () => adminService.getUsers(currentPage, 10, roleFilter || undefined),
     onError: (err) => {
-      showToast(`Error al cargar usuarios: ${err instanceof Error ? err.message : 'Error desconocido'}`, 'error');
-    }
+      showToast(
+        `Error al cargar usuarios: ${err instanceof Error ? err.message : 'Error desconocido'}`,
+        'error',
+      );
+    },
   });
 
   // Update filtered users when data or search term changes
   useEffect(() => {
     if (data?.users) {
       setFilteredUsers(
-        data.users.filter(user => {
+        data.users.filter((user) => {
           if (!searchTerm.trim()) return true;
 
           const searchLower = searchTerm.toLowerCase();
@@ -44,7 +43,7 @@ const UsersPage: React.FC = () => {
             user.last_name.toLowerCase().includes(searchLower) ||
             `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchLower)
           );
-        })
+        }),
       );
     }
   }, [data, searchTerm]);
@@ -55,7 +54,7 @@ const UsersPage: React.FC = () => {
     return date.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -76,13 +75,15 @@ const UsersPage: React.FC = () => {
   if (isError) {
     return (
       <div className={styles.errorContainer}>
-        <FaExclamationTriangle className={styles.errorIcon} />
+        <Icon
+          IconComponent={FaExclamationTriangle}
+          className={styles.errorIcon}
+          size="xl"
+          color="var(--color-danger)"
+        />
         <h2>Error al cargar usuarios</h2>
         <p>{error instanceof Error ? error.message : 'Error desconocido'}</p>
-        <Button
-          variant="primary"
-          onClick={() => refetch()}
-        >
+        <Button variant="primary" onClick={() => refetch()}>
           Intentar nuevamente
         </Button>
       </div>
@@ -94,14 +95,12 @@ const UsersPage: React.FC = () => {
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Gestión de Usuarios</h1>
-          <p className={styles.pageSubtitle}>
-            Total de usuarios: {data?.pagination?.total || 0}
-          </p>
+          <p className={styles.pageSubtitle}>Total de usuarios: {data?.pagination?.total || 0}</p>
         </div>
 
         <div className={styles.searchContainer}>
           <div className={styles.searchInputWrapper}>
-            <FaSearch className={styles.searchIcon} />
+            <Icon IconComponent={FaSearch} className={styles.searchIcon} size="sm" />
             <input
               type="text"
               placeholder="Buscar por nombre o email..."
@@ -112,7 +111,7 @@ const UsersPage: React.FC = () => {
           </div>
 
           <div className={styles.filterWrapper}>
-            <FaFilter className={styles.filterIcon} />
+            <Icon IconComponent={FaFilter} className={styles.filterIcon} size="sm" />
             <select
               className={styles.filterSelect}
               value={roleFilter}
@@ -131,7 +130,7 @@ const UsersPage: React.FC = () => {
           <Button
             variant="secondary"
             size="small"
-            icon={<FaSync />}
+            icon={<Icon IconComponent={FaSync} size="sm" />}
             onClick={() => refetch()}
           >
             Actualizar
@@ -169,7 +168,11 @@ const UsersPage: React.FC = () => {
                     <td>{`${user.first_name} ${user.last_name}`}</td>
                     <td>{user.email}</td>
                     <td>
-                      <span className={user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge}>
+                      <span
+                        className={
+                          user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge
+                        }
+                      >
                         {user.account_type === 'admin' ? 'Administrador' : 'Cliente'}
                       </span>
                     </td>

@@ -49,7 +49,7 @@ exports.createApplication = async (req, res, next) => {
       numero_serie: numero_serie ? String(numero_serie).trim().toUpperCase() : '',
       numero_motor: numero_motor ? String(numero_motor).trim() : 'No especificado',
       ano_modelo: ano_modelo || new Date().getFullYear(),
-      status: ApplicationStatus.PENDING_PAYMENT // Default status, will be updated if payment is successful
+      status: ApplicationStatus.AWAITING_PAYMENT // Default status, will be updated if payment is successful
     };
 
     // Extra validation check for VIN/serial number
@@ -272,8 +272,8 @@ exports.createApplication = async (req, res, next) => {
 
         // Defensive check - ensure status is never undefined or null before creating the record
         if (!applicationData.status || applicationData.status === 'undefined') {
-          logger.warn('Status field is missing or invalid, setting to PENDING_PAYMENT as fallback');
-          applicationData.status = 'PENDING_PAYMENT'; // Hardcoded fallback
+          logger.warn('Status field is missing or invalid, setting to AWAITING_PAYMENT as fallback');
+          applicationData.status = 'AWAITING_PAYMENT'; // Hardcoded fallback
         }
 
         // Final verification of status value immediately before repository call
@@ -379,14 +379,14 @@ exports.createApplication = async (req, res, next) => {
         }
 
         // If payment was successful or pending, update the application status
-        let finalStatus = ApplicationStatus.PENDING_PAYMENT; // Default status
+        let finalStatus = ApplicationStatus.AWAITING_PAYMENT; // Default status
         if (paymentResult && paymentResult.success) {
           logger.info(`Payment successful or pending for application ${newApplication.id}`);
 
           // Set the appropriate status based on the payment result
           if (paymentResult.status === 'pending_payment') {
             logger.info(`Payment is in pending state for application ${newApplication.id}`);
-            finalStatus = ApplicationStatus.PENDING_PAYMENT;
+            finalStatus = ApplicationStatus.PAYMENT_PROCESSING;
           } else {
             finalStatus = ApplicationStatus.PAYMENT_RECEIVED;
           }
@@ -456,11 +456,11 @@ exports.createApplication = async (req, res, next) => {
           paymentMessage = 'Tu pago ha sido procesado exitosamente.';
           logger.info(`Payment successful for application ${newApplication.id}, order ${paymentResult.orderId}`);
         } else if (paymentResult.status === 'pending_payment') {
-          applicationStatusToSet = ApplicationStatus.PENDING_PAYMENT;
+          applicationStatusToSet = ApplicationStatus.PAYMENT_PROCESSING;
           paymentMessage = 'Tu pago está siendo procesado. El estado se actualizará automáticamente cuando se complete.';
           logger.info(`Payment pending for application ${newApplication.id}, order ${paymentResult.orderId}`);
         } else {
-          applicationStatusToSet = ApplicationStatus.PAYMENT_DECLINED;
+          applicationStatusToSet = ApplicationStatus.PAYMENT_FAILED;
           paymentMessage = paymentResult.failureMessage || 'El pago no pudo ser procesado. Por favor, intenta con otro método de pago.';
           logger.warn(`Payment declined for application ${newApplication.id}, order ${paymentResult.orderId}: ${paymentMessage}`);
         }
@@ -510,12 +510,12 @@ exports.createApplication = async (req, res, next) => {
         });
       }
     } else {
-      // No payment method provided, create application with PENDING_PAYMENT status
-      logger.info(`No payment method provided, creating application with PENDING_PAYMENT status for user ${userId}`);
+      // No payment method provided, create application with AWAITING_PAYMENT status
+      logger.info(`No payment method provided, creating application with AWAITING_PAYMENT status for user ${userId}`);
 
       // Create application using repository
       // Ensure we have a valid status constant - use a hardcoded fallback if needed
-      const initialStatus = ApplicationStatus.PENDING_PAYMENT || 'PENDING_PAYMENT';
+      const initialStatus = ApplicationStatus.AWAITING_PAYMENT || 'AWAITING_PAYMENT';
 
       const applicationData = {
         user_id: Number(userId),
@@ -540,8 +540,8 @@ exports.createApplication = async (req, res, next) => {
 
       // Defensive check - ensure status is never undefined or null before creating the record
       if (!applicationData.status || applicationData.status === 'undefined') {
-        logger.warn('Status field is missing or invalid, setting to PENDING_PAYMENT as fallback');
-        applicationData.status = 'PENDING_PAYMENT'; // Hardcoded fallback
+        logger.warn('Status field is missing or invalid, setting to AWAITING_PAYMENT as fallback');
+        applicationData.status = 'AWAITING_PAYMENT'; // Hardcoded fallback
       }
 
       // Final verification of status value immediately before repository call
@@ -637,18 +637,42 @@ exports.getApplicationStatus = async (req, res, next) => {
     logger.debug(`Fetching status for application ID: ${applicationId}, user: ${userId}`);
 
     // Find application by ID and user ID using repository
-    const application = await applicationRepository.findById(applicationId);
+    let application;
+    try {
+      application = await applicationRepository.findById(applicationId);
 
-    if (!application || application.user_id !== userId) {
+      // Log the application object for debugging
+      logger.debug(`Application ${applicationId} data:`, {
+        id: application?.id,
+        user_id: application?.user_id,
+        status: application?.status,
+        fecha_vencimiento: application?.fecha_vencimiento
+      });
+
+    } catch (dbError) {
+      logger.error(`Database error fetching application ${applicationId}:`, dbError);
+      return res.status(500).json({
+        message: 'Error retrieving application from database',
+        error: dbError.message
+      });
+    }
+
+    if (!application) {
+      logger.warn(`Application ${applicationId} not found`);
       return res.status(404).json({ message: 'Application not found' });
+    }
+
+    if (application.user_id !== userId) {
+      logger.warn(`User ${userId} attempted to access application ${applicationId} owned by user ${application.user_id}`);
+      return res.status(403).json({ message: 'You do not have permission to access this application' });
     }
 
     // Ensure application.status is valid and never undefined
     if (!application.status || application.status === 'undefined') {
       logger.warn(`Application ${applicationId} has invalid status: ${application.status}`);
       // Update application with a valid status if it's invalid
-      await applicationRepository.updateStatus(applicationId, ApplicationStatus.PENDING_PAYMENT);
-      application.status = ApplicationStatus.PENDING_PAYMENT;
+      await applicationRepository.updateStatus(applicationId, ApplicationStatus.AWAITING_PAYMENT);
+      application.status = ApplicationStatus.AWAITING_PAYMENT;
     }
 
     let statusInfo = {
@@ -660,7 +684,7 @@ exports.getApplicationStatus = async (req, res, next) => {
     };
 
     switch (application.status) {
-    case 'PENDING_PAYMENT':
+    case ApplicationStatus.AWAITING_PAYMENT:
       // Check if this is a pending Conekta payment or just waiting for payment
       if (application.payment_processor_order_id) {
         statusInfo.displayMessage = 'Su pago está siendo procesado';
@@ -672,20 +696,23 @@ exports.getApplicationStatus = async (req, res, next) => {
         statusInfo.allowedActions = ['uploadPaymentProof', 'editApplication'];
       }
       break;
-    case 'AWAITING_OXXO_PAYMENT':
+    case ApplicationStatus.PAYMENT_PROCESSING:
+      statusInfo.displayMessage = 'Su pago está siendo procesado';
+      statusInfo.nextSteps = 'El pago está siendo procesado por el banco. Esto puede tomar unos minutos. La página se actualizará automáticamente cuando el pago sea confirmado.';
+      statusInfo.allowedActions = [];
+      break;
+    case ApplicationStatus.AWAITING_OXXO_PAYMENT:
       statusInfo.displayMessage = 'Su solicitud está esperando pago en OXXO';
       statusInfo.nextSteps = 'Por favor realice el pago en OXXO con la referencia proporcionada. Una vez procesado, su permiso será generado automáticamente.';
       statusInfo.allowedActions = ['viewOxxoDetails'];
       break;
+    // Map obsolete statuses to default case
+    // These cases are kept for backward compatibility with existing data
     case 'PROOF_SUBMITTED':
-      statusInfo.displayMessage = 'Su comprobante de pago ha sido enviado';
-      statusInfo.nextSteps = 'Nuestro equipo está revisando su pago. Este proceso normalmente toma 1-2 días hábiles.';
-      statusInfo.allowedActions = [];
-      break;
     case 'PROOF_REJECTED':
-      statusInfo.displayMessage = 'Su comprobante de pago no fue aceptado';
-      statusInfo.nextSteps = `Motivo: ${application.payment_rejection_reason}. Por favor envíe un nuevo comprobante.`;
-      statusInfo.allowedActions = ['uploadPaymentProof'];
+      statusInfo.displayMessage = 'Su solicitud está siendo procesada';
+      statusInfo.nextSteps = 'Por favor contacte a soporte para más información.';
+      statusInfo.allowedActions = [];
       break;
     case 'PAYMENT_RECEIVED':
     case 'GENERATING_PERMIT':
@@ -730,7 +757,9 @@ exports.getApplicationStatus = async (req, res, next) => {
           created: application.created_at,
           updated: application.updated_at,
           paymentProofUploaded: application.payment_proof_uploaded_at,
-          paymentVerified: application.payment_verified_at
+          paymentVerified: application.payment_verified_at,
+          fecha_expedicion: application.fecha_expedicion || null,
+          fecha_vencimiento: application.fecha_vencimiento || null
         },
         paymentReference: application.payment_reference,
         payment_rejection_reason: application.payment_rejection_reason,
@@ -1079,7 +1108,7 @@ exports.updateApplication = async (req, res, next) => {
 
     const currentStatus = rows[0].status;
     // Only allow updates if payment is not yet submitted
-    if (currentStatus !== 'PENDING_PAYMENT') {
+    if (currentStatus !== ApplicationStatus.AWAITING_PAYMENT) {
       return res.status(400).json({
         message: `Cannot update application in ${currentStatus} status. Only applications awaiting payment can be modified.`,
         currentStatus
@@ -1226,7 +1255,7 @@ exports.renewApplication = async (req, res, next) => {
       originalApp.ano_modelo,
       originalApplicationId,
       renewalCount,
-      'PENDING_PAYMENT' // New renewals always start pending payment
+      ApplicationStatus.AWAITING_PAYMENT // New renewals always start awaiting payment
     ];
 
     const { rows: insertedRows } = await db.query(insertQuery, insertParams);
@@ -1285,6 +1314,115 @@ exports.renewApplication = async (req, res, next) => {
   }
 };
 
+// --- CHECK RENEWAL ELIGIBILITY FUNCTION ---
+exports.checkRenewalEligibility = async (req, res, next) => {
+  const userId = req.session.userId;
+  const applicationId = parseInt(req.params.id, 10);
+
+  // Basic validation
+  if (isNaN(applicationId)) {
+    return res.status(400).json({ message: 'Invalid Application ID format.' });
+  }
+
+  try {
+    logger.info(`Checking renewal eligibility for application ID: ${applicationId} by user ${userId}`);
+
+    // Find and verify the original application
+    const findQuery = `
+      SELECT id, user_id, status, fecha_expedicion, fecha_vencimiento
+      FROM permit_applications
+      WHERE id = $1 AND user_id = $2;
+    `;
+    const { rows } = await db.query(findQuery, [applicationId, userId]);
+
+    if (rows.length === 0) {
+      logger.warn(`Renewal eligibility check failed: Application ${applicationId} not found or not owned by user ${userId}`);
+      return res.status(404).json({
+        eligible: false,
+        message: 'Application not found or not authorized.'
+      });
+    }
+
+    const application = rows[0];
+
+    // Check if permit has the correct status
+    if (application.status !== 'PERMIT_READY' && application.status !== 'ACTIVE') {
+      logger.warn(`Renewal eligibility check failed: Application ${applicationId} has status ${application.status}`);
+      return res.status(200).json({
+        eligible: false,
+        message: 'Solo los permisos activos o completados pueden ser renovados.'
+      });
+    }
+
+    // Check if permit has an expiration date
+    if (!application.fecha_vencimiento) {
+      logger.warn(`Renewal eligibility check failed: Application ${applicationId} has no expiration date`);
+      return res.status(200).json({
+        eligible: false,
+        message: 'Este permiso no tiene fecha de vencimiento.'
+      });
+    }
+
+    // Calculate days until expiration
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of day for comparison
+
+    const expirationDate = new Date(application.fecha_vencimiento);
+    expirationDate.setHours(0, 0, 0, 0); // Set to beginning of day for comparison
+
+    const diffTime = expirationDate.getTime() - today.getTime();
+    const daysUntilExpiration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    logger.debug(`Application ${applicationId} has ${daysUntilExpiration} days until expiration`);
+
+    // Determine eligibility based on days until expiration
+    // Permits can be renewed 7 days before expiration or up to 15 days after expiration
+    if (daysUntilExpiration <= 7 && daysUntilExpiration >= -15) {
+      // Eligible for renewal
+      let message = '';
+      if (daysUntilExpiration > 0) {
+        message = `Su permiso vence en ${daysUntilExpiration} días. Puede renovarlo ahora.`;
+      } else if (daysUntilExpiration === 0) {
+        message = 'Su permiso vence hoy. Puede renovarlo ahora.';
+      } else {
+        message = `Su permiso venció hace ${Math.abs(daysUntilExpiration)} días. Aún puede renovarlo.`;
+      }
+
+      logger.info(`Application ${applicationId} is eligible for renewal: ${daysUntilExpiration} days until expiration`);
+
+      return res.status(200).json({
+        eligible: true,
+        message,
+        daysUntilExpiration,
+        expirationDate: application.fecha_vencimiento
+      });
+    } else if (daysUntilExpiration > 7) {
+      // Not yet eligible - too early
+      logger.info(`Application ${applicationId} is not yet eligible for renewal: ${daysUntilExpiration} days until expiration`);
+
+      return res.status(200).json({
+        eligible: false,
+        message: `Su permiso vence en ${daysUntilExpiration} días. Podrá renovarlo 7 días antes de su vencimiento.`,
+        daysUntilExpiration,
+        expirationDate: application.fecha_vencimiento
+      });
+    } else {
+      // Too late for renewal
+      logger.info(`Application ${applicationId} is too late for renewal: ${daysUntilExpiration} days until expiration`);
+
+      return res.status(200).json({
+        eligible: false,
+        message: 'Su permiso venció hace más de 15 días. Debe solicitar un nuevo permiso.',
+        daysUntilExpiration,
+        expirationDate: application.fecha_vencimiento
+      });
+    }
+  } catch (error) {
+    logger.error(`Error checking renewal eligibility for application ${applicationId}:`, error);
+    next(error);
+  }
+};
+
 // --- TEMPORARY CONTROLLER FOR DEVELOPMENT - REMOVE LATER --- (Keep AS IS)
 exports.tempMarkPaid = async (req, res, next) => { // Added next
   const applicationId = parseInt(req.params.id, 10);
@@ -1297,15 +1435,15 @@ exports.tempMarkPaid = async (req, res, next) => { // Added next
     if (currentRows.length === 0) return res.status(404).json({ message: 'Application not found.' });
 
     const currentStatus = currentRows[0].status;
-    // Allow proceeding even if not PENDING_PAYMENT during dev
-    if (currentStatus !== 'PENDING_PAYMENT') {
+    // Allow proceeding even if not AWAITING_PAYMENT during dev
+    if (currentStatus !== ApplicationStatus.AWAITING_PAYMENT) {
       logger.warn(`--- Application ${applicationId} status is ${currentStatus}, proceeding anyway for DEV ---`);
     } else {
-      logger.info(`--- Application ${applicationId} status is PENDING_PAYMENT, proceeding to mark paid. ---`);
+      logger.info(`--- Application ${applicationId} status is AWAITING_PAYMENT, proceeding to mark paid. ---`);
     }
 
 
-    const { rowCount } = await db.query('UPDATE permit_applications SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', ['PAYMENT_RECEIVED', applicationId]);
+    const { rowCount } = await db.query('UPDATE permit_applications SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [ApplicationStatus.PAYMENT_RECEIVED, applicationId]);
     if (rowCount === 0) throw new Error('Application not found during update.');
     logger.info(`--- TEMP DEV: Application ${applicationId} status updated to PAYMENT_RECEIVED ---`); // Use info
 

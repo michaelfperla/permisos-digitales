@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFormContext } from 'react-hook-form';
 import {
   FaUser,
   FaCar,
@@ -6,36 +7,29 @@ import {
   FaEdit,
   FaInfoCircle,
   FaArrowLeft,
-  FaPaperPlane
+  FaPaperPlane,
 } from 'react-icons/fa';
+
 import styles from './CompleteForm.module.css';
-import Button from '../../components/ui/Button/Button';
+import { CompletePermitFormData } from '../../shared/schemas/permit.schema';
+import Button from "../ui/Button/Button";
 
 interface ReviewStepProps {
-  formData: {
-    nombre_completo: string;
-    curp_rfc: string;
-    domicilio: string;
-    marca: string;
-    linea: string;
-    color: string;
-    numero_serie: string;
-    numero_motor: string;
-    ano_modelo: string | number;
-  };
   onPrevious: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
-  goToStep: (step: string) => void;
+  goToStep: (_step: string) => void;
 }
 
 const CompleteReviewStep: React.FC<ReviewStepProps> = ({
-  formData,
   onPrevious,
   onSubmit,
   isSubmitting,
-  goToStep
+  goToStep,
 }) => {
+  // Get form values from React Hook Form context
+  const { getValues } = useFormContext<CompletePermitFormData>();
+  const formData = getValues();
   return (
     <div className={styles.formSection}>
       <div className={styles.formSectionHeader}>
@@ -191,8 +185,9 @@ const CompleteReviewStep: React.FC<ReviewStepProps> = ({
         <div className={styles.infoBox}>
           <FaInfoCircle className={styles.infoIcon} />
           <p className={styles.infoText}>
-            Por favor revise cuidadosamente toda la información antes de enviar su solicitud.
-            Una vez enviada, no podrá modificar estos datos y deberá iniciar una nueva solicitud si necesita hacer cambios.
+            Por favor revise cuidadosamente toda la información antes de enviar su solicitud. Una
+            vez enviada, no podrá modificar estos datos y deberá iniciar una nueva solicitud si
+            necesita hacer cambios.
           </p>
         </div>
 

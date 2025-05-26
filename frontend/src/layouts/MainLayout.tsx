@@ -1,9 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+
 import styles from './MainLayout.module.css';
 import { MobileNavigation } from '../components/mobile';
-import useAuth from '../hooks/useAuth';
 import useResponsive from '../hooks/useResponsive';
+import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
 
 const MainLayout: React.FC = () => {
   const { isAuthenticated } = useAuth();

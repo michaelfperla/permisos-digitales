@@ -1,13 +1,15 @@
 import React, { useState, FormEvent, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import authService from '../services/authService';
-import { debugLog, errorLog } from '../utils/debug';
-import styles from './ResendVerificationPage.module.css';
-import Button from '../components/ui/Button/Button';
-import Input from '../components/ui/Input/Input';
-import Alert from '../components/ui/Alert/Alert';
-import Card from '../components/ui/Card/Card';
 import { FaCheckCircle, FaEnvelope, FaArrowRight, FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
+import styles from './ResendVerificationPage.module.css';
+import Alert from '../components/ui/Alert/Alert';
+import Button from '../components/ui/Button/Button';
+import Card from '../components/ui/Card/Card';
+import Input from '../components/ui/Input/Input';
+import authService from '../services/authService';
+import Icon from '../shared/components/ui/Icon';
+import { debugLog, errorLog } from '../utils/debug';
 
 const ResendVerificationPage: React.FC = () => {
   const navigate = useNavigate();
@@ -72,7 +74,9 @@ const ResendVerificationPage: React.FC = () => {
       }
     } catch (error) {
       errorLog('ResendVerificationPage', 'Error resending verification email', error);
-      setError('Error al reenviar el correo de verificación. Por favor, intenta nuevamente más tarde.');
+      setError(
+        'Error al reenviar el correo de verificación. Por favor, intenta nuevamente más tarde.',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -92,23 +96,30 @@ const ResendVerificationPage: React.FC = () => {
           {isSuccess ? (
             <div className={styles.successContainer}>
               <div className={styles.successIconWrapper}>
-                <FaCheckCircle className={styles.successIcon} />
+                <Icon
+                  IconComponent={FaCheckCircle}
+                  className={styles.successIcon}
+                  size="xl"
+                  color="var(--color-success)"
+                />
               </div>
               <h2 className={styles.successTitle}>¡Correo enviado!</h2>
               <p className={styles.successMessage}>
-                Si tu correo electrónico está registrado y aún no ha sido verificado,
-                recibirás un nuevo enlace de verificación en tu bandeja de entrada.
+                Si tu correo electrónico está registrado y aún no ha sido verificado, recibirás un
+                nuevo enlace de verificación en tu bandeja de entrada.
               </p>
               <div className={styles.infoBox}>
                 <h3 className={styles.infoTitle}>
-                  <FaInfoCircle className={styles.infoIcon} />
+                  <Icon IconComponent={FaInfoCircle} className={styles.infoIcon} size="md" />
                   Información importante:
                 </h3>
                 <p className={styles.infoText}>
-                  El correo puede tardar hasta 5 minutos en llegar. Por favor, revisa tu bandeja de entrada y también tu carpeta de spam.
+                  El correo puede tardar hasta 5 minutos en llegar. Por favor, revisa tu bandeja de
+                  entrada y también tu carpeta de spam.
                 </p>
                 <p className={styles.infoText}>
-                  Recuerda que el enlace de verificación estará activo durante 24 horas. Haz clic en él para activar tu cuenta.
+                  Recuerda que el enlace de verificación estará activo durante 24 horas. Haz clic en
+                  él para activar tu cuenta.
                 </p>
               </div>
               <Button
@@ -117,13 +128,14 @@ const ResendVerificationPage: React.FC = () => {
                 className={styles.loginButton}
                 onClick={() => navigate('/login')}
               >
-                Ir a iniciar sesión <FaArrowRight className={styles.buttonIcon} />
+                Ir a iniciar sesión{' '}
+                <Icon IconComponent={FaArrowRight} className={styles.buttonIcon} size="sm" />
               </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate>
               <div className={styles.formIconWrapper}>
-                <FaEnvelope className={styles.formIcon} />
+                <Icon IconComponent={FaEnvelope} className={styles.formIcon} size="lg" />
               </div>
 
               {error && (
@@ -153,11 +165,12 @@ const ResendVerificationPage: React.FC = () => {
 
               <div className={styles.infoBox}>
                 <h3 className={styles.infoTitle}>
-                  <FaInfoCircle className={styles.infoIcon} />
+                  <Icon IconComponent={FaInfoCircle} className={styles.infoIcon} size="md" />
                   Nota:
                 </h3>
                 <p className={styles.infoText}>
-                  Si ya verificaste tu correo electrónico, puedes ir directamente a la página de inicio de sesión.
+                  Si ya verificaste tu correo electrónico, puedes ir directamente a la página de
+                  inicio de sesión.
                 </p>
               </div>
 
@@ -169,7 +182,8 @@ const ResendVerificationPage: React.FC = () => {
               >
                 {isLoading ? (
                   <>
-                    Enviando... <FaSpinner className={styles.spinner} />
+                    Enviando...{' '}
+                    <Icon IconComponent={FaSpinner} className={styles.spinner} size="sm" />
                   </>
                 ) : (
                   'Reenviar correo de verificación'
