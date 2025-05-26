@@ -248,7 +248,7 @@ async function navigateToPermitForm(page) {
     }
 
     if (!formFound) {
-      throw new Error(`Could not verify we're on the permit form page.`);
+      throw new Error('Could not verify we\'re on the permit form page.');
     }
   } catch (error) {
     logger.error('Failed to navigate to permit form:', error);
