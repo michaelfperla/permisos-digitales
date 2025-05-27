@@ -191,12 +191,12 @@
   color: var(--status-success);
 }
 
-.statusExpiring_soon {
+.statusExpiringSoon {
   background-color: var(--status-warning-bg);
   color: var(--status-warning-hover); /* Darker yellow for text */
 }
 
-.statusNeeds_attention {
+.statusNeedsAttention {
   background-color: var(--status-critical-bg);
   color: var(--status-critical);
 }

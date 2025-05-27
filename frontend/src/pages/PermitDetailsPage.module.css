@@ -199,7 +199,10 @@
   padding: 24px;
   box-shadow: var(--box-shadow);
   overflow-wrap: break-word; /* Ensure content wraps correctly */
-  word-break: break-word; /* Additional wrapping for long content */
+
+  /* word-break: break-word; */
+
+  /* Additional wrapping for long content - replaced by overflow-wrap */
   border: 1px solid var(--color-neutral-200);
   margin-bottom: 24px;
 }
@@ -286,7 +289,7 @@
   color: var(--text-primary, var(--color-neutral-900));
   font-size: 0.95rem;
   font-weight: 600;
-  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Status Tab Panel */
@@ -387,14 +390,7 @@
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 }
 
-.statusInstructionsPanel {
-  background-color: var(--color-neutral-50);
-  border-radius: var(--border-radius);
-  padding: var(--space-5);
-  margin-top: var(--space-5);
-  border-top: 3px solid var(--color-primary-light);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
-}
+/* .statusInstructionsPanel removed, consolidated with definition around line 313 */
 
 .statusInstructionsTitle {
   font-size: 1.25rem;
@@ -419,6 +415,8 @@
 }
 
 /* Payment Status Card */
+
+/* .oxxoInstructionsHeader (around line 509) removed, consolidated with definition around line 327 */
 .paymentStatusCard {
   background-color: rgb(var(--color-info-rgb), 0.05);
   border: 1px solid var(--color-info-light);
@@ -494,14 +492,7 @@
   box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
 }
 
-.oxxoInstructionsHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--color-warning-light);
-}
+/* Duplicate .oxxoInstructionsHeader removed from here */
 
 .oxxoInstructionsIcon {
   color: var(--color-warning);
@@ -668,6 +659,9 @@
   width: 100%;
 }
 
+/* .supportFooter (around line 1066) removed, consolidated with definition around line 667 */
+
+/* .supportFooterText (around line 1075) removed, consolidated with definition around line 673 */
 .supportFooterText {
   color: var(--color-neutral-700);
   font-size: 0.9rem;
@@ -1063,20 +1057,10 @@
 }
 
 /* Support Footer */
-.supportFooter {
-  background-color: var(--color-neutral-50);
-  border-radius: var(--border-radius);
-  padding: var(--space-4);
-  margin-top: var(--space-4);
-  text-align: center;
-  border: 1px solid var(--color-neutral-200);
-}
 
-.supportFooterText {
-  margin: 0;
-  color: var(--color-neutral-700);
-  font-size: 0.95rem;
-}
+/* Duplicate .supportFooter removed from here */
+
+/* Duplicate .supportFooterText removed from here */
 
 /* Media Queries for Document Section */
 @media (width <= 768px) {
