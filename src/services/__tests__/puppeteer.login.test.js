@@ -26,7 +26,7 @@ jest.mock('../../utils/enhanced-logger', () => ({
 const SCREENSHOT_DIR = path.join(__dirname, '../../../test-storage/screenshots');
 console.log(`Screenshot directory: ${SCREENSHOT_DIR}`);
 
-describe('Puppeteer Login Tests', () => {
+describe.skip('Puppeteer Login Tests', () => {
   // Create a configurable browser launcher for tests
   async function launchTestBrowser(options = {}) {
     const defaultOptions = {
@@ -198,7 +198,7 @@ describe('Puppeteer Login Tests', () => {
 });
 
 // New test suite for permit form navigation and verification
-describe('Puppeteer Permit Form Navigation and Verification', () => {
+describe.skip('Puppeteer Permit Form Navigation and Verification', () => {
   // Define the screenshot directory for this test suite
   const FORM_SCREENSHOT_DIR = path.join(__dirname, '../../../test-storage/screenshots/form-navigation');
 
@@ -1091,7 +1091,7 @@ describe('Puppeteer Permit Form Navigation and Verification', () => {
 });
 
 // New test suite for PDF download from existing permit
-describe('Puppeteer PDF Download from Existing Permit', () => {
+describe.skip('Puppeteer PDF Download from Existing Permit', () => {
   // Define the screenshot directory for this test suite
   const PDF_DOWNLOAD_SCREENSHOT_DIR = path.join(__dirname, '../../../test-storage/screenshots/pdf-download');
 

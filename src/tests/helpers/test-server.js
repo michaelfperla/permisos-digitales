@@ -76,7 +76,7 @@ const mockVerifyPassword = jest.fn().mockImplementation(async (password, hash) =
   return password === 'correct-password';
 });
 
-jest.mock('../../utils/password', () => ({
+jest.mock('../../utils/password-utils', () => ({
   hashPassword: mockHashPassword,
   verifyPassword: mockVerifyPassword
 }));
