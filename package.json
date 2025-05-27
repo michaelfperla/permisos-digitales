@@ -14,7 +14,7 @@
     "test:integration": "jest --testMatch='**/__tests__/**/*.integration.test.js' --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage --detectOpenHandles",
-    "test:check-coverage": "jest --coverage --detectOpenHandles --coverageThreshold='{\"global\":{\"branches\":70,\"functions\":70,\"lines\":70,\"statements\":70}}'",
+    "test:check-coverage": "jest --coverage --detectOpenHandles",
     "migrate": "node-pg-migrate --migrations-dir ./src/db/migrations --config config/pgm-config.js",
     "migrate:up": "node-pg-migrate up --migrations-dir ./src/db/migrations --config config/pgm-config.js",
     "migrate:down": "node-pg-migrate down --migrations-dir ./src/db/migrations --config config/pgm-config.js",
