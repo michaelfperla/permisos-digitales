@@ -22,7 +22,7 @@ router.use(rateLimiters.api);
 router.use(auditRequest);
 
 // Status route
-router.get('/status', (req, res) => { ApiResponse.success(res, null, { status: 'API is running' }); });
+router.get('/status', (req, res) => { ApiResponse.success(res, { status: 'API is running' }); });
 
 // Mount route modules
 // Apply stricter rate limiting to authentication routes

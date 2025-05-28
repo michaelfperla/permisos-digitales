@@ -15,6 +15,7 @@ const corsOptions = {
       ? [
           'https://permisosdigitales.com.mx',
           'https://www.permisosdigitales.com.mx',
+          'https://d2gtd1yvnspajh.cloudfront.net',
           // Add any staging/preview domains if needed
         ]
       : [
