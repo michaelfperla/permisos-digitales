@@ -8,10 +8,8 @@ import ApplicationDetailsPage from './pages/ApplicationDetailsPage';       // Pa
 import ApplicationsPage from './pages/ApplicationsPage';                 // Path was correct
 import DashboardPage from './pages/DashboardPage';                       // Path was correct
 import LoginPage from './pages/LoginPage';                               // Path was correct
-import PendingVerificationsPage from './pages/PendingVerificationsPage'; // Path was correct
 import UserDetailsPage from './pages/UserDetailsPage';                   // Path was correct
 import UsersPage from './pages/UsersPage';                               // Path was correct
-import VerificationHistoryPage from './pages/VerificationHistoryPage';   // Path was correct
 import LoadingSpinner from '../components/ui/LoadingSpinner'; // Adjusted path from ../../ to ../
 import { useAdminAuth as useAuth } from '../shared/hooks/useAuth';  // Adjusted path from ../../../ to ../shared/
 
@@ -32,8 +30,6 @@ function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/applications/:id" element={<ApplicationDetailsPage />} />
-          <Route path="/pending-verifications" element={<PendingVerificationsPage />} />
-          <Route path="/verification-history" element={<VerificationHistoryPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/users/:userId" element={<UserDetailsPage />} />
         </Route>

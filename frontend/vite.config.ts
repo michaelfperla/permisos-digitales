@@ -23,14 +23,14 @@ export default defineConfig({
         configure: (proxy, _options) => {
           // Always log proxy errors (critical information)
           proxy.on('error', (err, _req, _res) => {
-            console.error('Proxy error:', err); // Use console.error for errors
+            console.error('Proxy error:', err);
           });
 
-          // Conditional logging for request/response details
+          // Conditional logging for request/response details (development only)
           // To enable, run your dev server like: DEBUG_PROXY=true npm run dev
           const DEBUG_PROXY = process.env.VITE_DEBUG_PROXY === 'true' || process.env.DEBUG_PROXY === 'true';
 
-          if (DEBUG_PROXY) {
+          if (DEBUG_PROXY && import.meta.env?.DEV !== false) {
             proxy.on('proxyReq', (proxyReq, req, _res) => {
               console.log(`[Proxy Req]: ${req.method} ${req.url}`);
             });

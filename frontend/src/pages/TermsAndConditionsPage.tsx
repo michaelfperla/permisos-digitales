@@ -262,7 +262,7 @@ const TermsAndConditionsPage: React.FC = () => {
             Para cualquier duda o aclaración respecto a estos Términos o el uso del Permiso, puede
             contactarnos a través de:
           </p>
-          <p>Correo electrónico: transito@huitzuco.gob.mx</p>
+          <p>Correo electrónico: contacto@permisosdigitales.com.mx</p>
           <p>Teléfono: (727) 333-0142</p>
         </section>
 

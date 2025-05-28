@@ -1,8 +1,5 @@
 /* User Details Page Styles */
-.userDetailsPage {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+/* Container styling now handled by ResponsiveContainer component */
 
 /* Page Header */
 .pageHeader {
@@ -367,4 +364,154 @@
 .disableButton:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .userDetailsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .userActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .definitionList {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .definitionTerm {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .definitionDetail {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .definitionDetail:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    font-size: 0.8rem;
+  }
+
+  .securityEventsTable th,
+  .securityEventsTable td,
+  .applicationsTable th,
+  .applicationsTable td {
+    padding: 0.5rem;
+  }
+}
+
+@media (width <= 480px) {
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .userDetailsHeader,
+  .userDetailsBody {
+    padding: 1rem;
+  }
+
+  .backButton {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .userActions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .enableButton,
+  .disableButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    min-width: 500px;
+  }
+
+  .noEvents {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .viewButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+  }
+}
+
+@media (width <= 360px) {
+  .userDetailsCard {
+    margin-bottom: 1.5rem;
+  }
+
+  .userDetailsHeader,
+  .userDetailsBody {
+    padding: 0.75rem;
+  }
+
+  .adminBadge,
+  .clientBadge,
+  .booleanBadge,
+  .statusBadge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    min-width: 450px;
+  }
+
+  .loadingContainer,
+  .errorContainer {
+    padding: 2rem 1rem;
+  }
+
+  .retryButton {
+    width: 100%;
+    max-width: 200px;
+  }
 }

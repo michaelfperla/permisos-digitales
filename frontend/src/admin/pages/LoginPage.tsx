@@ -2,15 +2,22 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { FaUser, FaLock, FaExclamationTriangle, FaCheckCircle, FaSignInAlt } from 'react-icons/fa';
+
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import styles from './LoginPage.module.css';
-import Button from '../../components/ui/Button/Button';
-import Icon from '../../shared/components/ui/Icon';
 import { AdminUser } from '../../shared/contexts/AuthContext';
 import { useAdminAuth as useAuth } from '../../shared/hooks/useAuth';
+import { useToast } from '../../shared/hooks/useToast';
 import { adminLoginSchema, AdminLoginFormData } from '../../shared/schemas/auth.schema';
+import Alert from '../../components/ui/Alert/Alert';
+import Button from '../../components/ui/Button/Button';
+import MobileForm, {
+  MobileFormGroup,
+  MobileFormLabel,
+  MobileFormInput,
+  MobileFormActions,
+} from '../../components/ui/MobileForm/MobileForm';
+import AdminAuthLayout from '../layouts/AdminAuthLayout';
 import api from '../services/api';
 import { getCsrfToken as fetchCsrfToken } from '../services/authService';
 
@@ -34,7 +41,8 @@ const LoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, isLoading: isAuthLoading, error: authError } = useAuth(); // Get auth context values
+  const { login, isAuthenticated, isLoading: isAuthLoading, error: authError } = useAuth();
+  const { showToast } = useToast();
 
   // Log on every render to track state changes
   console.debug(
@@ -210,6 +218,9 @@ const LoginPage: React.FC = () => {
         // This will trigger the useEffect for navigation
         login(userData as AdminUser);
 
+        // Show success toast
+        showToast('¡Bienvenido al portal administrativo!', 'success');
+
         console.debug(
           '[LoginPage handleSubmit] Called authContext.login. State update should be queued.',
         );
@@ -278,9 +289,8 @@ const LoginPage: React.FC = () => {
           <input type="password" placeholder="Password" required {...register('password')} />
           <Button
             variant="primary"
-            htmlType="submit"
+            type="submit"
             disabled={isLoading}
-            icon={<Icon IconComponent={FaSignInAlt} size="sm" />}
           >
             {isLoading ? 'Processing...' : 'Login'}
           </Button>
@@ -294,98 +304,52 @@ const LoginPage: React.FC = () => {
 
   // Regular rendering
   return (
-    <div className={styles.loginPage}>
-      <div className={styles.loginContainer}>
-        <div className={styles.loginCard}>
-          <div className={styles.loginHeader}>
-            <img src="/img/logo.svg" alt="Permisos Digitales" className={styles.logo} />
-            <h1 className={styles.loginTitle}>Portal Administrativo</h1>
-          </div>
+    <AdminAuthLayout>
+      <MobileForm title="Portal Administrativo" onSubmit={handleSubmit(onSubmit)}>
+        {error && (
+          <Alert variant="error">
+            {error}
+          </Alert>
+        )}
 
-          <form className={styles.loginForm} onSubmit={handleSubmit(onSubmit)}>
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.formLabel}>
-                Correo Electrónico
-              </label>
-              <div className={styles.inputWrapper}>
-                <Icon IconComponent={FaUser} className={styles.inputIcon} size="sm" />
-                <input
-                  type="email"
-                  id="email"
-                  className={`${styles.formInput} ${errors.email ? styles.inputError : ''}`}
-                  placeholder="Ingrese su correo electrónico"
-                  autoComplete="username"
-                  required
-                  {...register('email')}
-                />
-              </div>
-              {errors.email && <div className={styles.fieldError}>{errors.email.message}</div>}
-            </div>
+        <MobileFormGroup>
+          <MobileFormLabel htmlFor="email" required>
+            Correo electrónico
+          </MobileFormLabel>
+          <MobileFormInput
+            type="email"
+            id="email"
+            error={errors.email?.message}
+            {...register('email')}
+            required
+            autoComplete="username"
+            inputMode="email"
+            placeholder="Ingrese su correo electrónico"
+          />
+        </MobileFormGroup>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.formLabel}>
-                Contraseña
-              </label>
-              <div className={styles.inputWrapper}>
-                <Icon IconComponent={FaLock} className={styles.inputIcon} size="sm" />
-                <input
-                  type="password"
-                  id="password"
-                  className={`${styles.formInput} ${errors.password ? styles.inputError : ''}`}
-                  placeholder="Ingrese su contraseña"
-                  autoComplete="current-password"
-                  required
-                  {...register('password')}
-                />
-              </div>
-              {errors.password && (
-                <div className={styles.fieldError}>{errors.password.message}</div>
-              )}
-            </div>
+        <MobileFormGroup>
+          <MobileFormLabel htmlFor="password" required>
+            Contraseña
+          </MobileFormLabel>
+          <MobileFormInput
+            type="password"
+            id="password"
+            error={errors.password?.message}
+            {...register('password')}
+            required
+            autoComplete="current-password"
+            placeholder="Ingrese su contraseña"
+          />
+        </MobileFormGroup>
 
-            <Button
-              variant="primary"
-              htmlType="submit"
-              className={styles.loginButton}
-              disabled={isLoading}
-              icon={<Icon IconComponent={FaSignInAlt} size="sm" />}
-            >
-              {isLoading ? 'Procesando...' : 'Iniciar Sesión'}
-            </Button>
-
-            {error && (
-              <div
-                className={
-                  error.includes('successful') ? styles.successMessage : styles.errorMessage
-                }
-              >
-                {error.includes('successful') ? (
-                  <>
-                    <Icon
-                      IconComponent={FaCheckCircle}
-                      className={styles.successIcon}
-                      size="sm"
-                      color="var(--color-success)"
-                    />
-                    <span>{error}</span>
-                  </>
-                ) : (
-                  <>
-                    <Icon
-                      IconComponent={FaExclamationTriangle}
-                      className={styles.errorIcon}
-                      size="sm"
-                      color="var(--color-danger)"
-                    />
-                    <span>{error}</span>
-                  </>
-                )}
-              </div>
-            )}
-          </form>
-        </div>
-      </div>
-    </div>
+        <MobileFormActions>
+          <Button type="submit" variant="primary" disabled={isLoading}>
+            {isLoading ? 'Procesando...' : 'Iniciar Sesión'}
+          </Button>
+        </MobileFormActions>
+      </MobileForm>
+    </AdminAuthLayout>
   );
 };
 

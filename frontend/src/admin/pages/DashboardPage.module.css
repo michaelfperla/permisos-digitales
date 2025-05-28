@@ -1,8 +1,5 @@
 /* Dashboard Page Styles */
-.dashboardPage {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+/* Container styling now handled by ResponsiveContainer component */
 
 /* Page Header */
 .pageHeader {
@@ -289,4 +286,102 @@
 
 .retryButton:hover {
   background-color: #852d2d;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  .pageHeader {
+    margin-bottom: 1.5rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .statsOverview {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .statusGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .linksGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .statCard,
+  .statusCard,
+  .linkCard {
+    padding: 1.25rem;
+  }
+}
+
+@media (width <= 480px) {
+  .pageHeader {
+    margin-bottom: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .statCard,
+  .statusCard,
+  .linkCard {
+    padding: 1rem;
+  }
+
+  .statValue {
+    font-size: 2rem;
+  }
+
+  .statIcon {
+    font-size: 2rem;
+  }
+
+  .statusCount {
+    font-size: 1.25rem;
+  }
+
+  .statusName {
+    font-size: 0.7rem;
+  }
+
+  .linkText {
+    font-size: 0.9rem;
+  }
+
+  .statusGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+@media (width <= 360px) {
+  .statCard,
+  .statusCard,
+  .linkCard {
+    padding: 0.75rem;
+  }
+
+  .statusGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .retryButton {
+    width: 100%;
+    max-width: 200px;
+  }
 }

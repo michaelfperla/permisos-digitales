@@ -9,6 +9,7 @@ import MainLayout from './layouts/MainLayout';
 import UserLayout from './layouts/UserLayout';
 import VerificationLayout from './layouts/VerificationLayout';
 import CompletePermitFormPage from './pages/CompletePermitFormPage';
+import ContactPage from './pages/ContactPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -88,7 +89,7 @@ function App() {
           } />
 
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/documents" element={<div>Mis Documentos (En desarrollo)</div>} />
+
         </Route>
       </Route>
 
@@ -100,6 +101,7 @@ function App() {
       {/* Legal pages */}
       <Route path="/terminos-y-condiciones" element={<TermsAndConditionsPage />} />
       <Route path="/politica-de-privacidad" element={<PrivacyPolicyPage />} />
+      <Route path="/contacto" element={<ContactPage />} />
 
       {/* 404 Route - can be added later */}
       {/* <Route path="*" element={<NotFoundPage />} /> */}

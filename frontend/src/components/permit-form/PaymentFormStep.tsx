@@ -11,6 +11,7 @@ import styles from './CompleteForm.module.css';
 import Icon from '../../shared/components/ui/Icon';
 import TestCardInfo from '../payment/TestCardInfo';
 import Button from "../ui/Button/Button";
+import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../../constants';
 
 // Define Conekta types for TypeScript
 declare global {
@@ -61,8 +62,10 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
 
   // Initialize Conekta with public key and set up device fingerprint
   useEffect(() => {
-    // Log API key for verification
-    console.info('Public Key:', import.meta.env.VITE_CONEKTA_PUBLIC_KEY.slice(0, 8) + '...');
+    // Log API key for verification (development only)
+    if (import.meta.env.DEV) {
+      console.info('Public Key:', import.meta.env.VITE_CONEKTA_PUBLIC_KEY.slice(0, 8) + '...');
+    }
 
     let checkConektaInterval: number | null = null;
 
@@ -73,7 +76,9 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
 
           // Set the public key
           window.Conekta.setPublicKey(import.meta.env.VITE_CONEKTA_PUBLIC_KEY);
-          console.info('Conekta public key set successfully');
+          if (import.meta.env.DEV) {
+            console.info('Conekta public key set successfully');
+          }
 
           // Try to get device fingerprint after initialization
           let deviceFingerprintValue;
@@ -178,8 +183,10 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
       }
     }
 
-    // Add debug logging for device fingerprint
-    console.info('Device fingerprint for payment:', currentDeviceSessionId.substring(0, 8) + '...');
+    // Add debug logging for device fingerprint (development only)
+    if (import.meta.env.DEV) {
+      console.info('Device fingerprint for payment:', currentDeviceSessionId.substring(0, 8) + '...');
+    }
 
     // For testing purposes, if we're in development mode, suggest using a valid test card number
     if (import.meta.env.DEV && cardNumber.trim() !== '4242424242424242') {
@@ -188,7 +195,9 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
 
     // If OXXO payment method is selected, submit with null token, 'oxxo' method, and deviceSessionId
     if (paymentMethod === 'oxxo') {
-      console.info('Submitting with OXXO payment method and deviceSessionId');
+      if (import.meta.env.DEV) {
+        console.info('Submitting with OXXO payment method and deviceSessionId');
+      }
       onSubmit(null, 'oxxo', currentDeviceSessionId);
       return;
     }
@@ -280,48 +289,55 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
       // device_fingerprint is now handled internally by Conekta.js
     };
 
-    // For testing, log a reminder about using valid test cards
+    // For testing, log a reminder about using valid test cards (development only)
     if (import.meta.env.DEV) {
       console.info(
         'Using card details as entered. For testing, remember to use Conekta test cards.',
       );
+
+      // Log the token parameters (without sensitive data) - development only
+      console.info('Creating token with parameters:', {
+        card: {
+          number: '************' + tokenParams.card.number.slice(-4),
+          name: tokenParams.card.name,
+          exp_year: tokenParams.card.exp_year,
+          exp_month: tokenParams.card.exp_month,
+          cvc: '***',
+        },
+      });
+
+      // Log the device session ID separately (will be sent to backend with token)
+      console.info('Device session ID for backend:', currentDeviceSessionId.substring(0, 8) + '...');
     }
 
-    // Log the token parameters (without sensitive data)
-    console.info('Creating token with parameters:', {
-      card: {
-        number: '************' + tokenParams.card.number.slice(-4),
-        name: tokenParams.card.name,
-        exp_year: tokenParams.card.exp_year,
-        exp_month: tokenParams.card.exp_month,
-        cvc: '***',
-      },
-    });
-
-    // Log the device session ID separately (will be sent to backend with token)
-    console.info('Device session ID for backend:', currentDeviceSessionId.substring(0, 8) + '...');
-
     try {
-      console.info('Attempting to create Conekta token with the following parameters:');
-      console.info(
-        '- Card number (masked):',
-        '*'.repeat(cardNumber.length - 4) + cardNumber.slice(-4),
-      );
-      console.info('- Card holder name:', cardName);
-      console.info('- Expiration month/year:', expMonth + '/' + expYear);
-      console.info('- Device fingerprint available:', !!deviceSessionId);
-      console.info('- Conekta ready state:', isConektaReady);
+      // Log token creation attempt (development only)
+      if (import.meta.env.DEV) {
+        console.info('Attempting to create Conekta token with the following parameters:');
+        console.info(
+          '- Card number (masked):',
+          '*'.repeat(cardNumber.length - 4) + cardNumber.slice(-4),
+        );
+        console.info('- Card holder name:', cardName);
+        console.info('- Expiration month/year:', expMonth + '/' + expYear);
+        console.info('- Device fingerprint available:', !!deviceSessionId);
+        console.info('- Conekta ready state:', isConektaReady);
+      }
 
       window.Conekta.Token.create(
         tokenParams,
         function (token: { id: string }) {
           // Success callback - token created
-          console.info('Token created successfully:', token.id);
-          console.info(
-            'Token format validation:',
-            token.id.startsWith('tok_') ? 'Valid format' : 'Unexpected format',
-          );
-          console.info('Token length:', token.id.length);
+          if (import.meta.env.DEV) {
+            console.info('Token created successfully:', token.id);
+            console.info(
+              'Token format validation:',
+              token.id.startsWith('tok_') ? 'Valid format' : 'Unexpected format',
+            );
+          }
+          if (import.meta.env.DEV) {
+            console.info('Token length:', token.id.length);
+          }
 
           // Get the device fingerprint again after token creation
           // Sometimes Conekta only generates the fingerprint during token creation
@@ -347,10 +363,12 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
           onSubmit(token.id, 'card', updatedDeviceSessionId);
         },
         function (error: { message: string; code?: string; details?: any[] }) {
-          // Error callback
+          // Error callback - always log errors regardless of environment
           console.error('Conekta error during token creation:', error);
-          console.error('Error code:', error.code || 'No error code provided');
-          console.error('Error details:', error.details || 'No details provided');
+          if (import.meta.env.DEV) {
+            console.error('Error code:', error.code || 'No error code provided');
+            console.error('Error details:', error.details || 'No details provided');
+          }
 
           // Format user-friendly error message
           let errorMessage = error.message;

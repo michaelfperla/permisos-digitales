@@ -43,7 +43,7 @@ const idParamValidation = [
   param('id').isInt({ gt: 0 }).withMessage('El ID del permiso debe ser un número positivo.')
 ];
 const typeParamValidation = [
-  param('type').isIn(['permiso', 'recibo', 'certificado']).withMessage('Tipo de documento no válido.')
+  param('type').isIn(['permiso', 'recibo', 'certificado', 'placas']).withMessage('Tipo de documento no válido.')
 ];
 
 
@@ -98,6 +98,16 @@ router.get(
   typeParamValidation,   // Validate Type
   handleValidationErrors,
   applicationController.downloadPermit
+);
+
+// GET /api/applications/:id/pdf-url/:type - Get secure URL for PDF access
+// Auth applied in src/routes/index.js
+router.get(
+  '/:id/pdf-url/:type',
+  idParamValidation,     // Validate ID
+  typeParamValidation,   // Validate Type
+  handleValidationErrors,
+  applicationController.getPdfUrl
 );
 
 // GET /api/applications/:id/renewal-eligibility - Check if a permit is eligible for renewal

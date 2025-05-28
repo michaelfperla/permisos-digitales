@@ -118,58 +118,9 @@ export interface CtaProps {
   icon?: string;
 }
 
-/**
- * Interface for focus item props (deprecated - kept for reference)
- * @deprecated This interface was used by the removed TodaysFocus component
- */
-export interface FocusItemProps {
-  type: 'critical_action' | 'warning_action' | 'info_action' | 'all_clear';
-  title: string;
-  message: string;
-  cta?: CtaProps;
-  iconName?: string;
-}
 
-/**
- * Interface for permit card props (deprecated - kept for reference)
- * @deprecated This interface was used by the removed PermitsOverview component
- */
-export interface PermitCardProps {
-  id: string;
-  vehicleIdentifier: string; // e.g., "Toyota Camry - ABC123"
-  permitType: string; // e.g., "Residencial Anual"
-  statusText: string; // e.g., "Activo", "Expira en 15 días"
-  statusType: 'active' | 'expiring_soon' | 'needs_attention' | 'archived'; // For styling card
-  expirationDate: string; // e.g., "Expira: 31 Dic, 2025"
-  primaryCta: CtaProps;
-  secondaryCta?: CtaProps; // Optional
 
-  // Additional vehicle details
-  vehicleMake: string;
-  vehicleModel: string;
-  vehicleColor: string;
-  vehicleYear: string | number;
-  vehicleSerialNumber: string;
 
-  // Permit details
-  folioNumber?: string;
-  issueDate?: string;
-  expiryDate?: string;
-  amount?: number;
-
-  // Payment details
-  paymentReference?: string;
-  paymentStatus?: string;
-
-  // Document paths
-  permitDocumentPath?: string;
-  receiptDocumentPath?: string;
-  certificateDocumentPath?: string;
-  licensePlatesDocumentPath?: string;
-
-  // Raw status for specific handling
-  rawStatus: string;
-}
 
 /**
  * Interface for document information

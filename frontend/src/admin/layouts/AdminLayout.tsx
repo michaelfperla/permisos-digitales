@@ -190,28 +190,6 @@ const AdminLayout: React.FC = () => {
           </NavLink>
 
           <NavLink
-            to="/pending-verifications"
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <Icon IconComponent={FaCheckCircle} className={styles.navIcon} />
-            <span className={styles.navText}>Verificaciones Pendientes</span>
-          </NavLink>
-
-          <NavLink
-            to="/verification-history"
-            className={({ isActive }) =>
-              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
-            }
-            onClick={handleNavLinkClick}
-          >
-            <Icon IconComponent={FaHistory} className={styles.navIcon} />
-            <span className={styles.navText}>Historial</span>
-          </NavLink>
-
-          <NavLink
             to="/users"
             className={({ isActive }) =>
               isActive ? `${styles.navLink} ${styles.active}` : styles.navLink

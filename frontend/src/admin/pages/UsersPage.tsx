@@ -5,13 +5,16 @@ import { useNavigate } from 'react-router-dom';
 
 import styles from './UsersPage.module.css';
 import Button from '../../components/ui/Button/Button';
+import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Icon from '../../shared/components/ui/Icon';
+import useResponsive from '../../hooks/useResponsive';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService, { AdminUserListItem, PaginatedUsers } from '../services/adminService';
 
 const UsersPage: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { isMdDown } = useResponsive();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('');
@@ -91,7 +94,7 @@ const UsersPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.usersPage}>
+    <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Gestión de Usuarios</h1>
@@ -145,29 +148,30 @@ const UsersPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className={styles.tableContainer}>
-            <table className={styles.usersTable}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Email</th>
-                  <th>Tipo de Cuenta</th>
-                  <th>Acceso Admin</th>
-                  <th>Fecha de Creación</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user: AdminUserListItem) => (
-                  <tr
-                    key={user.id}
-                    className={styles.clickableRow}
-                    onClick={() => navigate(`/users/${user.id}`)}
-                  >
-                    <td>{user.id}</td>
-                    <td>{`${user.first_name} ${user.last_name}`}</td>
-                    <td>{user.email}</td>
-                    <td>
+          {/* Mobile Card Layout */}
+          {isMdDown ? (
+            <div className={styles.mobileCards}>
+              {filteredUsers.map((user: AdminUserListItem) => (
+                <div
+                  key={user.id}
+                  className={styles.mobileCard}
+                  onClick={() => navigate(`/users/${user.id}`)}
+                >
+                  <div className={styles.mobileCardHeader}>
+                    <div className={styles.mobileCardTitle}>
+                      {`${user.first_name} ${user.last_name}`}
+                    </div>
+                    <div className={styles.mobileCardId}>ID: {user.id}</div>
+                  </div>
+
+                  <div className={styles.mobileCardContent}>
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Email:</span>
+                      <span className={styles.mobileCardValue}>{user.email}</span>
+                    </div>
+
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Tipo de Cuenta:</span>
                       <span
                         className={
                           user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge
@@ -175,14 +179,64 @@ const UsersPage: React.FC = () => {
                       >
                         {user.account_type === 'admin' ? 'Administrador' : 'Cliente'}
                       </span>
-                    </td>
-                    <td>{user.is_admin_portal ? 'Sí' : 'No'}</td>
-                    <td>{formatDate(user.created_at)}</td>
+                    </div>
+
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Acceso Admin:</span>
+                      <span className={styles.mobileCardValue}>
+                        {user.is_admin_portal ? 'Sí' : 'No'}
+                      </span>
+                    </div>
+
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Fecha de Creación:</span>
+                      <span className={styles.mobileCardValue}>{formatDate(user.created_at)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Desktop Table Layout */
+            <div className={styles.tableContainer}>
+              <table className={styles.usersTable}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Tipo de Cuenta</th>
+                    <th>Acceso Admin</th>
+                    <th>Fecha de Creación</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((user: AdminUserListItem) => (
+                    <tr
+                      key={user.id}
+                      className={styles.clickableRow}
+                      onClick={() => navigate(`/users/${user.id}`)}
+                    >
+                      <td>{user.id}</td>
+                      <td>{`${user.first_name} ${user.last_name}`}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <span
+                          className={
+                            user.account_type === 'admin' ? styles.adminBadge : styles.clientBadge
+                          }
+                        >
+                          {user.account_type === 'admin' ? 'Administrador' : 'Cliente'}
+                        </span>
+                      </td>
+                      <td>{user.is_admin_portal ? 'Sí' : 'No'}</td>
+                      <td>{formatDate(user.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Pagination */}
           {data?.pagination && data.pagination.totalPages > 1 && (
@@ -214,7 +268,7 @@ const UsersPage: React.FC = () => {
           )}
         </>
       )}
-    </div>
+    </ResponsiveContainer>
   );
 };
 

@@ -15,6 +15,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 import styles from './ApplicationDetailsPage.module.css';
 import Button from '../../components/ui/Button/Button';
+import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Icon from '../../shared/components/ui/Icon';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService from '../services/adminService';
@@ -214,7 +215,7 @@ const ApplicationDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.applicationDetailsPage}>
+    <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
         <Button
           variant="secondary"
@@ -555,7 +556,7 @@ const ApplicationDetailsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </ResponsiveContainer>
   );
 };
 

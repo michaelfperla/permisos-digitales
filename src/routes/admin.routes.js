@@ -13,19 +13,6 @@ router.use('/users', userRoutes);
 // [Refactor - Remove Manual Payment] Route for listing applications pending manual verification. Obsolete.
 // router.get('/pending-verifications', isAuthenticated, isAdminPortal, adminController.getPendingVerifications);
 
-// Temporary route handler for pending verifications - returns empty list
-router.get('/pending-verifications', isAuthenticated, isAdminPortal, (req, res) => {
-  res.json({
-    applications: [],
-    pagination: {
-      page: parseInt(req.query.page || '1', 10),
-      limit: parseInt(req.query.limit || '10', 10),
-      total: 0,
-      totalPages: 0
-    }
-  });
-});
-
 // [Refactor - Remove Manual Payment] Route for retrieving manual payment proof files. Obsolete.
 // router.get('/applications/:id/payment-proof', isAuthenticated, isAdminPortal, adminController.getPaymentProof);
 

@@ -18,7 +18,7 @@ const options = {
       description: 'API documentation for Permisos Digitales',
       contact: {
         name: 'API Support',
-        email: 'support@permisos-digitales.mx'
+        email: 'contacto@permisosdigitales.com.mx'
       }
     },
     servers: [
@@ -129,7 +129,7 @@ function setupSwagger(app) {
   // Serve Swagger UI only in development and staging environments
   if (config.nodeEnv !== 'production') {
     logger.info('Setting up Swagger UI at /api-docs');
-    
+
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
       explorer: true,
       customCss: '.swagger-ui .topbar { display: none }',

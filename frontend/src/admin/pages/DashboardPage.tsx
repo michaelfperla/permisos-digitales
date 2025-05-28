@@ -12,6 +12,7 @@ import {
 import { Link } from 'react-router-dom';
 
 import styles from './DashboardPage.module.css';
+import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Icon from '../../shared/components/ui/Icon';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService from '../services/adminService';
@@ -138,7 +139,7 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.dashboardPage}>
+    <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Dashboard</h1>
         <p className={styles.pageSubtitle}>Resumen de actividad del sistema</p>
@@ -232,7 +233,7 @@ const DashboardPage: React.FC = () => {
           </Link>
         </div>
       </section>
-    </div>
+    </ResponsiveContainer>
   );
 };
 

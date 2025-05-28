@@ -165,7 +165,6 @@ describe('Admin API Integration Tests', () => {
           id: 1,
           status: ApplicationStatus.PROOF_SUBMITTED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
           payment_reference: 'REF123',
           applicant_name: 'John Doe',
           applicant_email: 'john@example.com',
@@ -179,7 +178,6 @@ describe('Admin API Integration Tests', () => {
           id: 2,
           status: ApplicationStatus.PROOF_SUBMITTED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
           payment_reference: 'REF456',
           applicant_name: 'Jane Smith',
           applicant_email: 'jane@example.com',
@@ -223,7 +221,6 @@ describe('Admin API Integration Tests', () => {
 
       // Verify DB query was called with correct parameters
       expect(mockDb.query).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT pa.id, pa.status, pa.created_at, pa.payment_proof_uploaded_at'),
         [ApplicationStatus.PROOF_SUBMITTED]
       );
     }, 30000); // Increase timeout for this test
@@ -303,7 +300,6 @@ describe('Admin API Integration Tests', () => {
           });
         }
         // 4. Mock INSERT into verification log
-        else if (query.includes('INSERT INTO payment_verification_log')) {
           return Promise.resolve({
             rows: [{ id: 1 }],
             rowCount: 1
@@ -447,7 +443,6 @@ describe('Admin API Integration Tests', () => {
           });
         }
         // 4. Mock INSERT into verification log
-        else if (query.includes('INSERT INTO payment_verification_log')) {
           return Promise.resolve({
             rows: [{ id: 1 }],
             rowCount: 1
@@ -584,8 +579,6 @@ describe('Admin API Integration Tests', () => {
           id: 1,
           status: ApplicationStatus.PROOF_SUBMITTED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
-          payment_verified_at: null,
           payment_reference: 'REF123',
           nombre_completo: 'John Doe',
           marca: 'Toyota',
@@ -597,8 +590,6 @@ describe('Admin API Integration Tests', () => {
           id: 2,
           status: ApplicationStatus.PAYMENT_RECEIVED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
-          payment_verified_at: new Date().toISOString(),
           payment_reference: 'REF456',
           nombre_completo: 'Jane Smith',
           marca: 'Honda',
@@ -653,8 +644,6 @@ describe('Admin API Integration Tests', () => {
           id: 1,
           status: ApplicationStatus.PROOF_SUBMITTED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
-          payment_verified_at: null,
           payment_reference: 'REF123',
           nombre_completo: 'John Doe',
           marca: 'Toyota',
@@ -710,8 +699,6 @@ describe('Admin API Integration Tests', () => {
           id: 2,
           status: ApplicationStatus.PAYMENT_RECEIVED,
           created_at: '2023-05-15T10:00:00Z',
-          payment_proof_uploaded_at: '2023-05-15T11:00:00Z',
-          payment_verified_at: '2023-05-15T12:00:00Z',
           payment_reference: 'REF456',
           nombre_completo: 'Jane Smith',
           marca: 'Honda',
@@ -769,8 +756,6 @@ describe('Admin API Integration Tests', () => {
           id: 1,
           status: ApplicationStatus.PROOF_SUBMITTED,
           created_at: new Date().toISOString(),
-          payment_proof_uploaded_at: new Date().toISOString(),
-          payment_verified_at: null,
           payment_reference: 'REF123',
           nombre_completo: 'John Doe',
           marca: 'Toyota',
@@ -991,7 +976,6 @@ describe('Admin API Integration Tests', () => {
         }
         // Match the query for today's verifications
         else if (query.includes('SELECT action, COUNT(*) as count') &&
-                 query.includes('FROM payment_verification_log') &&
                  query.includes('CURRENT_DATE')) {
           return Promise.resolve({
             rows: mockTodayVerifications,

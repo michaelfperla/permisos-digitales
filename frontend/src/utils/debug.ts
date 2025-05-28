@@ -3,7 +3,7 @@
  */
 
 // Enable this to see detailed debug logs
-const DEBUG_ENABLED = true;
+const DEBUG_ENABLED = process.env.NODE_ENV !== 'production';
 
 /**
  * Log debug information to console

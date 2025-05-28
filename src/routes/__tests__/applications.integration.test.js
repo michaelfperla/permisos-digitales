@@ -1201,7 +1201,6 @@ describe('Application API Integration Tests', () => {
           ...testApplication,
           status: ApplicationStatus.PROOF_SUBMITTED,
           payment_proof_path: 'payment-proofs/app-1_123456_abcdef.pdf',
-          payment_proof_uploaded_at: new Date().toISOString()
         }],
         rowCount: 1
       }));
@@ -1260,7 +1259,6 @@ describe('Application API Integration Tests', () => {
           ...testApplication,
           status: ApplicationStatus.PROOF_SUBMITTED,
           payment_proof_path: 'payment-proofs/app-1_123456_abcdef.pdf',
-          payment_proof_uploaded_at: new Date().toISOString(),
           desired_start_date: desiredStartDate
         }],
         rowCount: 1

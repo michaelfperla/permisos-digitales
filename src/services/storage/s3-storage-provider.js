@@ -1,10 +1,21 @@
 /**
  * AWS S3 Storage Provider
- * 
+ *
  * Implementation of the StorageProvider interface for AWS S3 storage.
- * This is a placeholder that will be fully implemented when AWS S3 integration is ready.
+ * Provides full S3 integration for file upload, download, delete, and management operations.
  */
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  CopyObjectCommand
+} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { logger } = require('../../utils/enhanced-logger');
+const { ExternalServiceError, NotFoundError } = require('../../utils/errors');
 const StorageProvider = require('./storage-provider.interface');
 const path = require('path');
 const crypto = require('crypto');
@@ -21,28 +32,42 @@ class S3StorageProvider extends StorageProvider {
    */
   constructor(options) {
     super();
-    this.options = options;
-    
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Install the AWS SDK: npm install @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
-    // 2. Uncomment and complete the following code:
-    
-    /*
-    const { S3Client } = require('@aws-sdk/client-s3');
-    
-    this.s3Client = new S3Client({
+
+    // Validate required options
+    if (!options.bucket) {
+      throw new Error('S3 bucket name is required');
+    }
+    if (!options.region) {
+      throw new Error('AWS region is required');
+    }
+    if (!options.accessKeyId) {
+      throw new Error('AWS access key ID is required');
+    }
+    if (!options.secretAccessKey) {
+      throw new Error('AWS secret access key is required');
+    }
+
+    this.bucket = options.bucket;
+    this.region = options.region;
+
+    // Initialize S3 client
+    const clientConfig = {
       region: options.region,
       credentials: {
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey
-      },
-      endpoint: options.endpoint
-    });
-    
-    this.bucket = options.bucket;
-    */
-    
-    logger.info(`S3 storage provider initialized with bucket: ${options.bucket} (PLACEHOLDER)`);
+      }
+    };
+
+    // Add custom endpoint if provided (useful for testing with LocalStack)
+    if (options.endpoint) {
+      clientConfig.endpoint = options.endpoint;
+      clientConfig.forcePathStyle = true; // Required for custom endpoints
+    }
+
+    this.s3Client = new S3Client(clientConfig);
+
+    logger.info(`S3 storage provider initialized with bucket: ${this.bucket} in region: ${this.region}`);
   }
 
   /**
@@ -62,6 +87,11 @@ class S3StorageProvider extends StorageProvider {
    * Save a file to S3
    * @param {Buffer} fileBuffer - File content as buffer
    * @param {Object} options - Save options
+   * @param {string} options.originalName - Original filename
+   * @param {string} options.subDirectory - Subdirectory within bucket
+   * @param {string} options.prefix - Filename prefix
+   * @param {Object} options.metadata - Additional metadata
+   * @param {string} options.contentType - Content type (auto-detected if not provided)
    * @returns {Promise<Object>} - File information
    */
   async saveFile(fileBuffer, options = {}) {
@@ -69,28 +99,65 @@ class S3StorageProvider extends StorageProvider {
       originalName = 'file',
       subDirectory = '',
       prefix = '',
-      metadata = {}
+      metadata = {},
+      contentType = null
     } = options;
 
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Generate a unique key for the file
-    // 2. Upload the file to S3
-    // 3. Return file information
-    
-    logger.warn('S3StorageProvider.saveFile is a placeholder. S3 integration not implemented yet.');
-    
-    // Generate a mock response for now
-    const fileName = this.generateFileName(originalName, prefix);
-    const key = subDirectory ? `${subDirectory}/${fileName}` : fileName;
-    
-    return {
-      fileName,
-      key,
-      size: fileBuffer.length,
-      metadata,
-      url: `https://${this.options.bucket}.s3.amazonaws.com/${key}`,
-      storageType: 's3'
-    };
+    try {
+      // Generate unique filename and S3 key
+      const fileName = this.generateFileName(originalName, prefix);
+      const key = subDirectory ? `${subDirectory}/${fileName}` : fileName;
+
+      // Determine content type
+      const detectedContentType = contentType || this.getContentTypeFromPath(originalName);
+
+      // Prepare S3 upload parameters
+      const uploadParams = {
+        Bucket: this.bucket,
+        Key: key,
+        Body: fileBuffer,
+        ContentType: detectedContentType,
+        Metadata: {
+          originalName: originalName,
+          uploadedAt: new Date().toISOString(),
+          ...metadata
+        }
+      };
+
+      // Upload file to S3
+      const command = new PutObjectCommand(uploadParams);
+      const result = await this.s3Client.send(command);
+
+      logger.info(`File uploaded to S3: ${key}`, {
+        bucket: this.bucket,
+        key,
+        size: fileBuffer.length,
+        contentType: detectedContentType,
+        etag: result.ETag
+      });
+
+      return {
+        fileName,
+        key,
+        size: fileBuffer.length,
+        contentType: detectedContentType,
+        metadata: uploadParams.Metadata,
+        etag: result.ETag,
+        url: `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`,
+        storageType: 's3'
+      };
+    } catch (error) {
+      logger.error(`Failed to upload file to S3: ${error.message}`, {
+        bucket: this.bucket,
+        originalName,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to upload file to S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
@@ -99,13 +166,58 @@ class S3StorageProvider extends StorageProvider {
    * @returns {Promise<Object>} - File content and metadata
    */
   async getFile(fileIdentifier) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Get the file from S3
-    // 2. Return file content and metadata
-    
-    logger.warn('S3StorageProvider.getFile is a placeholder. S3 integration not implemented yet.');
-    
-    throw new Error('S3 integration not implemented yet');
+    try {
+      // Get object from S3
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: fileIdentifier
+      });
+
+      const result = await this.s3Client.send(command);
+
+      // Convert stream to buffer
+      const chunks = [];
+      for await (const chunk of result.Body) {
+        chunks.push(chunk);
+      }
+      const buffer = Buffer.concat(chunks);
+
+      logger.debug(`File retrieved from S3: ${fileIdentifier}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        size: buffer.length,
+        contentType: result.ContentType
+      });
+
+      return {
+        buffer,
+        size: buffer.length,
+        contentType: result.ContentType,
+        lastModified: result.LastModified,
+        etag: result.ETag,
+        metadata: result.Metadata || {},
+        key: fileIdentifier
+      };
+    } catch (error) {
+      if (error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
+        logger.warn(`File not found in S3: ${fileIdentifier}`, {
+          bucket: this.bucket,
+          key: fileIdentifier
+        });
+        throw new NotFoundError(`File not found: ${fileIdentifier}`);
+      }
+
+      logger.error(`Failed to get file from S3: ${error.message}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to get file from S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
@@ -114,29 +226,96 @@ class S3StorageProvider extends StorageProvider {
    * @returns {Promise<boolean>} - True if file was deleted
    */
   async deleteFile(fileIdentifier) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Delete the file from S3
-    // 2. Return success status
-    
-    logger.warn('S3StorageProvider.deleteFile is a placeholder. S3 integration not implemented yet.');
-    
-    return false;
+    try {
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: fileIdentifier
+      });
+
+      await this.s3Client.send(command);
+
+      logger.info(`File deleted from S3: ${fileIdentifier}`, {
+        bucket: this.bucket,
+        key: fileIdentifier
+      });
+
+      return true;
+    } catch (error) {
+      // S3 delete doesn't fail if the object doesn't exist, but we'll handle other errors
+      logger.error(`Failed to delete file from S3: ${error.message}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to delete file from S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
    * List files in an S3 prefix
    * @param {string} directory - S3 prefix
    * @param {Object} options - List options
+   * @param {string} options.extension - Filter by extension
+   * @param {number} options.maxKeys - Maximum number of keys to return
    * @returns {Promise<Array>} - Array of file information
    */
   async listFiles(directory = '', options = {}) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. List files in the S3 prefix
-    // 2. Return file information
-    
-    logger.warn('S3StorageProvider.listFiles is a placeholder. S3 integration not implemented yet.');
-    
-    return [];
+    const { extension = null, maxKeys = 1000 } = options;
+
+    try {
+      const prefix = directory ? `${directory}/` : '';
+
+      const command = new ListObjectsV2Command({
+        Bucket: this.bucket,
+        Prefix: prefix,
+        MaxKeys: maxKeys
+      });
+
+      const result = await this.s3Client.send(command);
+
+      if (!result.Contents) {
+        return [];
+      }
+
+      let files = result.Contents.map(object => ({
+        name: path.basename(object.Key),
+        key: object.Key,
+        size: object.Size,
+        lastModified: object.LastModified,
+        etag: object.ETag
+      }));
+
+      // Filter by extension if specified
+      if (extension) {
+        files = files.filter(file =>
+          path.extname(file.name).toLowerCase() === extension.toLowerCase()
+        );
+      }
+
+      logger.debug(`Listed ${files.length} files from S3 prefix: ${prefix}`, {
+        bucket: this.bucket,
+        prefix,
+        totalObjects: result.Contents.length,
+        filteredFiles: files.length
+      });
+
+      return files;
+    } catch (error) {
+      logger.error(`Failed to list files from S3: ${error.message}`, {
+        bucket: this.bucket,
+        directory,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to list files from S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
@@ -144,16 +323,50 @@ class S3StorageProvider extends StorageProvider {
    * @param {string} fileIdentifier - S3 key
    * @param {Object} options - URL options
    * @param {number} options.expiresIn - URL expiration in seconds (default: 3600)
+   * @param {string} options.operation - Operation type ('getObject' or 'putObject', default: 'getObject')
    * @returns {Promise<string>} - Pre-signed URL
    */
   async getFileUrl(fileIdentifier, options = {}) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Generate a pre-signed URL for the S3 object
-    // 2. Return the URL
-    
-    logger.warn('S3StorageProvider.getFileUrl is a placeholder. S3 integration not implemented yet.');
-    
-    return `https://${this.options.bucket}.s3.amazonaws.com/${fileIdentifier}`;
+    const { expiresIn = 3600, operation = 'getObject' } = options;
+
+    try {
+      let command;
+
+      if (operation === 'putObject') {
+        command = new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: fileIdentifier
+        });
+      } else {
+        command = new GetObjectCommand({
+          Bucket: this.bucket,
+          Key: fileIdentifier
+        });
+      }
+
+      const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+
+      logger.debug(`Generated pre-signed URL for S3 object: ${fileIdentifier}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        operation,
+        expiresIn
+      });
+
+      return url;
+    } catch (error) {
+      logger.error(`Failed to generate pre-signed URL: ${error.message}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        operation,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to generate pre-signed URL: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
@@ -162,29 +375,119 @@ class S3StorageProvider extends StorageProvider {
    * @returns {Promise<boolean>} - True if file exists
    */
   async fileExists(fileIdentifier) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Check if the file exists in S3
-    // 2. Return existence status
-    
-    logger.warn('S3StorageProvider.fileExists is a placeholder. S3 integration not implemented yet.');
-    
-    return false;
+    try {
+      const command = new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: fileIdentifier
+      });
+
+      await this.s3Client.send(command);
+
+      logger.debug(`File exists in S3: ${fileIdentifier}`, {
+        bucket: this.bucket,
+        key: fileIdentifier
+      });
+
+      return true;
+    } catch (error) {
+      if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+        logger.debug(`File does not exist in S3: ${fileIdentifier}`, {
+          bucket: this.bucket,
+          key: fileIdentifier
+        });
+        return false;
+      }
+
+      logger.error(`Failed to check file existence in S3: ${error.message}`, {
+        bucket: this.bucket,
+        key: fileIdentifier,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to check file existence in S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
   }
 
   /**
    * Copy a file within S3
    * @param {string} sourceIdentifier - Source S3 key
    * @param {string} destinationIdentifier - Destination S3 key
+   * @param {Object} options - Copy options
    * @returns {Promise<Object>} - Information about the copied file
    */
-  async copyFile(sourceIdentifier, destinationIdentifier) {
-    // This is a placeholder. When implementing S3 integration:
-    // 1. Copy the file within S3
-    // 2. Return information about the copied file
-    
-    logger.warn('S3StorageProvider.copyFile is a placeholder. S3 integration not implemented yet.');
-    
-    throw new Error('S3 integration not implemented yet');
+  async copyFile(sourceIdentifier, destinationIdentifier, options = {}) {
+    try {
+      const command = new CopyObjectCommand({
+        Bucket: this.bucket,
+        CopySource: `${this.bucket}/${sourceIdentifier}`,
+        Key: destinationIdentifier,
+        MetadataDirective: 'COPY'
+      });
+
+      const result = await this.s3Client.send(command);
+
+      logger.info(`File copied in S3: ${sourceIdentifier} -> ${destinationIdentifier}`, {
+        bucket: this.bucket,
+        sourceKey: sourceIdentifier,
+        destinationKey: destinationIdentifier,
+        etag: result.CopyObjectResult?.ETag
+      });
+
+      return {
+        sourceKey: sourceIdentifier,
+        destinationKey: destinationIdentifier,
+        etag: result.CopyObjectResult?.ETag,
+        lastModified: result.CopyObjectResult?.LastModified,
+        storageType: 's3'
+      };
+    } catch (error) {
+      logger.error(`Failed to copy file in S3: ${error.message}`, {
+        bucket: this.bucket,
+        sourceKey: sourceIdentifier,
+        destinationKey: destinationIdentifier,
+        error: error.message
+      });
+      throw new ExternalServiceError(
+        `Failed to copy file in S3: ${error.message}`,
+        'S3',
+        error.code
+      );
+    }
+  }
+
+  /**
+   * Get content type based on file extension
+   * @param {string} filePath - File path or key
+   * @returns {string} - Content type
+   */
+  getContentTypeFromPath(filePath) {
+    const extension = path.extname(filePath).toLowerCase();
+
+    const contentTypes = {
+      '.pdf': 'application/pdf',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.txt': 'text/plain',
+      '.html': 'text/html',
+      '.htm': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.json': 'application/json',
+      '.xml': 'application/xml',
+      '.zip': 'application/zip',
+      '.doc': 'application/msword',
+      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.xls': 'application/vnd.ms-excel',
+      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    };
+
+    return contentTypes[extension] || 'application/octet-stream';
   }
 }
 

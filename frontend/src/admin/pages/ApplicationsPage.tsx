@@ -7,17 +7,21 @@ import {
   FaFilter,
   FaSync,
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import styles from './ApplicationsPage.module.css';
 import Button from '../../components/ui/Button/Button';
 import MobileTable from '../../components/ui/MobileTable/MobileTable';
+import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
+import useResponsive from '../../hooks/useResponsive';
 import Icon from '../../shared/components/ui/Icon';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService from '../services/adminService';
 
 const ApplicationsPage: React.FC = () => {
   const { showToast } = useToast(); // Removed unused _showToast
+  const navigate = useNavigate();
+  const { isMdDown } = useResponsive();
   const [searchTerm, setSearchTerm] = useState(''); // Removed unused _searchTerm
   const [currentPage, setCurrentPage] = useState(1); // Removed unused _currentPage
   const [statusFilter, setStatusFilter] = useState(''); // Removed unused _statusFilter
@@ -111,7 +115,7 @@ const ApplicationsPage: React.FC = () => {
   const applications = data?.applications || [];
 
   const filteredApplications = applications.filter((app) => {
-    if (!app) return false; 
+    if (!app) return false;
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
     try {
@@ -146,7 +150,7 @@ const ApplicationsPage: React.FC = () => {
   });
 
   return (
-    <div className={styles.applicationsPage}>
+    <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Solicitudes de Permisos</h1>
@@ -175,7 +179,7 @@ const ApplicationsPage: React.FC = () => {
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
-                  setCurrentPage(1); 
+                  setCurrentPage(1);
                 }}
                 aria-label="Filtrar por estado"
                 title="Filtrar por estado"
@@ -214,7 +218,82 @@ const ApplicationsPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <MobileTable
+          {/* Mobile Card Layout */}
+          {isMdDown ? (
+            <div className={styles.mobileCards}>
+              {filteredApplications.map((application: any) => (
+                <div
+                  key={application.id || Math.random()}
+                  className={styles.mobileCard}
+                  onClick={() => {
+                    if (application.id) {
+                      navigate(`/applications/${application.id}`);
+                    }
+                  }}
+                >
+                  <div className={styles.mobileCardHeader}>
+                    <div className={styles.mobileCardTitle}>
+                      {(application as any).applicant_name || application.nombre_completo || 'Sin nombre'}
+                    </div>
+                    <div className={styles.mobileCardId}>ID: {application.id || 'N/A'}</div>
+                  </div>
+
+                  <div className={styles.mobileCardContent}>
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Vehículo:</span>
+                      <span className={styles.mobileCardValue}>
+                        {application.marca || 'N/A'} {application.linea || ''}{' '}
+                        {application.ano_modelo ? `(${application.ano_modelo})` : ''}
+                      </span>
+                    </div>
+
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Estado:</span>
+                      {application.status ? (
+                        <span className={`${styles.statusBadge} ${getStatusClass(application.status)}`}>
+                          {getStatusDisplayName(application.status)}
+                        </span>
+                      ) : (
+                        <span className={styles.mobileCardValue}>N/A</span>
+                      )}
+                    </div>
+
+                    <div className={styles.mobileCardItem}>
+                      <span className={styles.mobileCardLabel}>Fecha:</span>
+                      <span className={styles.mobileCardValue}>
+                        {application.created_at ? formatDate(application.created_at) : 'N/A'}
+                      </span>
+                    </div>
+
+                    <div className={styles.mobileCardActions}>
+                      {application.id ? (
+                        <Button
+                          variant="primary"
+                          size="small"
+                          to={`/applications/${application.id}`}
+                          icon={<Icon IconComponent={FaEye} size="sm" />}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Ver detalles
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="small"
+                          disabled
+                          icon={<Icon IconComponent={FaEye} size="sm" />}
+                        >
+                          Ver detalles
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Desktop Table Layout */
+            <MobileTable
             data={filteredApplications}
             columns={[
               {
@@ -260,7 +339,7 @@ const ApplicationsPage: React.FC = () => {
                     'N/A'
                   ),
                 sortable: true,
-                mobilePriority: 0, 
+                mobilePriority: 0,
               },
               {
                 id: 'created_at',
@@ -282,7 +361,7 @@ const ApplicationsPage: React.FC = () => {
                         to={`/applications/${application.id}`}
                         className={styles.viewButton}
                         title="Ver detalles"
-                        onClick={(e) => e.stopPropagation()} 
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Icon IconComponent={FaEye} size="sm" />
                       </Link>
@@ -312,9 +391,10 @@ const ApplicationsPage: React.FC = () => {
             emptyMessage="No se encontraron solicitudes"
             className={styles.mobileTable}
           />
+          )}
         </>
       )}
-    </div>
+    </ResponsiveContainer>
   );
 };
 

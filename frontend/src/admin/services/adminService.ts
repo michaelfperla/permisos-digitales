@@ -20,15 +20,16 @@ export interface DashboardStats {
     rejected: number;
   };
   pendingVerifications: number;
+  // Computed properties for the frontend
+  oxxoPaymentsPending?: number;
+  todayPermits?: number;
 }
 
 export interface Application {
   id: string;
   status: string;
   created_at: string;
-  updated_at: string;
-  payment_proof_uploaded_at?: string;
-  payment_verified_at?: string;
+  updated_at: string;  payment_verified_at?: string;
   payment_reference?: string;
   nombre_completo: string;
   marca: string;
@@ -43,7 +44,7 @@ export interface Application {
 }
 
 export interface PaginatedApplications {
-  data: Application[];
+  applications: Application[];
   pagination: {
     page: number;
     limit: number;
@@ -130,19 +131,37 @@ export interface PaginatedUsers {
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
     const response = await api.get<any>('/dashboard-stats');
+    console.log('[getDashboardStats] Raw API response:', response.data); // Temporarily changed to log for debugging
+
+    let stats: DashboardStats;
 
     if (response.data?.data) {
       console.debug('[getDashboardStats] Found stats in response.data.data'); // Changed to debug
-      return response.data.data;
+      stats = response.data.data;
     }
-    else if (response.data && (response.data.statusCounts || response.data.pendingVerifications)) {
+    else if (response.data && (response.data.statusCounts || response.data.pendingVerifications !== undefined)) {
       console.debug('[getDashboardStats] Found stats directly in response.data'); // Changed to debug
-      return response.data;
+      stats = response.data;
     }
     else {
       console.error('[getDashboardStats] Unexpected response structure:', response.data);
       throw new Error('Dashboard stats not found in response');
     }
+
+    // Compute derived properties for the frontend
+    const statusCounts = stats.statusCounts || [];
+
+    // Find OXXO payments pending (AWAITING_OXXO_PAYMENT status)
+    const oxxoPaymentsPending = statusCounts.find(s => s.status === 'AWAITING_OXXO_PAYMENT')?.count || 0;
+
+    // Find permits ready today (PERMIT_READY status)
+    const todayPermits = statusCounts.find(s => s.status === 'PERMIT_READY')?.count || 0;
+
+    return {
+      ...stats,
+      oxxoPaymentsPending,
+      todayPermits,
+    };
   } catch (error) {
     console.error('Failed to get dashboard stats:', error);
     throw new Error('Failed to get dashboard statistics');
@@ -169,22 +188,34 @@ export const getAllApplications = async (
     if (searchTerm) params.search = searchTerm;
 
     const response = await api.get<any>('/applications', { params });
-    console.debug('[getAllApplications] Raw API response:', response.data); // Changed to debug
-    console.debug('[getAllApplications] Request params:', params); // Changed to debug
+    console.log('[getAllApplications] Raw API response:', response.data); // Temporarily changed to log for debugging
+    console.log('[getAllApplications] Request params:', params); // Temporarily changed to log for debugging
 
+    // Check for ApiResponse.success format: { success: true, data: { applications: [...], total: X, page: Y, limit: Z, totalPages: W } }
+    if (response.data?.success && response.data?.data) {
+      console.debug('[getAllApplications] Found ApiResponse.success format'); // Changed to debug
+      const data = response.data.data;
+
+      if (data.applications && Array.isArray(data.applications)) {
+        console.debug('[getAllApplications] Found applications in response.data.data'); // Changed to debug
+        return {
+          applications: data.applications,
+          pagination: {
+            page: data.page || page,
+            limit: data.limit || limit,
+            total: data.total || data.applications.length,
+            totalPages: data.totalPages || Math.ceil((data.total || data.applications.length) / (data.limit || limit)),
+          },
+        };
+      }
+    }
+
+    // Legacy format: { applications: [...], pagination: {...} }
     if (response.data && response.data.applications && response.data.pagination) {
       console.debug('[getAllApplications] Found applications and pagination in response.data'); // Changed to debug
       return {
         applications: response.data.applications,
         pagination: response.data.pagination,
-      };
-    }
-
-    if (response.data?.data && response.data.data.applications && response.data.data.pagination) {
-      console.debug('[getAllApplications] Found applications and pagination in response.data.data'); // Changed to debug
-      return {
-        applications: response.data.data.applications,
-        pagination: response.data.data.pagination,
       };
     }
 
@@ -253,7 +284,7 @@ export const getPendingVerifications = async (
     'Manual payment verification is no longer supported. Payment provider integration pending.',
   );
   return {
-    data: [],
+    applications: [],
     pagination: {
       page: page,
       limit: limit,
@@ -435,11 +466,11 @@ export const getUserDetails = async (id: string): Promise<{ user: AdminUserDetai
     const response = await api.get<any>(`/users/${id}`);
     if (response.data?.data?.user) {
       console.debug('[getUserDetails] Found user data in response.data.data.user'); // Changed to debug
-      return { user: response.data.data.user }; 
+      return { user: response.data.data.user };
     }
     else if (response.data?.user) {
       console.debug('[getUserDetails] Found user data directly in response.data.user'); // Changed to debug
-      return { user: response.data.user }; 
+      return { user: response.data.user };
     }
     else {
       console.error(

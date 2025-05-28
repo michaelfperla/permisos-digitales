@@ -9,11 +9,74 @@ const { logger } = require('../utils/enhanced-logger');
 const http = require('http');
 const https = require('https');
 const samplePdfs = require('../utils/sample-pdfs');
+const storageService = require('./storage/storage-service');
 
 // Constants
 const PDF_STORAGE_DIR = path.join(__dirname, '../../storage/pdfs');
 const LOG_STORAGE_DIR = path.join(__dirname, '../../storage/logs');
 const SCREENSHOT_DIR = path.join(__dirname, '../../storage/permit_screenshots');
+
+/**
+ * Generate S3 object key for PDF files
+ * @param {number} applicationId - Application ID
+ * @param {string} type - PDF type (permiso, recibo, certificado, placas)
+ * @param {string} permitId - Permit ID from government system
+ * @param {number} timestamp - Timestamp for uniqueness
+ * @returns {string} S3 object key
+ */
+function generatePdfS3Key(applicationId, type, permitId, timestamp) {
+  // Structure: permits/{applicationId}/{type}_{permitId}_{timestamp}.pdf
+  return `permits/${applicationId}/${type}_${permitId}_${timestamp}.pdf`;
+}
+
+/**
+ * Save PDF buffer to storage (S3 or local based on configuration)
+ * @param {Buffer} pdfBuffer - PDF content as buffer
+ * @param {number} applicationId - Application ID
+ * @param {string} type - PDF type (permiso, recibo, certificado, placas)
+ * @param {string} permitId - Permit ID from government system
+ * @param {number} timestamp - Timestamp for uniqueness
+ * @returns {Promise<string>} Storage identifier (S3 key or local filename)
+ */
+async function savePdfToStorage(pdfBuffer, applicationId, type, permitId, timestamp) {
+  try {
+    const originalName = `${type}_${permitId}_${timestamp}.pdf`;
+
+    const saveOptions = {
+      originalName,
+      subDirectory: `permits/${applicationId}`,
+      prefix: type,
+      contentType: 'application/pdf',
+      metadata: {
+        applicationId: applicationId.toString(),
+        permitId: permitId || 'unknown',
+        documentType: type,
+        generatedAt: new Date().toISOString()
+      }
+    };
+
+    const result = await storageService.saveFile(pdfBuffer, saveOptions);
+
+    logger.info(`PDF saved to storage: ${result.key || result.fileName}`, {
+      applicationId,
+      type,
+      permitId,
+      storageType: result.storageType,
+      size: result.size
+    });
+
+    // Return the storage identifier (S3 key for S3, filename for local)
+    return result.key || result.fileName;
+  } catch (error) {
+    logger.error(`Failed to save PDF to storage: ${error.message}`, {
+      applicationId,
+      type,
+      permitId,
+      error: error.message
+    });
+    throw error;
+  }
+}
 
 /**
  * Main function to generate a permit via browser automation
@@ -78,7 +141,7 @@ exports.generatePermit = async (applicationId) => {
     logger.info(`Captured ${cookies.length} cookies for authenticated downloads`);
 
     // Download all PDF files
-    const pdfFilePaths = await downloadPermitPdfs(mainPage, pdfLinks, cookies);
+    const pdfFilePaths = await downloadPermitPdfs(mainPage, pdfLinks, cookies, applicationId);
 
     // Update the application with permit data and file paths
     await updateApplicationWithPermitData(applicationId, permitData, pdfFilePaths);
@@ -800,7 +863,95 @@ function extractPermitIdFromUrl(url) {
 }
 
 /**
- * Download a file via direct HTTP request with cookies
+ * Download a file via direct HTTP request with cookies and return as buffer
+ */
+function downloadFileAsBuffer(url, cookies) {
+  return new Promise((resolve, reject) => {
+    // Determine if it's http or https
+    const client = url.startsWith('https') ? https : http;
+
+    // Format cookies for HTTP header if provided
+    let cookieHeader = '';
+    if (cookies && cookies.length > 0) {
+      cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+      logger.info(`Using cookies: ${cookieHeader}`);
+    }
+
+    // Add headers to mimic browser with cookies
+    const options = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36',
+        'Accept': 'application/pdf,*/*',
+        'Cookie': cookieHeader
+      }
+    };
+
+    logger.info(`Starting download from: ${url}`);
+
+    // Create the request
+    const req = client.get(url, options, (res) => {
+      // Check for redirect
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        logger.info(`Following redirect to: ${res.headers.location}`);
+        // Follow the redirect
+        return downloadFileAsBuffer(res.headers.location, cookies).then(resolve).catch(reject);
+      }
+
+      // Check if the response is successful
+      if (res.statusCode !== 200) {
+        return reject(new Error(`Failed to download file, status code: ${res.statusCode}`));
+      }
+
+      // Log response headers for debugging
+      logger.debug(`Response headers: ${JSON.stringify(res.headers)}`);
+
+      // Check content type
+      const contentType = res.headers['content-type'];
+      logger.info(`Content-Type: ${contentType}`);
+
+      // Collect data chunks
+      const chunks = [];
+      let downloadedBytes = 0;
+
+      res.on('data', (chunk) => {
+        chunks.push(chunk);
+        downloadedBytes += chunk.length;
+      });
+
+      res.on('end', () => {
+        logger.info(`Download complete (${downloadedBytes} bytes)`);
+
+        const buffer = Buffer.concat(chunks);
+        if (buffer.length === 0) {
+          reject(new Error('Downloaded file is empty'));
+        } else {
+          resolve({
+            buffer: buffer,
+            size: buffer.length
+          });
+        }
+      });
+
+      res.on('error', (err) => {
+        reject(new Error(`Response error: ${err.message}`));
+      });
+    });
+
+    // Handle request errors
+    req.on('error', (err) => {
+      reject(new Error(`Request error: ${err.message}`));
+    });
+
+    // Set timeout
+    req.setTimeout(20000, () => {
+      req.abort();
+      reject(new Error('Request timeout'));
+    });
+  });
+}
+
+/**
+ * Download a file via direct HTTP request with cookies (legacy function for backward compatibility)
  */
 function downloadFile(url, filePath, cookies) {
   return new Promise((resolve, reject) => {
@@ -897,9 +1048,9 @@ function downloadFile(url, filePath, cookies) {
 }
 
 /**
- * Download PDF using the page's session
+ * Download PDF using the page's session and return as buffer
  */
-async function downloadPDFWithPage(page, pdfUrl, filePath) {
+async function downloadPDFWithPage(page, pdfUrl) {
   logger.info(`Starting browser-based download for ${pdfUrl}`);
 
   try {
@@ -907,21 +1058,18 @@ async function downloadPDFWithPage(page, pdfUrl, filePath) {
     logger.info(`Navigating to PDF URL: ${pdfUrl}`);
     await page.goto(pdfUrl, { waitUntil: 'networkidle0', timeout: 20000 });
 
-    // Use PDF printing functionality of browser
+    // Use PDF printing functionality of browser to get buffer
     logger.info('Using browser PDF functionality');
-    await page.pdf({
-      path: filePath,
+    const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true
     });
 
-    // Check the file size
-    const fileStats = await fs.stat(filePath);
-    logger.info(`PDF saved to ${filePath} (${fileStats.size} bytes)`);
+    logger.info(`PDF generated via browser (${pdfBuffer.length} bytes)`);
 
     return {
-      path: filePath,
-      size: fileStats.size
+      buffer: pdfBuffer,
+      size: pdfBuffer.length
     };
   } catch (error) {
     logger.error(`Error during browser-based download: ${error.message}`);
@@ -930,9 +1078,9 @@ async function downloadPDFWithPage(page, pdfUrl, filePath) {
 }
 
 /**
- * Download all PDF files using direct HTTP requests
+ * Download all PDF files and save to storage (S3 or local)
  */
-async function downloadPermitPdfs(page, pdfLinks, cookies) {
+async function downloadPermitPdfs(page, pdfLinks, cookies, applicationId) {
   logger.info('Downloading PDF files...');
 
   const pdfFilePaths = {
@@ -949,28 +1097,32 @@ async function downloadPermitPdfs(page, pdfLinks, cookies) {
         try {
           logger.info(`Downloading ${type} PDF from ${pdfLinks[type]}`);
 
-          // Use a unique filename based on type, application ID (extracted from URL), and timestamp
+          // Use a unique timestamp and permit ID
           const timestamp = Date.now();
           const permitId = extractPermitIdFromUrl(pdfLinks[type]) || 'unknown';
-          const filename = `${type}_${permitId}_${timestamp}.pdf`;
-          const filePath = path.join(PDF_STORAGE_DIR, filename);
+          let pdfBuffer = null;
 
           try {
             // Try direct HTTP download first
             logger.info(`Attempting direct HTTP download with cookies for ${type}`);
-            const result = await downloadFile(pdfLinks[type], filePath, cookies);
-            logger.info(`Successfully downloaded ${type} PDF via HTTP to ${filePath} (${result.size} bytes)`);
-            pdfFilePaths[type] = filename;
+            const result = await downloadFileAsBuffer(pdfLinks[type], cookies);
+            pdfBuffer = result.buffer;
+            logger.info(`Successfully downloaded ${type} PDF via HTTP (${result.size} bytes)`);
           } catch (httpError) {
             logger.warn(`Direct HTTP download failed for ${type}, error: ${httpError.message}`);
 
             // Fall back to browser-based download
             logger.info(`Falling back to browser-based download for ${type}`);
-            const browserFilePath = path.join(PDF_STORAGE_DIR, `browser_${type}_${permitId}_${timestamp}.pdf`);
-            const browserResult = await downloadPDFWithPage(page, pdfLinks[type], browserFilePath);
+            const browserResult = await downloadPDFWithPage(page, pdfLinks[type]);
+            pdfBuffer = browserResult.buffer;
+            logger.info(`Successfully downloaded ${type} PDF via browser (${browserResult.size} bytes)`);
+          }
 
-            logger.info(`Successfully downloaded ${type} PDF via browser to ${browserFilePath} (${browserResult.size} bytes)`);
-            pdfFilePaths[type] = path.basename(browserFilePath);
+          // Save PDF to storage (S3 or local)
+          if (pdfBuffer) {
+            const storageIdentifier = await savePdfToStorage(pdfBuffer, applicationId, type, permitId, timestamp);
+            pdfFilePaths[type] = storageIdentifier;
+            logger.info(`Saved ${type} PDF to storage: ${storageIdentifier}`);
           }
 
         } catch (downloadError) {

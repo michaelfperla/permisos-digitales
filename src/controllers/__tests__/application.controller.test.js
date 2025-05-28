@@ -96,8 +96,6 @@ jest.mock('path', () => ({
   relative: jest.fn().mockReturnValue('relative/path')
 }));
 
-
-
 describe('Application Controller', () => {
   let req, res, next;
   let applicationRepository, applicationService, storageService, handleControllerError, logger, db;
@@ -327,7 +325,6 @@ describe('Application Controller', () => {
         user_id: 123,
         status: ApplicationStatus.PROOF_REJECTED,
         updated_at: new Date(),
-        payment_rejection_reason: 'Invalid payment proof',
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
@@ -579,7 +576,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid document type. Allowed types: permiso, recibo, certificado' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid document type. Allowed types: permiso, recibo, certificado, placas' });
       expect(db.query).not.toHaveBeenCalled();
     });
 
@@ -1048,7 +1045,6 @@ describe('Application Controller', () => {
         status: ApplicationStatus.PROOF_SUBMITTED,
         payment_proof_path: fileInfo.relativePath,
         payment_reference: 'REF123456',
-        payment_proof_uploaded_at: new Date().toISOString()
       };
 
       // Mock the controller implementation directly

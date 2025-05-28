@@ -18,16 +18,12 @@ const config = {
   govtPassword: process.env.GOVT_PASSWORD,
   sessionSecret: process.env.SESSION_SECRET || DEFAULT_SESSION_SECRET, // Only use default in non-production
 
-  // Email configuration
+  // Email configuration - SMTP only
   emailHost: process.env.EMAIL_HOST,
   emailPort: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT, 10) : undefined,
   emailUser: process.env.EMAIL_USER,
   emailPass: process.env.EMAIL_PASS,
-  emailFrom: process.env.EMAIL_FROM || 'noreply@permisos-digitales.com',
-
-  // Mailgun configuration
-  mailgunApiKey: process.env.MAILGUN_API_KEY,
-  mailgunDomain: process.env.MAILGUN_DOMAIN,
+  emailFrom: process.env.EMAIL_FROM || 'contacto@permisosdigitales.com.mx',
 
   // Redis configuration
   redisUrl: process.env.REDIS_URL, // Use URL if available
@@ -50,7 +46,7 @@ const config = {
 
   // AWS S3 configuration (only used if storageType is 's3')
   s3Bucket: process.env.S3_BUCKET,
-  s3Region: process.env.S3_REGION || 'us-east-1',
+  s3Region: process.env.AWS_REGION || process.env.S3_REGION || 'us-west-1',
   s3AccessKeyId: process.env.S3_ACCESS_KEY_ID,
   s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
   s3Endpoint: process.env.S3_ENDPOINT, // Optional, for non-AWS S3 compatible services
@@ -72,16 +68,12 @@ if (config.nodeEnv === 'production') {
     { name: 'INTERNAL_API_KEY', value: config.internalApiKey, customCheck: (val) => val === 'dev-internal-api-key-change-in-production', customMessage: 'is using the default value' }
   ];
 
-  // Check if either email service is configured
-  const hasEmailConfig = (
-    config.emailHost && config.emailUser && config.emailPass
-  ) || (
-    config.mailgunApiKey && config.mailgunDomain
-  );
+  // Check if SMTP email service is configured
+  const hasEmailConfig = config.emailHost && config.emailUser && config.emailPass;
 
   if (!hasEmailConfig) {
-    const errorMessage = 'FATAL ERROR: No email configuration is set for production environment. ' +
-      'Either configure SMTP (EMAIL_HOST, EMAIL_USER, EMAIL_PASS) or Mailgun (MAILGUN_API_KEY, MAILGUN_DOMAIN).';
+    const errorMessage = 'FATAL ERROR: SMTP email configuration is not set for production environment. ' +
+      'Please configure EMAIL_HOST, EMAIL_USER, and EMAIL_PASS.';
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }

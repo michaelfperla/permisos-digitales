@@ -46,30 +46,30 @@ rl.question(`${colors.cyan}Do you want to proceed? (yes/no): ${colors.reset}`, (
     logStream.end();
     return;
   }
-  
+
   // Setup database user and password
   console.log(`\n${colors.blue}Production Database Configuration${colors.reset}`);
   console.log(`${colors.cyan}Default values are shown in brackets. Press Enter to accept the default.${colors.reset}`);
-  
+
   rl.question(`${colors.cyan}PostgreSQL superuser [postgres]: ${colors.reset}`, (pgUser) => {
     pgUser = pgUser || 'postgres';
-    
+
     rl.question(`${colors.cyan}Production database name [permisos_digitales]: ${colors.reset}`, (dbName) => {
       dbName = dbName || 'permisos_digitales';
-      
+
       rl.question(`${colors.cyan}Application DB user [permisos_admin]: ${colors.reset}`, (dbUser) => {
         dbUser = dbUser || 'permisos_admin';
-        
+
         rl.question(`${colors.cyan}Application DB password [Permisos2025!]: ${colors.reset}`, (dbPassword) => {
           dbPassword = dbPassword || 'Permisos2025!';
-          
+
           // Confirm settings
           console.log(`\n${colors.blue}Database Configuration Summary:${colors.reset}`);
           console.log(`- PostgreSQL Superuser: ${pgUser}`);
           console.log(`- Production Database Name: ${dbName}`);
           console.log(`- Application DB User: ${dbUser}`);
           console.log(`- Password: ${'*'.repeat(dbPassword.length)}`);
-          
+
           rl.question(`${colors.cyan}Confirm these settings? (yes/no): ${colors.reset}`, (confirm) => {
             if (confirm.toLowerCase() !== 'yes') {
               console.log(`${colors.yellow}Database setup canceled.${colors.reset}`);
@@ -77,11 +77,11 @@ rl.question(`${colors.cyan}Do you want to proceed? (yes/no): ${colors.reset}`, (
               logStream.end();
               return;
             }
-            
+
             // Create production SQL files with the provided settings
             try {
               log("Creating production database SQL files...");
-              
+
               // Create production database SQL
               const createDbSql = `
 -- production_create_database.sql
@@ -104,7 +104,7 @@ $$;
 
 -- Create the database and set the owner directly
 CREATE DATABASE ${dbName}
-  WITH 
+  WITH
   OWNER = ${dbUser}
   ENCODING = 'UTF8'
   LC_COLLATE = 'en_US.UTF-8'
@@ -122,10 +122,10 @@ CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 GRANT ALL PRIVILEGES ON DATABASE ${dbName} TO ${dbUser};
 GRANT ALL ON SCHEMA public TO ${dbUser};
 `;
-              
+
               fs.writeFileSync(path.join(__dirname, 'production_create_database.sql'), createDbSql);
               log("Created production_create_database.sql");
-              
+
               // Create .env.production file
               const envProduction = `# Server Config
 NODE_ENV=production
@@ -142,7 +142,7 @@ EMAIL_HOST=${process.env.EMAIL_HOST || 'smtp.example.com'}
 EMAIL_PORT=${process.env.EMAIL_PORT || '587'}
 EMAIL_USER=${process.env.EMAIL_USER || 'user@example.com'}
 EMAIL_PASS=${process.env.EMAIL_PASS || 'password'}
-EMAIL_FROM=noreply@permisos-digitales.com
+EMAIL_FROM=contacto@permisosdigitales.com.mx
 
 # Application URLs (update with production domains)
 APP_URL=https://api.permisos-digitales.com
@@ -155,10 +155,10 @@ RATE_LIMIT_MAX_REQUESTS=100
 COOKIE_SECRET=${require('crypto').randomBytes(32).toString('hex')}
 ENABLE_HTTPS_REDIRECT=true
 `;
-              
+
               fs.writeFileSync(path.join(__dirname, '../../..', '.env.production'), envProduction);
               log("Created .env.production file");
-              
+
               // Execute the database setup scripts
               const executeScript = (scriptName, description, isProduction = false) => {
                 console.log(`\n${colors.blue}${description}...${colors.reset}`);
@@ -184,14 +184,14 @@ ENABLE_HTTPS_REDIRECT=true
                   return false;
                 }
               };
-              
+
               // Create backup directory
               const backupDir = path.join(__dirname, '../../..', 'backups');
               if (!fs.existsSync(backupDir)) {
                 fs.mkdirSync(backupDir, { recursive: true });
                 log("Created backups directory");
               }
-              
+
               // Execute production database creation
               if (!executeScript('production_create_database.sql', 'Creating production database')) {
                 console.log(`${colors.red}Failed to create production database. See log for details.${colors.reset}`);
@@ -199,7 +199,7 @@ ENABLE_HTTPS_REDIRECT=true
                 logStream.end();
                 return;
               }
-              
+
               // Execute schema creation
               if (!executeScript('2_create_schema.sql', 'Creating database schema')) {
                 console.log(`${colors.red}Failed to create database schema. See log for details.${colors.reset}`);
@@ -207,7 +207,7 @@ ENABLE_HTTPS_REDIRECT=true
                 logStream.end();
                 return;
               }
-              
+
               // Execute admin user creation
               if (!executeScript('3_create_admin_user.sql', 'Creating admin users')) {
                 console.log(`${colors.red}Failed to create admin users. See log for details.${colors.reset}`);
@@ -215,7 +215,7 @@ ENABLE_HTTPS_REDIRECT=true
                 logStream.end();
                 return;
               }
-              
+
               console.log(`\n${colors.green}Production database setup completed successfully!${colors.reset}`);
               console.log(`\n${colors.blue}Next Steps:${colors.reset}`);
               console.log(`1. Update your application to use the production database`);
@@ -223,7 +223,7 @@ ENABLE_HTTPS_REDIRECT=true
               console.log(`   - Or use the .env.production file`);
               console.log(`2. Set up regular database backups using the provided scripts`);
               console.log(`3. Configure your web server for HTTPS`);
-              
+
               rl.close();
               logStream.end();
             } catch (err) {

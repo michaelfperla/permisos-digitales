@@ -1,6 +1,5 @@
 // src/services/email.service.js
 const nodemailer = require('nodemailer');
-const mailgunTransport = require('nodemailer-mailgun-transport');
 const config = require('../config');
 const { logger } = require('../utils/enhanced-logger');
 
@@ -11,25 +10,9 @@ let transporter;
 function initTransporter() {
   if (transporter) return;
 
-  // Check if Mailgun configuration is available
-  if (config.mailgunApiKey && config.mailgunDomain) {
-    // Configure Mailgun transport
-    const mailgunOptions = {
-      auth: {
-        api_key: config.mailgunApiKey,
-        domain: config.mailgunDomain
-      }
-    };
-
-    transporter = nodemailer.createTransport(mailgunTransport(mailgunOptions));
-    logger.info('Email service initialized with Mailgun transport');
-    return;
-  }
-
-  // Fall back to SMTP if Mailgun is not configured
   // Check if SMTP configuration is available
   if (!config.emailHost || !config.emailPort || !config.emailUser || !config.emailPass) {
-    logger.warn('Email configuration is incomplete. Email functionality will be disabled.');
+    logger.warn('SMTP email configuration is incomplete. Email functionality will be disabled.');
     return;
   }
 

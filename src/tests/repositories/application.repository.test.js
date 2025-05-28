@@ -283,7 +283,6 @@ describe('ApplicationRepository', () => {
           userId
         ])
       );
-      expect(db.query.mock.calls[0][0]).toContain('payment_proof_uploaded_at = CURRENT_TIMESTAMP');
       expect(db.query.mock.calls[0][0]).not.toContain('desired_start_date');
       expect(result).toEqual(mockUpdatedApplication);
     });
@@ -365,7 +364,6 @@ describe('ApplicationRepository', () => {
       const mockUpdatedApplication = {
         id: applicationId,
         status: ApplicationStatus.PAYMENT_RECEIVED,
-        payment_verified_by: adminId,
         payment_notes: notes
       };
 
@@ -427,8 +425,6 @@ describe('ApplicationRepository', () => {
       const mockUpdatedApplication = {
         id: applicationId,
         status: ApplicationStatus.PROOF_REJECTED,
-        payment_verified_by: adminId,
-        payment_rejection_reason: rejectionReason
       };
 
       // Mock the transaction callback result using our standardized approach

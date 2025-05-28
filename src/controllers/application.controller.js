@@ -5,6 +5,7 @@ const puppeteerService = require('../services/puppeteer.service');
 const applicationService = require('../services/application.service');
 const paymentService = require('../services/payment.service');
 const pdfService = require('../services/pdf-service');
+const storageService = require('../services/storage/storage-service');
 const pdfStorageService = require('../services/storage/pdf-storage-service');
 const { logger } = require('../utils/enhanced-logger');
 const { handleControllerError, createError } = require('../utils/error-helpers');
@@ -957,7 +958,7 @@ exports.downloadPermit = async (req, res, next) => {
     logger.warn(`Download failed: User not authenticated for AppID ${applicationId}`);
     return res.status(401).json({ message: 'Unauthorized.' });
   }
-  const allowedTypes = ['permiso', 'recibo', 'certificado'];
+  const allowedTypes = ['permiso', 'recibo', 'certificado', 'placas'];
   if (!requestedTypeParam || !allowedTypes.includes(requestedTypeParam.toLowerCase())) {
     logger.warn(`Download failed: Invalid document type requested '${requestedTypeParam}' for AppID ${applicationId}`);
     return res.status(400).json({ message: `Invalid document type. Allowed types: ${allowedTypes.join(', ')}` });
@@ -977,6 +978,10 @@ exports.downloadPermit = async (req, res, next) => {
     dbColumn = 'certificado_file_path';
     filenamePrefix = 'Certificado';
     break;
+  case 'placas':
+    dbColumn = 'placas_file_path';
+    filenamePrefix = 'Placas';
+    break;
   case 'permiso':
     // default case removed as we validated type earlier
     dbColumn = 'permit_file_path';
@@ -991,7 +996,7 @@ exports.downloadPermit = async (req, res, next) => {
   try {
     // --- Query DB ---
     // Fetch all path columns + status + ownership info
-    const query = `SELECT user_id, status, permit_file_path, recibo_file_path, certificado_file_path, is_sample_permit
+    const query = `SELECT user_id, status, permit_file_path, recibo_file_path, certificado_file_path, placas_file_path
                        FROM permit_applications WHERE id = $1;`;
     const { rows } = await db.query(query, [applicationId]);
 
@@ -1037,17 +1042,13 @@ exports.downloadPermit = async (req, res, next) => {
 
 
     // --- Prepare Download ---
-    const isSample = app.is_sample_permit === true;
     const fileExtension = path.extname(filePathFromDB) || '.pdf';
     let downloadFilename = `${filenamePrefix}_${applicationId}${fileExtension}`;
-    if (isSample) {
-      downloadFilename = `MUESTRA_${downloadFilename}`;
-    }
     logger.debug(`Generated Download Filename: ${downloadFilename}`);
 
     // --- Copy to User Downloads (Optional - run in background) ---
     const filename = path.basename(filePathFromDB);
-    pdfService.copyPermitToUserDownloads(filename, applicationId, requestedType, app.folio, isSample)
+    pdfService.copyPermitToUserDownloads(filename, applicationId, requestedType, app.folio, false)
       .then(copyResult => {
         if (copyResult.success) logger.info(`Copied ${requestedType} to user downloads: ${copyResult.filename}`);
         else logger.warn(`Could not copy ${requestedType} to user downloads: ${copyResult.error}`);
@@ -1080,6 +1081,115 @@ exports.downloadPermit = async (req, res, next) => {
     // Catch errors from DB query, ownership check, etc.
     logger.error(`Error during ${requestedType} download processing for App ${applicationId}:`, error);
     next(error); // Pass to global error handler
+  }
+};
+
+/**
+ * Get secure URL for PDF access (pre-signed URL for S3 or direct URL for local)
+ */
+exports.getPdfUrl = async (req, res, next) => {
+  const userId = req.session.userId;
+  const applicationId = parseInt(req.params.id, 10);
+  const requestedTypeParam = req.params.type;
+
+  // Input Validation
+  if (isNaN(applicationId) || applicationId <= 0) {
+    logger.warn(`PDF URL request failed: Invalid Application ID format ${req.params.id}`);
+    return res.status(400).json({ message: 'Invalid Application ID format.' });
+  }
+  if (!userId) {
+    logger.warn(`PDF URL request failed: User not authenticated for AppID ${applicationId}`);
+    return res.status(401).json({ message: 'Unauthorized.' });
+  }
+
+  try {
+    // Map frontend type to database column and user-friendly name
+    const typeMapping = {
+      'permiso': { dbColumn: 'permit_file_path', displayName: 'Permiso' },
+      'recibo': { dbColumn: 'recibo_file_path', displayName: 'Recibo' },
+      'certificado': { dbColumn: 'certificado_file_path', displayName: 'Certificado' },
+      'placas': { dbColumn: 'placas_file_path', displayName: 'Placas' }
+    };
+
+    const requestedType = requestedTypeParam.toLowerCase();
+    if (!typeMapping[requestedType]) {
+      logger.warn(`PDF URL request failed: Invalid document type '${requestedTypeParam}' for App ${applicationId}`);
+      return res.status(400).json({ message: `Invalid document type: ${requestedTypeParam}` });
+    }
+
+    const { dbColumn, displayName } = typeMapping[requestedType];
+
+    // Query database for application and check ownership
+    const query = `
+      SELECT id, user_id, status, ${dbColumn}
+      FROM permit_applications
+      WHERE id = $1
+    `;
+    const { rows } = await db.query(query, [applicationId]);
+
+    if (rows.length === 0) {
+      logger.warn(`PDF URL request failed: Application ${applicationId} not found`);
+      return res.status(404).json({ message: 'Application not found.' });
+    }
+
+    const app = rows[0];
+
+    // Check ownership
+    if (app.user_id !== userId) {
+      logger.warn(`PDF URL request failed: User ${userId} does not own Application ${applicationId}`);
+      return res.status(403).json({ message: 'Access denied. This application does not belong to you.' });
+    }
+
+    // Extract file path from database
+    const filePathFromDB = app[dbColumn];
+
+    // Check status and path existence
+    if (app.status !== 'PERMIT_READY' || !filePathFromDB) {
+      logger.warn(`PDF URL request failed for App ${applicationId}, Type ${requestedType}: Status=${app.status}, Path=${filePathFromDB}`);
+      const message = app.status !== 'PERMIT_READY'
+        ? `Permiso no está listo (Estado: ${app.status}).`
+        : `Documento de tipo '${requestedType}' no encontrado para esta solicitud.`;
+      return res.status(400).json({ message });
+    }
+
+    // Get secure URL from storage service
+    try {
+      const urlOptions = {
+        expiresIn: 3600 // 1 hour expiration
+      };
+
+      const secureUrl = await storageService.getFileUrl(filePathFromDB, urlOptions);
+
+      logger.info(`Generated secure URL for ${requestedType} PDF: ${filePathFromDB}`, {
+        applicationId,
+        userId,
+        documentType: requestedType,
+        storageType: storageService.provider.constructor.name
+      });
+
+      res.status(200).json({
+        success: true,
+        url: secureUrl,
+        documentType: requestedType,
+        displayName: displayName,
+        expiresIn: urlOptions.expiresIn,
+        message: `URL segura generada para ${displayName}`
+      });
+
+    } catch (urlError) {
+      logger.error(`Error generating secure URL for ${requestedType} PDF: ${urlError.message}`, {
+        applicationId,
+        filePathFromDB,
+        error: urlError.message
+      });
+      return res.status(500).json({
+        message: `Error generando URL segura para ${displayName}. Por favor intente de nuevo más tarde.`
+      });
+    }
+
+  } catch (error) {
+    logger.error(`Error during ${requestedType} PDF URL processing for App ${applicationId}:`, error);
+    next(error);
   }
 };
 

@@ -12,7 +12,7 @@ jest.mock('../../config', () => ({
   emailPort: 587,
   emailUser: 'ymmim6btfmeygvha@ethereal.email',
   emailPass: 'password123',
-  emailFrom: 'noreply@permisos-digitales.com',
+  emailFrom: 'contacto@permisosdigitales.com.mx',
   mailgunApiKey: null, // No Mailgun config for this test
   mailgunDomain: null,
   appUrl: 'https://test.example.com'

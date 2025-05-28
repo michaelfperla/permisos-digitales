@@ -33,9 +33,7 @@ interface TimelineStep {
 interface StatusTimelineProps {
   currentStatus: ApplicationStatus;
   applicationDates: {
-    created_at: string;
-    payment_proof_uploaded_at?: string;
-    payment_verified_at?: string;
+    created_at: string;    payment_verified_at?: string;
     fecha_expedicion?: string;
   };
 }

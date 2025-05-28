@@ -55,9 +55,7 @@ interface MockApplicationDetails {
   dates: {
     created: string;
     updated: string;
-    paymentVerified?: string;
-    paymentProofUploaded?: string;
-  };
+    paymentVerified?: string;  };
   paymentReference?: string;
   payment_rejection_reason?: string;
   folio?: string;

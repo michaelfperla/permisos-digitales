@@ -12,12 +12,16 @@ let isConektaLoaded = false;
  */
 export const loadConektaScript = (): Promise<void> => {
   if (isConektaLoaded && window.Conekta) {
-    console.debug('[ConektaLoader] Conekta already loaded'); // Changed to debug
+    if (import.meta.env.DEV) {
+      console.debug('[ConektaLoader] Conekta already loaded');
+    }
     return Promise.resolve();
   }
 
   if (isConektaLoading) {
-    console.debug('[ConektaLoader] Conekta already loading, waiting...'); // Changed to debug
+    if (import.meta.env.DEV) {
+      console.debug('[ConektaLoader] Conekta already loading, waiting...');
+    }
     return new Promise((resolve) => {
       const checkInterval = setInterval(() => {
         if (isConektaLoaded && window.Conekta) {
@@ -29,7 +33,9 @@ export const loadConektaScript = (): Promise<void> => {
   }
 
   isConektaLoading = true;
-  console.info('[ConektaLoader] Loading Conekta.js...'); // Changed to info
+  if (import.meta.env.DEV) {
+    console.info('[ConektaLoader] Loading Conekta.js...');
+  }
 
   return new Promise((resolve, reject) => {
     try {
@@ -39,7 +45,9 @@ export const loadConektaScript = (): Promise<void> => {
       script.async = true;
 
       script.onload = () => {
-        console.info('[ConektaLoader] Conekta.js loaded successfully'); // Changed to info
+        if (import.meta.env.DEV) {
+          console.info('[ConektaLoader] Conekta.js loaded successfully');
+        }
         isConektaLoaded = true;
         isConektaLoading = false;
         resolve();
@@ -71,10 +79,12 @@ export const initializeConekta = async (publicKey: string): Promise<void> => {
 
     if (window.Conekta) {
       window.Conekta.setPublicKey(publicKey);
-      console.info( // Changed to info
-        '[ConektaLoader] Conekta initialized with public key:',
-        publicKey.substring(0, 8) + '...',
-      );
+      if (import.meta.env.DEV) {
+        console.info(
+          '[ConektaLoader] Conekta initialized with public key:',
+          publicKey.substring(0, 8) + '...',
+        );
+      }
     } else {
       throw new Error('Conekta not available after loading');
     }
@@ -98,12 +108,16 @@ export const getDeviceFingerprint = (): string | null => {
     if (window.Conekta.deviceData && typeof window.Conekta.deviceData.getDeviceId === 'function') {
       const deviceId = window.Conekta.deviceData.getDeviceId();
       if (deviceId && typeof deviceId === 'string' && deviceId.length > 10) {
-        console.info('[ConektaLoader] Got device fingerprint:', deviceId.substring(0, 8) + '...'); // Changed to info
+        if (import.meta.env.DEV) {
+          console.info('[ConektaLoader] Got device fingerprint:', deviceId.substring(0, 8) + '...');
+        }
         return deviceId;
       }
     }
 
-    console.warn('[ConektaLoader] Device fingerprint not available using standard method');
+    if (import.meta.env.DEV) {
+      console.warn('[ConektaLoader] Device fingerprint not available using standard method');
+    }
     return null;
   } catch (error) {
     console.error('[ConektaLoader] Error getting device fingerprint:', error);

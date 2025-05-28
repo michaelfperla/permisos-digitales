@@ -12,6 +12,7 @@ import { useParams, Link } from 'react-router-dom';
 
 import styles from './UserDetailsPage.module.css';
 import Button from '../../components/ui/Button/Button';
+import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Icon from '../../shared/components/ui/Icon';
 import { useAdminAuth as useAuth } from '../../shared/hooks/useAuth';
 import { useToast } from '../../shared/hooks/useToast';
@@ -154,7 +155,7 @@ const UserDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className={styles.userDetailsPage}>
+    <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
         <div>
           <h1 className={styles.pageTitle}>Detalles del Usuario</h1>
@@ -382,7 +383,7 @@ const UserDetailsPage: React.FC = () => {
           </>
         )}
       </div>
-    </div>
+    </ResponsiveContainer>
   );
 };
 

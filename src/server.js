@@ -102,29 +102,31 @@ app.use((req, _res, next) => { httpContext.set('requestId', req.id); next(); });
 app.use(correlationMiddleware); // Set correlation IDs and log requests
 app.use(metricsMiddleware); // Add metrics collection
 
-// Add response finish event listener for debugging session issues
-app.use((req, res, next) => {
-  // Only monitor specific routes
-  if (req.path === '/api/user/profile' && req.method === 'PUT') {
-    const originalEnd = res.end;
+// Add response finish event listener for debugging session issues (development only)
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    // Only monitor specific routes
+    if (req.path === '/api/user/profile' && req.method === 'PUT') {
+      const originalEnd = res.end;
 
-    res.end = function(...args) {
-      // Call the original end method
-      originalEnd.apply(res, args);
+      res.end = function(...args) {
+        // Call the original end method
+        originalEnd.apply(res, args);
 
-      // Log after response is sent
-      console.log(`[ResponseFinish] ${req.method} ${req.path} completed with status ${res.statusCode}. Session ID: ${req.session?.id}`);
+        // Log after response is sent
+        console.log(`[ResponseFinish] ${req.method} ${req.path} completed with status ${res.statusCode}. Session ID: ${req.session?.id}`);
 
-      // Check if session still exists
-      if (req.session) {
-        console.log(`[ResponseFinish] Session still exists after response. User ID: ${req.session.userId}`);
-      } else {
-        console.log('[ResponseFinish] Session was destroyed during or after response!');
-      }
-    };
-  }
-  next();
-});
+        // Check if session still exists
+        if (req.session) {
+          console.log(`[ResponseFinish] Session still exists after response. User ID: ${req.session.userId}`);
+        } else {
+          console.log('[ResponseFinish] Session was destroyed during or after response!');
+        }
+      };
+    }
+    next();
+  });
+}
 
 // --- Core Body Parsing Middleware ---
 // Handle Stripe webhook endpoint BEFORE general JSON parsing if needed

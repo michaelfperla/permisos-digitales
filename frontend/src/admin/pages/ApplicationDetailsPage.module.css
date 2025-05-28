@@ -1,8 +1,5 @@
 /* Application Details Page Styles */
-.applicationDetailsPage {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+/* Container styling now handled by ResponsiveContainer component */
 
 /* Page Header */
 .pageHeader {
@@ -443,4 +440,176 @@
 
 .retryButton:hover {
   background-color: #852d2d;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .detailsCard {
+    padding: 1.25rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .modal {
+    max-width: 90vw;
+    margin: 1rem;
+  }
+
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 1rem;
+  }
+}
+
+@media (width <= 480px) {
+  .pageTitle {
+    font-size: 1.1rem;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .headerActions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .approveButton,
+  .rejectButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .detailsCard {
+    padding: 1rem;
+  }
+
+  .detailsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .detailsIcon {
+    font-size: 1.25rem;
+  }
+
+  .detailsTitle {
+    font-size: 1rem;
+  }
+
+  .detailLabel {
+    font-size: 0.7rem;
+  }
+
+  .detailValue {
+    font-size: 0.8rem;
+  }
+
+  .statusBadge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .paymentProofActions {
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .viewProofButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cancelButton,
+  .confirmRejectButton,
+  .confirmVerifyButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (width <= 360px) {
+  .applicationContent {
+    gap: 1.5rem;
+  }
+
+  .detailsCard {
+    padding: 0.75rem;
+  }
+
+  .detailsSection {
+    margin-bottom: 0.75rem;
+  }
+
+  .modal {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 0.75rem;
+  }
+
+  .verifyDetails {
+    padding: 0.75rem;
+  }
+
+  .loadingContainer,
+  .errorContainer {
+    padding: 2rem 1rem;
+  }
+
+  .errorActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .retryButton {
+    width: 100%;
+    max-width: 200px;
+  }
 }

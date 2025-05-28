@@ -34,8 +34,7 @@
 
 /* 8. Touch Target Enhancements */
 
-/* DEPRECATED: Touch target enhancements have been moved to component CSS modules */
-@import url('./mobile-touch-targets.css'); /* DEPRECATED: Will be removed in a future update */
+/* Touch target enhancements have been moved to component CSS modules */
 
 /* Apply border-box sizing to all elements */
 *,
