@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { api } from './api'; // Use the main API instance with CSRF interceptor
 import { debugLog, errorLog } from '../utils/debug';
 
 // Define types for our API responses and requests
@@ -32,59 +33,7 @@ interface StatusResponse {
   user?: User;
 }
 
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-  withCredentials: true, // Important for cookies
-  timeout: 5000, // 5 second timeout for all requests
-});
-
-// Store CSRF token
-let csrfToken: string | null = null;
-
-/**
- * Get CSRF token for secure requests
- */
-export const getCsrfToken = async (): Promise<string> => {
-  debugLog('authService', 'Fetching CSRF token');
-
-  // If we already have a token, return it
-  if (csrfToken) {
-    debugLog('authService', `Using existing CSRF token: ${csrfToken}`);
-    return csrfToken;
-  }
-
-  try {
-    // Make a direct request to the CSRF token endpoint
-    const response = await api.get<{ data: { csrfToken: string } }>('/auth/csrf-token');
-
-    // Check if the response has the expected structure
-    if (response && response.data && response.data.data && response.data.data.csrfToken) {
-      csrfToken = response.data.data.csrfToken;
-      debugLog('authService', `CSRF token fetched successfully: ${csrfToken}`);
-      return csrfToken;
-    } else {
-      debugLog('authService', 'Invalid CSRF token response structure:', response.data);
-      throw new Error('Invalid CSRF token response structure');
-    }
-  } catch (error) {
-    errorLog('authService', 'Failed to fetch CSRF token', error);
-
-    // In development mode, use a dummy token to allow testing
-    if (process.env.NODE_ENV !== 'production') {
-      csrfToken = 'dummy-csrf-token-for-development';
-      debugLog('authService', `Using dummy CSRF token: ${csrfToken}`);
-      return csrfToken;
-    }
-
-    // In production, rethrow the error
-    throw error;
-  }
-};
+// Note: CSRF token handling is now done automatically by the main API instance
 
 /**
  * Login user
@@ -95,25 +44,13 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   debugLog('authService', `Login attempt for email: ${email}`);
 
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      debugLog('authService', 'No CSRF token found, fetching one');
-      await getCsrfToken();
-    }
-
-    debugLog('authService', `Using CSRF token: ${csrfToken}`);
-
     // Log the request details
     debugLog('authService', 'Login request payload', { email, password: '***REDACTED***' });
 
+    // CSRF token is automatically added by the API interceptor
     const response = await api.post<{ success: boolean; data: { user: User }; message: string }>(
       '/auth/login',
       { email, password },
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
-      },
     );
 
     debugLog('authService', 'Login response received', response.data);
@@ -182,14 +119,6 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
   debugLog('authService', `Registration attempt for email: ${userData.email}`);
 
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      debugLog('authService', 'No CSRF token found, fetching one');
-      await getCsrfToken();
-    }
-
-    debugLog('authService', `Using CSRF token: ${csrfToken}`);
-
     // Log the request details
     const sanitizedUserData = {
       ...userData,
@@ -198,11 +127,8 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
     };
     debugLog('authService', 'Registration request payload', sanitizedUserData);
 
-    const response = await api.post<AuthResponse>('/auth/register', userData, {
-      headers: {
-        'X-CSRF-Token': csrfToken,
-      },
-    });
+    // CSRF token is automatically added by the API interceptor
+    const response = await api.post<AuthResponse>('/auth/register', userData);
 
     debugLog('authService', 'Registration response received', response.data);
 
@@ -263,7 +189,13 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
       return response.data.data; // Return { isLoggedIn: boolean, user?: User }
     } else {
       // Handle cases where the structure might be different unexpectedly
-      console.error('[checkStatus] Unexpected successful response structure:', response.data);
+      // Check if we received HTML instead of JSON (common with 404s or CORS issues)
+      const responseText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      if (responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
+        console.warn('[checkStatus] Received HTML response instead of JSON - likely a 404 or CORS issue');
+      } else {
+        console.error('[checkStatus] Unexpected successful response structure:', response.data);
+      }
       // Decide on appropriate fallback - maybe return logged out state?
       return { isLoggedIn: false };
     }
@@ -313,20 +245,8 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
  */
 export const logout = async (): Promise<AuthResponse> => {
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      await getCsrfToken();
-    }
-
-    const response = await api.post<AuthResponse>(
-      '/auth/logout',
-      {},
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
-      },
-    );
+    // CSRF token is automatically added by the API interceptor
+    const response = await api.post<AuthResponse>('/auth/logout', {});
 
     // Clear user from session storage
     sessionStorage.removeItem('user');
@@ -374,20 +294,8 @@ export const isLoggedIn = (): boolean => {
  */
 export const forgotPassword = async (email: string): Promise<AuthResponse> => {
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      await getCsrfToken();
-    }
-
-    const response = await api.post<AuthResponse>(
-      '/auth/forgot-password',
-      { email },
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
-      },
-    );
+    // CSRF token is automatically added by the API interceptor
+    const response = await api.post<AuthResponse>('/auth/forgot-password', { email });
 
     return response.data;
   } catch (error) {
@@ -415,20 +323,8 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
  */
 export const resetPassword = async (token: string, password: string): Promise<AuthResponse> => {
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      await getCsrfToken();
-    }
-
-    const response = await api.post<AuthResponse>(
-      '/auth/reset-password',
-      { token, password },
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
-      },
-    );
+    // CSRF token is automatically added by the API interceptor
+    const response = await api.post<AuthResponse>('/auth/reset-password', { token, password });
 
     return response.data;
   } catch (error) {
@@ -459,27 +355,17 @@ export const changePassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<AuthResponse> => {
-  // Ensure we have a CSRF token
-  if (!csrfToken) {
-    await getCsrfToken();
-  }
-
   // Log the request (without exposing sensitive data)
   debugLog('authService', 'Changing password', {
     currentPassword: '***REDACTED***',
     newPassword: '***REDACTED***',
   });
 
-  // Make the API call and let Axios errors propagate naturally
-  const response = await api.post<AuthResponse>(
-    '/auth/change-password',
-    { currentPassword, newPassword },
-    {
-      headers: {
-        'X-CSRF-Token': csrfToken,
-      },
-    },
-  );
+  // CSRF token is automatically added by the API interceptor
+  const response = await api.post<AuthResponse>('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
 
   // Log success (without sensitive data)
   debugLog('authService', 'Password change response received', response.data);
@@ -498,22 +384,10 @@ export const resendVerificationEmail = async (
   debugLog('authService', `Resending verification email for: ${email}`);
 
   try {
-    // Ensure we have a CSRF token
-    if (!csrfToken) {
-      debugLog('authService', 'No CSRF token found, fetching one');
-      await getCsrfToken();
-    }
-
-    debugLog('authService', `Using CSRF token: ${csrfToken}`);
-
+    // CSRF token is automatically added by the API interceptor
     const response = await api.post<{ success: boolean; message: string }>(
       '/auth/resend-verification',
       { email },
-      {
-        headers: {
-          'X-CSRF-Token': csrfToken,
-        },
-      },
     );
 
     debugLog('authService', 'Resend verification email response received', response.data);

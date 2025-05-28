@@ -60,8 +60,15 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
   // because it's a specialized form with custom validation and submission logic
   // that doesn't fit well with the schema-based validation approach
 
-  // Initialize Conekta with public key and set up device fingerprint
+  // Conekta initialization disabled until live payments are implemented
   useEffect(() => {
+    // Log that Conekta is disabled (development only)
+    if (import.meta.env.DEV) {
+      console.info('Conekta initialization disabled - live payments not yet implemented');
+    }
+
+    // TODO: Re-enable when implementing live payments
+    /*
     // Log API key for verification (development only)
     if (import.meta.env.DEV) {
       console.info('Public Key:', import.meta.env.VITE_CONEKTA_PUBLIC_KEY.slice(0, 8) + '...');
@@ -125,6 +132,7 @@ const PaymentFormStep: React.FC<PaymentFormStepProps> = ({
         clearInterval(checkConektaInterval);
       }
     };
+    */
   }, [setDeviceSessionId, setIsConektaReady]);
 
   // Format card number with spaces
