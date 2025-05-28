@@ -19,6 +19,16 @@ public/build/
 .env.production
 frontend/.env.production
 
+# Security - Private keys and sensitive files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+docs/*.pem
+docs/*.key
+
 # IDE and editor files
 .idea/
 .vscode/
