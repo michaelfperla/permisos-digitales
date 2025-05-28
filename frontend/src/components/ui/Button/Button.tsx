@@ -15,9 +15,9 @@ type CommonButtonProps = {
    */
   size?: 'default' | 'small' | 'large' | 'icon';
   /**
-   * Button content
+   * Button content - optional for icon-only buttons
    */
-  children: React.ReactNode;
+  children?: React.ReactNode;
   /**
    * Additional class names
    */
@@ -73,7 +73,7 @@ export type ButtonProps = ButtonElementProps | LinkElementProps | AnchorElementP
  * Applies global button styles from button-styles.css directly
  * Can render as a button, Link, or anchor based on props
  */
-const Button: React.FC<ButtonProps> = (props) => {
+const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>((props, ref) => {
   const {
     variant = 'primary',
     size = 'default',
@@ -179,6 +179,7 @@ const Button: React.FC<ButtonProps> = (props) => {
 
   return (
     <button
+      ref={ref as React.Ref<HTMLButtonElement>}
       className={combinedClasses}
       type={htmlType}
       {...(buttonProps as Omit<
@@ -189,6 +190,8 @@ const Button: React.FC<ButtonProps> = (props) => {
       {content}
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

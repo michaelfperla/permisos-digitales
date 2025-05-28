@@ -1,18 +1,18 @@
 // frontend/src/test/test-utils.tsx
 import { render, RenderOptions } from '@testing-library/react';
-import React, { ReactElement, ReactNode } from 'react'; 
+import React, { ReactElement, ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
-import { mockUser } from './mocks/authService'; 
+import { mockUser } from './mocks/authService';
 // Ensure this alias matches your actual context export
 import { UserAuthContext as AuthContext, UserAuthContextType as AuthContextType } from '../shared/contexts/AuthContext';
 import { ToastProvider } from '../shared/contexts/ToastContext';
 
 // Define the initial state type for the hook
 interface UseMockAuthOptions {
-  isAuthenticatedByDefault?: boolean; 
-  initialUser?: any; 
+  isAuthenticatedByDefault?: boolean;
+  initialUser?: any;
 }
 
 // Custom Hook to provide mock auth context value
@@ -25,7 +25,7 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
       try {
         return JSON.parse(userJson);
       } catch (ignore) { // Changed _e to ignore
-        sessionStorage.removeItem('user'); 
+        sessionStorage.removeItem('user');
         return null;
       }
     }
@@ -37,13 +37,13 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
   if (isAuthenticatedByDefault && initialAuthUser && !sessionStorage.getItem('user')) {
     sessionStorage.setItem('user', JSON.stringify(initialAuthUser));
   } else if (!isAuthenticatedByDefault) {
-    sessionStorage.removeItem('user'); 
+    sessionStorage.removeItem('user');
   }
 
-  const [user, setUserState] = React.useState<any | null>(initialAuthUser); 
+  const [user, setUserState] = React.useState<any | null>(initialAuthUser);
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(!!initialAuthUser);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string | null>(null); 
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (user) {
@@ -56,17 +56,17 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
   const login = vi.fn().mockImplementation(async (email, password) => {
     setIsLoading(true);
     setError(null);
-    await new Promise(resolve => setTimeout(resolve, 10)); 
+    await new Promise(resolve => setTimeout(resolve, 10));
     if (email === 'test@example.com' && password === 'password123') {
-      const loggedInUser = initialUser || mockUser; 
+      const loggedInUser = initialUser || mockUser;
       setUserState(loggedInUser);
       setIsAuthenticated(true);
       setIsLoading(false);
-      return { success: true, user: loggedInUser, message: 'Login successful' };
+      return true;
     } else {
       setError('Invalid email or password');
       setIsLoading(false);
-      return { success: false, user: null, message: 'Invalid email or password' };
+      return false;
     }
   });
 
@@ -77,7 +77,6 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
     setUserState(null);
     setIsAuthenticated(false);
     setIsLoading(false);
-    return { success: true, message: 'Logout successful' };
   });
 
   const register = vi.fn().mockImplementation(async () => {
@@ -85,7 +84,7 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
     setError(null);
     await new Promise(resolve => setTimeout(resolve, 10));
     setIsLoading(false);
-    return { success: true, user: mockUser, message: 'Registration successful' };
+    return true;
   });
 
   const checkAuth = vi.fn().mockImplementation(async () => {
@@ -96,7 +95,6 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
     setUserState(currentUser);
     setIsAuthenticated(!!currentUser);
     setIsLoading(false);
-    return currentUser;
   });
 
   const clearError = vi.fn().mockImplementation(() => {
@@ -115,13 +113,13 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
     checkAuth,
     error,
     clearError,
-    setUser: setUserState, 
+    setUser: setUserState,
     resendVerificationEmail,
-  } as AuthContextType; 
+  } as AuthContextType;
 };
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  authContextProps?: UseMockAuthOptions; 
+  authContextProps?: UseMockAuthOptions;
 }
 
 const customRender = (ui: ReactElement, options?: CustomRenderOptions) => {

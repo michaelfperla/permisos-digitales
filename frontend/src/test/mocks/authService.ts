@@ -9,8 +9,7 @@ export const mockUser: User = {
   first_name: 'Test',
   last_name: 'User',
   role: 'user',
-  created_at: '2025-01-01T00:00:00Z',
-  updated_at: '2025-01-01T00:00:00Z',
+  accountType: 'client',
 };
 
 // Mock CSRF token for tests

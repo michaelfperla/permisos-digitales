@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 // Create a custom axios instance for the admin portal
 const api: AxiosInstance = axios.create({
@@ -13,12 +13,12 @@ const api: AxiosInstance = axios.create({
 // Function to get CSRF token
 export const getCsrfToken = async (): Promise<string> => {
   try {
-    const response = await api.get<{ data: { csrfToken: string } }>('/auth/csrf-token');
+    const response = await api.get<{ data: { csrfToken: string } } | { csrfToken: string }>('/auth/csrf-token');
 
     // Handle different response structures
-    if (response.data.data && response.data.data.csrfToken) {
+    if ('data' in response.data && response.data.data && response.data.data.csrfToken) {
       return response.data.data.csrfToken;
-    } else if (response.data.csrfToken) {
+    } else if ('csrfToken' in response.data && response.data.csrfToken) {
       return response.data.csrfToken;
     } else {
       console.error('Invalid CSRF token response structure:', response.data);
@@ -32,16 +32,13 @@ export const getCsrfToken = async (): Promise<string> => {
 
 // Request interceptor to add CSRF token to requests that need it
 api.interceptors.request.use(
-  async (config: AxiosRequestConfig) => {
+  async (config) => {
     // Only add CSRF token for mutating requests (POST, PUT, PATCH, DELETE)
     if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
       try {
         const token = await getCsrfToken();
-        if (config.headers) {
-          config.headers['X-CSRF-Token'] = token;
-        } else {
-          config.headers = { 'X-CSRF-Token': token };
-        }
+        config.headers = config.headers || {};
+        config.headers['X-CSRF-Token'] = token;
       } catch (error) {
         console.error('Error adding CSRF token to request:', error);
       }

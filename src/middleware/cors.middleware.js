@@ -10,11 +10,16 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    // List of allowed origins based on environment
+    // Industry Standard: Allow all frontend domains to access canonical API
     const allowedOrigins = process.env.NODE_ENV === 'production'
       ? [
+          // All frontend domains (.com.mx)
           'https://permisosdigitales.com.mx',
           'https://www.permisosdigitales.com.mx',
+          // All frontend domains (.com)
+          'https://permisosdigitales.com',
+          'https://www.permisosdigitales.com',
+          // CloudFront distribution
           'https://d2gtd1yvnspajh.cloudfront.net',
           // Add any staging/preview domains if needed
         ]

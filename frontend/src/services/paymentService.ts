@@ -29,6 +29,7 @@ export interface PaymentMethodResponse {
   speiReference?: string; // For bank transfers
   oxxoReference?: string; // For OXXO payments
   expiresAt?: number; // Expiration timestamp for OXXO/SPEI
+  barcodeUrl?: string; // URL for OXXO barcode
   message?: string;
 }
 
@@ -83,7 +84,7 @@ export const initiatePayment = async (
     }
 
     // Real implementation for production
-    const csrfToken = getCsrfToken();
+    const csrfToken = await getCsrfToken();
 
     const response = await api.post<PaymentOrderResponse>(
       `/applications/${applicationId}/payment`,
@@ -122,7 +123,7 @@ export const processCardPayment = async (
   deviceSessionId: string,
 ): Promise<PaymentMethodResponse> => {
   try {
-    const csrfToken = getCsrfToken();
+    const csrfToken = await getCsrfToken();
 
     const response = await api.post<PaymentMethodResponse>(
       `/applications/${applicationId}/payment/card`,
@@ -187,7 +188,7 @@ export const processBankTransferPayment = async (
     }
 
     // Real implementation for production
-    const csrfToken = getCsrfToken();
+    const csrfToken = await getCsrfToken();
 
     const response = await api.post<PaymentMethodResponse>(
       `/applications/${applicationId}/payment/bank-transfer`,
@@ -242,7 +243,7 @@ export const processOxxoPayment = async (
       return simulatedResponse;
     }
 
-    const csrfToken = getCsrfToken();
+    const csrfToken = await getCsrfToken();
 
     // Use the new OXXO payment endpoint
     const response = await axios.post<PaymentMethodResponse>(
@@ -261,30 +262,32 @@ export const processOxxoPayment = async (
     );
 
     // Extract the OXXO payment details from the response
-    if (response.data && response.data.success && response.data.data) {
+    if (response.data && 'success' in response.data && response.data.success && 'data' in response.data && response.data.data) {
+      const data = response.data.data as any;
       return {
         success: true,
-        orderId: response.data.data.orderId,
+        orderId: data.orderId,
         status: 'pending_payment',
         paymentMethod: 'oxxo_cash',
-        oxxoReference: response.data.data.oxxoReference,
-        expiresAt: response.data.data.expiresAt,
-        barcodeUrl: response.data.data.barcodeUrl,
-        checkoutUrl: null,
+        oxxoReference: data.oxxoReference,
+        expiresAt: data.expiresAt,
+        barcodeUrl: data.barcodeUrl,
+        checkoutUrl: undefined,
       };
     }
 
     // If we don't have the expected data structure, return a generic success response
-    if (response.data && response.data.success) {
+    if (response.data && 'success' in response.data && response.data.success) {
+      const data = response.data as any;
       return {
         success: true,
-        orderId: response.data.orderId || `oxxo-${Date.now()}`,
+        orderId: data.orderId || `oxxo-${Date.now()}`,
         status: 'pending_payment',
         paymentMethod: 'oxxo_cash',
-        oxxoReference: response.data.oxxoReference || '93000123456789',
-        expiresAt: response.data.expiresAt || Math.floor(Date.now() / 1000) + 172800,
-        barcodeUrl: response.data.barcodeUrl,
-        checkoutUrl: null,
+        oxxoReference: data.oxxoReference || '93000123456789',
+        expiresAt: data.expiresAt || Math.floor(Date.now() / 1000) + 172800,
+        barcodeUrl: data.barcodeUrl,
+        checkoutUrl: undefined,
       };
     }
 

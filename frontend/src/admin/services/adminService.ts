@@ -60,7 +60,6 @@ export interface ApplicationDetails extends Application {
   folio?: string;
   fecha_expedicion?: string;
   fecha_vencimiento?: string;
-  payment_rejection_reason?: string;
 }
 
 export interface PaymentProofDetails {
@@ -131,16 +130,24 @@ export interface PaginatedUsers {
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
     const response = await api.get<any>('/dashboard-stats');
-    console.log('[getDashboardStats] Raw API response:', response.data); // Temporarily changed to log for debugging
+
+    // Only log in development mode
+    if (import.meta.env.DEV) {
+      console.log('[getDashboardStats] Raw API response:', response.data);
+    }
 
     let stats: DashboardStats;
 
     if (response.data?.data) {
-      console.debug('[getDashboardStats] Found stats in response.data.data'); // Changed to debug
+      if (import.meta.env.DEV) {
+        console.debug('[getDashboardStats] Found stats in response.data.data');
+      }
       stats = response.data.data;
     }
     else if (response.data && (response.data.statusCounts || response.data.pendingVerifications !== undefined)) {
-      console.debug('[getDashboardStats] Found stats directly in response.data'); // Changed to debug
+      if (import.meta.env.DEV) {
+        console.debug('[getDashboardStats] Found stats directly in response.data');
+      }
       stats = response.data;
     }
     else {
@@ -258,9 +265,11 @@ export const getAllApplications = async (
       };
     }
 
-    console.warn(
-      '[getAllApplications] Could not find applications in response, returning empty data',
-    );
+    if (import.meta.env.DEV) {
+      console.warn(
+        '[getAllApplications] Could not find applications in response, returning empty data',
+      );
+    }
     return {
       applications: [],
       pagination: {
@@ -411,7 +420,9 @@ export const getVerificationHistory = async (
       };
     }
 
-    console.warn('[getVerificationHistory] Unexpected response structure:', response.data);
+    if (import.meta.env.DEV) {
+      console.warn('[getVerificationHistory] Unexpected response structure:', response.data);
+    }
     return {
       history: [],
       total: 0,
@@ -450,7 +461,9 @@ export const getUsers = async (
         },
       };
     }
-    console.warn('Unexpected users response format:', responseData);
+    if (import.meta.env.DEV) {
+      console.warn('Unexpected users response format:', responseData);
+    }
     return {
       users: [],
       pagination: { page: page, limit: limit, total: 0, totalPages: 0 },

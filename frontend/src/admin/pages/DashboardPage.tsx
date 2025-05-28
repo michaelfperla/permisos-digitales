@@ -30,10 +30,14 @@ const DashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: adminService.getDashboardStats,
-    onError: (err: Error) => {
-      showToast(`Error al cargar estadísticas: ${err.message}`, 'error');
-    },
   });
+
+  // Handle dashboard stats error
+  React.useEffect(() => {
+    if (isError && error) {
+      showToast(`Error al cargar estadísticas: ${error.message}`, 'error');
+    }
+  }, [isError, error, showToast]);
 
   // Status mapping object to translate backend status codes to user-friendly Spanish display names
   const statusDisplayMap: Record<string, string> = {

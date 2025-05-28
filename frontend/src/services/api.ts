@@ -19,8 +19,10 @@ export const api = axios.create({
   withCredentials: true, // Important for cookies
 });
 
-// Log the API base URL for debugging
-console.info('API base URL (using proxy in dev):', apiBaseUrl);
+// Log the API base URL for debugging (development only)
+if (import.meta.env.DEV) {
+  console.info('API base URL (using proxy in dev):', apiBaseUrl);
+}
 
 // Add CSRF token interceptor
 addCsrfTokenInterceptor(api);

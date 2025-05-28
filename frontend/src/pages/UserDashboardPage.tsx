@@ -36,10 +36,14 @@ const UserDashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['applications'], // Query key for TanStack Query
     queryFn: applicationService.getApplications,
-    onError: (err: Error) => {
-      showToast(`Error al cargar permisos: ${err.message}`, 'error');
-    },
   });
+
+  // Handle dashboard data error
+  React.useEffect(() => {
+    if (isError && error) {
+      showToast(`Error al cargar permisos: ${error.message}`, 'error');
+    }
+  }, [isError, error, showToast]);
 
   const statusDisplayMap: Record<string, string> = {
     AWAITING_PAYMENT: 'Pendiente de Pago',

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { api } from './api'; // Use the main API instance with CSRF interceptor
 import { debugLog, errorLog } from '../utils/debug';
+import { getCsrfToken } from '../utils/csrf';
 
 // Define types for our API responses and requests
 interface RegisterRequest {
@@ -31,6 +32,11 @@ interface AuthResponse {
 interface StatusResponse {
   isLoggedIn: boolean;
   user?: User;
+}
+
+interface StatusApiResponse {
+  success: boolean;
+  data: StatusResponse;
 }
 
 // Note: CSRF token handling is now done automatically by the main API instance
@@ -173,11 +179,11 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse> => {
   console.info('[checkStatus] Starting API call to /api/auth/status...');
   try {
-    const response = await api.get<StatusResponse>('/auth/status', { signal });
+    const response = await api.get<StatusApiResponse>('/auth/status', { signal });
 
     // Update session storage with user info
-    if (response.data.user) {
-      sessionStorage.setItem('user', JSON.stringify(response.data.user));
+    if (response.data.data?.user) {
+      sessionStorage.setItem('user', JSON.stringify(response.data.data.user));
     } else {
       sessionStorage.removeItem('user');
     }

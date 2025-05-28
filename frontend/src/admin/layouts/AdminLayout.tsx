@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   FaTachometerAlt,
   FaClipboardList,
-  FaCheckCircle,
-  FaHistory,
   FaUsers,
   FaSignOutAlt,
   FaTimes,

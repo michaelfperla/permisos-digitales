@@ -8,7 +8,7 @@ const csrfProtection = csrf({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Use lax in development for cross-origin
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' in production for cross-origin HTTPS
     path: '/',
     maxAge: 3600 // 1 hour in seconds
   },

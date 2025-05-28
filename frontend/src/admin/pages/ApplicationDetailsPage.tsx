@@ -38,20 +38,28 @@ const ApplicationDetailsPage: React.FC = () => {
     queryKey: ['applicationDetails', id],
     queryFn: () => adminService.getApplicationDetails(id!),
     enabled: !!id,
-    onError: (err: Error) => {
-      showToast(`Error al cargar detalles de la solicitud: ${err.message}`, 'error');
-    },
   });
 
+  // Handle application details error
+  React.useEffect(() => {
+    if (isError && error) {
+      showToast(`Error al cargar detalles de la solicitud: ${error.message}`, 'error');
+    }
+  }, [isError, error, showToast]);
+
   // Fetch payment proof details if application is in PROOF_SUBMITTED status
-  const { data: paymentProofDetails, isLoading: isLoadingPaymentProof } = useQuery({
+  const { data: paymentProofDetails, isLoading: isLoadingPaymentProof, isError: isPaymentProofError, error: paymentProofError } = useQuery({
     queryKey: ['paymentProofDetails', id],
     queryFn: () => adminService.getPaymentProofDetails(id!),
     enabled: !!id && application?.status === 'PROOF_SUBMITTED',
-    onError: (err: Error) => {
-      showToast(`Error al cargar detalles del comprobante: ${err.message}`, 'error');
-    },
   });
+
+  // Handle payment proof error
+  React.useEffect(() => {
+    if (isPaymentProofError && paymentProofError) {
+      showToast(`Error al cargar detalles del comprobante: ${paymentProofError.message}`, 'error');
+    }
+  }, [isPaymentProofError, paymentProofError, showToast]);
 
   // Format date for display
   const formatDate = (dateString?: string) => {
@@ -394,7 +402,7 @@ const ApplicationDetailsPage: React.FC = () => {
                     <div className={styles.detailItem}>
                       <span className={styles.detailLabel}>Fecha de Carga:</span>
                       <span className={styles.detailValue}>
-                        {formatDate(application?.payment_proof_uploaded_at)}
+                        {paymentProofDetails?.uploaded_at ? formatDate(paymentProofDetails.uploaded_at) : 'No disponible'}
                       </span>
                     </div>
                     {paymentProofDetails && (
@@ -419,14 +427,7 @@ const ApplicationDetailsPage: React.FC = () => {
                         </div>
                       </>
                     )}
-                    {application?.payment_rejection_reason && (
-                      <div className={styles.detailItem}>
-                        <span className={styles.detailLabel}>Motivo de Rechazo:</span>
-                        <span className={styles.detailValue}>
-                          {application.payment_rejection_reason}
-                        </span>
-                      </div>
-                    )}
+                    {/* Legacy payment rejection reason - no longer used in current system */}
                   </div>
 
                   <div className={styles.paymentProofActions}>

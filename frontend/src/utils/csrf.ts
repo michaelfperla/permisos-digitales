@@ -19,7 +19,9 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
   }
 
   try {
-    console.info('Fetching fresh CSRF token from server');
+    if (import.meta.env.DEV) {
+      console.info('Fetching fresh CSRF token from server');
+    }
 
     // In development, use the Vite proxy which forwards requests to the backend
     // In production, use the environment variable or default to relative path
@@ -28,7 +30,9 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       ? '/api/auth/csrf-token' // Use relative path for proxy in development
       : `${import.meta.env.VITE_API_URL || ''}/api/auth/csrf-token`; // Use env var or relative path in production
 
-    console.info('Fetching CSRF token from:', csrfEndpoint);
+    if (import.meta.env.DEV) {
+      console.info('Fetching CSRF token from:', csrfEndpoint);
+    }
 
     // Make a direct request to the CSRF token endpoint
     const response = await axios.get<any>(csrfEndpoint, {
@@ -48,12 +52,12 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
     // Set token expiry time
     tokenExpiryTime = now + TOKEN_LIFETIME_MS;
 
-    return csrfToken;
+    return csrfToken || '';
   } catch (error) {
     console.error('Failed to fetch CSRF token:', error);
 
     // In development mode, use a dummy token to allow testing
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       console.warn('Using fallback CSRF token in development mode');
       csrfToken = 'dummy-csrf-token-for-development';
       tokenExpiryTime = now + TOKEN_LIFETIME_MS;
@@ -111,7 +115,9 @@ export const handleCsrfError = async (error: any): Promise<boolean> => {
       error.response.statusText?.includes('CSRF'));
 
   if (isCsrfError) {
-    console.warn('CSRF token validation failed. Refreshing token...');
+    if (import.meta.env.DEV) {
+      console.warn('CSRF token validation failed. Refreshing token...');
+    }
     try {
       // Force refresh the token
       await getCsrfToken(true);

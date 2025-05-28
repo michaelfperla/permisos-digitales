@@ -22,7 +22,7 @@ export const mockApplications: Application[] = [
     color: 'Rojo',
     numero_serie: 'ABC123456789',
     numero_motor: 'M123456',
-    ano_modelo: '2023',
+    ano_modelo: 2023,
 
     // Permit Data
     folio: 'PD-2025-001',
@@ -30,15 +30,13 @@ export const mockApplications: Application[] = [
     fecha_expedicion: '2025-01-15',
     fecha_vencimiento: '2026-01-15',
 
-    // Payment Data
-    payment_proof_path: '/uploads/payments/proof-001.jpg',
-    payment_proof_uploaded_at: '2025-01-16T09:30:00Z',
-    payment_verified_at: '2025-01-17T11:45:00Z',
+    // Payment Data - using current system properties
+    // payment_reference is not part of the Application type in current system
   },
   {
     id: '2',
     user_id: '123',
-    status: 'PENDING_PAYMENT' as ApplicationStatus,
+    status: 'AWAITING_OXXO_PAYMENT' as ApplicationStatus,
     created_at: '2025-02-10T09:15:00Z',
     updated_at: '2025-02-10T09:15:00Z',
 
@@ -53,12 +51,12 @@ export const mockApplications: Application[] = [
     color: 'Azul',
     numero_serie: 'DEF456789012',
     numero_motor: 'M789012',
-    ano_modelo: '2022',
+    ano_modelo: 2022,
   },
   {
     id: '3',
     user_id: '123',
-    status: 'PROOF_REJECTED' as ApplicationStatus,
+    status: 'PAYMENT_FAILED' as ApplicationStatus,
     created_at: '2025-03-05T13:20:00Z',
     updated_at: '2025-03-06T10:10:00Z',
 
@@ -73,12 +71,10 @@ export const mockApplications: Application[] = [
     color: 'Negro',
     numero_serie: 'GHI789012345',
     numero_motor: 'M345678',
-    ano_modelo: '2024',
+    ano_modelo: 2024,
 
-    // Payment Data
-    payment_proof_path: '/uploads/payments/proof-003.jpg',
-    payment_proof_uploaded_at: '2025-03-06T10:05:00Z',
-    payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.',
+    // Payment Data - payment failed
+    // payment_reference is not part of the Application type in current system
   },
 ];
 
@@ -162,7 +158,7 @@ const applicationServiceMock = {
         });
       }
 
-      if (application.status !== 'PENDING_PAYMENT') {
+      if (application.status !== 'AWAITING_OXXO_PAYMENT') {
         return Promise.resolve({
           success: false,
           application,
@@ -196,7 +192,7 @@ const applicationServiceMock = {
         });
       }
 
-      if (application.status !== 'PENDING_PAYMENT' && application.status !== 'PROOF_REJECTED') {
+      if (application.status !== 'AWAITING_OXXO_PAYMENT' && application.status !== 'PAYMENT_FAILED') {
         return Promise.resolve({
           success: false,
           application,

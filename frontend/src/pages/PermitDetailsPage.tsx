@@ -341,17 +341,14 @@ const PermitDetailsPage: React.FC = () => {
             : (applicationData.application.vehicleInfo.ano_modelo as number),
 
         // Payment info
-        payment_reference: applicationData.application.paymentReference,
-        payment_rejection_reason: applicationData.application.payment_rejection_reason,
-        payment_proof_uploaded_at: applicationData.application.dates.paymentProofUploaded,
-        payment_verified_at: applicationData.application.dates.paymentVerified,
+        // Legacy payment properties removed from current system
 
         // Other fields with default values or from mock data
         // Use type assertion to access properties that might not exist in the ApplicationDetails type
         folio: (applicationData.application as any).folio || '',
         importe: (applicationData.application as any).importe || 197.0, // Default amount
-        fecha_expedicion: applicationData.application.dates?.fecha_expedicion || '',
-        fecha_vencimiento: applicationData.application.dates?.fecha_vencimiento || '',
+        fecha_expedicion: (applicationData.application as any).fecha_expedicion || '',
+        fecha_vencimiento: (applicationData.application as any).fecha_vencimiento || '',
       }
     : null;
 
@@ -621,7 +618,7 @@ const PermitDetailsPage: React.FC = () => {
         placas: 'Placas',
       };
 
-      const folio = application?.folio || applicationData?.application?.folio || permitId;
+      const folio = (application as any)?.folio || (applicationData?.application as any)?.folio || permitId;
       const filename = `${typeLabels[type] || 'Documento'}_${folio}.pdf`;
 
       a.href = url;
@@ -656,7 +653,7 @@ const PermitDetailsPage: React.FC = () => {
   // Handle viewing OXXO payment slip
   const handleViewOxxoSlip = (_permitId: string = id!) => {
     // Check if we have the OXXO reference
-    if (!applicationData?.application?.paymentReference) {
+    if (!(applicationData?.application as any)?.paymentReference) {
       showToast('Referencia OXXO no disponible', 'error');
       return;
     }
@@ -668,7 +665,7 @@ const PermitDetailsPage: React.FC = () => {
   // Handle copying OXXO reference
   const handleCopyReference = () => {
     // Always use the Conekta-generated OXXO reference
-    const reference = applicationData?.application?.paymentReference;
+    const reference = (applicationData?.application as any)?.paymentReference;
 
     if (reference) {
       navigator.clipboard.writeText(reference);
@@ -967,10 +964,10 @@ const PermitDetailsPage: React.FC = () => {
                         <div className={styles.infoItem}>
                           <span className={styles.infoLabel}>Referencia OXXO para Pago:</span>
                           <div className={styles.infoValue}>
-                            {applicationData?.application?.paymentReference ? (
+                            {(applicationData?.application as any)?.paymentReference ? (
                               <>
                                 <span className={styles.infoValueImportant}>
-                                  {applicationData.application.paymentReference}
+                                  {(applicationData.application as any).paymentReference}
                                 </span>
                                 <button
                                   type="button"
@@ -1013,7 +1010,7 @@ const PermitDetailsPage: React.FC = () => {
                 );
                 break;
 
-              case 'PROOF_REJECTED':
+              case 'PAYMENT_FAILED':
                 instructionsTitle = 'Comprobante de Pago Rechazado';
                 instructionsIcon = (
                   <FaTimesCircle
@@ -1034,7 +1031,7 @@ const PermitDetailsPage: React.FC = () => {
                         <h3 className={styles.rejectionTitle}>Motivo del Rechazo</h3>
                       </div>
                       <p>
-                        {application?.payment_rejection_reason ||
+                        {(application as any)?.payment_rejection_reason ||
                           'Tu comprobante de pago no pudo ser verificado. Por favor, sube un nuevo comprobante que muestre claramente los detalles de la transacción.'}
                       </p>
                     </div>
@@ -1056,7 +1053,7 @@ const PermitDetailsPage: React.FC = () => {
                 );
                 break;
 
-              case 'PENDING_PAYMENT':
+              case 'AWAITING_OXXO_PAYMENT':
                 // Check if this is a pending Conekta payment
                 if ((application as any)?.payment_processor_order_id) {
                   instructionsTitle = 'Pago en Proceso';
@@ -1309,7 +1306,7 @@ const PermitDetailsPage: React.FC = () => {
             <div className={styles.infoItem}>
               <span className={styles.infoLabel}>Referencia OXXO para Pago:</span>
               <span className={styles.infoValue}>
-                {applicationData?.application?.paymentReference || 'No disponible'}
+                {(applicationData?.application as any)?.paymentReference || 'No disponible'}
               </span>
             </div>
 
@@ -1333,8 +1330,8 @@ const PermitDetailsPage: React.FC = () => {
               <span className={styles.infoLabel}>Fecha de procesamiento:</span>
               <span className={styles.infoValue}>
                 {currentStatus === 'PAYMENT_RECEIVED' &&
-                applicationData?.application?.dates?.paymentVerified
-                  ? formatDate(applicationData.application.dates.paymentVerified)
+                (applicationData?.application?.dates as any)?.paymentVerified
+                  ? formatDate((applicationData.application.dates as any).paymentVerified)
                   : 'Pendiente'}
               </span>
             </div>
@@ -1491,7 +1488,7 @@ const PermitDetailsPage: React.FC = () => {
 
           {/* OXXO Reference & Copy (if applicable) */}
           {currentStatus === 'AWAITING_OXXO_PAYMENT' &&
-            applicationData?.application?.paymentReference && (
+            (applicationData?.application as any)?.paymentReference && (
               <div className={styles.contextOxxoBlock}>
                 <div className={styles.contextOxxoLabel}>Referencia OXXO para Pago:</div>
                 <div className={styles.contextOxxoRefValue}>

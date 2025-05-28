@@ -100,20 +100,20 @@ const Icon: React.FC<IconProps> = ({
 
   // Prepare accessibility attributes
   const a11yProps: {
-    'aria-hidden'?: string;
+    'aria-hidden'?: boolean;
     'aria-label'?: string;
     role?: string;
   } = {};
 
   if (decorative) {
-    a11yProps['aria-hidden'] = 'true';
+    a11yProps['aria-hidden'] = true;
   } else {
     if (ariaLabel) {
       a11yProps['aria-label'] = ariaLabel;
       a11yProps.role = 'img';
     } else {
       console.warn('Icon is marked as non-decorative but no ariaLabel was provided');
-      a11yProps['aria-hidden'] = 'true';
+      a11yProps['aria-hidden'] = true;
     }
   }
 

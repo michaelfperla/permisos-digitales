@@ -54,26 +54,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
 
   // Generate steps based on the current status
   const getTimelineSteps = (): TimelineStep[] => {
-    // Special case for AWAITING_PAYMENT
-    if (currentStatus === 'AWAITING_PAYMENT') {
-      return [
-        {
-          id: 'created',
-          label: 'Solicitud Creada',
-          description: formatDate(applicationDates.created_at),
-          status: 'completed',
-          icon: <Icon IconComponent={FaCheck} size="sm" color="var(--color-success)" />,
-        },
-        {
-          id: 'awaiting-payment',
-          label: 'Pendiente de Pago',
-          description: 'Por favor realice el pago para continuar con el proceso.',
-          status: 'current',
-          icon: <Icon IconComponent={FaCircle} size="xs" />,
-        },
-      ];
-    }
-
     // Special case for OXXO payment
     if (currentStatus === 'AWAITING_OXXO_PAYMENT') {
       return [
@@ -126,7 +106,7 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       date?: string;
     }[] = [
       {
-        status: 'AWAITING_PAYMENT',
+        status: 'AWAITING_OXXO_PAYMENT',
         label: 'Solicitud Creada',
         description: 'Solicitud creada, pendiente de pago',
         date: applicationDates.created_at,
@@ -248,8 +228,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
 const getStatusText = (status: ApplicationStatus): string => {
   switch (status) {
     // Payment-related statuses
-    case 'AWAITING_PAYMENT':
-      return 'Pendiente de Pago';
     case 'AWAITING_OXXO_PAYMENT':
       return 'Pendiente de Pago (OXXO)';
     case 'PAYMENT_PROCESSING':
@@ -283,15 +261,7 @@ const getStatusText = (status: ApplicationStatus): string => {
     case 'RENEWAL_REJECTED':
       return 'Renovación Rechazada';
 
-    // Legacy statuses - kept for backward compatibility
-    case 'PENDING_PAYMENT':
-      return 'Pendiente de Pago';
-    case 'PROOF_RECEIVED_SCHEDULED':
-      return 'Comprobante Recibido';
-    case 'PROOF_SUBMITTED':
-      return 'Comprobante Enviado';
-    case 'PROOF_REJECTED':
-      return 'Comprobante Rechazado';
+    // Legacy statuses are no longer supported in current system
 
     default:
       return status;

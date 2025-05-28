@@ -30,14 +30,22 @@ const ApplicationsPage: React.FC = () => {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['applications', currentPage, statusFilter],
     queryFn: () => adminService.getAllApplications(currentPage, 10, statusFilter),
-    onSuccess: (data) => {
-      console.debug('[ApplicationsPage] Query success, data:', data); // Changed to debug
-    },
-    onError: (err: Error) => {
-      console.error('[ApplicationsPage] Query error:', err);
-      showToast(`Error al cargar solicitudes: ${err.message}`, 'error');
-    },
   });
+
+  // Handle query success
+  React.useEffect(() => {
+    if (data) {
+      console.debug('[ApplicationsPage] Query success, data:', data);
+    }
+  }, [data]);
+
+  // Handle query error
+  React.useEffect(() => {
+    if (isError && error) {
+      console.error('[ApplicationsPage] Query error:', error);
+      showToast(`Error al cargar solicitudes: ${error.message}`, 'error');
+    }
+  }, [isError, error, showToast]);
 
   // Format date for display
   const formatDate = (dateString: string) => {

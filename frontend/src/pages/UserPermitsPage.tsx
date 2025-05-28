@@ -46,10 +46,14 @@ const UserPermitsPage: React.FC = () => {
   } = useQuery({
     queryKey: ['applications'],
     queryFn: applicationService.getApplications,
-    onError: (err: Error) => {
-      showToast(`Error al cargar permisos: ${err.message}`, 'error');
-    },
   });
+
+  // Handle applications data error
+  React.useEffect(() => {
+    if (isError && error) {
+      showToast(`Error al cargar permisos: ${error.message}`, 'error');
+    }
+  }, [isError, error, showToast]);
 
   // Handle page change
   const _handlePageChange = (page: number) => {

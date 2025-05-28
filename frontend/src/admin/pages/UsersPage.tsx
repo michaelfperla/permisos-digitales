@@ -24,13 +24,17 @@ const UsersPage: React.FC = () => {
   const { data, isLoading, isError, error, refetch } = useQuery<PaginatedUsers>({
     queryKey: ['adminUsers', { page: currentPage, limit: 10, role: roleFilter }],
     queryFn: () => adminService.getUsers(currentPage, 10, roleFilter || undefined),
-    onError: (err) => {
+  });
+
+  // Handle users query error
+  React.useEffect(() => {
+    if (isError && error) {
       showToast(
-        `Error al cargar usuarios: ${err instanceof Error ? err.message : 'Error desconocido'}`,
+        `Error al cargar usuarios: ${error instanceof Error ? error.message : 'Error desconocido'}`,
         'error',
       );
-    },
-  });
+    }
+  }, [isError, error, showToast]);
 
   // Update filtered users when data or search term changes
   useEffect(() => {

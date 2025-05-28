@@ -33,7 +33,10 @@
     "audit:code": "node scripts/code-audit.js",
     "audit:database": "node scripts/database-cleanup-analysis.js",
     "audit:full": "npm run audit:code && npm run audit:database",
+    "audit:production": "node scripts/production-audit-fix.js",
+    "validate:production": "node scripts/validate-production-config.js",
     "prepare:production": "bash scripts/prepare-production.sh",
+    "deploy:production": "bash scripts/deploy-production-final.sh",
     "health:check": "node scripts/production-health-check.js",
     "prepare": "husky && husky install"
   },
