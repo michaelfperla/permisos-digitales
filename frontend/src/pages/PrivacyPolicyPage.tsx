@@ -117,7 +117,7 @@ const PrivacyPolicyPage: React.FC = () => {
           <p>
             Si usted no desea que sus datos personales sean tratados para las finalidades
             secundarias, puede manifestar su negativa enviando un correo electrónico a
-            transito@huitzuco.gob.mx, indicando en el asunto &quot;NEGATIVA FINALIDADES SECUNDARIAS&quot;, o
+            contacto@permisosdigitales.com.mx, indicando en el asunto &quot;NEGATIVA FINALIDADES SECUNDARIAS&quot;, o
             bien, marcando la casilla correspondiente durante el proceso de registro en nuestra
             Plataforma.
           </p>
@@ -164,7 +164,7 @@ const PrivacyPolicyPage: React.FC = () => {
             solicitud respectiva a través de:
           </p>
           <ul className={styles.legalList}>
-            <li>Correo electrónico: transito@huitzuco.gob.mx</li>
+            <li>Correo electrónico: contacto@permisosdigitales.com.mx</li>
             <li>
               Presencialmente en: Calle Benito Juárez No. 4, Col. Centro, C.P. 40140, Huitzuco de
               los Figueroa, Guerrero
@@ -275,7 +275,7 @@ const PrivacyPolicyPage: React.FC = () => {
             Si tiene alguna duda o comentario respecto a este Aviso de Privacidad, puede
             contactarnos a través de:
           </p>
-          <p>Correo electrónico: transito@huitzuco.gob.mx</p>
+          <p>Correo electrónico: contacto@permisosdigitales.com.mx</p>
           <p>Teléfono: (727) 333-0142</p>
           <p>
             Dirección: Calle Benito Juárez No. 4, Col. Centro, C.P. 40140, Huitzuco de los Figueroa,

@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   authService,
   debugUtils,
 }) => {
-  const debugLog = useMemo(() => 
+  const debugLog = useMemo(() =>
     debugUtils?.debugLog ||
     ((context: string, message: string, data?: any) => console.debug(`[${context}] ${message}`, data || ''))
   , [debugUtils]);
@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
               setIsAuthenticated(false);
               setUser(null);
               setError('No tienes acceso al portal administrativo');
-              try { await authService.logout(); } 
+              try { await authService.logout(); }
               catch (logoutErr: unknown) { errorLog('checkAuth', 'Error during logout after access check', logoutErr); }
             }
           } else {
@@ -206,7 +206,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     debugLog('AuthContext', 'Initial effect running, calling checkAuth...');
     const controller = new AbortController();
     const performAuthCheck = async () => {
-      try { await checkAuth(controller.signal); } 
+      try { await checkAuth(controller.signal); }
       catch (err) { if (!controller.signal.aborted) { errorLog('AuthContext', 'Unhandled error in initial auth check', err); } }
     };
     performAuthCheck();
@@ -245,7 +245,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   }, [debugLog, setError]);
 
   const userLogin = useCallback(async (email: string, password: string): Promise<boolean> => {
-    if (type !== 'user') return false; 
+    if (type !== 'user') return false;
     debugLog('AuthContext', `User login attempt: ${email}`);
     setIsLoading(true);
     setError(null);
@@ -273,7 +273,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   }, [type, authService, debugLog, errorLog, setIsAuthenticated, setUser, setIsLoading, setError]);
 
-  const userRegister = useCallback(async (userData: { 
+  const userRegister = useCallback(async (userData: {
     first_name: string;
     last_name: string;
     email: string;
@@ -291,21 +291,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       loadingTimeout = null;
       if (response.success) {
         setIsLoading(false);
-        return true; 
+        return true;
       }
-      setError(response.message || 'Registration failed.');
+      setError(response.message || 'Error en el registro.');
       setIsLoading(false);
       return false;
     } catch (errRegister) {
       if (loadingTimeout) clearTimeout(loadingTimeout);
       loadingTimeout = null;
       errorLog('AuthContext', 'User registration error', errRegister);
-      setError('Network error during registration.');
+      setError('Error de conexión durante el registro.');
       setIsLoading(false);
       return false;
     }
   }, [type, authService, debugLog, errorLog, setIsLoading, setError]);
-  
+
   const userResendVerificationEmail = useCallback(async (email: string): Promise<{ success: boolean; message: string }> => {
     if (type !== 'user') return { success: false, message: 'Invalid operation for admin type' };
     try {
@@ -351,7 +351,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     logout,
     checkAuth,
     clearError,
-    setUser: setUser as (newUser: User | null) => void, 
+    setUser: setUser as (newUser: User | null) => void,
     resendVerificationEmail: userResendVerificationEmail,
   }), [isAuthenticated, user, isLoading, error, userLogin, userRegister, logout, checkAuth, clearError, setUser, userResendVerificationEmail]);
 
@@ -365,7 +365,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     checkAuth,
     clearError,
     setUser: setUser as (newUser: AdminUser | null) => void, // Added setUser for admin context as well
-  }), [isAuthenticated, user, isLoading, error, adminLogin, logout, checkAuth, clearError, setUser]); 
+  }), [isAuthenticated, user, isLoading, error, adminLogin, logout, checkAuth, clearError, setUser]);
 
   if (type === 'user') {
     return <UserAuthContext.Provider value={userContextValue}>{children}</UserAuthContext.Provider>;

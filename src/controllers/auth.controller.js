@@ -17,7 +17,7 @@ exports.register = async (req, res, next) => {
   if (!email || !password || !first_name || !last_name) {
     // Example: Add basic check here if not using validation middleware
     logger.warn(`Registration attempt failed: Missing required fields - ${email}`);
-    return ApiResponse.badRequest(res, 'Missing required fields (email, password, first_name, last_name).');
+    return ApiResponse.badRequest(res, 'Faltan campos requeridos (correo, contraseña, nombre, apellido).');
   }
 
   try {
@@ -27,7 +27,7 @@ exports.register = async (req, res, next) => {
     const isLimited = await securityService.isRateLimitExceeded(req.ip, 'registration', 5, 60 ); // 5 per hour
     if (isLimited) {
       await securityService.logActivity(null, 'registration_rate_limited', req.ip, req.headers['user-agent'], { email });
-      return ApiResponse.tooManyRequests(res, 'Too many registration attempts. Please try again later.');
+      return ApiResponse.tooManyRequests(res, 'Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.');
     }
 
     // Check if user exists
@@ -36,7 +36,7 @@ exports.register = async (req, res, next) => {
     if (existingUsers.length > 0) {
       logger.warn(`Registration failed: Email already exists - ${email}`);
       await securityService.logActivity(null, 'registration_failed', req.ip, req.headers['user-agent'], { email, reason: 'email_exists' });
-      return ApiResponse.conflict(res, 'User with this email already exists.');
+      return ApiResponse.conflict(res, 'Ya existe un usuario con este correo electrónico.');
     }
 
     // Hash password
@@ -131,8 +131,8 @@ exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   // Basic validation for required fields
-  if (!email) { return ApiResponse.badRequest(res, 'Email is required'); }
-  if (!password) { return ApiResponse.badRequest(res, 'Password is required'); }
+  if (!email) { return ApiResponse.badRequest(res, 'El correo electrónico es requerido'); }
+  if (!password) { return ApiResponse.badRequest(res, 'La contraseña es requerida'); }
 
   try {
     logger.debug(`[Login Controller] Login attempt started for email: ${email}`);
@@ -157,7 +157,7 @@ exports.login = async (req, res, next) => {
     if (isLimited) {
       logger.warn(`[Login Controller] Login rate limit exceeded for IP: ${req.ip}`);
       await securityService.logActivity( null, 'login_rate_limited', req.ip, req.headers['user-agent'], { email });
-      return ApiResponse.tooManyRequests(res, 'Too many failed login attempts. Please try again later.');
+      return ApiResponse.tooManyRequests(res, 'Demasiados intentos de inicio de sesión fallidos. Por favor, inténtalo de nuevo más tarde.');
     }
 
     // Check portal type

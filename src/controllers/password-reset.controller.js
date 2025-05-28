@@ -34,7 +34,7 @@ exports.requestReset = async (req, res, next) => {
         req.headers['user-agent'],
         { email }
       );
-      return ApiResponse.tooManyRequests(res, 'Too many password reset attempts. Please try again later.');
+      return ApiResponse.tooManyRequests(res, 'Demasiados intentos de restablecimiento de contraseña. Por favor, inténtalo de nuevo más tarde.');
     }
 
     // Request password reset

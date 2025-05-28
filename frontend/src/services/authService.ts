@@ -169,7 +169,7 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
     return {
       success: false,
-      message: 'Network error. Please check your connection.',
+      message: 'Error de conexión. Por favor, verifica tu conexión a internet.',
     };
   }
 };
@@ -222,7 +222,7 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 
         return {
           success: false,
-          message: error.response.data.message || 'Registration failed. Please try again.',
+          message: error.response.data.message || 'Error en el registro. Por favor, inténtalo de nuevo.',
         };
       } else if (error.request) {
         // The request was made but no response was received
@@ -235,7 +235,7 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 
     return {
       success: false,
-      message: 'Network error. Please check your connection.',
+      message: 'Error de conexión. Por favor, verifica tu conexión a internet.',
     };
   }
 };
@@ -341,7 +341,7 @@ export const logout = async (): Promise<AuthResponse> => {
     // and consider the logout successful from the client's perspective
     return {
       success: true,
-      message: 'Logout successful. You have been logged out locally.',
+      message: 'Sesión cerrada exitosamente. Has sido desconectado localmente.',
     };
   }
 };
@@ -398,12 +398,12 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
       return {
         success: false,
         message:
-          error.response.data.message || 'Failed to send password reset email. Please try again.',
+          error.response.data.message || 'Error al enviar el correo de restablecimiento de contraseña. Por favor, inténtalo de nuevo.',
       };
     }
     return {
       success: false,
-      message: 'Network error. Please check your connection.',
+      message: 'Error de conexión. Por favor, verifica tu conexión a internet.',
     };
   }
 };
@@ -440,12 +440,12 @@ export const resetPassword = async (token: string, password: string): Promise<Au
         success: false,
         message:
           error.response.data.message ||
-          'Failed to reset password. The token may be invalid or expired.',
+          'Error al restablecer la contraseña. El token puede ser inválido o haber expirado.',
       };
     }
     return {
       success: false,
-      message: 'Network error. Please check your connection.',
+      message: 'Error de conexión. Por favor, verifica tu conexión a internet.',
     };
   }
 };

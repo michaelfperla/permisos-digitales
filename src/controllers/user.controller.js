@@ -121,7 +121,7 @@ exports.updateProfile = async (req, res, next) => {
     const result = ApiResponse.success(res,
       null,
       200,
-      'Profile updated successfully.'
+      'Perfil actualizado exitosamente.'
     );
 
     // This might not execute if res.json() ends the request cycle
@@ -133,7 +133,7 @@ exports.updateProfile = async (req, res, next) => {
       errorMappings: {
         '23505': {
           status: 409,
-          message: 'Email is already in use by another account.'
+          message: 'El correo electrónico ya está en uso por otra cuenta.'
         }
       }
     });

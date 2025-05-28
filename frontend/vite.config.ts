@@ -46,12 +46,13 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html')
+        // Remove admin from main build - it should be deployed separately
+        // admin: resolve(__dirname, 'admin.html')
       },
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
-          'admin': ['./src/admin/main.tsx'],
+          // Only include client bundle in main build
           'client': ['./src/main.tsx']
         }
       }

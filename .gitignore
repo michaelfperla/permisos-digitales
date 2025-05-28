@@ -29,6 +29,20 @@ frontend/.env.production
 docs/*.pem
 docs/*.key
 
+# AWS and deployment configuration files
+*-cert-validation.json
+*-subdomain-record.json
+cert-validation-records.json
+current-cloudfront-config.json
+updated-cloudfront-config.json
+delete-old-validation-records.json
+route53-a-records.json
+single-cert-validation.json
+
+# Security audit and deployment files
+PRE_DEPLOYMENT_SECURITY_AUDIT_FINAL.md
+SECURITY_ACTION_PLAN.md
+
 # IDE and editor files
 .idea/
 .vscode/
@@ -43,6 +57,7 @@ logs/
 
 # Testing and coverage
 coverage/
+frontend/coverage/
 .nyc_output/
 test-storage/
 
@@ -51,10 +66,10 @@ tmp/
 temp/
 .cache/
 
-# Generate files
-storage/pdfs/
-storage/payment-proofs/
-storage/payment_proofs/
+# Generated files and storage
+storage/
+frontend/dist/
+dist/
 
-# docs
-docs
+# Build artifacts
+frontend/dist-admin/

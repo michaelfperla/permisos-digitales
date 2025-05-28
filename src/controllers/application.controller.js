@@ -593,7 +593,7 @@ exports.createApplication = async (req, res, next) => {
       errorMappings: {
         '23505': {
           status: 409,
-          message: 'Application failed: A vehicle with this information already exists.'
+          message: 'Error en la solicitud: Ya existe un vehículo con esta información.'
         }
       }
     });
@@ -603,7 +603,7 @@ exports.createApplication = async (req, res, next) => {
 // --- GET USER APPLICATIONS ---
 exports.getUserApplications = async (req, res, next) => {
   const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ message: 'User not authenticated.' }); // Should be caught by middleware
+  if (!userId) return res.status(401).json({ message: 'Usuario no autenticado.' }); // Should be caught by middleware
 
   try {
     logger.debug(`Fetching applications for user ID: ${userId}`);

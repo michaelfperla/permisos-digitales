@@ -158,7 +158,7 @@ describe('Password Reset Controller', () => {
       );
       expect(ApiResponse.tooManyRequests).toHaveBeenCalledWith(
         res,
-        'Too many password reset attempts. Please try again later.'
+        'Demasiados intentos de restablecimiento de contraseña. Por favor, inténtalo de nuevo más tarde.'
       );
     });
 
