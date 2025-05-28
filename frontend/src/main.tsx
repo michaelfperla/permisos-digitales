@@ -9,6 +9,7 @@ import authService from './services/authService';
 import { AuthProvider } from './shared/contexts/AuthContext';
 import { ToastProvider } from './shared/contexts/ToastContext';
 import { setupGlobalErrorHandler, debugLog, errorLog } from './utils/debug';
+import { getCsrfToken } from './utils/csrf';
 
 import './styles/global.css'; // Import global styles
 
@@ -28,6 +29,11 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 // Set up global error handler
 setupGlobalErrorHandler();
+
+// Expose getCsrfToken globally for debugging in development
+if (import.meta.env.DEV) {
+  (window as any).getCsrfToken = getCsrfToken;
+}
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
