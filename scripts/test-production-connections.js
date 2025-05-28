@@ -93,7 +93,11 @@ async function testRedisConnection() {
       host: process.env.REDIS_HOST,
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || undefined,
-      connect_timeout: 10000
+      connect_timeout: 10000,
+      tls: {
+        // Enable TLS for ElastiCache with encryption in transit
+        servername: process.env.REDIS_HOST
+      }
     });
 
     await new Promise((resolve, reject) => {
