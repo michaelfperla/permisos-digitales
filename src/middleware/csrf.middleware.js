@@ -47,8 +47,8 @@ const handleCsrfError = (err, req, res, next) => {
     session: req.session ? 'exists' : 'none'
   });
 
-  // For API requests, return JSON error
-  if (req.xhr || req.originalUrl.startsWith('/api/') || req.get('Accept') === 'application/json') {
+  // For API requests (on api.domain.com), return JSON error
+  if (req.xhr || req.get('Accept') === 'application/json') {
     return ApiResponse.forbidden(res, 'Invalid or missing CSRF token');
   }
 

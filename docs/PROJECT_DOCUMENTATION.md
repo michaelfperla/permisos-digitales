@@ -89,7 +89,7 @@ Ensure you have the following installed:
 The application uses `.env` files for managing environment variables.
 *   **Backend**: Create a `.env` file in the project root. Refer to `.env.example` for required variables such as database connection strings (`DATABASE_URL`), session secrets (`SESSION_SECRET`), email server details, and API keys for services like Conekta.
     *   **CRITICAL**: `SESSION_SECRET` must be a strong, unique random string.
-*   **Frontend**: Create a `.env.local` file in the `frontend/` directory. Refer to `frontend/.env.example` if available, or configure `VITE_API_URL` to point to the backend API (e.g., `http://localhost:3001/api`).
+*   **Frontend**: Create a `.env.local` file in the `frontend/` directory. Refer to `frontend/.env.example` if available, or configure `VITE_API_URL` to point to the backend API (e.g., `http://localhost:3001`).
 
 ### 2.3. Installation
 

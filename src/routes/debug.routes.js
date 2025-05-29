@@ -20,7 +20,7 @@ router.get('/csrf-test', csrfProtection, (req, res) => {
       cookies: {
         count: Object.keys(req.cookies || {}).length,
         names: Object.keys(req.cookies || {}),
-        hasSessionCookie: !!(req.cookies && req.cookies['connect.sid']),
+        hasSessionCookie: !!(req.cookies && req.cookies['permisos.sid']),
       },
       session: {
         exists: !!req.session,
@@ -54,7 +54,7 @@ router.post('/csrf-validate', csrfProtection, (req, res) => {
       tokenSource: req.headers['x-csrf-token'] ? 'header' : req.body._csrf ? 'body' : 'none',
       cookies: {
         count: Object.keys(req.cookies || {}).length,
-        hasSessionCookie: !!(req.cookies && req.cookies['connect.sid']),
+        hasSessionCookie: !!(req.cookies && req.cookies['permisos.sid']),
       },
       session: {
         exists: !!req.session,
@@ -87,7 +87,7 @@ router.get('/session-info', (req, res) => {
       cookies: {
         count: Object.keys(req.cookies || {}).length,
         names: Object.keys(req.cookies || {}),
-        sessionCookie: req.cookies?.['connect.sid'] ? 'present' : 'missing',
+        sessionCookie: req.cookies?.['permisos.sid'] ? 'present' : 'missing',
       },
       headers: {
         origin: req.get('Origin') || 'none',

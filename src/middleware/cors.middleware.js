@@ -44,17 +44,37 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Cookie'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Cookie', 'X-Portal-Type'],
   exposedHeaders: ['Set-Cookie'],
   credentials: true, // Allow cookies to be sent with requests
-  maxAge: 86400 // Cache preflight request for 24 hours
+  maxAge: 86400, // Cache preflight request for 24 hours
+  // Prevent duplicate headers by ensuring only one CORS middleware handles the response
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 };
 
-// Create the CORS middleware
-const corsMiddleware = cors(corsOptions);
+// Create the CORS middleware with header cleanup
+const corsMiddleware = (req, res, next) => {
+  // Clear any existing CORS headers that might have been set by nginx or other middleware
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Expose-Headers');
+
+  // Apply the cors middleware
+  cors(corsOptions)(req, res, next);
+};
 
 // Create a simple CORS middleware for development
 const simpleCorsMiddleware = (req, res, next) => {
+  // Clear any existing CORS headers first
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Expose-Headers');
+
   // Get the origin from the request
   const origin = req.headers.origin;
 
@@ -81,7 +101,7 @@ const simpleCorsMiddleware = (req, res, next) => {
   }
 
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, X-Portal-Type');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Expose-Headers', 'Set-Cookie');
 

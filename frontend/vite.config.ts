@@ -16,7 +16,8 @@ export default defineConfig({
   server: {
     port: 3002, // Use port 3002 for the frontend to avoid conflicts
     proxy: {
-      '/api': {
+      // Industry standard: proxy all API calls to backend (clean subdomain routing in dev)
+      '/auth': {
         target: 'http://localhost:3001', // Backend server is running on port 3001
         changeOrigin: true,
         secure: false,
@@ -39,6 +40,36 @@ export default defineConfig({
             });
           }
         },
+      },
+      '/applications': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/user': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/admin': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/payments': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/notifications': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/status': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
       }
     }
   },
@@ -50,12 +81,47 @@ export default defineConfig({
         // admin: resolve(__dirname, 'admin.html')
       },
       output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
-          // Only include client bundle in main build
-          'client': ['./src/main.tsx']
+        manualChunks: (id) => {
+          // Vendor dependencies - split into smaller chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('react-router')) {
+              return 'vendor-router';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('axios')) {
+              return 'vendor-http';
+            }
+            if (id.includes('zod') || id.includes('react-hook-form')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('react-icons')) {
+              return 'vendor-icons';
+            }
+            return 'vendor-other';
+          }
+
+          // Split by feature areas
+          if (id.includes('/pages/')) {
+            return 'pages';
+          }
+          if (id.includes('/components/')) {
+            return 'components';
+          }
+          if (id.includes('/services/')) {
+            return 'services';
+          }
+          if (id.includes('/shared/')) {
+            return 'shared';
+          }
         }
       }
-    }
+    },
+    // Increase chunk size warning limit since we're splitting more
+    chunkSizeWarningLimit: 600
   }
 })

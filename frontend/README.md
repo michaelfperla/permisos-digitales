@@ -16,7 +16,7 @@ For a comprehensive understanding of the overall project architecture, including
 - Create a `.env.local` file in this `frontend/` directory.
 - Set the `VITE_API_URL` variable to point to your running backend API. Example:
   ```
-  VITE_API_URL=http://localhost:3001/api
+  VITE_API_URL=http://localhost:3001
   ```
 
 ### Installation

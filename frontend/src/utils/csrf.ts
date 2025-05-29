@@ -23,12 +23,13 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       console.info('Fetching fresh CSRF token from server');
     }
 
-    // In development, use the Vite proxy which forwards requests to the backend
-    // In production, use the environment variable or default to relative path
+    // Industry standard: clean subdomain routing
+    // In development, use relative paths (proxied by Vite)
+    // In production, use the clean API subdomain
     const isDevelopment = import.meta.env.DEV;
     const csrfEndpoint = isDevelopment
-      ? '/api/auth/csrf-token' // Use relative path for proxy in development
-      : `${import.meta.env.VITE_API_URL || ''}/api/auth/csrf-token`; // Use env var or relative path in production
+      ? '/auth/csrf-token' // Use relative path for proxy in development (clean routing)
+      : `${import.meta.env.VITE_API_URL || ''}/auth/csrf-token`; // Use env var in production
 
     if (import.meta.env.DEV) {
       console.info('Fetching CSRF token from:', csrfEndpoint);

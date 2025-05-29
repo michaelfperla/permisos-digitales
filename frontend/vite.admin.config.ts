@@ -16,7 +16,8 @@ export default defineConfig({
   server: {
     port: 3003, // Use different port for admin development
     proxy: {
-      '/api': {
+      // Industry standard: proxy all API calls to backend (clean subdomain routing in dev)
+      '/auth': {
         target: 'http://localhost:3001', // Backend server is running on port 3001
         changeOrigin: true,
         secure: false,
@@ -25,6 +26,26 @@ export default defineConfig({
             console.error('Admin proxy error:', err);
           });
         },
+      },
+      '/admin': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/applications': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/user': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/status': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
       }
     }
   },

@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-// Create a custom axios instance for the admin portal
+// Create a custom axios instance for the admin portal (industry standard: clean subdomain routing)
 const api: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: '', // Use relative paths for clean subdomain routing
   headers: {
     'Content-Type': 'application/json',
     'X-Portal-Type': 'admin',

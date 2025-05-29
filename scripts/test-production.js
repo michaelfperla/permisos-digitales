@@ -13,6 +13,10 @@ const path = require('path');
 const API_BASE_URL = 'https://api.permisosdigitales.com.mx';
 const FRONTEND_ORIGIN = 'https://permisosdigitales.com.mx';
 
+// Add timeout and retry configuration
+const TIMEOUT_MS = 15000;
+const MAX_RETRIES = 3;
+
 // Create axios instance with proper configuration
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,7 +25,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000,
+  timeout: TIMEOUT_MS,
 });
 
 // Store cookies between requests
@@ -111,7 +115,7 @@ async function testCsrfTokenGeneration() {
 async function testCsrfTokenValidation(token) {
   console.log('\n🔐 Testing CSRF Token Validation...');
   try {
-    const response = await api.post('/debug/csrf-validate', 
+    const response = await api.post('/debug/csrf-validate',
       { test: 'data' },
       { headers: { 'X-CSRF-Token': token } }
     );
@@ -145,9 +149,9 @@ async function testRegistrationEndpoint() {
     // First get a CSRF token
     const csrfResponse = await api.get('/api/auth/csrf-token');
     const csrfToken = csrfResponse.data.data.csrfToken;
-    
+
     console.log('Got CSRF token for registration test');
-    
+
     // Test registration with a test email
     const testEmail = `test-${Date.now()}@example.com`;
     const registrationData = {
@@ -156,11 +160,11 @@ async function testRegistrationEndpoint() {
       first_name: 'Test',
       last_name: 'User'
     };
-    
+
     const response = await api.post('/api/auth/register', registrationData, {
       headers: { 'X-CSRF-Token': csrfToken }
     });
-    
+
     console.log('✅ Registration test passed:', response.data);
     return true;
   } catch (error) {
@@ -190,7 +194,7 @@ async function runAllTests() {
   console.log('🚀 Starting Production Tests...');
   console.log('API Base URL:', API_BASE_URL);
   console.log('Frontend Origin:', FRONTEND_ORIGIN);
-  
+
   const results = {
     healthCheck: false,
     cors: false,
@@ -200,42 +204,42 @@ async function runAllTests() {
     registration: false,
     environment: false,
   };
-  
+
   // Run tests in sequence
   results.healthCheck = await testHealthCheck();
   results.cors = await testCorsConfiguration();
-  
+
   const csrfToken = await testCsrfTokenGeneration();
   results.csrfGeneration = !!csrfToken;
-  
+
   if (csrfToken) {
     results.csrfValidation = await testCsrfTokenValidation(csrfToken);
   }
-  
+
   results.sessionInfo = await testSessionInfo();
   results.environment = await testEnvironmentInfo();
-  
+
   // Registration test (might fail if email already exists, that's OK)
   results.registration = await testRegistrationEndpoint();
-  
+
   // Summary
   console.log('\n📊 Test Results Summary:');
   console.log('========================');
   Object.entries(results).forEach(([test, passed]) => {
     console.log(`${passed ? '✅' : '❌'} ${test}: ${passed ? 'PASSED' : 'FAILED'}`);
   });
-  
+
   const passedTests = Object.values(results).filter(Boolean).length;
   const totalTests = Object.keys(results).length;
-  
+
   console.log(`\n🎯 Overall: ${passedTests}/${totalTests} tests passed`);
-  
+
   if (passedTests === totalTests) {
     console.log('🎉 All tests passed! Production environment looks healthy.');
   } else {
     console.log('⚠️ Some tests failed. Check the troubleshooting guide.');
   }
-  
+
   return results;
 }
 

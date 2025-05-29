@@ -241,7 +241,7 @@ aws s3 sync dist/ s3://your-frontend-bucket-name --delete
    - Type: Instances
    - Protocol: HTTP
    - Port: 3001
-   - Health Check Path: `/api/status`
+   - Health Check Path: `/status`
 
 2. Register your EC2 instance
 
@@ -273,7 +273,7 @@ aws s3 sync dist/ s3://your-frontend-bucket-name --delete
 
 ### 8.2 Test Deployment
 
-1. Test API: `https://api.permisosdigitales.com.mx/api/status`
+1. Test API: `https://api.permisosdigitales.com.mx/status` (Industry Standard: Clean Subdomain Routing)
 2. Test Frontend: `https://permisosdigitales.com.mx`
 
 ## 🔍 Monitoring & Maintenance
@@ -345,7 +345,7 @@ chmod +x scripts/deploy-aws.sh
 
 ---
 
-**Need Help?** 
+**Need Help?**
 - Check AWS documentation
 - Review application logs
 - Contact support if needed

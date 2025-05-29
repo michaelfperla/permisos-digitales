@@ -73,3 +73,31 @@ dist/
 
 # Build artifacts
 frontend/dist-admin/
+
+# ============================================================================
+# 🔒 PRODUCTION SECURITY - ADDITIONAL EXCLUSIONS
+# ============================================================================
+
+# Documentation directory (contains sensitive deployment info)
+docs/
+docs/**/*
+
+# Database backups and SQL files
+database/backups/
+*.sql
+*.dump
+*.backup
+
+# Troubleshooting and production documentation
+PRODUCTION_*.md
+TROUBLESHOOTING_*.md
+*_TROUBLESHOOTING.md
+*_REGISTRATION_FIX.md
+
+# Cookies and session files
+cookies.txt
+*.cookies
+
+# Additional temporary files
+*.tmp
+*.bak

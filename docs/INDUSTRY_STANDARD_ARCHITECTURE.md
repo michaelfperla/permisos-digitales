@@ -50,7 +50,7 @@ Frontend Domains (Any of these):          API Endpoint (Always this):
 ### **Frontend Configuration:**
 ```bash
 # frontend/.env.production
-VITE_API_URL=https://api.permisosdigitales.com.mx/api
+VITE_API_URL=https://api.permisosdigitales.com.mx
 ```
 
 ### **Backend Configuration:**

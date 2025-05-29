@@ -2,12 +2,13 @@ import axios from 'axios';
 
 import { addCsrfTokenInterceptor } from '../utils/csrf';
 
-// In development, use the Vite proxy which forwards requests to the backend
-// In production, use the environment variable or default to relative path
+// Industry standard: clean subdomain routing
+// In development, use relative paths (proxied by Vite)
+// In production, use the clean API subdomain
 const isDevelopment = import.meta.env.DEV;
 const apiBaseUrl = isDevelopment
-  ? '/api' // Use relative path for proxy in development
-  : import.meta.env.VITE_API_URL || '/api'; // Use env var or relative path in production
+  ? '' // Use relative paths for proxy in development (clean routing)
+  : import.meta.env.VITE_API_URL || ''; // Use env var in production
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -21,7 +22,7 @@ export const api = axios.create({
 
 // Log the API base URL for debugging (development only)
 if (import.meta.env.DEV) {
-  console.info('API base URL (using proxy in dev):', apiBaseUrl);
+  console.info('API base URL (clean subdomain routing):', apiBaseUrl || 'relative paths');
 }
 
 // Add CSRF token interceptor
