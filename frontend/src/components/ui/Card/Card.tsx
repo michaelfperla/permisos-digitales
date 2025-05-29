@@ -3,40 +3,18 @@ import React from 'react';
 import styles from './Card.module.css';
 
 export interface CardProps {
-  /**
-   * Card content for the main body
-   */
   children: React.ReactNode;
-  /**
-   * Optional title for the card, will render a styled header
-   */
   title?: string;
-  /**
-   * Optional content for the card footer
-   */
   footerContent?: React.ReactNode;
-  /**
-   * Additional class names to apply to the root card element
-   */
   className?: string;
-  /**
-   * Whether the card should have a hover effect (scales up slightly, deeper shadow)
-   */
   hoverable?: boolean;
-  /**
-   * Card variant - 'auth' adds special styling for authentication forms
-   */
   variant?: 'default' | 'auth';
-  /**
-   * Optional custom padding for the card body.
-   * Useful if the card content needs specific spacing different from default.
-   */
-  bodyPadding?: string; // e.g., "var(--space-2)", "0", "1rem 0.5rem"
+  bodyPadding?: string;
 }
 
 /**
- * Card component for displaying content in a structured and styled container.
- * Supports optional title (renders a header) and footer.
+ * Card component for displaying content in a structured container.
+ * Supports optional title header and footer content.
  */
 const Card: React.FC<CardProps> = ({
   children,

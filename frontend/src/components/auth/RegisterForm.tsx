@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 
-import generalFormStyles from './Form.module.css'; // Assuming this is the original styles import
-import formSpecificStyles from './RegisterForm.module.css'; // Renamed import for clarity
+import generalFormStyles from './Form.module.css';
+import formSpecificStyles from './RegisterForm.module.css';
 import Icon from '../../shared/components/ui/Icon';
 import { useUserAuth as useAuth } from '../../shared/hooks/useAuth';
 import { useToast } from '../../shared/hooks/useToast';
@@ -21,12 +21,13 @@ import MobileForm, {
   MobileFormActions,
 } from "../ui/MobileForm/MobileForm";
 
-
-
 interface RegisterFormProps {
   onRegistrationSuccess: (email: string) => void;
 }
 
+/**
+ * Two-step registration form with validation and timeout protection
+ */
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onRegistrationSuccess }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -107,13 +108,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
           registeredEmail,
         );
         navigate('/pre-verification', { state: { email: registeredEmail } });
-      } else {
-        // This 'else' might not be hit if registerUser throws on failure or timeout rejects.
-        // The catch block is more likely to handle explicit failures.
-        // showToast('No pudimos crear tu cuenta. Por favor, inténtalo de nuevo.', 'error');
       }
     } catch (err) {
-      // Changed 'error' to 'err' to avoid conflict with context 'error'
       errorLog('RegisterForm', 'Registration submission error', err);
       let errorMessage = 'No pudimos crear tu cuenta. Por favor, inténtalo de nuevo.';
 
@@ -151,19 +147,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
       }
       showToast(errorMessage, 'error');
     }
-    // Removed isLoading manual toggle; useAuth hook should manage this.
   };
 
   return (
     <MobileForm
       title="Crear cuenta"
       onSubmit={handleSubmit(onSubmit)}
-      // className={formSpecificStyles.mobileFormOverrides} // If MobileForm itself needs overrides from RegisterForm.module.css
     >
       {error && (
         <Alert variant="error" className={generalFormStyles.formAlert}>
-          {' '}
-          {/* Use generalFormStyles or specific from formSpecificStyles */}
           {error}
         </Alert>
       )}
@@ -209,7 +201,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
               onClick={goToNextStep}
               icon={<Icon IconComponent={FaArrowRight} size="sm" />}
               iconAfter={true}
-              className={formSpecificStyles.nextButton} // Apply full-width style for step 1
+              className={formSpecificStyles.nextButton}
             >
               Siguiente
             </Button>
@@ -227,7 +219,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
               error={errors.email?.message}
               {...register('email')}
               required
-              autoComplete="off" // Changed from "email" to "off" as it's a new account, or "username" if email is username
+              autoComplete="off"
               inputMode="email"
               className={formSpecificStyles.input}
             />
@@ -287,8 +279,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
               {isLoading ? (
                 <>
                   Creando cuenta...
-                  {/* Assuming Button component shows spinner if isLoading prop is true, or add custom */}
-                  {/* <span className={generalFormStyles.spinner}></span> */}
                 </>
               ) : (
                 'Crear cuenta'
@@ -301,7 +291,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegistrationSuccess: _onR
       <div className={formSpecificStyles.formFooterLinks}>
         <div className={formSpecificStyles.formFooterSection}>
           <p className={formSpecificStyles.mutedText}>
-            Al continuar, aceptas nuestros {/* Wording updated */}
+            Al continuar, aceptas nuestros
           </p>
           <div className={formSpecificStyles.termsLinksContainer}>
             <Link to="/terminos-y-condiciones" className={formSpecificStyles.minorLink}>

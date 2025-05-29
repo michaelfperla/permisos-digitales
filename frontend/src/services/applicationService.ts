@@ -4,21 +4,20 @@ import api from './api';
 import { ApplicationFormData } from '../types/application.types';
 import { getCsrfToken, handleCsrfError } from '../utils/csrf';
 
-// Define types for our API responses and requests based on backend schema
 export interface Application {
   id: string;
   user_id: string;
   status: ApplicationStatus;
   created_at: string;
   updated_at: string;
-  parent_application_id?: string; // For renewals, references the original application
+  parent_application_id?: string;
 
-  // Applicant Data
+  // Applicant data
   nombre_completo: string;
   curp_rfc: string;
   domicilio: string;
 
-  // Vehicle Data
+  // Vehicle data
   marca: string;
   linea: string;
   color: string;
@@ -26,14 +25,14 @@ export interface Application {
   numero_motor: string;
   ano_modelo: number;
 
-  // Permit Data
+  // Permit data
   folio?: string;
   importe?: number;
   fecha_expedicion?: string;
   fecha_vencimiento?: string;
-  is_renewal?: boolean; // Indicates if this is a renewal application
+  is_renewal?: boolean;
 
-  // Renewal Data
+  // Renewal data
   renewal_reason?: string;
   renewal_notes?: string;
   renewal_submitted_at?: string;
@@ -41,7 +40,7 @@ export interface Application {
   renewal_rejected_at?: string;
   renewal_rejection_reason?: string;
 
-  // Payment Data
+  // Payment data
   payment_reference?: string;
   paymentReference?: string;
 
@@ -52,7 +51,6 @@ export interface Application {
   placas_file_path?: string;
 }
 
-// Application status values from backend - matches src/constants/index.js
 export type ApplicationStatus =
   | 'AWAITING_PAYMENT'
   | 'AWAITING_OXXO_PAYMENT'
@@ -171,12 +169,8 @@ export interface RenewalFormData {
   device_session_id?: string;
 }
 
-// Note: We now use the centralized api instance from api.ts
-// and the getCsrfToken function from utils/csrf.ts
-
 /**
  * Get all applications for the current user
- * @param options Optional request options including AbortSignal
  */
 export const getApplications = async (options?: {
   signal?: AbortSignal;
@@ -185,10 +179,8 @@ export const getApplications = async (options?: {
     signal: options?.signal,
   });
 
-  // Log the response for debugging
   console.info('Applications response from API:', response.data);
 
-  // If the response doesn't have a success flag, add it
   if (response.data.success === undefined) {
     return {
       success: true,
@@ -197,18 +189,13 @@ export const getApplications = async (options?: {
     };
   }
 
-  // Return the response as is
   return response.data;
 };
 
-// Cache for non-existent permit IDs to prevent repeated API calls
 export const nonExistentPermitIds = new Set<string>();
 
 /**
- * Get a specific application by ID
- * @param id Application ID
- * @param options Optional request options including AbortSignal
- * @returns Full application status response including application details and status info
+ * Get application details and status by ID
  */
 export const getApplicationById = async (
   id: string,
@@ -224,10 +211,7 @@ export const getApplicationById = async (
 };
 
 /**
- * Get a specific application for renewal
- * @param id Application ID
- * @param options Optional request options including AbortSignal
- * @returns Application response with success flag and application data
+ * Get application for renewal process
  */
 export const getApplicationForRenewal = async (
   id: string,
@@ -236,7 +220,6 @@ export const getApplicationForRenewal = async (
   console.info(`Fetching application for renewal with ID: ${id}`);
 
   try {
-    // First try to get the application status
     const statusResponse = await api.get<ApplicationStatusResponse>(`/applications/${id}/status`, {
       signal: options?.signal,
     });
@@ -245,23 +228,19 @@ export const getApplicationForRenewal = async (
       throw new Error('Application not found');
     }
 
-    // Convert the status response to an application response
     const appDetails = statusResponse.data.application;
 
-    // Create an Application object from the ApplicationDetails
     const application: Application = {
       id: appDetails.id,
-      user_id: '', // Will be filled by the backend
+      user_id: '',
       status: (statusResponse.data.status?.currentStatus || 'PENDING_PAYMENT') as ApplicationStatus,
       created_at: appDetails.dates.created,
       updated_at: appDetails.dates.updated,
 
-      // Applicant Data
       nombre_completo: appDetails.ownerInfo.nombre_completo,
       curp_rfc: appDetails.ownerInfo.curp_rfc,
       domicilio: appDetails.ownerInfo.domicilio,
 
-      // Vehicle Data
       marca: appDetails.vehicleInfo.marca,
       linea: appDetails.vehicleInfo.linea,
       color: appDetails.vehicleInfo.color,
@@ -272,7 +251,6 @@ export const getApplicationForRenewal = async (
           ? parseInt(appDetails.vehicleInfo.ano_modelo, 10)
           : appDetails.vehicleInfo.ano_modelo,
 
-      // Permit Data - extract from dates if available
       fecha_expedicion: appDetails.dates.created,
       fecha_vencimiento: appDetails.dates.fecha_vencimiento || '',
     };
@@ -302,14 +280,11 @@ export const getApplicationForRenewal = async (
 
 /**
  * Create a new vehicle permit application
- * @param applicationData Application data
  */
 export const createApplication = async (
   applicationData: ApplicationFormData,
 ): Promise<ApplicationResponse> => {
   try {
-    // Make sure ano_modelo is a number before submission
-    // This is critical since the database expects an integer
     const submissionData = {
       ...applicationData,
       ano_modelo:
@@ -318,10 +293,8 @@ export const createApplication = async (
           : applicationData.ano_modelo,
     };
 
-    // Log the data being submitted for debugging
     console.info('Submitting application data to API:', submissionData);
 
-    // Ensure the parsed ano_modelo value is valid (not NaN)
     if (isNaN(submissionData.ano_modelo as number)) {
       console.error('Invalid ano_modelo value:', applicationData.ano_modelo);
       return {
@@ -331,7 +304,6 @@ export const createApplication = async (
       };
     }
 
-    // Log if payment token is present
     if (submissionData.payment_token) {
       console.info(
         'Payment token included in submission:',
@@ -341,7 +313,6 @@ export const createApplication = async (
       console.info('No payment token included in submission');
     }
 
-    // Log device session ID if present
     if (submissionData.device_session_id) {
       console.info(
         'Device session ID included in submission:',
@@ -351,25 +322,20 @@ export const createApplication = async (
       console.info('No device session ID included in submission');
     }
 
-    // Attempt to make the API call with detailed error handling
     console.info('Making POST request to /api/applications');
 
     try {
-      // Get the API base URL from environment variables or use a default
       const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       console.info('Using API base URL:', apiBaseUrl);
 
-      // Make the API call (CSRF token will be added by the interceptor)
       const response = await api.post<ApplicationResponse>('/applications', submissionData);
 
-      // If there's a CSRF error, the interceptor will handle it automatically
       console.info('Application submission successful, response:', response?.data);
 
       // Ensure we have a valid response object to return
       if (response && response.data) {
         const responseData = response.data;
 
-        // Log the payment information if present
         if (responseData.payment) {
           console.info('Payment information in response:', {
             method: responseData.payment.method,
@@ -379,14 +345,11 @@ export const createApplication = async (
           });
         }
 
-        // Check if the response has the expected structure
         if (responseData.application) {
-          // If the response already has a success flag, return it as is
           if (responseData.success !== undefined) {
             return responseData;
           }
 
-          // The backend might not include a success flag, so we add it
           return {
             success: true,
             application: responseData.application,
@@ -396,19 +359,16 @@ export const createApplication = async (
           };
         }
 
-        // If the response already has a success flag, return it as is
         if (responseData.success !== undefined) {
           return responseData;
         }
 
-        // If we can't determine the structure, return a generic success
         return {
           success: true,
           application: responseData.application || ({} as Application),
           message: 'Solicitud procesada',
         };
       } else {
-        // Create a minimal valid response if response or data is missing
         return {
           success: false,
           application: {} as Application,
@@ -416,16 +376,13 @@ export const createApplication = async (
         };
       }
     } catch (apiError) {
-      // This is a more detailed error handler specifically for the API call
       if (axios.isAxiosError(apiError)) {
         console.error('API call failed with status:', apiError.response?.status);
         console.error('API error response:', apiError.response?.data);
 
-        // Handle payment-specific errors (402 Payment Required)
         if (apiError.response?.status === 402) {
           console.error('Payment required error:', apiError.response?.data);
 
-          // Extract detailed error message from the response
           let errorMessage =
             'Error al procesar el pago. Por favor, verifica los datos de tu tarjeta e intenta de nuevo.';
           let errorCode = 'payment_error';
@@ -449,9 +406,7 @@ export const createApplication = async (
           };
         }
 
-        // Check if this is a CSRF error and try to refresh the token
         if (await handleCsrfError(apiError)) {
-          // Retry with fresh token
           try {
             console.info('Retrying request with fresh CSRF token');
             const retryResponse = await api.post<ApplicationResponse>(
@@ -574,9 +529,7 @@ export const createApplication = async (
 };
 
 /**
- * Update an existing application (only allowed in PENDING_PAYMENT status)
- * @param id Application ID
- * @param applicationData Updated application data
+ * Update application data (only allowed in PENDING_PAYMENT status)
  */
 export const updateApplication = async (
   id: string,
@@ -595,9 +548,7 @@ export const updateApplication = async (
   } catch (error) {
     console.error(`Failed to update application ${id}:`, error);
 
-    // Return error response
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         application: {} as Application,
@@ -614,8 +565,7 @@ export const updateApplication = async (
 };
 
 /**
- * Submit an application for review (not used in current backend flow)
- * @param id Application ID
+ * Submit application for review (not used in current backend flow)
  */
 export const submitApplication = async (id: string): Promise<ApplicationResponse> => {
   try {
@@ -635,9 +585,7 @@ export const submitApplication = async (id: string): Promise<ApplicationResponse
   } catch (error) {
     console.error(`Failed to submit application ${id}:`, error);
 
-    // Return error response
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         application: {} as Application,
@@ -653,48 +601,9 @@ export const submitApplication = async (id: string): Promise<ApplicationResponse
   }
 };
 
-// [Refactor - Remove Manual Payment] API call for uploading manual payment proof. Obsolete.
 /**
- * Upload payment proof for an application
- * @param id Application ID
- * @param file Payment proof file
- * @param paymentReference Optional payment reference
- * @param options Optional request options including AbortSignal
+ * Upload payment proof (deprecated - payment provider integration pending)
  */
-/*
-export const uploadPaymentProof = async (
-  id: string,
-  file: File,
-  paymentReference?: string,
-  options?: { signal?: AbortSignal }
-): Promise<ApplicationResponse> => {
-  const csrfToken = await getCsrfToken();
-
-  const formData = new FormData();
-  formData.append('paymentProof', file);
-
-  // Add payment reference if provided
-  if (paymentReference) {
-    formData.append('paymentReference', paymentReference);
-  }
-
-  const response = await api.post<ApplicationResponse>(
-    `/applications/${id}/payment-proof`,
-    formData,
-    {
-      headers: {
-        'X-CSRF-Token': csrfToken,
-        'Content-Type': 'multipart/form-data'
-      },
-      signal: options?.signal
-    }
-  );
-
-  return response.data;
-};
-*/
-
-// Temporary placeholder function until payment provider integration is implemented
 export const uploadPaymentProof = async (
   _id: string,
   _file: File,
@@ -712,10 +621,7 @@ export const uploadPaymentProof = async (
 };
 
 /**
- * Download permit document
- * @param id Application ID
- * @param type Document type ('permiso', 'recibo', 'certificado', 'placas')
- * @param options Optional request options including AbortSignal
+ * Download permit document by type
  */
 export const downloadPermit = async (
   id: string,
@@ -723,10 +629,8 @@ export const downloadPermit = async (
   options?: { signal?: AbortSignal },
 ): Promise<Blob> => {
   try {
-    // Get CSRF token for authenticated requests
     const csrfToken = await getCsrfToken();
 
-    // Map frontend types to backend API endpoints
     const typeMap: Record<string, string> = {
       permiso: 'permiso',
       recibo: 'recibo',
@@ -749,17 +653,14 @@ export const downloadPermit = async (
   } catch (error) {
     console.error(`Failed to download ${type} for application ${id}:`, error);
 
-    // For development purposes, generate a mock PDF
-    // In a real implementation, this would be handled by the error handler
+    // Development fallback: generate mock PDF
     const mockPdfContent = `Mock PDF content for ${type} document - application ${id}`;
     return new Blob([mockPdfContent], { type: 'application/pdf' });
   }
 };
 
 /**
- * Check if a permit is eligible for renewal
- * @param id Application ID
- * @param options Optional request options including AbortSignal
+ * Check permit renewal eligibility
  */
 export const checkRenewalEligibility = async (
   id: string,
@@ -778,7 +679,6 @@ export const checkRenewalEligibility = async (
   } catch (error) {
     console.error(`Failed to check renewal eligibility for application ${id}:`, error);
 
-    // Return error response
     return {
       eligible: false,
       message: 'Failed to check renewal eligibility. Please try again later.',
@@ -787,10 +687,7 @@ export const checkRenewalEligibility = async (
 };
 
 /**
- * Create a renewal application for an existing permit
- * @param id Original application ID
- * @param renewalData Additional data for the renewal
- * @param options Optional request options including AbortSignal
+ * Create renewal application for existing permit
  */
 export const createRenewalApplication = async (
   id: string,
@@ -807,15 +704,11 @@ export const createRenewalApplication = async (
       signal: options?.signal,
     });
 
-    // Ensure the response always has success: true for successful API calls
     if (response.data) {
-      // If the response already has a success flag, check if it's true
       if (response.data.success === true) {
         return response.data;
       }
 
-      // If success is undefined or false but we have an application object,
-      // it means the operation was successful
       if (response.data.application) {
         return {
           success: true,
@@ -829,8 +722,6 @@ export const createRenewalApplication = async (
       }
     }
 
-    // If we can't determine success from the response, assume it was successful
-    // since we're in the try block (no exception was thrown)
     return {
       success: true,
       application: response.data?.application || ({} as Application),
@@ -843,9 +734,7 @@ export const createRenewalApplication = async (
   } catch (error) {
     console.error(`Failed to create renewal for application ${id}:`, error);
 
-    // Return error response
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         application: {} as Application,
@@ -863,9 +752,7 @@ export const createRenewalApplication = async (
 };
 
 /**
- * Submit a renewal application for review
- * @param id Renewal application ID
- * @param options Optional request options including AbortSignal
+ * Submit renewal application for review
  */
 export const submitRenewalApplication = async (
   id: string,
@@ -889,9 +776,7 @@ export const submitRenewalApplication = async (
   } catch (error) {
     console.error(`Failed to submit renewal application ${id}:`, error);
 
-    // Return error response
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         application: {} as Application,
@@ -909,9 +794,7 @@ export const submitRenewalApplication = async (
 };
 
 /**
- * Delete an application (only allowed in PENDING_PAYMENT status)
- * @param id Application ID
- * @param options Optional request options including AbortSignal
+ * Delete application (only allowed in PENDING_PAYMENT status)
  */
 export const deleteApplication = async (
   id: string,
@@ -934,7 +817,6 @@ export const deleteApplication = async (
   } catch (error) {
     console.error(`Failed to delete application ${id}:`, error);
 
-    // Return error response
     return {
       success: false,
       message: 'Failed to delete application. Please try again later.',
@@ -943,9 +825,7 @@ export const deleteApplication = async (
 };
 
 /**
- * Renew an application (simplified version that calls createRenewalApplication)
- * @param id Application ID to renew
- * @param options Optional request options including AbortSignal
+ * Renew application with default renewal data
  */
 export const renewApplication = async (
   id: string,
@@ -968,15 +848,11 @@ export const renewApplication = async (
       signal: options?.signal,
     });
 
-    // Ensure the response always has success: true for successful API calls
     if (response.data) {
-      // If the response already has a success flag, check if it's true
       if (response.data.success === true) {
         return response.data;
       }
 
-      // If success is undefined or false but we have an application object,
-      // it means the operation was successful
       if (response.data.application) {
         return {
           success: true,
@@ -990,8 +866,6 @@ export const renewApplication = async (
       }
     }
 
-    // If we can't determine success from the response, assume it was successful
-    // since we're in the try block (no exception was thrown)
     return {
       success: true,
       application: response.data?.application || ({} as Application),
@@ -1004,7 +878,6 @@ export const renewApplication = async (
   } catch (error) {
     console.error(`Failed to renew application ${id}:`, error);
 
-    // Return error response
     return {
       success: false,
       application: {} as Application,
@@ -1013,7 +886,6 @@ export const renewApplication = async (
   }
 };
 
-// Export all functions as default object
 const applicationService = {
   getApplications,
   getApplicationById,
@@ -1028,7 +900,7 @@ const applicationService = {
   submitRenewalApplication,
   deleteApplication,
   renewApplication,
-  nonExistentPermitIds, // Export the set of non-existent permit IDs
+  nonExistentPermitIds,
 };
 
 export default applicationService;

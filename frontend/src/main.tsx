@@ -1,4 +1,3 @@
-// Import React and other dependencies
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -11,9 +10,9 @@ import { ToastProvider } from './shared/contexts/ToastContext';
 import { getCsrfToken } from './utils/csrf';
 import { setupGlobalErrorHandler, debugLog, errorLog } from './utils/debug';
 
-import './styles/global.css'; // Import global styles
+import './styles/global.css';
 
-// Register service worker for offline capabilities
+// Register service worker for offline functionality in production
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
@@ -27,13 +26,11 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
-// Set up global error handler
 setupGlobalErrorHandler();
 
-// Expose getCsrfToken globally for debugging and production compatibility
+// Expose CSRF token function for debugging
 (window as any).getCsrfToken = getCsrfToken;
 
-// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

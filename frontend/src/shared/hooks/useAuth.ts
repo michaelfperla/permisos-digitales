@@ -8,9 +8,7 @@ import {
 } from '../contexts/AuthContext';
 
 /**
- * Custom hook to use the user auth context
- * @returns The user auth context
- * @throws Error if used outside of a UserAuthProvider
+ * Hook for accessing user authentication context
  */
 export const useUserAuth = (): UserAuthContextType => {
   const context = useContext(UserAuthContext);
@@ -23,9 +21,7 @@ export const useUserAuth = (): UserAuthContextType => {
 };
 
 /**
- * Custom hook to use the admin auth context
- * @returns The admin auth context
- * @throws Error if used outside of an AdminAuthProvider
+ * Hook for accessing admin authentication context
  */
 export const useAdminAuth = (): AdminAuthContextType => {
   const context = useContext(AdminAuthContext);

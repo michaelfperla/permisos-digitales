@@ -2,35 +2,30 @@ import axios from 'axios';
 
 import { AdminUser } from '../../shared/contexts/AuthContext';
 
-// Create an axios instance with default config
 const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
-    'X-Portal-Type': 'admin', // Always include admin portal flag
+    'X-Portal-Type': 'admin',
   },
-  withCredentials: true, // Include cookies for session authentication
+  withCredentials: true,
 });
 
-// Define types for API responses
 interface StatusResponse {
   isLoggedIn: boolean;
   user?: AdminUser;
 }
 
 /**
- * Get CSRF token for protected requests
+ * Get CSRF token for admin requests
  */
 export const getCsrfToken = async (): Promise<string> => {
   try {
     const response = await api.get<any>('/auth/csrf-token');
 
-    // Handle different response structures
     if (response.data.data && response.data.data.csrfToken) {
-      // ApiResponse.success format: { data: { csrfToken: string } }
       return response.data.data.csrfToken;
     } else if (response.data.csrfToken) {
-      // Direct format: { csrfToken: string }
       return response.data.csrfToken;
     } else {
       console.error('Invalid CSRF token response structure:', response.data);
@@ -43,29 +38,24 @@ export const getCsrfToken = async (): Promise<string> => {
 };
 
 /**
- * Check if user is logged in
- * @param signal Optional AbortSignal for cancellation
+ * Check admin authentication status
  */
 export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse> => {
   try {
-    console.debug('[checkStatus] Starting API call to /api/auth/status...'); // Changed to debug
+    console.debug('[checkStatus] Starting API call to /api/auth/status...');
     const response = await api.get<any>('/auth/status', { signal });
 
-    console.debug('[checkStatus] API call successful, response:', response.data); // Changed to debug
+    console.debug('[checkStatus] API call successful, response:', response.data);
 
-    // Handle different response structures
     if (response.data.data) {
-      // ApiResponse.success format: { data: { isLoggedIn: boolean, user?: AdminUser } }
       return response.data.data;
     } else {
-      // Direct format: { isLoggedIn: boolean, user?: AdminUser }
       return response.data;
     }
   } catch (error) {
-    // Don't log canceled requests as errors
     if (axios.isCancel(error)) {
-      console.info('[checkStatus] Request cancelled/aborted. Rethrowing...'); // Changed to info
-      throw error; // Rethrow to be handled by the caller
+      console.info('[checkStatus] Request cancelled/aborted. Rethrowing...');
+      throw error;
     } else {
       console.error('[checkStatus] Failed to check auth status:', error);
     }
@@ -74,11 +64,11 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
 };
 
 /**
- * Log out the current user
+ * Log out current admin user
  */
 export const logout = async (): Promise<void> => {
   try {
-    const csrfTokenVal = await getCsrfToken(); // Renamed variable for clarity
+    const csrfTokenVal = await getCsrfToken();
     await api.post(
       '/auth/logout',
       {},
@@ -94,7 +84,6 @@ export const logout = async (): Promise<void> => {
   }
 };
 
-// Export all functions as default object
 const authService = {
   getCsrfToken,
   checkStatus,

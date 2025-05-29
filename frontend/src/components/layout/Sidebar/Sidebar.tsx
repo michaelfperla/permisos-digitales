@@ -11,10 +11,13 @@ interface SidebarProps {
   onCloseMobile: () => void;
 }
 
+/**
+ * Navigation sidebar with user-specific menu items.
+ * Adapts content based on authentication status.
+ */
 const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
   const { isAuthenticated, user } = useUserAuth();
 
-  // Handle link click on mobile to close sidebar
   const handleLinkClick = () => {
     if (isMobileView) {
       onCloseMobile();
@@ -23,7 +26,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
 
   return (
     <div className={styles.sidebarContent}>
-      {/* User info section - only show when authenticated */}
       {isAuthenticated && (
         <div className={styles.userSection}>
           <div className={styles.userInfo}>
@@ -38,7 +40,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
         </div>
       )}
 
-      {/* Navigation Links */}
       <nav className={styles.sidebarNav}>
         <ul className={styles.navList}>
           <li className={styles.navItem}>
@@ -54,7 +55,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
           </li>
 
           {isAuthenticated ? (
-            // Authenticated user links
             <>
               <li className={styles.navItem}>
                 <NavLink
@@ -78,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
               </li>
             </>
           ) : (
-            // Non-authenticated user links
             <li className={styles.navItem}>
               <NavLink
                 to="/solicitar-permiso"
@@ -90,8 +89,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
               </NavLink>
             </li>
           )}
-
-          {/* Common links for all users */}
           <li className={styles.navItem}>
             <NavLink
               to="/acerca-de"

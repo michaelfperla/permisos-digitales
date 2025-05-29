@@ -17,10 +17,12 @@ import Icon from '../../shared/components/ui/Icon';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService from '../services/adminService';
 
+/**
+ * Admin dashboard showing system statistics and quick action links
+ */
 const DashboardPage: React.FC = () => {
   const { showToast } = useToast();
 
-  // Fetch dashboard stats
   const {
     data: stats,
     isLoading,
@@ -32,35 +34,24 @@ const DashboardPage: React.FC = () => {
     queryFn: adminService.getDashboardStats,
   });
 
-  // Handle dashboard stats error
   React.useEffect(() => {
     if (isError && error) {
       showToast(`Error al cargar estadísticas: ${error.message}`, 'error');
     }
   }, [isError, error, showToast]);
 
-  // Status mapping object to translate backend status codes to user-friendly Spanish display names
   const statusDisplayMap: Record<string, string> = {
-    // New payment flow statuses
     AWAITING_OXXO_PAYMENT: 'Pagos OXXO Pendientes',
     PAYMENT_RECEIVED: 'Pagos Recibidos',
-
-    // Permit generation statuses
     GENERATING_PERMIT: 'Generando Permisos',
     ERROR_GENERATING_PERMIT: 'Error al Generar Permisos',
     PERMIT_READY: 'Permisos Listos',
-
-    // Completion statuses
     COMPLETED: 'Completados',
     CANCELLED: 'Cancelados',
     EXPIRED: 'Permisos Vencidos',
-
-    // Renewal statuses
     RENEWAL_PENDING: 'Renovaciones Pendientes',
     RENEWAL_APPROVED: 'Renovaciones Aprobadas',
     RENEWAL_REJECTED: 'Renovaciones Rechazadas',
-
-    // Legacy statuses - kept for backward compatibility
     PENDING: 'Pendientes de Pago (Legacy)',
     PROOF_SUBMITTED: 'Comprobantes Enviados (Legacy)',
     PAYMENT_VERIFIED: 'Pagos Verificados (Legacy)',
@@ -68,37 +59,28 @@ const DashboardPage: React.FC = () => {
     PERMIT_GENERATED: 'Permisos Generados (Legacy)',
   };
 
-  // Helper function to get status display name using the mapping
   const getStatusDisplayName = (status: string): string => {
     return statusDisplayMap[status] || status;
   };
 
-  // Helper function to get status icon
   const getStatusIcon = (status: string): React.ReactNode => {
     switch (status) {
-      // New payment flow statuses
       case 'AWAITING_OXXO_PAYMENT':
         return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'PAYMENT_RECEIVED':
         return <Icon IconComponent={FaCheckCircle} className={styles.iconVerified} size="md" />;
-
-      // Permit generation statuses
       case 'GENERATING_PERMIT':
         return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'ERROR_GENERATING_PERMIT':
         return <Icon IconComponent={FaTimesCircle} className={styles.iconRejected} size="md" />;
       case 'PERMIT_READY':
         return <Icon IconComponent={FaCheckCircle} className={styles.iconGenerated} size="md" />;
-
-      // Completion statuses
       case 'COMPLETED':
         return <Icon IconComponent={FaCheckCircle} className={styles.iconCompleted} size="md" />;
       case 'CANCELLED':
         return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} size="md" />;
       case 'EXPIRED':
         return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} size="md" />;
-
-      // Legacy statuses
       case 'PENDING':
         return <Icon IconComponent={FaHourglassHalf} className={styles.iconPending} size="md" />;
       case 'PROOF_SUBMITTED':
@@ -109,7 +91,6 @@ const DashboardPage: React.FC = () => {
         return <Icon IconComponent={FaTimesCircle} className={styles.iconRejected} size="md" />;
       case 'PERMIT_GENERATED':
         return <Icon IconComponent={FaCheckCircle} className={styles.iconGenerated} size="md" />;
-
       default:
         return <Icon IconComponent={FaChartBar} className={styles.iconDefault} size="md" />;
     }
@@ -149,7 +130,6 @@ const DashboardPage: React.FC = () => {
         <p className={styles.pageSubtitle}>Resumen de actividad del sistema</p>
       </header>
 
-      {/* Stats Overview */}
       <section className={styles.statsOverview}>
         <div className={styles.statCard}>
           <div className={styles.statHeader}>
@@ -186,7 +166,6 @@ const DashboardPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Status Counts */}
       <section className={styles.statusSection}>
         <h2 className={styles.sectionTitle}>Estado de Solicitudes</h2>
 
@@ -210,7 +189,6 @@ const DashboardPage: React.FC = () => {
         )}
       </section>
 
-      {/* Quick Links */}
       <section className={styles.quickLinks}>
         <h2 className={styles.sectionTitle}>Acciones Rápidas</h2>
 

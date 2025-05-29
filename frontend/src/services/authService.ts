@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-import { api } from './api'; // Use the main API instance with CSRF interceptor
+import { api } from './api';
 import { getCsrfToken } from '../utils/csrf';
 import { debugLog, errorLog } from '../utils/debug';
 
-// Define types for our API responses and requests
 interface RegisterRequest {
   first_name: string;
   last_name: string;
@@ -39,21 +38,15 @@ interface StatusApiResponse {
   data: StatusResponse;
 }
 
-// Note: CSRF token handling is now done automatically by the main API instance
-
 /**
- * Login user
- * @param email User email
- * @param password User password
+ * Authenticate user with email and password
  */
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
   debugLog('authService', `Login attempt for email: ${email}`);
 
   try {
-    // Log the request details
     debugLog('authService', 'Login request payload', { email, password: '***REDACTED***' });
 
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<{ success: boolean; data: { user: User }; message: string }>(
       '/auth/login',
       { email, password },
@@ -61,15 +54,12 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
     debugLog('authService', 'Login response received', response.data);
 
-    // Extract user from the nested data structure
     const user = response.data.data && response.data.data.user;
 
-    // Store user info in session storage for persistence
     if (user) {
       debugLog('authService', 'Storing user in session storage', user);
       sessionStorage.setItem('user', JSON.stringify(user));
 
-      // Return in the format expected by the AuthContext
       return {
         success: response.data.success,
         message: response.data.message,
@@ -78,7 +68,6 @@ export const login = async (email: string, password: string): Promise<AuthRespon
     } else {
       debugLog('authService', 'No user data in response', response.data);
 
-      // Return success but no user
       return {
         success: response.data.success,
         message: response.data.message,
@@ -89,8 +78,6 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorLog(
           'authService',
           `Server responded with status ${error.response.status}`,
@@ -102,10 +89,8 @@ export const login = async (email: string, password: string): Promise<AuthRespon
           message: error.response.data.message || 'Login failed. Please check your credentials.',
         };
       } else if (error.request) {
-        // The request was made but no response was received
         errorLog('authService', 'No response received from server', error.request);
       } else {
-        // Something happened in setting up the request
         errorLog('authService', 'Error setting up request', error.message);
       }
     }
@@ -118,14 +103,12 @@ export const login = async (email: string, password: string): Promise<AuthRespon
 };
 
 /**
- * Register a new user
- * @param userData User registration data
+ * Register a new user account
  */
 export const register = async (userData: RegisterRequest): Promise<AuthResponse> => {
   debugLog('authService', `Registration attempt for email: ${userData.email}`);
 
   try {
-    // Log the request details
     const sanitizedUserData = {
       ...userData,
       password: '***REDACTED***',
@@ -133,7 +116,6 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
     };
     debugLog('authService', 'Registration request payload', sanitizedUserData);
 
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<AuthResponse>('/auth/register', userData);
 
     debugLog('authService', 'Registration response received', response.data);
@@ -144,8 +126,6 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorLog(
           'authService',
           `Server responded with status ${error.response.status}`,
@@ -157,10 +137,8 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
           message: error.response.data.message || 'Error en el registro. Por favor, inténtalo de nuevo.',
         };
       } else if (error.request) {
-        // The request was made but no response was received
         errorLog('authService', 'No response received from server', error.request);
       } else {
-        // Something happened in setting up the request
         errorLog('authService', 'Error setting up request', error.message);
       }
     }
@@ -173,15 +151,13 @@ export const register = async (userData: RegisterRequest): Promise<AuthResponse>
 };
 
 /**
- * Check authentication status
- * @param signal Optional AbortSignal to cancel the request
+ * Check current authentication status
  */
 export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse> => {
   console.info('[checkStatus] Starting API call to /api/auth/status...');
   try {
     const response = await api.get<StatusApiResponse>('/auth/status', { signal });
 
-    // Update session storage with user info
     if (response.data.data?.user) {
       sessionStorage.setItem('user', JSON.stringify(response.data.data.user));
     } else {
@@ -190,23 +166,19 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
 
     console.info('[checkStatus] API call successful, response:', response.data);
 
-    // Return the *nested* data object which matches the StatusResponse type
     if (response.data.success && response.data.data) {
-      return response.data.data; // Return { isLoggedIn: boolean, user?: User }
+      return response.data.data;
     } else {
-      // Handle cases where the structure might be different unexpectedly
-      // Check if we received HTML instead of JSON (common with 404s or CORS issues)
       const responseText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
       if (responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
         console.warn('[checkStatus] Received HTML response instead of JSON - likely a 404 or CORS issue');
       } else {
         console.error('[checkStatus] Unexpected successful response structure:', response.data);
       }
-      // Decide on appropriate fallback - maybe return logged out state?
       return { isLoggedIn: false };
     }
   } catch (error) {
-    // IMMEDIATELY check for cancellation and re-throw if found
+    // Re-throw cancellation errors immediately
     if (
       axios.isAxiosError(error) &&
       (error.name === 'AbortError' ||
@@ -214,18 +186,15 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
         error.code === 'ERR_CANCELED')
     ) {
       console.info('[checkStatus] Request cancelled/aborted. Rethrowing...');
-      throw error; // Exit catch block immediately
+      throw error;
     }
 
-    // --- ONLY proceed here if it's NOT a cancellation error ---
     console.error('[checkStatus] API call error (non-cancellation):', error);
     console.error('Failed to check auth status (non-cancellation error):', error);
 
-    // Fallback logic for actual errors (network, server issues etc.)
     sessionStorage.removeItem('user');
 
-    // For development purposes, check if there's a user in session storage
-    // This allows us to test the UI without a working backend
+    // Development fallback: check session storage for testing without backend
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       try {
@@ -247,24 +216,19 @@ export const checkStatus = async (signal?: AbortSignal): Promise<StatusResponse>
 };
 
 /**
- * Logout user
+ * Logout current user
  */
 export const logout = async (): Promise<AuthResponse> => {
   try {
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<AuthResponse>('/auth/logout', {});
 
-    // Clear user from session storage
     sessionStorage.removeItem('user');
 
     return response.data;
   } catch (error) {
     console.error('Failed to logout:', error);
-    // Still remove user from session storage even if API call fails
     sessionStorage.removeItem('user');
 
-    // Even if the API call fails, we still want to remove the user from session storage
-    // and consider the logout successful from the client's perspective
     return {
       success: true,
       message: 'Sesión cerrada exitosamente. Has sido desconectado localmente.',
@@ -288,19 +252,17 @@ export const getCurrentUser = (): User | null => {
 };
 
 /**
- * Check if user is logged in (from session storage)
+ * Check if user is logged in
  */
 export const isLoggedIn = (): boolean => {
   return getCurrentUser() !== null;
 };
 
 /**
- * Request password reset
- * @param email User email
+ * Request password reset email
  */
 export const forgotPassword = async (email: string): Promise<AuthResponse> => {
   try {
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<AuthResponse>('/auth/forgot-password', { email });
 
     return response.data;
@@ -308,7 +270,6 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
     console.error('Forgot password error:', error);
 
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         message:
@@ -323,13 +284,10 @@ export const forgotPassword = async (email: string): Promise<AuthResponse> => {
 };
 
 /**
- * Reset password with token
- * @param token Reset token from email
- * @param password New password
+ * Reset password using token from email
  */
 export const resetPassword = async (token: string, password: string): Promise<AuthResponse> => {
   try {
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<AuthResponse>('/auth/reset-password', { token, password });
 
     return response.data;
@@ -337,7 +295,6 @@ export const resetPassword = async (token: string, password: string): Promise<Au
     console.error('Reset password error:', error);
 
     if (axios.isAxiosError(error) && error.response) {
-      // Return the error message from the API
       return {
         success: false,
         message:
@@ -354,35 +311,28 @@ export const resetPassword = async (token: string, password: string): Promise<Au
 
 /**
  * Change user password
- * @param currentPassword Current password
- * @param newPassword New password
  */
 export const changePassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<AuthResponse> => {
-  // Log the request (without exposing sensitive data)
   debugLog('authService', 'Changing password', {
     currentPassword: '***REDACTED***',
     newPassword: '***REDACTED***',
   });
 
-  // CSRF token is automatically added by the API interceptor
   const response = await api.post<AuthResponse>('/auth/change-password', {
     currentPassword,
     newPassword,
   });
 
-  // Log success (without sensitive data)
   debugLog('authService', 'Password change response received', response.data);
 
-  // Return the response data directly
   return response.data;
 };
 
 /**
- * Resend verification email
- * @param email User email
+ * Resend email verification
  */
 export const resendVerificationEmail = async (
   email: string,
@@ -390,7 +340,6 @@ export const resendVerificationEmail = async (
   debugLog('authService', `Resending verification email for: ${email}`);
 
   try {
-    // CSRF token is automatically added by the API interceptor
     const response = await api.post<{ success: boolean; message: string }>(
       '/auth/resend-verification',
       { email },
@@ -407,8 +356,6 @@ export const resendVerificationEmail = async (
 
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorLog(
           'authService',
           `Server responded with status ${error.response.status}`,
@@ -420,10 +367,8 @@ export const resendVerificationEmail = async (
           message: error.response.data.message || 'Error al reenviar el correo de verificación.',
         };
       } else if (error.request) {
-        // The request was made but no response was received
         errorLog('authService', 'No response received from server', error.request);
       } else {
-        // Something happened in setting up the request
         errorLog('authService', 'Error setting up request', error.message);
       }
     }
@@ -436,8 +381,7 @@ export const resendVerificationEmail = async (
 };
 
 /**
- * Verify email token
- * @param token Email verification token
+ * Verify email using token from verification email
  */
 export const verifyEmailToken = async (
   token: string,
@@ -460,8 +404,6 @@ export const verifyEmailToken = async (
 
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         errorLog(
           'authService',
           `Server responded with status ${error.response.status}`,
@@ -473,10 +415,8 @@ export const verifyEmailToken = async (
           message: error.response.data.message || 'Error al verificar el correo electrónico.',
         };
       } else if (error.request) {
-        // The request was made but no response was received
         errorLog('authService', 'No response received from server', error.request);
       } else {
-        // Something happened in setting up the request
         errorLog('authService', 'Error setting up request', error.message);
       }
     }
@@ -488,7 +428,6 @@ export const verifyEmailToken = async (
   }
 };
 
-// Export all functions as default object
 const authService = {
   login,
   register,

@@ -2,17 +2,15 @@ import axios from 'axios';
 
 import { getCsrfToken } from './authService';
 
-// Create an axios instance with default config
 const api = axios.create({
   baseURL: '/api/admin',
   headers: {
     'Content-Type': 'application/json',
-    'X-Portal-Type': 'admin', // Always include admin portal flag
+    'X-Portal-Type': 'admin',
   },
-  withCredentials: true, // Include cookies for session authentication
+  withCredentials: true,
 });
 
-// Define types for API responses and data
 export interface DashboardStats {
   statusCounts: Array<{ status: string; count: number }>;
   todayVerifications: {
@@ -20,7 +18,6 @@ export interface DashboardStats {
     rejected: number;
   };
   pendingVerifications: number;
-  // Computed properties for the frontend
   oxxoPaymentsPending?: number;
   todayPermits?: number;
 }
@@ -125,13 +122,12 @@ export interface PaginatedUsers {
 }
 
 /**
- * Get dashboard statistics
+ * Get admin dashboard statistics
  */
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   try {
     const response = await api.get<any>('/dashboard-stats');
 
-    // Only log in development mode
     if (import.meta.env.DEV) {
       console.log('[getDashboardStats] Raw API response:', response.data);
     }
@@ -155,13 +151,9 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
       throw new Error('Dashboard stats not found in response');
     }
 
-    // Compute derived properties for the frontend
     const statusCounts = stats.statusCounts || [];
 
-    // Find OXXO payments pending (AWAITING_OXXO_PAYMENT status)
     const oxxoPaymentsPending = statusCounts.find(s => s.status === 'AWAITING_OXXO_PAYMENT')?.count || 0;
-
-    // Find permits ready today (PERMIT_READY status)
     const todayPermits = statusCounts.find(s => s.status === 'PERMIT_READY')?.count || 0;
 
     return {
@@ -176,7 +168,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 /**
- * Get all applications with optional filters
+ * Get all applications with optional filters and pagination
  */
 export const getAllApplications = async (
   page: number = 1,
@@ -196,19 +188,17 @@ export const getAllApplications = async (
 
     const response = await api.get<any>('/applications', { params });
 
-    // Debug logging for development only
     if (import.meta.env.DEV) {
       console.debug('[getAllApplications] Raw API response:', response.data);
       console.debug('[getAllApplications] Request params:', params);
     }
 
-    // Check for ApiResponse.success format: { success: true, data: { applications: [...], total: X, page: Y, limit: Z, totalPages: W } }
     if (response.data?.success && response.data?.data) {
-      console.debug('[getAllApplications] Found ApiResponse.success format'); // Changed to debug
+      console.debug('[getAllApplications] Found ApiResponse.success format');
       const data = response.data.data;
 
       if (data.applications && Array.isArray(data.applications)) {
-        console.debug('[getAllApplications] Found applications in response.data.data'); // Changed to debug
+        console.debug('[getAllApplications] Found applications in response.data.data');
         return {
           applications: data.applications,
           pagination: {
@@ -221,9 +211,8 @@ export const getAllApplications = async (
       }
     }
 
-    // Legacy format: { applications: [...], pagination: {...} }
     if (response.data && response.data.applications && response.data.pagination) {
-      console.debug('[getAllApplications] Found applications and pagination in response.data'); // Changed to debug
+      console.debug('[getAllApplications] Found applications and pagination in response.data');
       return {
         applications: response.data.applications,
         pagination: response.data.pagination,
@@ -231,7 +220,7 @@ export const getAllApplications = async (
     }
 
     if (Array.isArray(response.data)) {
-      console.debug('[getAllApplications] Found applications as array in response.data'); // Changed to debug
+      console.debug('[getAllApplications] Found applications as array in response.data');
       return {
         applications: response.data,
         pagination: {
@@ -244,7 +233,7 @@ export const getAllApplications = async (
     }
 
     if (Array.isArray(response.data?.data)) {
-      console.debug('[getAllApplications] Found applications as array in response.data.data'); // Changed to debug
+      console.debug('[getAllApplications] Found applications as array in response.data.data');
       return {
         applications: response.data.data,
         pagination: {
@@ -257,7 +246,7 @@ export const getAllApplications = async (
     }
 
     if (response.data?.applications && Array.isArray(response.data.applications)) {
-      console.debug('[getAllApplications] Found applications array without pagination'); // Changed to debug
+      console.debug('[getAllApplications] Found applications array without pagination');
       return {
         applications: response.data.applications,
         pagination: {
@@ -289,11 +278,14 @@ export const getAllApplications = async (
   }
 };
 
+/**
+ * Get pending payment verifications (deprecated)
+ */
 export const getPendingVerifications = async (
   page: number = 1,
   limit: number = 10,
 ): Promise<PaginatedApplications> => {
-  console.warn( // This is a good use of console.warn
+  console.warn(
     'Manual payment verification is no longer supported. Payment provider integration pending.',
   );
   return {
@@ -307,16 +299,19 @@ export const getPendingVerifications = async (
   };
 };
 
+/**
+ * Get detailed application information by ID
+ */
 export const getApplicationDetails = async (id: string): Promise<ApplicationDetails> => {
   try {
     const response = await api.get<any>(`/applications/${id}`);
 
     if (response.data?.data) {
-      console.debug('[getApplicationDetails] Found application data in response.data.data'); // Changed to debug
+      console.debug('[getApplicationDetails] Found application data in response.data.data');
       return response.data.data;
     }
     else if (response.data && response.data.id) {
-      console.debug('[getApplicationDetails] Found application data directly in response.data'); // Changed to debug
+      console.debug('[getApplicationDetails] Found application data directly in response.data');
       return response.data;
     }
     else {
@@ -329,8 +324,11 @@ export const getApplicationDetails = async (id: string): Promise<ApplicationDeta
   }
 };
 
+/**
+ * Get payment proof details (deprecated)
+ */
 export const getPaymentProofDetails = async (_id: string): Promise<PaymentProofDetails> => {
-  console.warn( // Good use of console.warn
+  console.warn(
     'Manual payment proof details are no longer supported. Payment provider integration pending.',
   );
   throw new Error(
@@ -338,11 +336,14 @@ export const getPaymentProofDetails = async (_id: string): Promise<PaymentProofD
   );
 };
 
+/**
+ * Verify payment manually (deprecated)
+ */
 export const verifyPayment = async (
   _id: string,
   _notes?: string,
 ): Promise<{ success: boolean; message?: string }> => {
-  console.warn( // Good use of console.warn
+  console.warn(
     'Manual payment verification is no longer supported. Payment provider integration pending.',
   );
   return {
@@ -352,11 +353,14 @@ export const verifyPayment = async (
   };
 };
 
+/**
+ * Reject payment manually (deprecated)
+ */
 export const rejectPayment = async (
   _id: string,
   _reason: string,
 ): Promise<{ success: boolean; message?: string }> => {
-  console.warn( // Good use of console.warn
+  console.warn(
     'Manual payment rejection is no longer supported. Payment provider integration pending.',
   );
   return {
@@ -366,6 +370,9 @@ export const rejectPayment = async (
   };
 };
 
+/**
+ * Get payment verification history with pagination
+ */
 export const getVerificationHistory = async (
   page: number = 1,
   limit: number = 10,
@@ -382,10 +389,10 @@ export const getVerificationHistory = async (
 
     const response = await api.get<any>('/verification-history', { params });
 
-    console.debug('[getVerificationHistory] Raw API response:', response.data); // Changed to debug
+    console.debug('[getVerificationHistory] Raw API response:', response.data);
 
     if (response.data?.success === true && response.data?.data) {
-      console.debug('[getVerificationHistory] Found success response format with data property'); // Changed to debug
+      console.debug('[getVerificationHistory] Found success response format with data property');
       if (response.data.data.history && typeof response.data.data.total === 'number') {
         return response.data.data;
       }
@@ -401,7 +408,7 @@ export const getVerificationHistory = async (
           total: response.data.data.length,
         };
       }
-      console.debug('[getVerificationHistory] Data property exists but no history found'); // Changed to debug
+      console.debug('[getVerificationHistory] Data property exists but no history found');
       return {
         history: [],
         total: 0,
@@ -409,7 +416,7 @@ export const getVerificationHistory = async (
     }
 
     if (response.data?.history) {
-      console.debug('[getVerificationHistory] Found history directly in response.data'); // Changed to debug
+      console.debug('[getVerificationHistory] Found history directly in response.data');
       return {
         history: response.data.history,
         total: response.data.total || response.data.history.length,
@@ -417,7 +424,7 @@ export const getVerificationHistory = async (
     }
 
     if (Array.isArray(response.data)) {
-      console.debug('[getVerificationHistory] Found history as array directly in response.data'); // Changed to debug
+      console.debug('[getVerificationHistory] Found history as array directly in response.data');
       return {
         history: response.data,
         total: response.data.length,
@@ -437,6 +444,9 @@ export const getVerificationHistory = async (
   }
 };
 
+/**
+ * Get users with pagination and optional filters
+ */
 export const getUsers = async (
   page: number = 1,
   limit: number = 10,
@@ -478,15 +488,18 @@ export const getUsers = async (
   }
 };
 
+/**
+ * Get detailed user information by ID
+ */
 export const getUserDetails = async (id: string): Promise<{ user: AdminUserDetails }> => {
   try {
     const response = await api.get<any>(`/users/${id}`);
     if (response.data?.data?.user) {
-      console.debug('[getUserDetails] Found user data in response.data.data.user'); // Changed to debug
+      console.debug('[getUserDetails] Found user data in response.data.data.user');
       return { user: response.data.data.user };
     }
     else if (response.data?.user) {
-      console.debug('[getUserDetails] Found user data directly in response.data.user'); // Changed to debug
+      console.debug('[getUserDetails] Found user data directly in response.data.user');
       return { user: response.data.user };
     }
     else {
@@ -502,21 +515,24 @@ export const getUserDetails = async (id: string): Promise<{ user: AdminUserDetai
   }
 };
 
+/**
+ * Get all applications for a specific user
+ */
 export const getUserApplications = async (
   userId: string,
 ): Promise<{ applications: Application[] }> => {
   try {
     const response = await api.get<any>(`/users/${userId}/applications`);
     if (response.data?.data?.applications) {
-      console.debug('[getUserApplications] Found applications in response.data.data.applications'); // Changed to debug
+      console.debug('[getUserApplications] Found applications in response.data.data.applications');
       return { applications: response.data.data.applications };
     } else if (response.data?.applications) {
-      console.debug( // Changed to debug
+      console.debug(
         '[getUserApplications] Found applications directly in response.data.applications',
       );
       return { applications: response.data.applications };
     } else {
-      console.error( // Kept as error because this is an unexpected structure
+      console.error(
         '[getUserApplications] Unexpected response structure or applications data missing:',
         response.data,
       );
@@ -528,11 +544,14 @@ export const getUserApplications = async (
   }
 };
 
+/**
+ * Enable user account
+ */
 export const enableUser = async (
   userId: string,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const csrfTokenVal = await getCsrfToken(); // Renamed for clarity
+    const csrfTokenVal = await getCsrfToken();
     const response = await api.patch(
       `/users/${userId}/enable`,
       {},
@@ -551,11 +570,14 @@ export const enableUser = async (
   }
 };
 
+/**
+ * Disable user account
+ */
 export const disableUser = async (
   userId: string,
 ): Promise<{ success: boolean; message?: string }> => {
   try {
-    const csrfTokenVal = await getCsrfToken(); // Renamed for clarity
+    const csrfTokenVal = await getCsrfToken();
     const response = await api.patch(
       `/users/${userId}/disable`,
       {},

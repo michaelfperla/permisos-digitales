@@ -3,32 +3,26 @@ import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   css: {
     modules: {
-      // Enable CSS modules for all .module.css files
       localsConvention: 'camelCase',
       generateScopedName: '[local]_[hash:base64:5]',
     },
   },
   plugins: [react()],
   server: {
-    port: 3002, // Use port 3002 for the frontend to avoid conflicts
+    port: 3002,
     proxy: {
-      // Industry standard: proxy all API calls to backend (clean subdomain routing in dev)
       '/auth': {
-        target: 'http://localhost:3001', // Backend server is running on port 3001
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
-          // Always log proxy errors (critical information)
           proxy.on('error', (err, _req, _res) => {
             console.error('Proxy error:', err);
           });
 
-          // Conditional logging for request/response details (development only)
-          // To enable, run your dev server like: DEBUG_PROXY=true npm run dev
           const DEBUG_PROXY = process.env.VITE_DEBUG_PROXY === 'true' || process.env.DEBUG_PROXY === 'true';
 
           if (DEBUG_PROXY && (import.meta as any).env?.DEV !== false) {
@@ -77,12 +71,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        // Remove admin from main build - it should be deployed separately
-        // admin: resolve(__dirname, 'admin.html')
       },
       output: {
         manualChunks: (id) => {
-          // Vendor dependencies - split into smaller chunks
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor-react';
@@ -105,7 +96,6 @@ export default defineConfig({
             return 'vendor-other';
           }
 
-          // Split by feature areas
           if (id.includes('/pages/')) {
             return 'pages';
           }
@@ -121,7 +111,6 @@ export default defineConfig({
         }
       }
     },
-    // Increase chunk size warning limit since we're splitting more
     chunkSizeWarningLimit: 600
   }
 })

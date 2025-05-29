@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 
 import styles from './Footer.module.css';
 
+/**
+ * Application footer with copyright and navigation links
+ */
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 

@@ -33,10 +33,8 @@ import paymentService from '../services/paymentService';
 import { useToast } from '../shared/hooks/useToast';
 import { PermitStatus } from '../types/permisos';
 
-// Set to false to use real API calls instead of mock data
 const USE_MOCK_DATA = false;
 
-// Define a type for our mock application data
 interface MockApplicationDetails {
   id: string;
   vehicleInfo: {
@@ -68,7 +66,6 @@ interface MockApplicationDetails {
   placas_file_path?: string;
 }
 
-// Define a type for our mock status data
 interface MockStatusInfo {
   currentStatus: PermitStatus;
   lastUpdated: string;
@@ -77,16 +74,12 @@ interface MockStatusInfo {
   allowedActions: string[];
 }
 
-// Define a type for our mock application response
 interface MockApplicationResponse {
   application: MockApplicationDetails;
   status: MockStatusInfo;
 }
 
-// Simplified mock data for MVP demo
-// These are simplified versions of the mock data from NewDashboardPage.tsx
 const mockPermits: Record<string, MockApplicationResponse> = {
-  // Payment Pending OXXO scenario
   'payment-123': {
     application: {
       id: 'payment-123',
@@ -118,7 +111,6 @@ const mockPermits: Record<string, MockApplicationResponse> = {
       allowedActions: ['view_payment_instructions'],
     },
   },
-  // Permit Ready scenario
   '1': {
     application: {
       id: '1',
@@ -157,7 +149,6 @@ const mockPermits: Record<string, MockApplicationResponse> = {
       allowedActions: ['download_permit'],
     },
   },
-  // Expiring Soon scenario
   '2': {
     application: {
       id: '2',
@@ -198,6 +189,9 @@ const mockPermits: Record<string, MockApplicationResponse> = {
   },
 };
 
+/**
+ * Detailed permit view with payment status, document downloads, and renewal options
+ */
 const PermitDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -212,7 +206,6 @@ const PermitDetailsPage: React.FC = () => {
   const [isOxxoModalOpen, setIsOxxoModalOpen] = useState(false);
   const [isFetchingRenewalData, setIsFetchingRenewalData] = useState(false);
 
-  // For mock data implementation
   const [mockApplicationData, setMockApplicationData] = useState<MockApplicationResponse | null>(
     null,
   );
@@ -220,7 +213,6 @@ const PermitDetailsPage: React.FC = () => {
   const [mockIsError, setMockIsError] = useState(false);
   const [mockError, setMockError] = useState<Error | null>(null);
 
-  // Use effect to simulate API call with mock data
   useEffect(() => {
     if (USE_MOCK_DATA && id) {
       setMockIsLoading(true);

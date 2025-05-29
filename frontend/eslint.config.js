@@ -1,4 +1,3 @@
-// frontend/eslint.config.js
 /* eslint-disable import/order */
 import js from '@eslint/js';
 
@@ -14,7 +13,6 @@ import vitestPlugin from 'eslint-plugin-vitest';
 /* eslint-enable import/order */
 
 export default tseslint.config(
-  // ---- Global Ignores ----
   {
     ignores: [
       'dist/**',
@@ -22,17 +20,17 @@ export default tseslint.config(
       '.DS_Store',
       'coverage/**',
       '*.log',
-      'pnpm-lock.yaml', // Or package-lock.json, yarn.lock
+      'pnpm-lock.yaml',
     ],
   },
 
-  // ---- 1. Configuration for Root-Level Config Files (.js, .ts, .cjs) ----
+  // Configuration files
   {
     files: [
       '*.config.js',
       '*.config.ts',
       '*.config.cjs',
-      'eslint.config.js', 
+      'eslint.config.js',
       '.prettierrc.cjs',
     ],
     languageOptions: {
@@ -71,7 +69,7 @@ export default tseslint.config(
         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
         'newlines-between': 'always', 
         alphabetize: { order: 'asc', caseInsensitive: true },
-      }], // This rule here still applies to vite.config.ts etc.
+      }],
       'no-console': 'off',
       'eqeqeq': ['error', 'always'],
       'prefer-const': 'warn',
@@ -85,7 +83,7 @@ export default tseslint.config(
     },
   },
 
-  // ---- 2. Main Application Code Configuration (src/**/*.{ts,tsx}) ----
+  // Main application code
   {
     files: ['src/**/*.{ts,tsx}'],
     languageOptions: {
@@ -156,7 +154,7 @@ export default tseslint.config(
     },
   },
 
-  // ---- 3. Configuration for Test Files ----
+  // Test files
   {
     files: [
       'src/**/*.test.{ts,tsx}',
@@ -206,6 +204,6 @@ export default tseslint.config(
     },
   },
 
-  // ---- Prettier Configuration (MUST BE LAST) ----
-  prettierConfig, 
+  // Prettier integration (must be last)
+  prettierConfig,
 );

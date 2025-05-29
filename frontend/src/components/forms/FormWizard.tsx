@@ -17,21 +17,22 @@ interface FormWizardProps {
   onDataChange?: (_data: any) => void;
 }
 
+/**
+ * Multi-step form wizard with progress tracking and validation.
+ * Manages form state and navigation between steps.
+ */
 const FormWizard: React.FC<FormWizardProps> = ({
   steps,
   onComplete,
   initialData,
   onDataChange,
 }) => {
-  // Single source of truth - FormWizard manages form state
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [formData, setFormData] = useState(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Calculate progress percentage
   const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
 
-  // Update form data with change detection
   const updateFormData = (newData: any) => {
     if (!newData || Object.keys(newData).length === 0) {
       return;
@@ -43,7 +44,6 @@ const FormWizard: React.FC<FormWizardProps> = ({
         ...newData,
       };
 
-      // Notify parent of the change if needed
       if (onDataChange) {
         onDataChange(updatedData);
       }
@@ -52,12 +52,10 @@ const FormWizard: React.FC<FormWizardProps> = ({
     });
   };
 
-  // Handle next step
   const handleNext = async () => {
     const currentStep = steps[currentStepIndex];
     console.debug('Attempting to move to next step from:', currentStep.id);
 
-    // Validate current step if validation function exists
     if (currentStep.validate) {
       try {
         const isValid = await currentStep.validate(formData);
@@ -76,7 +74,6 @@ const FormWizard: React.FC<FormWizardProps> = ({
     }
   };
 
-  // Handle previous step
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
       setCurrentStepIndex(currentStepIndex - 1);
@@ -84,12 +81,10 @@ const FormWizard: React.FC<FormWizardProps> = ({
     }
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     console.debug('Attempting to submit form with data:', formData);
     const finalStep = steps[currentStepIndex];
 
-    // Validate final step if validation function exists
     if (finalStep.validate) {
       try {
         const isValid = await finalStep.validate(formData);
@@ -113,7 +108,6 @@ const FormWizard: React.FC<FormWizardProps> = ({
     }
   };
 
-  // Render step indicator
   const renderStepIndicator = () => {
     return (
       <div className={styles.progressContainer}>
@@ -137,10 +131,8 @@ const FormWizard: React.FC<FormWizardProps> = ({
     );
   };
 
-  // Get current step
   const currentStep = steps[currentStepIndex];
 
-  // Render the current step content with necessary props
   const stepContent =
     typeof currentStep.content === 'function'
       ? currentStep.content({

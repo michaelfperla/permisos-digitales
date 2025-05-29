@@ -5,10 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
 import authService from './services/authService';
-// Corrected import paths assuming shared is a sibling of admin, or one level up from src/admin
-import { AuthProvider } from '../shared/contexts/AuthContext'; 
+import { AuthProvider } from '../shared/contexts/AuthContext';
 import { ToastProvider } from '../shared/contexts/ToastContext';
-import '../styles/global.css'; // Assuming styles is a sibling of admin, or one level up from src/admin
+import '../styles/global.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +21,7 @@ const queryClient = new QueryClient({
 const rootElement = document.getElementById('admin-root') || document.getElementById('root');
 
 if (!rootElement) {
-  console.error('Root element not found. Creating a new div element.');
+  console.error('Root element not found. Creating fallback element.');
   const newRoot = document.createElement('div');
   newRoot.id = 'admin-root';
   document.body.appendChild(newRoot);
@@ -41,8 +40,6 @@ if (!rootElement) {
     </React.StrictMode>,
   );
 } else {
-  console.debug('Admin app mounting with root element:', rootElement); // Changed to debug
-
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

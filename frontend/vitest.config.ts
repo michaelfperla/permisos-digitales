@@ -5,7 +5,6 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()] as any,
-  // @ts-ignore - vitest config
   test: {
     globals: true,
     environment: 'jsdom',
@@ -16,7 +15,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       thresholds: {
-        statements: 30,  // Lower initial target due to test setup issues
+        statements: 30,
         branches: 30,
         functions: 30,
         lines: 30

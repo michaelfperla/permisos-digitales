@@ -8,14 +8,9 @@ import {
   ToastPosition,
 } from '../../components/ui/Toast/index';
 
-// Duración fija para todas las notificaciones: 3.3 segundos (3300ms)
 const TOAST_DURATION = 3300;
-// Tiempo mínimo entre toasts idénticos: 500ms
 const TOAST_DEBOUNCE_TIME = 500;
 
-/**
- * Interface for the ToastContext
- */
 export interface ToastContextType {
   showToast: (
     message: string,
@@ -33,9 +28,6 @@ export interface ToastContextType {
   position: ToastPosition;
 }
 
-/**
- * Create the ToastContext with default values
- */
 export const ToastContext = createContext<ToastContextType>({
   showToast: () => {},
   hideToast: () => {},
@@ -43,15 +35,12 @@ export const ToastContext = createContext<ToastContextType>({
   position: 'top-right',
 });
 
-/**
- * Props for the ToastProvider component
- */
 export interface ToastProviderProps {
   children: ReactNode;
 }
 
 /**
- * ToastProvider component for managing toast notifications
+ * Provider for managing toast notifications with debouncing and positioning
  */
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -93,13 +82,13 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     const hasDuplicate = toasts.some((toast) => toast.message === message && toast.type === type);
 
     if (!hasDuplicate) {
-      console.debug('Creating new toast with type:', type); // Changed to debug
+      console.debug('Creating new toast with type:', type);
 
       const validType: ToastType = ['success', 'error', 'info', 'warning'].includes(type)
         ? (type as ToastType)
         : 'info';
 
-      console.debug('Using toast type:', validType); // Changed to debug
+      console.debug('Using toast type:', validType);
 
       setToasts((prevToasts) => [
         ...prevToasts,
@@ -137,12 +126,4 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   );
 };
 
-// Default export kept as ToastContext if that's how it's primarily consumed elsewhere.
-// If ToastProvider is the main export, change this.
-// Given the react-refresh warning points to ToastProvider (line 41),
-// it suggests ToastProvider might be considered the primary component export.
-// Let's assume the previous export default ToastContext was intentional for now.
-// If you primarily import { ToastProvider } then making it the default is better.
-export default ToastContext; 
-// If you import { ToastProvider, ToastContext } from ... then having named exports is fine:
-// export { ToastContext, ToastProvider };
+export default ToastContext;

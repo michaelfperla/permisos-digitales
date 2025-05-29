@@ -1,19 +1,15 @@
 import axios from 'axios';
 
-// Store CSRF token
 let csrfToken: string | null = null;
 let tokenExpiryTime: number | null = null;
-const TOKEN_LIFETIME_MS = 50 * 60 * 1000; // 50 minutes (less than the server's 1 hour)
+const TOKEN_LIFETIME_MS = 50 * 60 * 1000; // 50 minutes
 
 /**
- * Get CSRF token for secure requests
- * @param forceRefresh Force refresh the token even if we have a cached one
- * @returns Promise resolving to CSRF token
+ * Get CSRF token for secure requests, with caching and auto-refresh
  */
 export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
   const now = Date.now();
 
-  // If we have a token and it's not expired and we're not forcing a refresh, return it
   if (csrfToken && tokenExpiryTime && now < tokenExpiryTime && !forceRefresh) {
     return csrfToken;
   }
@@ -23,24 +19,19 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       console.info('Fetching fresh CSRF token from server');
     }
 
-    // Industry standard: clean subdomain routing
-    // In development, use relative paths (proxied by Vite)
-    // In production, use the clean API subdomain
     const isDevelopment = import.meta.env.DEV;
     const csrfEndpoint = isDevelopment
-      ? '/auth/csrf-token' // Use relative path for proxy in development (clean routing)
-      : `${import.meta.env.VITE_API_URL || ''}/auth/csrf-token`; // Use env var in production
+      ? '/auth/csrf-token'
+      : `${import.meta.env.VITE_API_URL || ''}/auth/csrf-token`;
 
     if (import.meta.env.DEV) {
       console.info('Fetching CSRF token from:', csrfEndpoint);
     }
 
-    // Make a direct request to the CSRF token endpoint
     const response = await axios.get<any>(csrfEndpoint, {
       withCredentials: true,
     });
 
-    // Check different possible response structures
     if (response.data && response.data.data && response.data.data.csrfToken) {
       csrfToken = response.data.data.csrfToken;
     } else if (response.data && response.data.csrfToken) {
@@ -50,14 +41,12 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       throw new Error('Invalid CSRF token response structure');
     }
 
-    // Set token expiry time
     tokenExpiryTime = now + TOKEN_LIFETIME_MS;
 
     return csrfToken || '';
   } catch (error) {
     console.error('Failed to fetch CSRF token:', error);
 
-    // In development mode, use a dummy token to allow testing
     if (import.meta.env.DEV) {
       console.warn('Using fallback CSRF token in development mode');
       csrfToken = 'dummy-csrf-token-for-development';
@@ -65,19 +54,16 @@ export const getCsrfToken = async (forceRefresh = false): Promise<string> => {
       return csrfToken;
     }
 
-    // In production, rethrow the error
     throw error;
   }
 };
 
 /**
- * Create an axios request interceptor that adds CSRF token to requests
- * @param axiosInstance The axios instance to add the interceptor to
+ * Add CSRF token interceptor to axios instance for mutating requests
  */
 export const addCsrfTokenInterceptor = (axiosInstance: any) => {
   axiosInstance.interceptors.request.use(
     async (config: any) => {
-      // Only add CSRF token for mutating requests (POST, PUT, PATCH, DELETE)
       if (
         config.method &&
         ['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())
@@ -103,11 +89,8 @@ export const addCsrfTokenInterceptor = (axiosInstance: any) => {
 
 /**
  * Handle CSRF token errors by refreshing the token
- * @param error The error that occurred
- * @returns True if the error was a CSRF error and the token was refreshed
  */
 export const handleCsrfError = async (error: any): Promise<boolean> => {
-  // Check if this is a CSRF token error
   const isCsrfError =
     error.response &&
     (error.response.status === 403 || error.response.status === 419) &&
@@ -120,7 +103,6 @@ export const handleCsrfError = async (error: any): Promise<boolean> => {
       console.warn('CSRF token validation failed. Refreshing token...');
     }
     try {
-      // Force refresh the token
       await getCsrfToken(true);
       return true;
     } catch (refreshError) {

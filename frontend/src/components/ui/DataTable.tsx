@@ -19,6 +19,9 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
+/**
+ * Generic data table with sorting, pagination, and row click handling
+ */
 function DataTable<T>({
   data,
   columns,
@@ -31,10 +34,9 @@ function DataTable<T>({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Handle sorting
   const handleSort = (accessor: keyof T | ((data: T) => React.ReactNode)) => {
     if (typeof accessor === 'function') {
-      return; // Can't sort by function accessors
+      return;
     }
 
     if (sortField === accessor) {
@@ -45,7 +47,6 @@ function DataTable<T>({
     }
   };
 
-  // Sort and paginate data
   const sortedData = useMemo(() => {
     if (!sortField) return data;
 
@@ -55,7 +56,6 @@ function DataTable<T>({
 
       if (aValue === bValue) return 0;
 
-      // Handle different types
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === 'asc'
           ? aValue.localeCompare(bValue)
@@ -69,17 +69,14 @@ function DataTable<T>({
     });
   }, [data, sortField, sortDirection]);
 
-  // Calculate pagination
   const totalPages = Math.ceil(sortedData.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedData = sortedData.slice(startIndex, startIndex + pageSize);
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // Render pagination controls
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
@@ -130,7 +127,6 @@ function DataTable<T>({
     );
   };
 
-  // Render sort icon
   const renderSortIcon = (column: Column<T>) => {
     if (!column.sortable || typeof column.accessor === 'function') return null;
 
@@ -145,7 +141,6 @@ function DataTable<T>({
     );
   };
 
-  // Render cell content
   const renderCell = (row: T, column: Column<T>) => {
     if (column.cell) {
       return column.cell(row);
@@ -157,7 +152,6 @@ function DataTable<T>({
 
     const value = row[column.accessor];
 
-    // Handle different types of values
     if (value === null || value === undefined) {
       return '-';
     }

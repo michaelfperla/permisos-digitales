@@ -67,7 +67,6 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    // Apply conditional padding class to the pageWrapper
     <div className={`${styles.pageWrapper} ${isMdDown ? styles.pageWrapperMobilePadded : ''}`}>
       {isMdDown && <AppHeaderMobile logoPath="/" navLinks={homeNavLinks} />}
 
@@ -86,7 +85,6 @@ const HomePage: React.FC = () => {
           </div>
         )}
 
-        {/* No longer need .paneHeroContentMobilePadded here, as .pageWrapper handles the main spacing */}
         <div className={styles.paneHeroContent}>
           <h1>Permisos Digitales de Circulación</h1>
           <p className={styles.subtitle}>

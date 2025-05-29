@@ -1,15 +1,7 @@
-/**
- * Debug utility functions
- */
-
-// Enable this to see detailed debug logs
 const DEBUG_ENABLED = process.env.NODE_ENV !== 'production';
 
 /**
- * Log debug information to console
- * @param component Component name or identifier
- * @param message Debug message
- * @param data Optional data to log
+ * Log debug information in development
  */
 export const debugLog = (component: string, message: string, data?: any) => {
   if (DEBUG_ENABLED) {
@@ -22,32 +14,23 @@ export const debugLog = (component: string, message: string, data?: any) => {
 };
 
 /**
- * Log error information to console
- * @param component Component name or identifier
- * @param message Error message
- * @param error Error object
+ * Log error information with detailed context
  */
 export const errorLog = (component: string, message: string, error: any) => {
   console.error(`[ERROR][${component}] ${message}`, error);
 
-  // Log additional error details if available
   if (error) {
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
       console.error(`[ERROR][${component}] Response data:`, error.response.data);
       console.error(`[ERROR][${component}] Response status:`, error.response.status);
       console.error(`[ERROR][${component}] Response headers:`, error.response.headers);
     } else if (error.request) {
-      // The request was made but no response was received
       console.error(`[ERROR][${component}] No response received:`, error.request);
     } else {
-      // Something happened in setting up the request that triggered an Error
       console.error(`[ERROR][${component}] Error message:`, error.message);
     }
     console.error(`[ERROR][${component}] Error config:`, error.config);
 
-    // Log stack trace
     if (error.stack) {
       console.error(`[ERROR][${component}] Stack trace:`, error.stack);
     }
@@ -55,7 +38,7 @@ export const errorLog = (component: string, message: string, error: any) => {
 };
 
 /**
- * Create a global error handler to catch unhandled errors
+ * Set up global error handlers for unhandled errors and promise rejections
  */
 export const setupGlobalErrorHandler = () => {
   window.onerror = (message, source, lineno, colno, error) => {
@@ -66,7 +49,7 @@ export const setupGlobalErrorHandler = () => {
       colno,
       error,
     });
-    return false; // Let default handler run
+    return false;
   };
 
   window.addEventListener('unhandledrejection', (event) => {

@@ -10,9 +10,7 @@ interface PasswordValidationResult {
 }
 
 /**
- * Validates an email address
- * @param email Email to validate
- * @returns Object with validation result and error message
+ * Validates email address format
  */
 export const validateEmail = (email: string): { isValid: boolean; error: string } => {
   if (!email) {
@@ -28,9 +26,7 @@ export const validateEmail = (email: string): { isValid: boolean; error: string 
 };
 
 /**
- * Validates a password with strength checking
- * @param password Password to validate
- * @returns Object with validation result, error message, and strength indicators
+ * Validates password with strength checking
  */
 export const validatePassword = (password: string): PasswordValidationResult => {
   if (!password) {
@@ -51,11 +47,9 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     };
   }
 
-  // Check password strength
   let strength: 'weak' | 'medium' | 'strong' = 'weak';
   let strengthText = 'Débil';
 
-  // Has uppercase, lowercase, number, and special character
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -75,7 +69,6 @@ export const validatePassword = (password: string): PasswordValidationResult => 
     }
   }
 
-  // Only return invalid if it doesn't meet minimum requirements
   const isValid = password.length >= 8;
   const error = isValid ? '' : 'Tu contraseña debe tener mínimo 8 caracteres';
 
@@ -84,9 +77,6 @@ export const validatePassword = (password: string): PasswordValidationResult => 
 
 /**
  * Validates name fields
- * @param name Name to validate
- * @param fieldName Name of the field for error message
- * @returns Object with validation result and error message
  */
 export const validateName = (
   name: string,
@@ -100,10 +90,7 @@ export const validateName = (
 };
 
 /**
- * Validates that two passwords match
- * @param password Main password
- * @param confirmPassword Confirmation password
- * @returns Object with validation result and error message
+ * Validates password confirmation match
  */
 export const validatePasswordMatch = (
   password: string,

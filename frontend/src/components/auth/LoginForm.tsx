@@ -18,6 +18,9 @@ import MobileForm, {
   MobileFormActions,
 } from "../ui/MobileForm/MobileForm";
 
+/**
+ * Login form with email verification handling and timeout protection
+ */
 const LoginForm: React.FC = () => {
   const [isEmailNotVerified, setIsEmailNotVerified] = useState(false);
   const [isResendingVerification, setIsResendingVerification] = useState(false);
@@ -25,16 +28,11 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get auth context
   const { login, isLoading, error, clearError, resendVerificationEmail } = useAuth();
-
-  // Get toast context
   const { showToast } = useToast();
 
-  // Get the intended destination from location state, or default to dashboard
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
-  // React Hook Form setup
   const {
     register,
     handleSubmit,
@@ -45,14 +43,12 @@ const LoginForm: React.FC = () => {
     mode: 'onSubmit',
   });
 
-  // Clear auth errors when component unmounts
   useEffect(() => {
     return () => {
       clearError();
     };
   }, [clearError]);
 
-  // Handle resend verification email
   const handleResendVerification = async () => {
     const email = getValues('email');
 
@@ -77,7 +73,6 @@ const LoginForm: React.FC = () => {
         showToast(result.message || 'Error al reenviar el correo de verificación.', 'error');
       }
     } catch (ignore) {
-      // Ignore the specific error and just show a generic message
       showToast('Error al reenviar el correo de verificación.', 'error');
     } finally {
       setIsResendingVerification(false);
@@ -87,31 +82,26 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     debugLog('LoginForm', 'Login form submitted');
 
-    // Clear any previous errors
     clearError();
 
-    // Create a promise that will reject after a timeout
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('Login request timed out'));
-      }, 10000); // 10 second timeout
+      }, 10000);
     });
 
     try {
       debugLog('LoginForm', `Attempting login with email: ${data.email}`);
 
-      // Race the login against the timeout
       const loginPromise = login(data.email, data.password);
       const success = (await Promise.race([loginPromise, timeoutPromise])) as boolean;
 
       debugLog('LoginForm', `Login result: ${success}`);
 
       if (success) {
-        // Show success toast
         showToast('¡Bienvenido! Iniciaste sesión', 'success');
         debugLog('LoginForm', `Login successful, navigating to: ${from}`);
 
-        // Navigate directly without setTimeout
         navigate(from, { replace: true });
       } else {
         debugLog('LoginForm', 'Login returned false');
@@ -120,41 +110,31 @@ const LoginForm: React.FC = () => {
     } catch (error) {
       errorLog('LoginForm', 'Login submission error', error);
 
-      // Reset email verification state
       setIsEmailNotVerified(false);
       setResendVerificationSuccess(false);
 
-      // Handle timeout specifically
       if (error instanceof Error && error.message === 'Login request timed out') {
         showToast(
           'La solicitud de inicio de sesión tardó demasiado. Por favor, inténtalo de nuevo.',
           'error',
         );
       } else if (axios.isAxiosError(error)) {
-        // Check for email not verified error
         const status = error.response?.status;
         const errorCode = error.response?.data?.code;
         const errorMessage = error.response?.data?.message;
 
         if ((status === 401 || status === 403) && errorCode === 'EMAIL_NOT_VERIFIED') {
-          // Set email not verified state
           setIsEmailNotVerified(true);
-          // Don't show a toast since we'll display a specific message in the UI
         } else if (errorMessage) {
-          // Show the error message from the server
           showToast(errorMessage, 'error');
         } else {
-          // Show a generic error message
           showToast('No pudimos iniciar tu sesión. Por favor, inténtalo de nuevo.', 'error');
         }
       } else {
         showToast('No pudimos iniciar tu sesión. Por favor, inténtalo de nuevo.', 'error');
       }
 
-      // Force isLoading to false in case it got stuck
       if (isLoading) {
-        // This is a hack to force the loading state to false
-        // We're directly calling the function that would normally be called by the AuthContext
         if (typeof clearError === 'function') {
           clearError();
         }
@@ -238,7 +218,6 @@ const LoginForm: React.FC = () => {
       </MobileFormGroup>
 
       <MobileFormActions>
-        {/* Empty button to maintain consistent layout with RegisterForm */}
         <div className="hidden-xs"></div>
 
         <Button type="submit" variant="primary" disabled={isLoading}>

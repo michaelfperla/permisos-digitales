@@ -10,19 +10,18 @@ import {
   FaChartBar,
   FaInfoCircle,
   FaPlus,
-  // FaFileAlt, // Not used directly here, but can be for empty states
-  // FaDownload, // Not used directly here
-  // FaCar // Not used directly here
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-import styles from './UserDashboardPage.module.css'; // Ensure this path is correct
+import styles from './UserDashboardPage.module.css';
 import applicationService from '../services/applicationService';
-import Icon from '../shared/components/ui/Icon'; // For consistency if you use Icon component
+import Icon from '../shared/components/ui/Icon';
 import { useUserAuth as useAuth } from '../shared/hooks/useAuth';
 import { useToast } from '../shared/hooks/useToast';
-// import Button from '../components/ui/Button/Button'; // Button not directly used here, links are used
 
+/**
+ * User dashboard showing permit statistics and quick actions
+ */
 const UserDashboardPage: React.FC = () => {
   const { showToast } = useToast();
   const { user } = useAuth();
@@ -34,11 +33,10 @@ const UserDashboardPage: React.FC = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['applications'], // Query key for TanStack Query
+    queryKey: ['applications'],
     queryFn: applicationService.getApplications,
   });
 
-  // Handle dashboard data error
   React.useEffect(() => {
     if (isError && error) {
       showToast(`Error al cargar permisos: ${error.message}`, 'error');
@@ -147,7 +145,6 @@ const UserDashboardPage: React.FC = () => {
 
   return (
     <div className={styles.dashboardPage}>
-      {/* Wrapper for centering content */}
       <div className={styles.dashboardContentWrapper}>
         <header className={`${styles.pageHeader} page-header-main-content ${styles.centeredText}`}>
           <h1 className={`${styles.pageTitle} page-title-h1`}>Dashboard</h1>
@@ -199,8 +196,6 @@ const UserDashboardPage: React.FC = () => {
               {Object.entries(statusGroups).map(([status, count]) => (
                 <div key={status} className={styles.statusCard}>
                   <div className={styles.statusIconWrapper}>
-                    {' '}
-                    {/* Added wrapper for icon styling */}
                     {getStatusIcon(status)}
                   </div>
                   <div className={styles.statusContent}>
@@ -223,16 +218,12 @@ const UserDashboardPage: React.FC = () => {
           <div className={styles.linksGrid}>
             <Link to="/permits/new" className={styles.linkCard}>
               <div className={styles.linkIconWrapper}>
-                {' '}
-                {/* Added wrapper for icon styling */}
                 <Icon IconComponent={FaPlus} />
               </div>
               <div className={styles.linkText}>Solicitar Nuevo Permiso</div>
             </Link>
             <Link to="/permits" className={styles.linkCard}>
               <div className={styles.linkIconWrapper}>
-                {' '}
-                {/* Added wrapper for icon styling */}
                 <Icon IconComponent={FaClipboardList} />
               </div>
               <div className={styles.linkText}>Ver Todos Mis Permisos</div>

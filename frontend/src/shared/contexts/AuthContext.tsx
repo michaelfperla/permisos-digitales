@@ -7,21 +7,20 @@ import React, {
   useMemo,
 } from 'react';
 
-// Base User interface
 export interface BaseUser {
   id: string;
   email: string;
   first_name: string;
   last_name: string;
 }
-// User interface
+
 export interface User extends BaseUser {
   role?: string;
   accountType?: string;
   created_at?: string;
   updated_at?: string;
 }
-// AdminUser interface
+
 export interface AdminUser extends BaseUser {
   accountType: string;
   is_admin_portal: boolean;
@@ -31,10 +30,9 @@ export interface AdminUser extends BaseUser {
     sessionId: string;
   };
 }
-// AuthUser type
+
 export type AuthUser<T extends 'user' | 'admin'> = T extends 'user' ? User : AdminUser;
 
-// BaseAuthContextType
 interface BaseAuthContextType<T extends BaseUser> {
   isAuthenticated: boolean;
   user: T | null;
@@ -44,7 +42,7 @@ interface BaseAuthContextType<T extends BaseUser> {
   checkAuth: (signal?: AbortSignal) => Promise<void>;
   clearError: () => void;
 }
-// UserAuthContextType
+
 export interface UserAuthContextType extends BaseAuthContextType<User> {
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: {
@@ -57,12 +55,12 @@ export interface UserAuthContextType extends BaseAuthContextType<User> {
   setUser: (user: User | null) => void;
   resendVerificationEmail: (email: string) => Promise<{ success: boolean; message: string }>;
 }
-// AdminAuthContextType
+
 export interface AdminAuthContextType extends BaseAuthContextType<AdminUser> {
   login: (loggedInUser: AdminUser) => void;
-  setUser?: (user: AdminUser | null) => void; // Added optional setUser for Admin consistency
+  setUser?: (user: AdminUser | null) => void;
 }
-// AuthContextType
+
 export type AuthContextType<T extends 'user' | 'admin'> = T extends 'user'
   ? UserAuthContextType
   : AdminAuthContextType;
@@ -90,7 +88,7 @@ const defaultAdminAuthContext: AdminAuthContextType = {
   logout: async () => {},
   checkAuth: async () => {},
   clearError: () => {},
-  setUser: () => {}, // Provide a default empty setUser for admin if needed for type consistency
+  setUser: () => {},
 };
 
 export const UserAuthContext = createContext<UserAuthContextType>(defaultUserAuthContext);
@@ -106,6 +104,10 @@ interface AuthProviderProps {
   };
 }
 
+/**
+ * Authentication provider that handles both user and admin authentication flows.
+ * Manages authentication state, login/logout, and session persistence.
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
   type,
@@ -369,13 +371,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   if (type === 'user') {
     return <UserAuthContext.Provider value={userContextValue}>{children}</UserAuthContext.Provider>;
-  } else { // type === 'admin'
+  } else {
     return <AdminAuthContext.Provider value={adminContextValue}>{children}</AdminAuthContext.Provider>;
   }
 };
-
-// Keeping AuthProvider as named export, and contexts also named.
-// This aligns with how they are likely imported and used.
-// The `react-refresh/only-export-components` warnings for this file are acceptable.
-// Default export is removed to avoid ambiguity if UserAuthContext or AdminAuthContext are meant to be primary.
-// Typically, you'd import { AuthProvider, UserAuthContext } from './AuthContext';

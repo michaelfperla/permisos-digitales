@@ -30,17 +30,20 @@ import UserPermitsPage from './pages/UserPermitsPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import { useUserAuth as useAuth } from './shared/hooks/useAuth';
 
+/**
+ * Main application component that defines all routes for the digital permits platform.
+ * Handles authentication state and renders appropriate layouts for different user flows.
+ */
 function App() {
   const { isLoading } = useAuth();
 
-  // Show loading spinner while checking authentication status
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
   return (
     <Routes>
-      {/* Public auth routes */}
+      {/* Authentication routes */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -48,34 +51,27 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
-      {/* Verification routes */}
+      {/* Email verification routes */}
       <Route element={<VerificationLayout />}>
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/resend-verification" element={<ResendVerificationPage />} />
         <Route path="/pre-verification" element={<PreVerificationPage />} />
       </Route>
 
-      {/* Routes requiring authentication */}
+      {/* Protected user routes */}
       <Route element={<ProtectedRoute />}>
-        {/* Legacy layout */}
         <Route element={<MainLayout />}>
           <Route path="/permits-legacy" element={<PermitsListPage />} />
-
-          {/* Payment result pages */}
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/error" element={<PaymentErrorPage />} />
-
         </Route>
 
-        {/* New User Layout */}
         <Route element={<UserLayout />}>
-          {/* Main dashboard and permits pages */}
           <Route path="/dashboard" element={<UserDashboardPage />} />
           <Route path="/permits" element={<UserPermitsPage />} />
           <Route path="/permits/new" element={<Navigate to="/permits/complete" replace />} />
           <Route path="/permits/complete" element={<CompletePermitFormPage />} />
 
-          {/* Routes that need permit validation */}
           <Route path="/permits/:id" element={
             <PermitRouteGuard>
               <PermitDetailsPage />
@@ -89,22 +85,17 @@ function App() {
           } />
 
           <Route path="/profile" element={<ProfilePage />} />
-
         </Route>
       </Route>
 
-      {/* Public Home page - with custom layout */}
+      {/* Public routes */}
       <Route element={<HomeLayout />}>
         <Route path="/" element={<HomePage />} />
       </Route>
 
-      {/* Legal pages */}
       <Route path="/terminos-y-condiciones" element={<TermsAndConditionsPage />} />
       <Route path="/politica-de-privacidad" element={<PrivacyPolicyPage />} />
       <Route path="/contacto" element={<ContactPage />} />
-
-      {/* 404 Route - can be added later */}
-      {/* <Route path="*" element={<NotFoundPage />} /> */}
     </Routes>
   );
 }

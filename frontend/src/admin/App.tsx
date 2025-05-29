@@ -1,26 +1,26 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// Corrected import paths assuming components are in ./components, pages in ./pages etc.
-// And shared components are in ../shared/
-import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute'; // Path was correct
-import AdminLayout from './layouts/AdminLayout';                           // Path was correct
-import ApplicationDetailsPage from './pages/ApplicationDetailsPage';       // Path was correct
-import ApplicationsPage from './pages/ApplicationsPage';                 // Path was correct
-import DashboardPage from './pages/DashboardPage';                       // Path was correct
-import LoginPage from './pages/LoginPage';                               // Path was correct
-import UserDetailsPage from './pages/UserDetailsPage';                   // Path was correct
-import UsersPage from './pages/UsersPage';                               // Path was correct
-import LoadingSpinner from '../components/ui/LoadingSpinner'; // Adjusted path from ../../ to ../
-import { useAdminAuth as useAuth } from '../shared/hooks/useAuth';  // Adjusted path from ../../../ to ../shared/
+import ProtectedAdminRoute from './components/auth/ProtectedAdminRoute';
+import AdminLayout from './layouts/AdminLayout';
+import ApplicationDetailsPage from './pages/ApplicationDetailsPage';
+import ApplicationsPage from './pages/ApplicationsPage';
+import DashboardPage from './pages/DashboardPage';
+import LoginPage from './pages/LoginPage';
+import UserDetailsPage from './pages/UserDetailsPage';
+import UsersPage from './pages/UsersPage';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useAdminAuth as useAuth } from '../shared/hooks/useAuth';
 
+/**
+ * Admin application component that defines routes for the administrative interface.
+ * Handles admin authentication and provides access to user and application management.
+ */
 function App() {
   const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
-  console.debug('[AdminApp] Rendering with path:', window.location.pathname); // Changed to debug
 
   return (
     <Routes>

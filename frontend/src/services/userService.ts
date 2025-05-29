@@ -15,14 +15,9 @@ export interface UserProfileResponse {
   message: string;
 }
 
-/**
- * Service for user profile management
- */
 const userService = {
   /**
-   * Get the current user's profile
-   * @param options Optional request options including AbortSignal
-   * @returns Promise with user profile data
+   * Get current user profile
    */
   getProfile: async (options?: { signal?: AbortSignal }): Promise<UserProfileResponse> => {
     try {
@@ -48,16 +43,13 @@ const userService = {
   },
 
   /**
-   * Update the current user's profile
-   * @param data - User profile data to update
-   * @param options Optional request options including AbortSignal
-   * @returns Promise with updated user profile data
+   * Update user profile information
    */
   updateProfile: async (
     data: UserProfileUpdateData,
     options?: { signal?: AbortSignal },
   ): Promise<UserProfileResponse> => {
-    console.debug('Updating user profile with data:', data); // Changed to debug
+    console.debug('Updating user profile with data:', data);
 
     let user = null;
     try {
@@ -78,38 +70,32 @@ const userService = {
       signal: options?.signal,
     });
 
-    console.debug('[userService.updateProfile] Raw Axios response:', response); // Changed to debug
-    console.debug( // Changed to debug
+    console.debug('[userService.updateProfile] Raw Axios response:', response);
+    console.debug(
       '[userService.updateProfile] Response data structure:',
       JSON.stringify(response.data, null, 2),
     );
 
     return {
-      success: true, 
+      success: true,
       message: response.data.message || 'Profile updated successfully',
       user: {
         ...(user || {}),
         first_name: data.first_name || user?.first_name || '',
         last_name: data.last_name || user?.last_name || '',
-        // Note: email and profile_image_url are not typically updated this way here
-        // email changes usually have specific flows, and image is via updateProfileImage
-        // Ensure the returned user object reflects what the backend actually allows to be updated.
-      } as User, // Added type assertion
+      } as User,
     };
   },
 
   /**
-   * Change the current user's password
-   * @param currentPassword - Current password
-   * @param newPassword - New password
-   * @returns Promise with success/error message
+   * Change user password
    */
   changePassword: async (
     currentPassword: string,
     newPassword: string,
   ): Promise<{ success: boolean; message: string }> => {
     try {
-      console.debug('Changing password via userService'); // Changed to debug
+      console.debug('Changing password via userService');
       const response = await authService.changePassword(currentPassword, newPassword);
       return {
         success: response.success,
@@ -133,9 +119,7 @@ const userService = {
   },
 
   /**
-   * Update the user's profile image
-   * @param formData - FormData containing the profile_image file
-   * @returns Promise with updated user profile data
+   * Update user profile image
    */
   updateProfileImage: async (formData: FormData): Promise<UserProfileResponse> => {
     try {
@@ -161,15 +145,14 @@ const userService = {
         success: true,
         message: response.data.message || 'Imagen de perfil actualizada exitosamente',
         user: {
-          ...(user || {}), // Spread existing user fields
+          ...(user || {}),
           profile_image_url: response.data.profile_image_url || user?.profile_image_url,
-          // Ensure other fields of User type are present if user was null
           id: user?.id || '',
           email: user?.email || '',
           first_name: user?.first_name || '',
           last_name: user?.last_name || '',
           accountType: user?.accountType || '',
-        } as User, // Added type assertion
+        } as User,
       };
     } catch (error) {
       console.error('Error updating profile image:', error);

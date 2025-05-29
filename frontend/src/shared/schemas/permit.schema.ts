@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Schema for permit renewal form
- */
 export const permitRenewalSchema = z.object({
   domicilio: z
     .string()
@@ -16,14 +13,8 @@ export const permitRenewalSchema = z.object({
   renewal_notes: z.string().optional(),
 });
 
-/**
- * Type for permit renewal form data
- */
 export type PermitRenewalFormData = z.infer<typeof permitRenewalSchema>;
 
-/**
- * Schema for personal information step
- */
 export const personalInfoSchema = z.object({
   nombre_completo: z
     .string()
@@ -41,9 +32,6 @@ export const personalInfoSchema = z.object({
   domicilio: z.string().min(5, 'El domicilio debe tener al menos 5 caracteres'),
 });
 
-/**
- * Schema for vehicle information step
- */
 export const vehicleInfoSchema = z.object({
   marca: z
     .string()
@@ -94,40 +82,19 @@ export const vehicleInfoSchema = z.object({
   ]),
 });
 
-/**
- * Schema for payment information
- */
 export const paymentInfoSchema = z.object({
   payment_token: z.string().optional(),
   payment_method: z.enum(['card', 'oxxo']).optional(),
   device_session_id: z.string().optional(),
 });
 
-/**
- * Complete permit application schema
- */
 export const completePermitSchema = z.object({
   ...personalInfoSchema.shape,
   ...vehicleInfoSchema.shape,
   ...paymentInfoSchema.shape,
 });
 
-/**
- * Type for personal information form data
- */
 export type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
-
-/**
- * Type for vehicle information form data
- */
 export type VehicleInfoFormData = z.infer<typeof vehicleInfoSchema>;
-
-/**
- * Type for payment information form data
- */
 export type PaymentInfoFormData = z.infer<typeof paymentInfoSchema>;
-
-/**
- * Type for complete permit form data
- */
 export type CompletePermitFormData = z.infer<typeof completePermitSchema>;

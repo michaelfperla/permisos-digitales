@@ -1,14 +1,3 @@
-/**
- * StatusTimeline Component
- *
- * This component displays a timeline of application status steps.
- * It was previously named NewStatusTimeline and has been updated to support
- * the new payment flow, including OXXO payments and other status types.
- *
- * The component provides a responsive timeline that adapts to different screen sizes
- * and shows the appropriate steps based on the current application status.
- */
-
 import React from 'react';
 import { FaCheck, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
 
@@ -16,10 +5,8 @@ import styles from './StatusTimeline.module.css';
 import { ApplicationStatus } from '../../services/applicationService';
 import Icon from '../../shared/components/ui/Icon';
 
-// Define the step status types
 type StepStatus = 'completed' | 'current' | 'pending' | 'rejected' | 'expired';
 
-// Define the structure for a timeline step
 interface TimelineStep {
   id: string;
   label: string;
@@ -29,7 +16,6 @@ interface TimelineStep {
   icon?: React.ReactNode;
 }
 
-// Props for the StatusTimeline component
 interface StatusTimelineProps {
   currentStatus: ApplicationStatus;
   applicationDates: {
@@ -38,8 +24,11 @@ interface StatusTimelineProps {
   };
 }
 
+/**
+ * Timeline component showing application status progression with OXXO payment support
+ */
+
 const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicationDates }) => {
-  // Helper function to format dates
   const formatDate = (dateString?: string): string => {
     if (!dateString) return 'Pendiente';
 
@@ -52,9 +41,7 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
     });
   };
 
-  // Generate steps based on the current status
   const getTimelineSteps = (): TimelineStep[] => {
-    // Special case for OXXO payment
     if (currentStatus === 'AWAITING_OXXO_PAYMENT') {
       return [
         {
@@ -75,7 +62,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       ];
     }
 
-    // Special case for expired permits
     if (currentStatus === 'EXPIRED') {
       return [
         {
@@ -98,7 +84,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       ];
     }
 
-    // Define all possible status steps in order for the new payment flow
     const allSteps: {
       status: ApplicationStatus;
       label: string;
@@ -143,10 +128,8 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       },
     ];
 
-    // Find the index of the current status
     const currentStatusIndex = allSteps.findIndex((step) => step.status === currentStatus);
 
-    // If status not found in our defined steps, show a simplified timeline
     if (currentStatusIndex === -1) {
       return [
         {
@@ -166,10 +149,8 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       ];
     }
 
-    // Create timeline steps up to the current status
     const timelineSteps: TimelineStep[] = [];
 
-    // Add all steps up to and including the current one
     for (let i = 0; i <= currentStatusIndex; i++) {
       const step = allSteps[i];
       timelineSteps.push({
@@ -186,7 +167,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
       });
     }
 
-    // Add the next step as pending if not at the end
     if (currentStatusIndex < allSteps.length - 1) {
       const nextStep = allSteps[currentStatusIndex + 1];
       timelineSteps.push({
@@ -201,7 +181,6 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
     return timelineSteps;
   };
 
-  // Get the timeline steps
   const steps = getTimelineSteps();
 
   return (
@@ -224,10 +203,8 @@ const StatusTimeline: React.FC<StatusTimelineProps> = ({ currentStatus, applicat
   );
 };
 
-// Helper function to get status text
 const getStatusText = (status: ApplicationStatus): string => {
   switch (status) {
-    // Payment-related statuses
     case 'AWAITING_OXXO_PAYMENT':
       return 'Pendiente de Pago (OXXO)';
     case 'PAYMENT_PROCESSING':
@@ -236,33 +213,24 @@ const getStatusText = (status: ApplicationStatus): string => {
       return 'Pago Fallido';
     case 'PAYMENT_RECEIVED':
       return 'Pago Recibido';
-
-    // Permit generation statuses
     case 'GENERATING_PERMIT':
       return 'Generando Permiso';
     case 'ERROR_GENERATING_PERMIT':
       return 'Error al Generar';
     case 'PERMIT_READY':
       return 'Permiso Listo';
-
-    // Final statuses
     case 'COMPLETED':
       return 'Completado';
     case 'CANCELLED':
       return 'Cancelado';
     case 'EXPIRED':
       return 'Expirado';
-
-    // Renewal statuses
     case 'RENEWAL_PENDING':
       return 'Renovación Pendiente';
     case 'RENEWAL_APPROVED':
       return 'Renovación Aprobada';
     case 'RENEWAL_REJECTED':
       return 'Renovación Rechazada';
-
-    // Legacy statuses are no longer supported in current system
-
     default:
       return status;
   }
