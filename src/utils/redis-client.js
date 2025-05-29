@@ -99,12 +99,21 @@ try {
     });
     logger.info('Connecting to Redis using URL...');
   } else if (config.redisHost && config.redisPort) {
-    redisClient = new Redis({
+    const redisConfig = {
       host: config.redisHost,
       port: config.redisPort,
       password: config.redisPassword,
       maxRetriesPerRequest: 3,
-    });
+    };
+
+    // Add TLS configuration for production ElastiCache with encryption in transit
+    if (config.nodeEnv === 'production') {
+      redisConfig.tls = {
+        servername: config.redisHost
+      };
+    }
+
+    redisClient = new Redis(redisConfig);
     logger.info(`Connecting to Redis using Host/Port: ${config.redisHost}:${config.redisPort}...`);
   } else {
     throw new Error('Redis configuration (URL or Host/Port) not found.');

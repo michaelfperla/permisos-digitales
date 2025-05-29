@@ -224,12 +224,10 @@ const staticOptions = {
   }
 };
 
-app.use('/assets', express.static(path.join(__dirname, '../frontend/assets'), staticOptions));
-app.use('/src', express.static(path.join(__dirname, '../frontend/src'), staticOptions));
-app.use('/views', express.static(path.join(__dirname, '../frontend/views'), staticOptions));
-app.use('/', express.static(path.join(__dirname, '../frontend'), staticOptions));
-
-// Admin portal routing
+// ============================================
+// === ADMIN INTERFACE ROUTE HANDLERS ===
+// ============================================
+// Admin portal - serve admin.html for all admin routes (BEFORE static files)
 app.get(['/admin', '/admin/*'], (req, res) => {
   if (req.session) {
     req.session.portalType = 'admin';
@@ -237,7 +235,8 @@ app.get(['/admin', '/admin/*'], (req, res) => {
 
   logger.debug(`Admin route requested: ${req.path}`);
 
-  res.sendFile(path.join(__dirname, '../frontend/admin.html'), (err) => {
+  // Serve admin.html for all admin routes from dist-admin directory
+  res.sendFile(path.join(__dirname, '../frontend/dist-admin/admin.html'), (err) => {
     if (err) {
       logger.error(`Admin portal not found: ${err.message}`);
       res.status(404).send('Admin portal not found');
@@ -247,7 +246,31 @@ app.get(['/admin', '/admin/*'], (req, res) => {
   });
 });
 
-// SPA fallback for client-side routing
+// =========================================
+// === SERVE FRONTEND STATIC ASSETS/VIEWS ===
+// =========================================
+// Serve built frontend assets from dist directory (AFTER admin routes)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/dist/assets'), staticOptions));
+// Serve admin assets from dist-admin directory
+app.use('/admin/assets', express.static(path.join(__dirname, '../frontend/dist-admin/assets'), staticOptions));
+// Serve client static files but exclude admin routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/admin')) {
+    next(); // Skip static file serving for admin routes
+  } else {
+    express.static(path.join(__dirname, '../frontend/dist'), staticOptions)(req, res, next);
+  }
+});
+
+// ============================================
+// === FRONTEND SPA CATCH-ALL ROUTE HANDLER ===
+// ============================================
+// This MUST come AFTER API routes and static file routes.
+// It serves the main index.html for any GET request that doesn't match the above,
+// allowing client-side routing (like react-router or our hash router) to take over.
+
+// Catch-all route handler for HTML requests
+// IMPORTANT: This should only serve frontend files when the request is NOT for an API endpoint
 app.get('*', (req, res, next) => {
   const isApiRoute = req.path.startsWith('/auth') ||
                      req.path.startsWith('/applications') ||
@@ -265,8 +288,9 @@ app.get('*', (req, res, next) => {
     return;
   }
 
+  // For non-API requests that accept HTML, serve the SPA shell from dist directory
   if (req.accepts('html')) {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'), (err) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'), (err) => {
       if (err) {
         logger.error(`Error sending index.html: ${err.message}`);
         next(err);

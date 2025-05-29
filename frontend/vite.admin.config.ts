@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 
 // Admin-specific Vite configuration
 export default defineConfig({
+  base: '/admin/', // Set base path for admin assets
   css: {
     modules: {
       // Enable CSS modules for all .module.css files
