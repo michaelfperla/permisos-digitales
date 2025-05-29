@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import AuthContext from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import userService from '../../services/userService';
 import { mockUser } from '../../test/mocks/authService';
 import ProfilePage from '../ProfilePage';
@@ -66,6 +66,15 @@ describe('ProfilePage', () => {
     };
   };
 
+  // Mock auth service
+  const mockAuthService = {
+    login: vi.fn(),
+    logout: vi.fn(),
+    checkStatus: vi.fn(),
+    register: vi.fn(),
+    resendVerificationEmail: vi.fn(),
+  };
+
   // Custom render function with auth context
   const customRender = (
     ui: React.ReactElement,
@@ -73,9 +82,9 @@ describe('ProfilePage', () => {
   ) => {
     return render(
       <BrowserRouter>
-        <AuthContext.Provider value={authContext}>
+        <AuthProvider type="user" authService={mockAuthService}>
           <ToastProvider>{ui}</ToastProvider>
-        </AuthContext.Provider>
+        </AuthProvider>
       </BrowserRouter>,
       options,
     );

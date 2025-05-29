@@ -18,7 +18,7 @@ interface ReviewStepProps {
   onPrevious: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
-  goToStep: (_step: string) => void;
+  goToStep: (step: any) => void;
 }
 
 const CompleteReviewStep: React.FC<ReviewStepProps> = ({

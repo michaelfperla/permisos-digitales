@@ -256,7 +256,7 @@ describe('usePermitFormValidation Hook', () => {
       color: '',
       numero_serie: '',
       numero_motor: '',
-      ano_modelo: '',
+      ano_modelo: 0,
     };
     const { result } = renderHook(() => usePermitFormValidation(emptyData));
 

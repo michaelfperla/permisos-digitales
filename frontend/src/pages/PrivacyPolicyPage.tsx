@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
-import AppHeaderMobile from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
+import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
 import TextLogo from '../components/ui/TextLogo/TextLogo';
 import useResponsive from '../hooks/useResponsive';
 
@@ -11,7 +11,7 @@ const PrivacyPolicyPage: React.FC = () => {
   const { isMdDown } = useResponsive();
   const currentDate = new Date().toLocaleDateString('es-MX');
 
-  const authNavLinks = [
+  const authNavLinks: NavLinkItem[] = [
     { to: '/login', label: 'Iniciar Sesión', type: 'link' },
     { to: '/register', label: 'Registrarse', type: 'button-secondary' },
   ];

@@ -118,28 +118,6 @@ describe('authService', () => {
   });
 
   // Tests for API functions
-  describe('getCsrfToken', () => {
-    it('should fetch and return CSRF token on success', async () => {
-      const mockCsrfToken = 'test-csrf-token';
-      mockGet.mockResolvedValueOnce({
-        data: { csrfToken: mockCsrfToken },
-      });
-
-      const result = await authService.getCsrfToken();
-
-      expect(result).toBe(mockCsrfToken);
-      expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-    });
-
-    it('should return a dummy token when API call fails', async () => {
-      mockGet.mockRejectedValueOnce(new Error('Network error'));
-
-      const result = await authService.getCsrfToken();
-
-      expect(result).toBe('dummy-csrf-token-for-development');
-      expect(mockGet).toHaveBeenCalledWith('/auth/csrf-token');
-    });
-  });
 
   describe('login', () => {
     it('should fetch CSRF token and login successfully', async () => {

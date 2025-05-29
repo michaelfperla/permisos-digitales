@@ -157,7 +157,7 @@ const AfterMigrationExample: React.FC = () => {
           IconComponent={FaCheckCircle}
           color="var(--color-success)"
           size="24px"
-          style={{ marginRight: '12px' }}
+          className="me-3"
         />
         <div>
           <h4 style={{ margin: '0 0 4px 0' }}>Operation Successful</h4>
@@ -190,7 +190,7 @@ const AfterMigrationExample: React.FC = () => {
           IconComponent={FaExclamationCircle}
           color="var(--color-danger)"
           size="24px"
-          style={{ marginRight: '12px' }}
+          className="me-3"
         />
         <div>
           <h4 style={{ margin: '0 0 4px 0' }}>Error Occurred</h4>
@@ -222,7 +222,7 @@ const AfterMigrationExample: React.FC = () => {
           IconComponent={FaInfoCircle}
           color="var(--color-info)"
           size="24px"
-          style={{ marginRight: '12px' }}
+          className="me-3"
         />
         <div>
           <h4 style={{ margin: '0 0 4px 0' }}>Information</h4>

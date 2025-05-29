@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { render, screen, waitFor } from '../../test/test-utils';
+import { render, screen, waitFor } from '../../../test/test-utils';
 import RenewalEligibility from '../RenewalEligibility';
 
 // Mock the application service
-vi.mock('../../services/applicationService', () => {
+vi.mock('../../../services/applicationService', () => {
   return {
     default: {
       checkRenewalEligibility: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('../../services/applicationService', () => {
 });
 
 // Get the mocked service
-const applicationService = (await import('../../services/applicationService')).default;
+const applicationService = (await import('../../../services/applicationService')).default;
 
 describe('RenewalEligibility', () => {
   const mockApplication = {
@@ -31,7 +31,7 @@ describe('RenewalEligibility', () => {
     color: 'Red',
     numero_serie: 'TEST123',
     numero_motor: 'MOTOR123',
-    ano_modelo: '2023',
+    ano_modelo: 2023,
     folio: 'F123',
     importe: 1000,
     fecha_expedicion: '2023-01-01T00:00:00.000Z',

@@ -209,7 +209,7 @@ const AppHeaderMobile: React.FC<AppHeaderMobileProps> = ({
                 const isActive = link.isActive
                   ? link.isActive(location.pathname, link.to)
                   : location.pathname ===
-                    (typeof link.to === 'string' ? link.to : link.to.pathname);
+                    (typeof link.to === 'string' ? link.to : link.to.pathname || '');
 
                 let linkClass = styles.navLinkBase;
                 if (link.type === 'button-primary')
@@ -227,7 +227,7 @@ const AppHeaderMobile: React.FC<AppHeaderMobileProps> = ({
                 }
 
                 return (
-                  <li key={typeof link.to === 'string' ? link.to : link.to.pathname + index}>
+                  <li key={typeof link.to === 'string' ? link.to : (link.to.pathname || '') + index}>
                     <Link
                       to={link.to}
                       className={linkClass}

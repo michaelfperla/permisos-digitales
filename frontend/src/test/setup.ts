@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 // Mock window.scrollTo
-window.scrollTo = vi.fn();
+window.scrollTo = vi.fn() as any;
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {

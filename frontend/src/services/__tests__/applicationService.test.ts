@@ -172,6 +172,13 @@ describe('applicationService', () => {
       const applicationData = {
         nombre_completo: 'Test User',
         curp_rfc: 'TESU123456ABC',
+        domicilio: '123 Main St',
+        marca: 'Toyota',
+        linea: 'Corolla',
+        color: 'Blue',
+        numero_serie: 'ABC123',
+        numero_motor: 'M123',
+        ano_modelo: 2023,
       };
 
       mockPost.mockRejectedValueOnce(new Error('Network error'));
@@ -628,6 +635,9 @@ describe('applicationService', () => {
       const applicationId = '1';
       const renewalData = {
         renewal_reason: 'Need to extend permit',
+        renewal_notes: 'Additional notes',
+        domicilio: 'New address',
+        color: 'Blue',
       };
 
       // Mock API error
@@ -662,6 +672,9 @@ describe('applicationService', () => {
       const applicationId = '1';
       const renewalData = {
         renewal_reason: 'Need to extend permit',
+        renewal_notes: 'Additional notes',
+        domicilio: 'New address',
+        color: 'Blue',
       };
 
       mockPost.mockRejectedValueOnce(new Error('Network error'));

@@ -10,7 +10,7 @@ import {
   validateVehicleSerialNumber,
   validateVehicleEngineNumber,
   validateVehicleModelYear,
-} from '../permitValidation';
+} from '../permit-validation';
 
 describe('Permit Validation Functions', () => {
   describe('validateFullName', () => {

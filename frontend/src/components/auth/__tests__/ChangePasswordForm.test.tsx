@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import userService from '../../services/userService';
-import { render, screen, fireEvent, waitFor } from '../../test/test-utils';
+import userService from '../../../services/userService';
+import { render, screen, fireEvent, waitFor } from '../../../test/test-utils';
 import ChangePasswordForm from '../ChangePasswordForm';
 
 // Mock the userService

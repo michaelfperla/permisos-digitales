@@ -4,8 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import components and mocked service after mocks are defined
-import { AuthProvider } from '../../contexts/AuthContext'; // Adjust path if needed
-import { ToastProvider } from '../../contexts/ToastContext'; // Adjust path if needed
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import authService from '../../services/authService'; // Import the mocked service
 import RegisterPage from '../RegisterPage';
 
@@ -17,7 +17,7 @@ vi.mock('../../services/authService');
 // Mock useNavigate from react-router-dom
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal(); // Import actual module
+  const actual = await importOriginal() as any; // Import actual module
   return {
     ...actual, // Keep other exports like BrowserRouter
     useNavigate: () => mockNavigate,
@@ -27,7 +27,7 @@ vi.mock('react-router-dom', async (importOriginal) => {
 // Mock the toast context hook
 const mockShowToast = vi.fn();
 vi.mock('../../contexts/ToastContext', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return {
     ...actual,
     useToast: () => ({
@@ -37,11 +37,20 @@ vi.mock('../../contexts/ToastContext', async (importOriginal) => {
 });
 // No longer importing useAuth directly in the test file
 
+// Mock auth service
+const mockAuthService = {
+  login: vi.fn(),
+  logout: vi.fn(),
+  checkStatus: vi.fn(),
+  register: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+};
+
 // Helper function for standard rendering (used by most tests)
 const renderRegisterPage = () => {
   render(
     <BrowserRouter>
-      <AuthProvider>
+      <AuthProvider type="user" authService={mockAuthService}>
         <ToastProvider>
           <RegisterPage />
         </ToastProvider>

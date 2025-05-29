@@ -4,7 +4,7 @@
  */
 
 /**
- * Permit status values from backend
+ * Permit status values from backend - matches src/constants/index.js
  */
 export enum PermitStatus {
   AWAITING_PAYMENT = 'AWAITING_PAYMENT',
@@ -130,4 +130,34 @@ export interface DocumentInfo {
   displayName: string;
   path?: string;
   icon: string;
+}
+
+/**
+ * Interface for permit card props
+ */
+export interface PermitCardProps {
+  id: string;
+  vehicleInfo: string;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleYear: number | string;
+  statusType: 'active' | 'expiring_soon' | 'needs_attention' | 'archived';
+  statusText: string;
+  creationDate: string;
+  expirationDate?: string;
+  primaryCta: {
+    text: string;
+    link: string;
+    icon: string;
+  };
+  secondaryCta?: {
+    text: string;
+    link: string;
+    icon: string;
+  } | null;
+  permitDocumentPath?: string;
+  receiptDocumentPath?: string;
+  certificateDocumentPath?: string;
+  licensePlatesDocumentPath?: string;
+  rawStatus: string;
 }

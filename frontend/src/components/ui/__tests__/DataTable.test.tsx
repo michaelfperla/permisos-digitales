@@ -7,8 +7,8 @@ import DataTable, { Column } from '../DataTable';
 // Define a test data type
 interface TestData {
   id: number;
-  name: string;
-  age: number;
+  name: string | null;
+  age: number | undefined;
   active: boolean;
   createdAt: Date;
 }

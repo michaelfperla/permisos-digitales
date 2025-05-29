@@ -289,8 +289,8 @@ const Toast: React.FC<ToastProps> = memo(
             width: `${remainingPercentage}%`,
           }}
           role="progressbar"
-          aria-valuemin="0"
-          aria-valuemax="100"
+          aria-valuemin={0}
+          aria-valuemax={100}
           aria-valuenow={ariaValueNow}
           aria-label="Tiempo restante de la notificación"
         />

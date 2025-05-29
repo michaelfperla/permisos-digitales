@@ -316,7 +316,7 @@ const PermitDetailsPage: React.FC = () => {
   const refetch = USE_MOCK_DATA ? mockRefetch : apiRefetch;
 
   // Create a flattened application object for backward compatibility
-  const application: Application | null = applicationData
+  const application: Application | null = applicationData && applicationData.application && applicationData.status
     ? {
         id: applicationData.application.id,
         user_id: '', // Not available in new format
@@ -1331,7 +1331,7 @@ const PermitDetailsPage: React.FC = () => {
               <span className={styles.infoValue}>
                 {currentStatus === 'PAYMENT_RECEIVED' &&
                 (applicationData?.application?.dates as any)?.paymentVerified
-                  ? formatDate((applicationData.application.dates as any).paymentVerified)
+                  ? formatDate((applicationData?.application?.dates as any).paymentVerified)
                   : 'Pendiente'}
               </span>
             </div>
@@ -1492,7 +1492,7 @@ const PermitDetailsPage: React.FC = () => {
               <div className={styles.contextOxxoBlock}>
                 <div className={styles.contextOxxoLabel}>Referencia OXXO para Pago:</div>
                 <div className={styles.contextOxxoRefValue}>
-                  {applicationData.application.paymentReference}
+                  {(applicationData?.application as any)?.paymentReference}
                 </div>
                 <button
                   type="button"

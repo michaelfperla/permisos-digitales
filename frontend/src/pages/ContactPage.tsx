@@ -4,7 +4,7 @@ import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
-import AppHeaderMobile from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
+import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
 import TextLogo from '../components/ui/TextLogo/TextLogo';
 import useResponsive from '../hooks/useResponsive';
 import Card from '../components/ui/Card/Card';
@@ -13,7 +13,7 @@ import Icon from '../shared/components/ui/Icon/Icon';
 const ContactPage: React.FC = () => {
   const { isMdDown } = useResponsive();
 
-  const authNavLinks = [
+  const authNavLinks: NavLinkItem[] = [
     { to: '/login', label: 'Iniciar Sesión', type: 'link' },
     { to: '/register', label: 'Registrarse', type: 'button-secondary' },
   ];

@@ -4,8 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import components and mocked services after mocks are defined
-import { AuthProvider } from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import applicationService, { Application } from '../../services/applicationService';
 import authService from '../../services/authService';
 import PermitDetailsPage from '../PermitDetailsPage';
@@ -18,7 +18,7 @@ vi.mock('../../services/authService'); // For AuthProvider checkStatus call
 // Mock the toast context hook
 const mockShowToast = vi.fn();
 vi.mock('../../contexts/ToastContext', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return {
     ...actual,
     useToast: () => ({
@@ -31,7 +31,7 @@ vi.mock('../../contexts/ToastContext', async (importOriginal) => {
 const mockNavigate = vi.fn();
 const mockParams = { id: '123' };
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -63,11 +63,20 @@ const createMockApplication = (status: string, overrides = {}): Application => (
   ...overrides,
 });
 
+// Mock auth service
+const mockAuthService = {
+  login: vi.fn(),
+  logout: vi.fn(),
+  checkStatus: vi.fn(),
+  register: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+};
+
 // Helper function for standard rendering
 const renderPermitDetailsPage = () => {
   return render(
     <BrowserRouter>
-      <AuthProvider>
+      <AuthProvider type="user" authService={mockAuthService}>
         <ToastProvider>
           <PermitDetailsPage />
         </ToastProvider>
@@ -98,14 +107,29 @@ describe('PermitDetailsPage', () => {
     // Default mock for getApplicationById
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PERMIT_READY', {
-        folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z',
-        fecha_vencimiento: '2023-02-15T00:00:00Z',
-        payment_proof_path: '/uploads/payment-proof.jpg',
-        payment_proof_uploaded_at: '2023-01-02T00:00:00Z',
-        payment_verified_at: '2023-01-03T00:00:00Z',
-      }),
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+          fecha_vencimiento: '2023-02-15T00:00:00Z',
+          fecha_expedicion: '2023-01-15T00:00:00Z',
+        },
+        is_sample_permit: false,
+      },
     });
 
     // Default mock for downloadPermit
@@ -154,7 +178,7 @@ describe('PermitDetailsPage', () => {
     // Check for applicant details section
     const applicantSection = screen.getByRole('heading', {
       name: /Información del Solicitante/i,
-    }).parentElement;
+    }).parentElement!;
     expect(within(applicantSection).getByText(/Test User/i)).toBeInTheDocument();
     expect(within(applicantSection).getByText(/TESU123456ABC/i)).toBeInTheDocument();
     expect(
@@ -164,7 +188,7 @@ describe('PermitDetailsPage', () => {
     // Check for vehicle details section
     const vehicleSection = screen.getByRole('heading', {
       name: /Información del Vehículo/i,
-    }).parentElement;
+    }).parentElement!;
     expect(within(vehicleSection).getByText(/Toyota/i)).toBeInTheDocument();
     expect(within(vehicleSection).getByText(/Corolla/i)).toBeInTheDocument();
     expect(within(vehicleSection).getByText(/Azul/i)).toBeInTheDocument();
@@ -173,15 +197,15 @@ describe('PermitDetailsPage', () => {
 
     // Find the año modelo field specifically
     const yearModelItem = Array.from(vehicleSection.querySelectorAll('div')).find((div) =>
-      div.textContent.includes('Año Modelo'),
+      div.textContent?.includes('Año Modelo'),
     );
     expect(yearModelItem).toBeTruthy();
-    expect(yearModelItem.textContent).toContain('2023');
+    expect(yearModelItem!.textContent).toContain('2023');
 
     // Check for permit details section
     const permitSection = screen.getByRole('heading', {
       name: /Información del Permiso/i,
-    }).parentElement;
+    }).parentElement!;
     expect(within(permitSection).getByText(/PD-2023-123/i)).toBeInTheDocument();
     expect(within(permitSection).getByText(/\$1,500.00/i)).toBeInTheDocument();
 
@@ -251,10 +275,28 @@ describe('PermitDetailsPage', () => {
     // Mock application with PERMIT_READY status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PERMIT_READY', {
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+          fecha_expedicion: '2023-01-15T00:00:00Z',
+        },
         folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z',
-      }),
+      },
     });
 
     renderPermitDetailsPage();
@@ -284,10 +326,29 @@ describe('PermitDetailsPage', () => {
   }, 15000);
 
   test('shows upload payment proof link for PENDING_PAYMENT status', async () => {
-    // Mock application with PENDING_PAYMENT status
+    // Mock application with AWAITING_PAYMENT status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PENDING_PAYMENT'),
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+        },
+      },
     });
 
     const { container } = renderPermitDetailsPage();
@@ -303,19 +364,37 @@ describe('PermitDetailsPage', () => {
     // Check that upload payment proof link is present
     const headerActions = container.querySelector('.' + styles.headerActions);
     expect(headerActions).toBeTruthy();
-    expect(headerActions.textContent).toContain('Subir Comprobante de Pago');
+    expect(headerActions!.textContent).toContain('Subir Comprobante de Pago');
 
     // Check that download button is NOT present
     expect(screen.queryByRole('button', { name: /Descargar Permiso/i })).not.toBeInTheDocument();
   }, 10000);
 
   test('shows rejection reason for PROOF_REJECTED status', async () => {
-    // Mock application with PROOF_REJECTED status
+    // Mock application with PAYMENT_FAILED status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PROOF_REJECTED', {
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+        },
         payment_rejection_reason: 'Comprobante ilegible. Por favor, suba una imagen más clara.',
-      }),
+      },
     });
 
     const { container } = renderPermitDetailsPage();
@@ -331,26 +410,44 @@ describe('PermitDetailsPage', () => {
     // Check that rejection reason is displayed
     const statusSection = container.querySelector('.' + styles.statusSection);
     expect(statusSection).toBeTruthy();
-    expect(statusSection.textContent).toContain('Motivo de Rechazo');
-    expect(statusSection.textContent).toContain(
+    expect(statusSection!.textContent).toContain('Motivo de Rechazo');
+    expect(statusSection!.textContent).toContain(
       'Comprobante ilegible. Por favor, suba una imagen más clara.',
     );
 
     // Check that upload new payment proof link is present
     const headerActions = container.querySelector('.' + styles.headerActions);
     expect(headerActions).toBeTruthy();
-    expect(headerActions.textContent).toContain('Subir Nuevo Comprobante');
+    expect(headerActions!.textContent).toContain('Subir Nuevo Comprobante');
   }, 10000);
 
   test('shows renewal eligibility section for PERMIT_READY status', async () => {
     // Mock application with PERMIT_READY status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PERMIT_READY', {
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+          fecha_expedicion: '2023-01-15T00:00:00Z',
+          fecha_vencimiento: '2023-02-15T00:00:00Z',
+        },
         folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z',
-        fecha_vencimiento: '2023-02-15T00:00:00Z',
-      }),
+      },
     });
 
     const { container } = renderPermitDetailsPage();
@@ -366,17 +463,35 @@ describe('PermitDetailsPage', () => {
     // Check that renewal section is displayed
     const statusSection = container.querySelector('.' + styles.statusSection);
     expect(statusSection).toBeTruthy();
-    expect(statusSection.textContent).toContain('Renovación de Permiso');
+    expect(statusSection!.textContent).toContain('Renovación de Permiso');
   }, 15000);
 
   test('shows download button for PERMIT_READY status', async () => {
     // Mock application with PERMIT_READY status
     vi.mocked(applicationService.getApplicationById).mockResolvedValue({
       success: true,
-      application: createMockApplication('PERMIT_READY', {
+      application: {
+        id: '123',
+        vehicleInfo: {
+          marca: 'Toyota',
+          linea: 'Corolla',
+          ano_modelo: 2023,
+          color: 'Azul',
+          numero_serie: 'ABC123456789',
+          numero_motor: 'M123456',
+        },
+        ownerInfo: {
+          nombre_completo: 'Test User',
+          curp_rfc: 'TESU123456ABC',
+          domicilio: '123 Main St, Anytown, CA 12345',
+        },
+        dates: {
+          created: '2023-01-01T00:00:00Z',
+          updated: '2023-01-01T00:00:00Z',
+          fecha_expedicion: '2023-01-15T00:00:00Z',
+        },
         folio: 'PD-2023-123',
-        fecha_expedicion: '2023-01-15T00:00:00Z',
-      }),
+      },
     });
 
     renderPermitDetailsPage();

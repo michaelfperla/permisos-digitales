@@ -4,11 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Import components and mocked services after mocks
-import { AuthProvider } from '../../contexts/AuthContext';
-import { ToastProvider } from '../../contexts/ToastContext';
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import applicationService, { Application, ApplicationStatus } from '../../services/applicationService';
 import authService from '../../services/authService';
-import DashboardPage from '../DashboardPage';
+import DashboardPage from '../UserDashboardPage';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -16,7 +16,7 @@ vi.mock('../../services/authService'); // For AuthProvider checkStatus call
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as any;
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
@@ -45,7 +45,7 @@ const mockApplications: Application[] = [
   {
     id: '2',
     user_id: '123',
-    status: 'PENDING_PAYMENT' as ApplicationStatus,
+    status: 'AWAITING_PAYMENT' as ApplicationStatus,
     created_at: '2025-02-10T09:15:00Z',
     updated_at: '2025-02-10T09:15:00Z',
     nombre_completo: 'Test User',
@@ -60,11 +60,20 @@ const mockApplications: Application[] = [
   },
 ];
 
+// Mock auth service
+const mockAuthService = {
+  login: vi.fn(),
+  logout: vi.fn(),
+  checkStatus: vi.fn(),
+  register: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+};
+
 // Render helper
 const renderDashboardPage = () => {
   render(
     <BrowserRouter>
-      <AuthProvider>
+      <AuthProvider type="user" authService={mockAuthService}>
         <ToastProvider>
           <DashboardPage />
         </ToastProvider>

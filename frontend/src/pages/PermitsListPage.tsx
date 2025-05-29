@@ -286,7 +286,7 @@ const PermitsListPage: React.FC = () => {
   };
 
   const filterOptions = [
-    { id: 'all', label: 'Todos' },
+    { id: 'all', label: 'Todos', icon: undefined },
     { id: 'active', label: 'Activos', icon: <FaTag /> },
     { id: 'expiring_soon', label: 'Por Vencer', icon: <FaClock /> },
     { id: 'needs_attention', label: 'Requieren Atención', icon: <FaExclamationTriangle /> },

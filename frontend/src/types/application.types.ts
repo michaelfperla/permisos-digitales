@@ -41,6 +41,7 @@ export interface ApplicationFormData extends Omit<ApplicationFormRawData, 'ano_m
   payment_token?: string; // Conekta payment token for card payments
   payment_method?: string; // Payment method ('card' or 'oxxo')
   device_session_id?: string; // Conekta device fingerprint for fraud prevention
+  email?: string; // User email for notifications
 }
 
 /**

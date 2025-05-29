@@ -26,12 +26,21 @@ vi.mock('../../../shared/hooks/useToast', () => ({
   }),
 }));
 
+// Mock auth service
+const mockAuthService = {
+  login: vi.fn(),
+  logout: vi.fn(),
+  checkStatus: vi.fn(),
+  register: vi.fn(),
+  resendVerificationEmail: vi.fn(),
+};
+
 // Helper function to render the component with all required providers
 const renderLoginForm = () => {
   return render(
     <BrowserRouter>
       <ToastProvider>
-        <AuthProvider>
+        <AuthProvider type="user" authService={mockAuthService}>
           <LoginForm />
         </AuthProvider>
       </ToastProvider>

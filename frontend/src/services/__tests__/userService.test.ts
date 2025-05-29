@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
-import { User } from '../../contexts/AuthContext';
+import { User } from '../../shared/contexts/AuthContext';
 // Import userService AFTER mocks
 import authService from '../authService';
 import userService from '../userService';

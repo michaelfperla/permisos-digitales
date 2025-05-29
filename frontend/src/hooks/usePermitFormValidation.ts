@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 
-import { ApplicationFormRawData } from '../types/application.types';
+import { ApplicationFormRawData, ApplicationFormData } from '../types/application.types';
 import {
   validateFullName,
   validateCurpRfc,
@@ -149,7 +149,7 @@ export const getFirstStepError = (
       : ['marca', 'linea', 'color', 'numero_serie', 'numero_motor', 'ano_modelo'];
 
   for (const field of fields) {
-    const key = field as keyof ApplicationFormData;
+    const key = field as keyof ApplicationFormRawData;
     if (errors[key]) {
       return errors[key];
     }

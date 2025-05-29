@@ -397,8 +397,6 @@ const UserPermitsPage: React.FC = () => {
                   </div>
                 ),
                 sortable: false,
-                mobilePriority: 5,
-                headerClassName: styles.actionsHeaderCell,
               },
             ]}
             keyExtractor={(permit) => permit.id || ''}

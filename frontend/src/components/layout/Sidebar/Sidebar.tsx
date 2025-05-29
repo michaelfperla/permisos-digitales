@@ -3,7 +3,7 @@ import { FaHome, FaClipboardList, FaUser, FaInfoCircle, FaQuestionCircle } from 
 import { NavLink } from 'react-router-dom';
 
 import styles from './Sidebar.module.css';
-import useAuth from '../../../hooks/useAuth';
+import { useUserAuth } from '../../../shared/hooks/useAuth';
 import Icon from '../../../shared/components/ui/Icon';
 
 interface SidebarProps {
@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobileView, onCloseMobile }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useUserAuth();
 
   // Handle link click on mobile to close sidebar
   const handleLinkClick = () => {

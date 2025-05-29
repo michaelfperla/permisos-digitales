@@ -30,7 +30,7 @@ export default defineConfig({
           // To enable, run your dev server like: DEBUG_PROXY=true npm run dev
           const DEBUG_PROXY = process.env.VITE_DEBUG_PROXY === 'true' || process.env.DEBUG_PROXY === 'true';
 
-          if (DEBUG_PROXY && import.meta.env?.DEV !== false) {
+          if (DEBUG_PROXY && (import.meta as any).env?.DEV !== false) {
             proxy.on('proxyReq', (proxyReq, req, _res) => {
               console.log(`[Proxy Req]: ${req.method} ${req.url}`);
             });

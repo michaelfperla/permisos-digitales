@@ -1,7 +1,6 @@
 import React, { useState, ReactNode } from 'react';
 
 import styles from './FormWizard.module.css';
-import FormDebugger from '../debug/FormDebugger';
 import Button from '../ui/Button/Button';
 
 export interface Step {
@@ -38,7 +37,7 @@ const FormWizard: React.FC<FormWizardProps> = ({
       return;
     }
 
-    setFormData((prevData) => {
+    setFormData((prevData: any) => {
       const updatedData = {
         ...prevData,
         ...newData,
@@ -151,10 +150,9 @@ const FormWizard: React.FC<FormWizardProps> = ({
         })
       : React.isValidElement(currentStep.content)
         ? React.cloneElement(currentStep.content as React.ReactElement, {
-            formData,
             updateFormData,
             isLastStep: currentStepIndex === steps.length - 1,
-          })
+          } as any)
         : currentStep.content;
 
   return (
@@ -163,16 +161,6 @@ const FormWizard: React.FC<FormWizardProps> = ({
         <h1 className={styles.wizardTitle}>Solicitud de Permiso</h1>
         <p className={styles.wizardSubtitle}>Complete todos los pasos para enviar su solicitud</p>
       </div>
-
-      <FormDebugger
-        data={{
-          currentStepIndex,
-          currentStepId: steps[currentStepIndex].id,
-          formData,
-          isSubmitting,
-        }}
-        title="FormWizard Debug"
-      />
 
       {renderStepIndicator()}
 

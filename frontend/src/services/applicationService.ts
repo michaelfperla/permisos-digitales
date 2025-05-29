@@ -40,10 +40,21 @@ export interface Application {
   renewal_approved_at?: string;
   renewal_rejected_at?: string;
   renewal_rejection_reason?: string;
+
+  // Payment Data
+  payment_reference?: string;
+  paymentReference?: string;
+
+  // File paths
+  permit_file_path?: string;
+  recibo_file_path?: string;
+  certificado_file_path?: string;
+  placas_file_path?: string;
 }
 
-// Application status values from backend
+// Application status values from backend - matches src/constants/index.js
 export type ApplicationStatus =
+  | 'AWAITING_PAYMENT'
   | 'AWAITING_OXXO_PAYMENT'
   | 'PAYMENT_PROCESSING'
   | 'PAYMENT_FAILED'
@@ -84,6 +95,9 @@ export interface ApplicationDates {
   created: string;
   updated: string;
   fecha_vencimiento?: string;
+  paymentVerified?: string;
+  payment_verified_at?: string;
+  fecha_expedicion?: string;
 }
 
 export interface ApplicationDetails {
@@ -92,6 +106,12 @@ export interface ApplicationDetails {
   ownerInfo: OwnerInfo;
   dates: ApplicationDates;
   is_sample_permit?: boolean;
+  paymentReference?: string;
+  payment_proof_path?: string;
+  payment_proof_uploaded_at?: string;
+  payment_verified_at?: string;
+  payment_rejection_reason?: string;
+  folio?: string;
 }
 
 export interface StatusInfo {
@@ -103,8 +123,10 @@ export interface StatusInfo {
 }
 
 export interface ApplicationStatusResponse {
-  application: ApplicationDetails;
-  status: StatusInfo;
+  application: ApplicationDetails | null;
+  status?: StatusInfo;
+  success: boolean;
+  message?: string;
 }
 
 export interface ApplicationResponse {
@@ -144,6 +166,9 @@ export interface RenewalFormData {
   color: string;
   renewal_reason: string;
   renewal_notes?: string;
+  payment_method?: string;
+  payment_token?: string;
+  device_session_id?: string;
 }
 
 // Note: We now use the centralized api instance from api.ts
@@ -227,7 +252,7 @@ export const getApplicationForRenewal = async (
     const application: Application = {
       id: appDetails.id,
       user_id: '', // Will be filled by the backend
-      status: statusResponse.data.status.currentStatus,
+      status: (statusResponse.data.status?.currentStatus || 'PENDING_PAYMENT') as ApplicationStatus,
       created_at: appDetails.dates.created,
       updated_at: appDetails.dates.updated,
 
