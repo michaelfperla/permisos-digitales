@@ -78,6 +78,10 @@ frontend/dist-admin/
 # 🔒 PRODUCTION SECURITY - ADDITIONAL EXCLUSIONS
 # ============================================================================
 
+# Scripts directory (contains deployment and production scripts)
+scripts/
+scripts/**/*
+
 # Documentation directory (contains sensitive deployment info)
 docs/
 docs/**/*
