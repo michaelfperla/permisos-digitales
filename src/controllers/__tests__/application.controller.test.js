@@ -138,6 +138,7 @@ describe('Application Controller', () => {
 
     const pdfService = require('../../services/pdf-service');
     pdfService.copyPermitToUserDownloads = jest.fn().mockResolvedValue({ success: true, filename: 'test.pdf' });
+    pdfService.getPdf = jest.fn();
 
     const path = require('path');
     path.extname = jest.fn().mockReturnValue('.pdf');
@@ -203,22 +204,22 @@ describe('Application Controller', () => {
       expect(res.json).toHaveBeenCalledWith({ message: 'Application not found' });
     });
 
-    it('should return 404 if application belongs to different user', async () => {
+    it('should return 403 if application belongs to different user', async () => {
       // Arrange
       req.params.id = '1';
       req.session.userId = 123;
       applicationRepository.findById.mockResolvedValue({
         id: 1,
         user_id: 456, // Different user ID
-        status: ApplicationStatus.PENDING_PAYMENT
+        status: ApplicationStatus.AWAITING_PAYMENT
       });
 
       // Act
       await applicationController.getApplicationStatus(req, res, next);
 
       // Assert
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Application not found' });
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({ message: 'You do not have permission to access this application' });
     });
 
     it('should update status if application has invalid status', async () => {
@@ -234,7 +235,7 @@ describe('Application Controller', () => {
       applicationRepository.updateStatus.mockResolvedValue({
         id: 1,
         user_id: 123,
-        status: ApplicationStatus.PENDING_PAYMENT,
+        status: ApplicationStatus.AWAITING_PAYMENT,
         updated_at: new Date()
       });
 
@@ -242,29 +243,29 @@ describe('Application Controller', () => {
       await applicationController.getApplicationStatus(req, res, next);
 
       // Assert
-      expect(applicationRepository.updateStatus).toHaveBeenCalledWith(1, ApplicationStatus.PENDING_PAYMENT);
+      expect(applicationRepository.updateStatus).toHaveBeenCalledWith(1, ApplicationStatus.AWAITING_PAYMENT);
       expect(res.json).toHaveBeenCalled();
-      expect(res.json.mock.calls[0][0]).toHaveProperty('status.currentStatus', ApplicationStatus.PENDING_PAYMENT);
+      expect(res.json.mock.calls[0][0]).toHaveProperty('status.currentStatus', ApplicationStatus.AWAITING_PAYMENT);
     });
 
-    it('should return correct status info for PENDING_PAYMENT status', async () => {
+    it('should return correct status info for AWAITING_PAYMENT status', async () => {
       // Arrange
       req.params.id = '1';
       req.session.userId = 123;
       const mockApplication = {
         id: 1,
         user_id: 123,
-        status: ApplicationStatus.PENDING_PAYMENT,
+        status: ApplicationStatus.AWAITING_PAYMENT,
         updated_at: new Date(),
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -274,7 +275,7 @@ describe('Application Controller', () => {
       // Assert
       expect(res.json).toHaveBeenCalled();
       const response = res.json.mock.calls[0][0];
-      expect(response).toHaveProperty('status.currentStatus', ApplicationStatus.PENDING_PAYMENT);
+      expect(response).toHaveProperty('status.currentStatus', ApplicationStatus.AWAITING_PAYMENT);
       expect(response).toHaveProperty('status.displayMessage', 'Su solicitud está esperando pago');
       expect(response).toHaveProperty('status.nextSteps', 'Por favor realice el pago y suba el comprobante');
       expect(response).toHaveProperty('status.allowedActions');
@@ -289,17 +290,17 @@ describe('Application Controller', () => {
       const mockApplication = {
         id: 1,
         user_id: 123,
-        status: ApplicationStatus.PROOF_SUBMITTED,
+        status: 'PROOF_SUBMITTED',
         updated_at: new Date(),
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -309,9 +310,9 @@ describe('Application Controller', () => {
       // Assert
       expect(res.json).toHaveBeenCalled();
       const response = res.json.mock.calls[0][0];
-      expect(response).toHaveProperty('status.currentStatus', ApplicationStatus.PROOF_SUBMITTED);
-      expect(response).toHaveProperty('status.displayMessage', 'Su comprobante de pago ha sido enviado');
-      expect(response).toHaveProperty('status.nextSteps', 'Nuestro equipo está revisando su pago. Este proceso normalmente toma 1-2 días hábiles.');
+      expect(response).toHaveProperty('status.currentStatus', 'PROOF_SUBMITTED');
+      expect(response).toHaveProperty('status.displayMessage', 'Su solicitud está siendo procesada');
+      expect(response).toHaveProperty('status.nextSteps', 'Por favor contacte a soporte para más información.');
       expect(response).toHaveProperty('status.allowedActions');
       expect(response.status.allowedActions).toEqual([]);
     });
@@ -323,17 +324,17 @@ describe('Application Controller', () => {
       const mockApplication = {
         id: 1,
         user_id: 123,
-        status: ApplicationStatus.PROOF_REJECTED,
+        status: 'PROOF_REJECTED',
         updated_at: new Date(),
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -343,11 +344,11 @@ describe('Application Controller', () => {
       // Assert
       expect(res.json).toHaveBeenCalled();
       const response = res.json.mock.calls[0][0];
-      expect(response).toHaveProperty('status.currentStatus', ApplicationStatus.PROOF_REJECTED);
-      expect(response).toHaveProperty('status.displayMessage', 'Su comprobante de pago no fue aceptado');
-      expect(response).toHaveProperty('status.nextSteps', 'Motivo: Invalid payment proof. Por favor envíe un nuevo comprobante.');
+      expect(response).toHaveProperty('status.currentStatus', 'PROOF_REJECTED');
+      expect(response).toHaveProperty('status.displayMessage', 'Su solicitud está siendo procesada');
+      expect(response).toHaveProperty('status.nextSteps', 'Por favor contacte a soporte para más información.');
       expect(response).toHaveProperty('status.allowedActions');
-      expect(response.status.allowedActions).toEqual(['uploadPaymentProof']);
+      expect(response.status.allowedActions).toEqual([]);
     });
 
     it('should return correct status info for PAYMENT_RECEIVED status', async () => {
@@ -362,12 +363,12 @@ describe('Application Controller', () => {
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -396,12 +397,12 @@ describe('Application Controller', () => {
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -431,12 +432,12 @@ describe('Application Controller', () => {
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -469,12 +470,12 @@ describe('Application Controller', () => {
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -506,12 +507,12 @@ describe('Application Controller', () => {
         marca: 'Toyota',
         linea: 'Corolla',
         ano_modelo: '2023',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123',
         numero_motor: 'M123',
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TEST123',
-        domicilio: 'Test Address'
+        domicilio: 'Dirección de Prueba'
       };
       applicationRepository.findById.mockResolvedValue(mockApplication);
 
@@ -625,7 +626,7 @@ describe('Application Controller', () => {
       db.query.mockResolvedValue({
         rows: [{
           user_id: 123,
-          status: ApplicationStatus.PENDING_PAYMENT, // Not PERMIT_READY
+          status: ApplicationStatus.AWAITING_PAYMENT, // Not PERMIT_READY
           permit_file_path: '/path/to/permit.pdf',
           recibo_file_path: '/path/to/receipt.pdf',
           certificado_file_path: '/path/to/certificate.pdf'
@@ -638,7 +639,7 @@ describe('Application Controller', () => {
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: `Permiso no está listo (Estado: ${ApplicationStatus.PENDING_PAYMENT}).`
+        message: `Permiso no está listo (Estado: ${ApplicationStatus.AWAITING_PAYMENT}).`
       });
     });
 
@@ -694,11 +695,9 @@ describe('Application Controller', () => {
         mimetype: 'application/pdf'
       };
 
-      // Mock storageService.fileExists to return true
-      storageService.fileExists.mockResolvedValue(true);
-
-      // Mock storageService.getFile to return the fileInfo
-      storageService.getFile.mockImplementation(() => Promise.resolve(fileInfo));
+      // Mock pdfService.getPdf to return the fileInfo
+      const pdfService = require('../../services/pdf-service');
+      pdfService.getPdf.mockImplementation(() => Promise.resolve(fileInfo));
 
       // Mock response methods for file download
       res.setHeader = jest.fn();
@@ -708,7 +707,7 @@ describe('Application Controller', () => {
       await applicationController.downloadPermit(req, res, next);
 
       // Assert
-      expect(storageService.getFile).toHaveBeenCalled();
+      expect(pdfService.getPdf).toHaveBeenCalled();
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
       expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename='));
       expect(res.setHeader).toHaveBeenCalledWith('Content-Length', fileBuffer.length);
@@ -742,11 +741,9 @@ describe('Application Controller', () => {
         mimetype: 'application/pdf'
       };
 
-      // Mock storageService.fileExists to return true
-      storageService.fileExists.mockResolvedValue(true);
-
-      // Mock storageService.getFile to return the fileInfo
-      storageService.getFile.mockImplementation(() => Promise.resolve(fileInfo));
+      // Mock pdfService.getPdf to return the fileInfo
+      const pdfService = require('../../services/pdf-service');
+      pdfService.getPdf.mockImplementation(() => Promise.resolve(fileInfo));
 
       // Mock response methods for file download
       res.setHeader = jest.fn();
@@ -756,7 +753,7 @@ describe('Application Controller', () => {
       await applicationController.downloadPermit(req, res, next);
 
       // Assert
-      expect(storageService.getFile).toHaveBeenCalled();
+      expect(pdfService.getPdf).toHaveBeenCalled();
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
       expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename='));
       expect(res.setHeader).toHaveBeenCalledWith('Content-Length', fileBuffer.length);
@@ -790,11 +787,9 @@ describe('Application Controller', () => {
         mimetype: 'application/pdf'
       };
 
-      // Mock storageService.fileExists to return true
-      storageService.fileExists.mockResolvedValue(true);
-
-      // Mock storageService.getFile to return the fileInfo
-      storageService.getFile.mockImplementation(() => Promise.resolve(fileInfo));
+      // Mock pdfService.getPdf to return the fileInfo
+      const pdfService = require('../../services/pdf-service');
+      pdfService.getPdf.mockImplementation(() => Promise.resolve(fileInfo));
 
       // Mock response methods for file download
       res.setHeader = jest.fn();
@@ -804,7 +799,7 @@ describe('Application Controller', () => {
       await applicationController.downloadPermit(req, res, next);
 
       // Assert
-      expect(storageService.getFile).toHaveBeenCalled();
+      expect(pdfService.getPdf).toHaveBeenCalled();
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
       expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename='));
       expect(res.setHeader).toHaveBeenCalledWith('Content-Length', fileBuffer.length);
@@ -829,8 +824,9 @@ describe('Application Controller', () => {
         }]
       });
 
-      // Mock storageService.fileExists to return false (file not found)
-      storageService.fileExists.mockResolvedValue(false);
+      // Mock pdfService.getPdf to throw an error (file not found)
+      const pdfService = require('../../services/pdf-service');
+      pdfService.getPdf.mockRejectedValue(new Error('File not found'));
 
       // Mock response methods
       res.status = jest.fn().mockReturnThis();
@@ -865,12 +861,12 @@ describe('Application Controller', () => {
     beforeEach(() => {
       // Set up request body with valid application data
       req.body = {
-        nombre_completo: 'Test User',
+        nombre_completo: 'Usuario de Prueba',
         curp_rfc: 'TESU123456ABC',
-        domicilio: 'Test Address 123',
+        domicilio: 'Dirección de Prueba 123',
         marca: 'Toyota',
         linea: 'Corolla',
-        color: 'Blue',
+        color: 'Azul',
         numero_serie: 'ABC123456789',
         numero_motor: 'M123456',
         ano_modelo: '2023'
@@ -881,7 +877,7 @@ describe('Application Controller', () => {
       // Arrange
       const validatedData = {
         ...req.body,
-        status: ApplicationStatus.PENDING_PAYMENT
+        status: ApplicationStatus.AWAITING_PAYMENT
       };
 
       const newApplication = {
@@ -897,11 +893,11 @@ describe('Application Controller', () => {
         res.status(201).json({
           application: {
             id: 1,
-            status: ApplicationStatus.PENDING_PAYMENT
+            status: ApplicationStatus.AWAITING_PAYMENT
           },
           paymentInstructions: {
             accountNumber: '123456789',
-            bankName: 'Test Bank'
+            bankName: 'Banco de Prueba'
           }
         });
       });
@@ -914,7 +910,7 @@ describe('Application Controller', () => {
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         application: expect.objectContaining({
           id: 1,
-          status: ApplicationStatus.PENDING_PAYMENT
+          status: ApplicationStatus.AWAITING_PAYMENT
         }),
         paymentInstructions: expect.any(Object)
       }));
@@ -1005,7 +1001,7 @@ describe('Application Controller', () => {
       mockController.mockRestore();
     });
 
-    it('should return 400 for invalid application ID', async () => {
+    it('should return 410 for payment system being updated', async () => {
       // Arrange
       req.params.id = 'invalid-id';
 
@@ -1013,12 +1009,14 @@ describe('Application Controller', () => {
       await applicationController.submitPaymentProof(req, res, next);
 
       // Assert
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid application ID format' });
-      expect(applicationRepository.submitPaymentProof).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(410);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.'
+      });
     });
 
-    it('should return 400 if file is missing', async () => {
+    it('should return 410 for payment system being updated (file missing)', async () => {
       // Arrange
       req.file = undefined;
 
@@ -1026,9 +1024,11 @@ describe('Application Controller', () => {
       await applicationController.submitPaymentProof(req, res, next);
 
       // Assert
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Payment proof file is required' });
-      expect(applicationRepository.submitPaymentProof).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(410);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.'
+      });
     });
 
     it('should successfully submit payment proof without desired start date', async () => {
@@ -1196,7 +1196,7 @@ describe('Application Controller', () => {
 
       // Mock first query to get current status
       db.query.mockResolvedValueOnce({
-        rows: [{ status: ApplicationStatus.PENDING_PAYMENT }]
+        rows: [{ status: ApplicationStatus.AWAITING_PAYMENT }]
       });
 
       // Mock second query to update status
@@ -1239,7 +1239,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: 'User not authenticated.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Usuario no autenticado.' });
       expect(applicationRepository.findByUserId).not.toHaveBeenCalled();
       expect(applicationRepository.findExpiringPermits).not.toHaveBeenCalled();
     });
@@ -1250,7 +1250,7 @@ describe('Application Controller', () => {
         {
           id: 1,
           user_id: 123,
-          status: ApplicationStatus.PENDING_PAYMENT,
+          status: ApplicationStatus.AWAITING_PAYMENT,
           created_at: new Date().toISOString()
         },
         {
@@ -1281,6 +1281,7 @@ describe('Application Controller', () => {
       expect(applicationRepository.findExpiringPermits).toHaveBeenCalledWith(123);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
+        success: true,
         applications: mockApplications,
         expiringPermits: mockExpiringPermits
       });
