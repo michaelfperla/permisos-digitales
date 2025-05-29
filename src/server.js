@@ -224,6 +224,10 @@ app.use('/health', healthRoutes);
 const metricsRoutes = require('./routes/metrics.routes');
 app.use('/metrics', metricsRoutes);
 
+// Mount debug routes (production only)
+const debugRoutes = require('./routes/debug.routes');
+app.use('/debug', debugRoutes);
+
 // Set up Swagger documentation
 const { setupSwagger } = require('./utils/swagger');
 setupSwagger(app);

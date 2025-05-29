@@ -8,9 +8,10 @@ const csrfProtection = csrf({
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Use 'none' in production for cross-origin HTTPS
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Use 'strict' in production for better security
     path: '/',
-    maxAge: 3600 // 1 hour in seconds
+    maxAge: 3600, // 1 hour in seconds
+    domain: process.env.NODE_ENV === 'production' ? '.permisosdigitales.com.mx' : undefined // Share cookies across subdomains in production
   },
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
   value: (req) => {

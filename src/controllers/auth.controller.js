@@ -9,14 +9,21 @@ const config = require('../config');
 const { hashPassword, verifyPassword } = require('../utils/password-utils');
 const { handleControllerError, createError } = require('../utils/error-helpers');
 const ApiResponse = require('../utils/api-response');
+const ProductionDebugger = require('../utils/production-debug');
 
 // --- Registration Function ---
 exports.register = async (req, res, next) => {
   const { email, password, first_name, last_name } = req.body;
+
+  // Log detailed request information for production debugging
+  ProductionDebugger.logRequestDetails(req, 'registration');
+  ProductionDebugger.logRegistrationAttempt(req, { email, first_name, last_name, password });
+
   // Basic Input Validation (consider adding middleware validation for required fields)
   if (!email || !password || !first_name || !last_name) {
     // Example: Add basic check here if not using validation middleware
     logger.warn(`Registration attempt failed: Missing required fields - ${email}`);
+    ProductionDebugger.logError(new Error('Missing required fields'), 'registration_validation', req);
     return ApiResponse.badRequest(res, 'Faltan campos requeridos (correo, contraseña, nombre, apellido).');
   }
 
@@ -32,9 +39,13 @@ exports.register = async (req, res, next) => {
 
     // Check if user exists
     const checkUserQuery = 'SELECT id FROM users WHERE email = $1';
+    ProductionDebugger.logDatabaseOperation('user_check', true, { email, query: 'SELECT id FROM users WHERE email = $1' });
     const { rows: existingUsers } = await db.query(checkUserQuery, [email]);
+    ProductionDebugger.logDatabaseOperation('user_check_result', true, { email, existingUsersCount: existingUsers.length });
+
     if (existingUsers.length > 0) {
       logger.warn(`Registration failed: Email already exists - ${email}`);
+      ProductionDebugger.logDatabaseOperation('registration_failed', false, { email, reason: 'email_exists' });
       await securityService.logActivity(null, 'registration_failed', req.ip, req.headers['user-agent'], { email, reason: 'email_exists' });
       return ApiResponse.conflict(res, 'Ya existe un usuario con este correo electrónico.');
     }
@@ -92,13 +103,18 @@ exports.register = async (req, res, next) => {
     }
 
     // Automatically log in the user after registration
+    ProductionDebugger.logSessionAction(req, 'pre_regenerate', { userId: newUser.id, email: newUser.email });
     req.session.regenerate(err => {
       if (err) {
         logger.error('Error regenerating session after registration:', err);
+        ProductionDebugger.logError(err, 'session_regenerate_registration', req);
         // Avoid calling next(err) if response already sent by error handler upstream potentially
         // Maybe return a generic error if session fails?
         return handleControllerError(err, 'register (session regenerate)', req, res, next); // Delegate error handling
       }
+
+      ProductionDebugger.logSessionAction(req, 'post_regenerate', { userId: newUser.id, email: newUser.email, newSessionId: req.session.id });
+
       // Set session data *after* successful regeneration
       req.session.userId = newUser.id;
       req.session.userEmail = newUser.email;
@@ -106,6 +122,13 @@ exports.register = async (req, res, next) => {
       req.session.userLastName = last_name; // Store consistently
       req.session.accountType = 'client';
       req.session.isAdminPortal = false;
+
+      ProductionDebugger.logSessionAction(req, 'session_data_set', {
+        userId: newUser.id,
+        email: newUser.email,
+        sessionId: req.session.id,
+        accountType: 'client'
+      });
 
       logger.info(`👤 AUTO-LOGIN AFTER REGISTRATION: ${newUser.email} (ID: ${newUser.id}), SessionID: ${req.session.id}`);
       ApiResponse.success(res, {
