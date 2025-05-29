@@ -1,4 +1,3 @@
-// src/controllers/auth.controller.js
 const crypto = require('crypto');
 const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
@@ -11,17 +10,13 @@ const { handleControllerError, createError } = require('../utils/error-helpers')
 const ApiResponse = require('../utils/api-response');
 const ProductionDebugger = require('../utils/production-debug');
 
-// --- Registration Function ---
 exports.register = async (req, res, next) => {
   const { email, password, first_name, last_name } = req.body;
 
-  // Log detailed request information for production debugging
   ProductionDebugger.logRequestDetails(req, 'registration');
   ProductionDebugger.logRegistrationAttempt(req, { email, first_name, last_name, password });
 
-  // Basic Input Validation (consider adding middleware validation for required fields)
   if (!email || !password || !first_name || !last_name) {
-    // Example: Add basic check here if not using validation middleware
     logger.warn(`Registration attempt failed: Missing required fields - ${email}`);
     ProductionDebugger.logError(new Error('Missing required fields'), 'registration_validation', req);
     return ApiResponse.badRequest(res, 'Faltan campos requeridos (correo, contraseña, nombre, apellido).');
@@ -30,14 +25,12 @@ exports.register = async (req, res, next) => {
   try {
     logger.debug(`Registration attempt for email: ${email}`);
 
-    // Check for rate limiting first
-    const isLimited = await securityService.isRateLimitExceeded(req.ip, 'registration', 5, 60 ); // 5 per hour
+    const isLimited = await securityService.isRateLimitExceeded(req.ip, 'registration', 5, 60);
     if (isLimited) {
       await securityService.logActivity(null, 'registration_rate_limited', req.ip, req.headers['user-agent'], { email });
       return ApiResponse.tooManyRequests(res, 'Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.');
     }
 
-    // Check if user exists
     const checkUserQuery = 'SELECT id FROM users WHERE email = $1';
     ProductionDebugger.logDatabaseOperation('user_check', true, { email, query: 'SELECT id FROM users WHERE email = $1' });
     const { rows: existingUsers } = await db.query(checkUserQuery, [email]);
@@ -50,15 +43,12 @@ exports.register = async (req, res, next) => {
       return ApiResponse.conflict(res, 'Ya existe un usuario con este correo electrónico.');
     }
 
-    // Hash password
     logger.debug(`Hashing password for ${email}`);
     const passwordHash = await hashPassword(password);
 
-    // Generate email verification token and expiry
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Insert user with verification data
     const insertUserQuery = `
             INSERT INTO users (
               email, password_hash, first_name, last_name, account_type, role, is_admin_portal, account_created_at,
@@ -80,10 +70,9 @@ exports.register = async (req, res, next) => {
     const newUser = insertedUserRows[0];
     logger.info(`User registered successfully: ${newUser.email} (ID: ${newUser.id})`);
 
-    // Log successful registration activity
     await securityService.logActivity(newUser.id, 'registration_successful', req.ip, req.headers['user-agent'], { email: newUser.email });
 
-    // Send verification email
+    // Send verification email (non-blocking)
     try {
       const verificationUrl = `${config.frontendUrl}/verify-email`;
       const emailSent = await emailService.sendEmailVerificationEmail(
@@ -98,28 +87,24 @@ exports.register = async (req, res, next) => {
         logger.warn(`Failed to send verification email to ${email}`);
       }
     } catch (emailError) {
-      // Log the error but don't fail the registration process
       logger.error(`Error sending verification email to ${email}:`, emailError);
     }
 
-    // Automatically log in the user after registration
+    // Auto-login after successful registration
     ProductionDebugger.logSessionAction(req, 'pre_regenerate', { userId: newUser.id, email: newUser.email });
     req.session.regenerate(err => {
       if (err) {
         logger.error('Error regenerating session after registration:', err);
         ProductionDebugger.logError(err, 'session_regenerate_registration', req);
-        // Avoid calling next(err) if response already sent by error handler upstream potentially
-        // Maybe return a generic error if session fails?
-        return handleControllerError(err, 'register (session regenerate)', req, res, next); // Delegate error handling
+        return handleControllerError(err, 'register (session regenerate)', req, res, next);
       }
 
       ProductionDebugger.logSessionAction(req, 'post_regenerate', { userId: newUser.id, email: newUser.email, newSessionId: req.session.id });
 
-      // Set session data *after* successful regeneration
       req.session.userId = newUser.id;
       req.session.userEmail = newUser.email;
-      req.session.userName = first_name; // Store consistently
-      req.session.userLastName = last_name; // Store consistently
+      req.session.userName = first_name;
+      req.session.userLastName = last_name;
       req.session.accountType = 'client';
       req.session.isAdminPortal = false;
 
@@ -132,35 +117,31 @@ exports.register = async (req, res, next) => {
 
       logger.info(`👤 AUTO-LOGIN AFTER REGISTRATION: ${newUser.email} (ID: ${newUser.id}), SessionID: ${req.session.id}`);
       ApiResponse.success(res, {
-        user: { // Return consistent user object structure
+        user: {
           id: newUser.id,
           email: newUser.email,
           first_name: first_name,
           last_name: last_name,
-          accountType: 'client', // Use camelCase for consistency
+          accountType: 'client',
           is_admin_portal: false,
           created_at: newUser.created_at
         }
       }, 201, 'User registered successfully!');
     });
   } catch (error) {
-    // Catch errors from DB query, password hash etc.
     handleControllerError(error, 'register', req, res, next);
   }
 };
 
-// --- Login Function ---
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Basic validation for required fields
   if (!email) { return ApiResponse.badRequest(res, 'El correo electrónico es requerido'); }
   if (!password) { return ApiResponse.badRequest(res, 'La contraseña es requerida'); }
 
   try {
     logger.debug(`[Login Controller] Login attempt started for email: ${email}`);
 
-    // Check account lockout
     logger.debug(`[Login Controller] Checking account lockout status for email: ${email}`);
     const lockStatus = await authSecurity.checkLockStatus(email);
     logger.debug(`[Login Controller] Lock status for ${email}: ${JSON.stringify(lockStatus)}`);
@@ -168,11 +149,9 @@ exports.login = async (req, res, next) => {
     if (lockStatus.locked) {
       logger.warn(`[Login Controller] Login attempt for locked account: ${email}. Remaining lockout time: ${lockStatus.remainingSeconds} seconds`);
       await securityService.logActivity( null, 'login_account_locked', req.ip, req.headers['user-agent'], { email, remainingSeconds: lockStatus.remainingSeconds });
-      // Return structured error data for frontend if needed
       return ApiResponse.tooManyRequests(res, `Cuenta bloqueada temporalmente. Intente nuevamente en ${lockStatus.remainingSeconds} segundos.`, { locked: true, remainingSeconds: lockStatus.remainingSeconds });
     }
 
-    // Check rate limiting
     logger.debug(`[Login Controller] Checking rate limiting for IP: ${req.ip}`);
     const isLimited = await securityService.isRateLimitExceeded( req.ip, 'failed_login', 5, 15 );
     logger.debug(`[Login Controller] Rate limit check result for IP ${req.ip}: ${isLimited ? 'limited' : 'not limited'}`);
@@ -183,11 +162,9 @@ exports.login = async (req, res, next) => {
       return ApiResponse.tooManyRequests(res, 'Demasiados intentos de inicio de sesión fallidos. Por favor, inténtalo de nuevo más tarde.');
     }
 
-    // Check portal type
     const isAdminPortal = req.get('X-Portal-Type') === 'admin';
     logger.info(`[Login Controller] Login attempt from ${isAdminPortal ? 'ADMIN PORTAL' : 'CLIENT PORTAL'} for user: ${email}`);
 
-    // Get user
     logger.debug(`[Login Controller] Retrieving user data for email: ${email}`);
     const findUserQuery = `
       SELECT id, email, password_hash, first_name, last_name, account_type, role, is_admin_portal,
@@ -215,35 +192,29 @@ exports.login = async (req, res, next) => {
       logger.warn(`[Login Controller] Login attempt failed: User not found for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( null, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'user_not_found' });
-      return ApiResponse.unauthorized(res, 'Invalid email or password.');
+      return ApiResponse.unauthorized(res, 'Correo electrónico o contraseña incorrectos.');
     }
 
     const user = rows[0];
     logger.debug(`[Login Controller] User found for email ${email}: ID=${user.id}, is_email_verified=${user.is_email_verified}, role=${user.role}`);
     logger.debug(`[Login Controller] Password hash exists: ${!!user.password_hash}`);
 
-    // Note: is_active check removed as the column no longer exists in the database
-
-    // Check if email is verified
     logger.debug(`[Login Controller] Checking if email is verified for user ${email}`);
     if (user.is_email_verified === false) {
       logger.warn(`[Login Controller] Login attempt failed: Email ${email} is not verified`);
       await securityService.logActivity(user.id, 'login_unverified_email', req.ip, req.headers['user-agent'], { email });
 
-      // If verification token is expired, generate a new one and send a new verification email
+      // Regenerate verification token if expired
       const now = new Date();
       if (!user.email_verification_expires || now > user.email_verification_expires) {
-        // Generate new token and expiry
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-        // Update user with new token and expiry
         await db.query(
           'UPDATE users SET email_verification_token = $1, email_verification_expires = $2 WHERE id = $3',
           [verificationToken, verificationExpires, user.id]
         );
 
-        // Send new verification email
         try {
           const verificationUrl = `${config.frontendUrl}/verify-email`;
           await emailService.sendEmailVerificationEmail(
@@ -264,12 +235,12 @@ exports.login = async (req, res, next) => {
     if (isAdminPortal && (user.account_type !== 'admin' || user.is_admin_portal !== true)) {
       logger.warn(`Login attempt failed: Account ${email} attempted admin portal access without proper permissions`);
       await securityService.logActivity( user.id, 'unauthorized_portal_access', req.ip, req.headers['user-agent'], { email, attempted_portal: 'admin' });
-      return ApiResponse.forbidden(res, 'Access Denied: Administrator privileges required for this portal.');
+      return ApiResponse.forbidden(res, 'Acceso denegado: Se requieren privilegios de administrador para este portal.');
     }
     if (!isAdminPortal && user.account_type === 'admin') {
       logger.warn(`Login attempt failed: Admin account ${email} attempted client portal access`);
       await securityService.logActivity( user.id, 'unauthorized_portal_access', req.ip, req.headers['user-agent'], { email, attempted_portal: 'client' });
-      return ApiResponse.forbidden(res, 'Access Denied: Admin accounts must use the admin portal.');
+      return ApiResponse.forbidden(res, 'Acceso denegado: Las cuentas de administrador deben usar el portal de administración.');
     }
 
     // Verify password
@@ -288,14 +259,14 @@ exports.login = async (req, res, next) => {
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity(user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'password_verify_error' });
       // Return generic unauthorized for security, don't expose internal error details
-      return ApiResponse.unauthorized(res, 'Authentication error occurred.');
+      return ApiResponse.unauthorized(res, 'Ocurrió un error de autenticación.');
     }
 
     if (!isMatch) {
       logger.warn(`[Login Controller] Login attempt failed: Invalid password for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'invalid_password' });
-      return ApiResponse.unauthorized(res, 'Invalid email or password.');
+      return ApiResponse.unauthorized(res, 'Correo electrónico o contraseña incorrectos.');
     }
 
     logger.debug(`[Login Controller] Password verified successfully for user ${email}`);
@@ -317,7 +288,7 @@ exports.login = async (req, res, next) => {
         });
         // Destroy potentially partially populated session data if regenerate fails
         for (let key in req.session) { if (key !== 'cookie') delete req.session[key]; }
-        return next(createError('Session initialization failed during login.', 500)); // Use createError helper
+        return next(createError('Error al inicializar la sesión durante el inicio de sesión.', 500)); // Use createError helper
       }
 
       logger.debug(`[Login Controller] Session regenerated successfully for user ${email}, new session ID: ${req.session.id}`);
@@ -390,7 +361,7 @@ exports.login = async (req, res, next) => {
             sessionId: req.session.id
           }
         }
-      }, 200, 'Login successful!'); // Consistent message
+      }, 200, '¡Inicio de sesión exitoso!'); // Consistent message
     });
   } catch (error) {
     // Catch errors from DB queries, security checks etc. before regenerate
@@ -422,12 +393,12 @@ exports.logout = (req, res, next) => {
     if (err) {
       logger.error(`Session destruction error for user ID ${userId || 'N/A'}:`, err);
       // Avoid sending response after error passed to next
-      return next(createError('Failed to log out properly.', 500));
+      return next(createError('Error al cerrar sesión correctamente.', 500));
     }
     logger.info(`User logged out successfully: ID ${userId || 'N/A'}`);
     // Ensure cookie is cleared (adjust 'connect.sid' if using different name)
     res.clearCookie('connect.sid', { path: '/' }); // Add path etc. if needed
-    ApiResponse.success(res, null, 200, 'Logout successful.');
+    ApiResponse.success(res, null, 200, 'Cierre de sesión exitoso.');
   });
 };
 
@@ -638,7 +609,7 @@ exports.changePassword = async (req, res, next) => {
   // Check if user is authenticated
   if (!userId) {
     logger.warn('Change password attempt without authentication');
-    return ApiResponse.unauthorized(res, 'You must be logged in to change your password.');
+    return ApiResponse.unauthorized(res, 'Debes iniciar sesión para cambiar tu contraseña.');
   }
 
   const { currentPassword, newPassword } = req.body;
@@ -654,9 +625,9 @@ exports.changePassword = async (req, res, next) => {
 
       // Determine appropriate status code based on the error
       if (result.reason === 'INVALID_CURRENT_PASSWORD') {
-        return ApiResponse.unauthorized(res, result.message || 'Current password is incorrect.');
+        return ApiResponse.unauthorized(res, result.message || 'La contraseña actual es incorrecta.');
       } else {
-        return ApiResponse.badRequest(res, result.message || 'Failed to change password.');
+        return ApiResponse.badRequest(res, result.message || 'Error al cambiar la contraseña.');
       }
     }
 
@@ -670,7 +641,7 @@ exports.changePassword = async (req, res, next) => {
     );
 
     logger.info(`Password changed successfully for user ID: ${userId}`);
-    return ApiResponse.success(res, null, 200, 'Password changed successfully.');
+    return ApiResponse.success(res, null, 200, 'Contraseña cambiada exitosamente.');
   } catch (error) {
     handleControllerError(error, 'changePassword', req, res, next);
   }

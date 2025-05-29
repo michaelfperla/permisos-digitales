@@ -77,7 +77,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle BadRequestError with 400 status', () => {
     // Arrange
-    const error = new BadRequestError('Invalid input', 'INVALID_INPUT');
+    const error = new BadRequestError('Entrada inválida', 'INVALID_INPUT');
 
     // Act
     errorHandler(error, req, res, next);
@@ -88,7 +88,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Invalid input',
+          message: 'Entrada inválida',
           code: 'INVALID_INPUT',
           status: 400
         })
@@ -98,7 +98,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle NotFoundError with 404 status', () => {
     // Arrange
-    const error = new NotFoundError('Resource not found');
+    const error = new NotFoundError('Recurso no encontrado');
 
     // Act
     errorHandler(error, req, res, next);
@@ -109,7 +109,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Resource not found',
+          message: 'Recurso no encontrado',
           status: 404
         })
       })
@@ -119,8 +119,8 @@ describe('Error Handler Middleware', () => {
   it('should handle ValidationError with validation errors', () => {
     // Arrange
     const validationErrors = [
-      { field: 'email', message: 'Invalid email format' },
-      { field: 'password', message: 'Password too short' }
+      { field: 'email', message: 'Formato de correo electrónico inválido' },
+      { field: 'password', message: 'Contraseña muy corta' }
     ];
     const error = new ValidationError('Los datos no son válidos', validationErrors);
 
@@ -143,7 +143,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle generic Error with 500 status', () => {
     // Arrange
-    const error = new Error('Something went wrong');
+    const error = new Error('Algo salió mal');
 
     // Act
     errorHandler(error, req, res, next);
@@ -154,7 +154,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Something went wrong',
+          message: 'Algo salió mal',
           status: 500
         })
       })
@@ -202,7 +202,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle UnauthorizedError with 401 status', () => {
     // Arrange
-    const error = new UnauthorizedError('Authentication required', 'AUTH_REQUIRED');
+    const error = new UnauthorizedError('Autenticación requerida', 'AUTH_REQUIRED');
 
     // Act
     errorHandler(error, req, res, next);
@@ -213,7 +213,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Authentication required',
+          message: 'Autenticación requerida',
           code: 'AUTH_REQUIRED',
           status: 401
         })
@@ -224,7 +224,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle ForbiddenError with 403 status', () => {
     // Arrange
-    const error = new ForbiddenError('Access denied', 'ACCESS_DENIED');
+    const error = new ForbiddenError('Acceso denegado', 'ACCESS_DENIED');
 
     // Act
     errorHandler(error, req, res, next);
@@ -235,7 +235,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Access denied',
+          message: 'Acceso denegado',
           code: 'ACCESS_DENIED',
           status: 403
         })
@@ -245,7 +245,7 @@ describe('Error Handler Middleware', () => {
 
   it('should handle ConflictError with 409 status', () => {
     // Arrange
-    const error = new ConflictError('Resource already exists', 'DUPLICATE_RESOURCE');
+    const error = new ConflictError('El recurso ya existe', 'DUPLICATE_RESOURCE');
 
     // Act
     errorHandler(error, req, res, next);
@@ -256,7 +256,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Resource already exists',
+          message: 'El recurso ya existe',
           code: 'DUPLICATE_RESOURCE',
           status: 409
         })
@@ -268,7 +268,7 @@ describe('Error Handler Middleware', () => {
     // Arrange
     const originalError = new Error('Database connection failed');
     originalError.code = 'ECONNREFUSED';
-    const error = new DatabaseError('Database error', originalError, 'DB_ERROR');
+    const error = new DatabaseError('Error de base de datos', originalError, 'DB_ERROR');
 
     // Act
     errorHandler(error, req, res, next);
@@ -279,7 +279,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Database error',
+          message: 'Error de base de datos',
           code: 'DB_ERROR',
           status: 500
         })

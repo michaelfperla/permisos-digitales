@@ -106,14 +106,14 @@ describe('Auth Controller', () => {
     it('should return 400 if email is missing', async () => {
       req.body = { password: 'password123' };
       await authController.login(req, res, next);
-      expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, 'Email is required');
+      expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, 'El correo electrónico es requerido');
       expect(res.locals.statusCode).toBe(400);
     });
 
     it('should return 400 if password is missing', async () => {
       req.body = { email: 'test@example.com' };
       await authController.login(req, res, next);
-      expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, 'Password is required');
+      expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, 'La contraseña es requerida');
       expect(res.locals.statusCode).toBe(400);
     });
 
@@ -227,10 +227,10 @@ describe('Auth Controller', () => {
     it('should return 400 if required fields are missing', async () => {
       // Test cases for missing fields
       const testCases = [
-        { body: { password: 'p', first_name: 'f', last_name: 'l' }, message: 'Missing required fields' }, // Missing email
-        { body: { email: 'e@e.com', first_name: 'f', last_name: 'l' }, message: 'Missing required fields' }, // Missing password
-        { body: { email: 'e@e.com', password: 'p', last_name: 'l' }, message: 'Missing required fields' }, // Missing first_name
-        { body: { email: 'e@e.com', password: 'p', first_name: 'f' }, message: 'Missing required fields' }, // Missing last_name
+        { body: { password: 'p', first_name: 'f', last_name: 'l' }, message: 'Faltan campos requeridos' }, // Missing email
+        { body: { email: 'e@e.com', first_name: 'f', last_name: 'l' }, message: 'Faltan campos requeridos' }, // Missing password
+        { body: { email: 'e@e.com', password: 'p', last_name: 'l' }, message: 'Faltan campos requeridos' }, // Missing first_name
+        { body: { email: 'e@e.com', password: 'p', first_name: 'f' }, message: 'Faltan campos requeridos' }, // Missing last_name
       ];
 
       // Add check to controller if not present:
@@ -245,7 +245,7 @@ describe('Auth Controller', () => {
         await authController.register(req, res, next);
         // Check that badRequest was called (assuming controller adds this validation)
         // If validation is only in middleware, this test needs adjusting or the controller needs the check
-        expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, expect.stringContaining('Missing required fields'));
+        expect(ApiResponse.badRequest).toHaveBeenCalledWith(res, expect.stringContaining('Faltan campos requeridos'));
         expect(res.locals.statusCode).toBe(400); // Check status set by mock
       }
     });
@@ -254,7 +254,7 @@ describe('Auth Controller', () => {
       req.body = { email: 'existing@example.com', password: 'password123', first_name: 'Existing', last_name: 'User' };
       db.query.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // User exists
       await authController.register(req, res, next);
-      expect(ApiResponse.conflict).toHaveBeenCalledWith(res, expect.stringContaining('already exists'));
+      expect(ApiResponse.conflict).toHaveBeenCalledWith(res, expect.stringContaining('Ya existe un usuario'));
     });
 
     // --- FIXED: REGISTRATION SUCCESS TEST ---

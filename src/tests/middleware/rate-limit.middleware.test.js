@@ -43,7 +43,7 @@ describe('Rate Limit Middleware', () => {
 
     // Add a test route
     app.get('/limited', (req, res) => {
-      res.status(200).json({ message: 'Success' });
+      res.status(200).json({ message: 'Éxito' });
     });
 
     // Add error handler

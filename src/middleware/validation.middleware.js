@@ -1,13 +1,6 @@
-// src/middleware/validation.middleware.js
 const { validationResult } = require('express-validator');
 const { logger } = require('../utils/enhanced-logger');
 
-/**
- * Middleware to handle validation errors from express-validator
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next function
- */
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -20,12 +13,6 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-/**
- * Middleware to validate application ID parameter
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next function
- */
 const validateApplicationId = (req, res, next) => {
   const { applicationId } = req.params;
 

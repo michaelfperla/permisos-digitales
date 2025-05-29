@@ -173,7 +173,7 @@ const AdminLayout: React.FC = () => {
             onClick={handleNavLinkClick}
           >
             <Icon IconComponent={FaTachometerAlt} className={styles.navIcon} />
-            <span className={styles.navText}>Dashboard</span>
+            <span className={styles.navText}>Panel de Control</span>
           </NavLink>
 
           <NavLink

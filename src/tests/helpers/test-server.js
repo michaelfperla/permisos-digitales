@@ -186,7 +186,7 @@ jest.mock('../../middleware/csrf.middleware', () => {
     },
     handleCsrfError: (err, req, res, next) => {
       if (err.code === 'EBADCSRFTOKEN') {
-        return res.status(403).json({ message: 'Invalid CSRF token' });
+        return res.status(403).json({ message: 'Token CSRF inválido' });
       }
       next(err);
     }

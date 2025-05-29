@@ -9,12 +9,6 @@ class ApplicationRepository extends BaseRepository {
     super('permit_applications', 'id');
   }
 
-  /**
-   * Find applications with pagination and filtering
-   * @param {Object} filters - Filter criteria (status, startDate, endDate, searchTerm)
-   * @param {Object} pagination - Pagination options (page, limit)
-   * @returns {Promise<{applications: Array, total: number, page: number, limit: number, totalPages: number}>} - Paginated applications
-   */
   async findApplicationsWithPagination(filters = {}, pagination = {}) {
     const { status, startDate, endDate, searchTerm } = filters;
     const { page = 1, limit = 10 } = pagination;
@@ -22,7 +16,6 @@ class ApplicationRepository extends BaseRepository {
     const offset = (page - 1) * limit;
     const params = [];
 
-    // Build base query
     let countQuery = `
       SELECT COUNT(*)
       FROM permit_applications pa
@@ -39,7 +32,6 @@ class ApplicationRepository extends BaseRepository {
       WHERE 1=1
     `;
 
-    // Add filters if provided
     if (status) {
       params.push(status);
       query += ` AND pa.status = $${params.length}`;
@@ -72,21 +64,17 @@ class ApplicationRepository extends BaseRepository {
       countQuery += searchCondition;
     }
 
-    // Add order by
     query += ' ORDER BY pa.created_at DESC';
 
-    // Add pagination
     const queryParams = [...params];
     queryParams.push(limit);
     queryParams.push(offset);
     query += ` LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}`;
 
     try {
-      // Get total count
       const countResult = await db.query(countQuery, params);
       const total = parseInt(countResult.rows[0].count, 10);
 
-      // Get paginated applications
       const { rows } = await db.query(query, queryParams);
 
       return {
@@ -102,11 +90,6 @@ class ApplicationRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find applications by user ID
-   * @param {number} userId - User ID to find applications for
-   * @returns {Promise<Array>} - Array of applications for the user
-   */
   async findByUserId(userId) {
     try {
       const query = `
@@ -146,14 +129,8 @@ class ApplicationRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find expiring permits for a user
-   * @param {number} userId - User ID to find expiring permits for
-   * @returns {Promise<Array>} - Array of expiring permits for the user
-   */
   async findExpiringPermits(userId) {
     try {
-      // Find permits that are expiring within 30 days
       const query = `
         SELECT
           id,
@@ -183,13 +160,8 @@ class ApplicationRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Get dashboard statistics
-   * @returns {Promise<Object>} - Dashboard statistics
-   */
   async getDashboardStats() {
     try {
-      // Get status counts
       const statusQuery = `
         SELECT status, COUNT(*) as count
         FROM permit_applications
@@ -197,7 +169,6 @@ class ApplicationRepository extends BaseRepository {
       `;
       const statusResults = await db.query(statusQuery);
 
-      // Get pending verifications count - using AWAITING_OXXO_PAYMENT status
       const pendingQuery = `
         SELECT COUNT(*) as count
         FROM permit_applications

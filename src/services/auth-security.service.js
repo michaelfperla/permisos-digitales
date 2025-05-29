@@ -232,7 +232,7 @@ async function changePassword(userId, currentPassword, newPassword) {
       logger.warn(`User not found for ID: ${userId}`);
       return {
         success: false,
-        message: 'User not found.',
+        message: 'Usuario no encontrado.',
         reason: 'USER_NOT_FOUND'
       };
     }
@@ -244,7 +244,7 @@ async function changePassword(userId, currentPassword, newPassword) {
       logger.warn(`Invalid current password for user ID: ${userId}`);
       return {
         success: false,
-        message: 'Current password is incorrect.',
+        message: 'La contraseña actual es incorrecta.',
         reason: 'INVALID_CURRENT_PASSWORD'
       };
     }
@@ -259,7 +259,7 @@ async function changePassword(userId, currentPassword, newPassword) {
       logger.error(`Failed to update password for user ID: ${userId}`);
       return {
         success: false,
-        message: 'Failed to update password.',
+        message: 'Error al actualizar la contraseña.',
         reason: 'UPDATE_FAILED'
       };
     }
@@ -267,13 +267,13 @@ async function changePassword(userId, currentPassword, newPassword) {
     logger.info(`Password changed successfully for user ID: ${userId}`);
     return {
       success: true,
-      message: 'Password changed successfully.'
+      message: 'Contraseña cambiada exitosamente.'
     };
   } catch (error) {
     logger.error(`Error changing password for user ID: ${userId}:`, error);
     return {
       success: false,
-      message: 'An error occurred while changing the password.',
+      message: 'Ocurrió un error al cambiar la contraseña.',
       reason: 'INTERNAL_ERROR'
     };
   }

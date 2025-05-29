@@ -1,7 +1,3 @@
-/**
- * User Repository
- * Handles database operations for users
- */
 const BaseRepository = require('./base.repository');
 const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
@@ -11,11 +7,6 @@ class UserRepository extends BaseRepository {
     super('users');
   }
 
-  /**
-   * Find a user by email
-   * @param {string} email - User email
-   * @returns {Promise<Object|null>} - User object or null
-   */
   async findByEmail(email) {
     logger.debug(`[User Repository] findByEmail called for email: ${email}`);
     const query = 'SELECT * FROM users WHERE email = $1';
@@ -32,7 +23,6 @@ class UserRepository extends BaseRepository {
         const user = result.rows[0];
         logger.debug(`[User Repository] User found with ID: ${user.id}`);
 
-        // Verify presence of critical fields
         const criticalFields = ['id', 'password_hash', 'is_email_verified', 'role'];
         const missingFields = criticalFields.filter(field => user[field] === undefined);
 
@@ -58,12 +48,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find users with pagination and filtering
-   * @param {Object} filters - Filter criteria (role, search)
-   * @param {Object} pagination - Pagination options (page, limit)
-   * @returns {Promise<{users: Array, total: number, page: number, limit: number, totalPages: number}>} - Paginated users
-   */
   async findUsersWithPagination(filters = {}, pagination = {}) {
     const { role, search } = filters;
     const { page = 1, limit = 10 } = pagination;
@@ -71,7 +55,6 @@ class UserRepository extends BaseRepository {
     const offset = (page - 1) * limit;
     const params = [];
 
-    // Build base query
     let countQuery = 'SELECT COUNT(*) FROM users WHERE 1=1';
     let query = `
       SELECT id, email, first_name, last_name, account_type, is_admin_portal, created_at, updated_at
@@ -79,7 +62,6 @@ class UserRepository extends BaseRepository {
       WHERE 1=1
     `;
 
-    // Add role filter if provided
     if (role) {
       params.push(role);
       const paramIndex = params.length;
@@ -87,7 +69,6 @@ class UserRepository extends BaseRepository {
       countQuery += ` AND account_type = $${paramIndex}`;
     }
 
-    // Add search filter if provided
     if (search) {
       params.push(`%${search}%`);
       const paramIndex = params.length;
@@ -103,20 +84,16 @@ class UserRepository extends BaseRepository {
       )`;
     }
 
-    // Add order by
     query += ' ORDER BY created_at DESC';
 
-    // Add pagination
     params.push(limit);
     params.push(offset);
     query += ` LIMIT $${params.length - 1} OFFSET $${params.length}`;
 
     try {
-      // Get total count
       const countResult = await db.query(countQuery, params.slice(0, -2));
       const total = parseInt(countResult.rows[0].count, 10);
 
-      // Get paginated users
       const { rows } = await db.query(query, params);
 
       return {
@@ -132,11 +109,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Create a new user
-   * @param {Object} userData - User data
-   * @returns {Promise<Object>} - Created user
-   */
   async createUser(userData) {
     const { email, password_hash, first_name, last_name, account_type = 'client', created_by = null, is_admin_portal = false } = userData;
 
@@ -164,12 +136,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Update user password
-   * @param {number} userId - User ID
-   * @param {string} passwordHash - New password hash
-   * @returns {Promise<boolean>} - True if updated successfully
-   */
   async updatePassword(userId, passwordHash) {
     const query = `
       UPDATE users
@@ -187,21 +153,10 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find admin users
-   * @param {Object} options - Query options
-   * @returns {Promise<Array>} - Array of admin users
-   */
   async findAdmins(options = {}) {
     return this.findAll({ account_type: 'admin' }, options);
   }
 
-  /**
-   * Get user security events
-   * @param {number} userId - User ID
-   * @param {number} limit - Maximum number of events to return
-   * @returns {Promise<Array>} - Array of security events
-   */
   async getSecurityEvents(userId, limit = 10) {
     const query = `
       SELECT id, action_type, ip_address, user_agent, details, created_at
@@ -220,11 +175,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Check if email exists
-   * @param {string} email - Email to check
-   * @returns {Promise<boolean>} - True if email exists
-   */
   async emailExists(email) {
     const query = 'SELECT 1 FROM users WHERE email = $1';
 
@@ -237,11 +187,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Get detailed user information by ID
-   * @param {number} userId - User ID
-   * @returns {Promise<Object|null>} - User object or null
-   */
   async getUserDetails(userId) {
     const query = `
       SELECT
@@ -262,7 +207,6 @@ class UserRepository extends BaseRepository {
         return null;
       }
 
-      // Get recent security events
       const securityEvents = await this.getSecurityEvents(userId, 5);
 
       return {
@@ -275,13 +219,6 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Set user active status
-   * Note: This method is deprecated as the is_active column no longer exists
-   * @param {number} userId - User ID
-   * @param {boolean} isActive - Active status to set
-   * @returns {Promise<boolean>} - Always returns true for backward compatibility
-   */
   async setUserStatus(userId, isActive) {
     logger.warn(`setUserStatus called for user ${userId} but is_active column no longer exists`);
     return true;

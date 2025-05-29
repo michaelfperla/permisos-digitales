@@ -1,9 +1,7 @@
-// src/controllers/admin.controller.js
 const { logger } = require('../utils/enhanced-logger');
 const ApiResponse = require('../utils/api-response');
 const applicationRepository = require('../repositories/application.repository');
 
-// Temporary replacement function for getPaymentProof
 exports.getPaymentProof = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
   const adminId = req.session.userId;
@@ -13,7 +11,6 @@ exports.getPaymentProof = async (req, res, next) => {
   return ApiResponse.error(res, 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.', 410);
 };
 
-// Temporary replacement function for rejectPayment
 exports.rejectPayment = async (req, res, next) => {
   const adminId = req.session.userId;
   const applicationId = parseInt(req.params.id, 10);
@@ -23,7 +20,6 @@ exports.rejectPayment = async (req, res, next) => {
   return ApiResponse.error(res, 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.', 410);
 };
 
-// Temporary replacement function for servePaymentProofFile
 exports.servePaymentProofFile = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
   const adminId = req.session.userId;
@@ -33,9 +29,6 @@ exports.servePaymentProofFile = async (req, res, next) => {
   return ApiResponse.error(res, 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.', 410);
 };
 
-
-
-// Temporary replacement function for getPaymentProofDetails
 exports.getPaymentProofDetails = async (req, res) => {
   const applicationId = parseInt(req.params.id, 10);
   const adminId = req.session.userId;
@@ -45,11 +38,6 @@ exports.getPaymentProofDetails = async (req, res) => {
   return ApiResponse.error(res, 'El sistema de pagos está siendo actualizado para usar un proveedor de pagos externo. Esta funcionalidad ya no está disponible.', 410);
 };
 
-
-
-/**
- * Get dashboard statistics
- */
 exports.getDashboardStats = async (req, res) => {
   try {
     const adminId = req.session.userId;
@@ -64,9 +52,6 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-/**
- * Get all applications with filtering and pagination
- */
 exports.getAllApplications = async (req, res) => {
   try {
     const adminId = req.session.userId;
@@ -94,9 +79,6 @@ exports.getAllApplications = async (req, res) => {
   }
 };
 
-/**
- * Get application details by ID
- */
 exports.getApplicationDetails = async (req, res) => {
   try {
     const adminId = req.session.userId;

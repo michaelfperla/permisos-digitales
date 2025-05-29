@@ -75,7 +75,7 @@ const IconExample: React.FC = () => {
           </div>
           <div>
             <Icon IconComponent={FaCheckCircle} color="var(--color-success)" size="lg" />
-            <span style={{ marginLeft: '8px' }}>Success</span>
+            <span style={{ marginLeft: '8px' }}>Éxito</span>
           </div>
           <div>
             <Icon IconComponent={FaExclamationTriangle} color="var(--color-warning)" size="lg" />

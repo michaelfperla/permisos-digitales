@@ -1,4 +1,3 @@
-// src/controllers/application.controller.js
 const path = require('path');
 const puppeteerService = require('../services/puppeteer.service');
 const paymentService = require('../services/payment.service');
@@ -10,32 +9,27 @@ const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants');
 const { applicationRepository, paymentRepository } = require('../repositories');
 const db = require('../db');
 
-// --- CREATE APPLICATION FUNCTION ---
 exports.createApplication = async (req, res, next) => {
   const userId = req.session.userId;
-  // Extract form fields with consistent naming aligned with our DB schema
   const {
     nombre_completo,
     curp_rfc,
     domicilio,
     marca,
-    linea,        // This matches the DB schema field name
+    linea,
     color,
     numero_serie,
     numero_motor,
     ano_modelo,
-    payment_token,  // Field for Conekta payment token (card payment)
-    payment_method, // Field to specify payment method ('card' or 'oxxo')
-    device_session_id, // Device session ID for fraud prevention
-    email           // Customer email (may be needed for OXXO payments)
+    payment_token,
+    payment_method,
+    device_session_id,
+    email
   } = req.body;
-    // Validation handled by middleware
 
   try {
     logger.info(`Creating new application for user ID: ${userId}`);
 
-    // Enhanced validation with stronger defaults and logging
-    // Ensure all values are stringified and never undefined
     const validatedData = {
       nombre_completo: nombre_completo ? String(nombre_completo).trim() : 'No especificado',
       curp_rfc: curp_rfc ? String(curp_rfc).trim() : 'No especificado',
@@ -46,22 +40,19 @@ exports.createApplication = async (req, res, next) => {
       numero_serie: numero_serie ? String(numero_serie).trim().toUpperCase() : '',
       numero_motor: numero_motor ? String(numero_motor).trim() : 'No especificado',
       ano_modelo: ano_modelo || new Date().getFullYear(),
-      status: ApplicationStatus.AWAITING_PAYMENT // Default status, will be updated if payment is successful
+      status: ApplicationStatus.AWAITING_PAYMENT
     };
 
-    // Extra validation check for VIN/serial number
     if (!validatedData.numero_serie || validatedData.numero_serie.length < 5 || validatedData.numero_serie.length > 50) {
       logger.warn(`Invalid VIN/serial number detected: ${validatedData.numero_serie}`);
       throw new Error('El número de serie debe tener entre 5 y 50 caracteres');
     }
 
-    // Check if the serial number contains only alphanumeric characters
     if (!/^[A-Z0-9]+$/i.test(validatedData.numero_serie)) {
       logger.warn(`Invalid characters in VIN/serial number: ${validatedData.numero_serie}`);
       throw new Error('El número de serie solo debe contener letras y números');
     }
 
-    // Double check that values are never undefined
     Object.keys(validatedData).forEach(key => {
       if (validatedData[key] === undefined) {
         logger.warn(`Found undefined value for ${key}, replacing with default`);
@@ -69,14 +60,11 @@ exports.createApplication = async (req, res, next) => {
       }
     });
 
-    // Log the validated data for debugging
     logger.debug('Validated application data:', validatedData);
 
-    // Define payment amount and currency
-    const amount = DEFAULT_PERMIT_FEE; // Correct permit fee from constants
-    const currency = 'MXN'; // Currency code (as a STRING)
+    const amount = DEFAULT_PERMIT_FEE;
+    const currency = 'MXN';
 
-    // Determine payment method
     const paymentMethodType = payment_method ? payment_method.toLowerCase() : 'card';
     logger.info(`Payment method for application by user ${userId}: ${paymentMethodType}`);
 
@@ -98,7 +86,7 @@ exports.createApplication = async (req, res, next) => {
 
           if (userRows.length === 0) {
             logger.error(`User ${userId} not found in database`);
-            throw new Error('User not found');
+            throw new Error('Usuario no encontrado');
           }
 
           const user = userRows[0];
@@ -106,15 +94,12 @@ exports.createApplication = async (req, res, next) => {
           userName = userName || `${user.first_name} ${user.last_name}`;
         }
 
-        // Create customer in payment provider
         const customer = await paymentService.createCustomer({
           name: userName,
           email: userEmail,
           phone: ''
         });
 
-        // Create application with AWAITING_OXXO_PAYMENT status
-        // Ensure we have a valid status constant - use a hardcoded fallback if needed
         const initialStatus = ApplicationStatus.AWAITING_OXXO_PAYMENT || 'AWAITING_OXXO_PAYMENT';
 
         const applicationData = {
@@ -128,30 +113,25 @@ exports.createApplication = async (req, res, next) => {
           numero_serie: String(validatedData.numero_serie || ''),
           numero_motor: String(validatedData.numero_motor || ''),
           ano_modelo: Number(validatedData.ano_modelo || 0),
-          status: initialStatus, // Use the validated status value
+          status: initialStatus,
           importe: Number(amount || 0)
         };
 
-        // Log the application data before creating the record to verify status is set
         logger.debug('Creating application with OXXO payment data:', {
           ...applicationData,
-          status: applicationData.status // Explicitly log the status field
+          status: applicationData.status
         });
 
-        // Defensive check - ensure status is never undefined or null before creating the record
         if (!applicationData.status || applicationData.status === 'undefined') {
           logger.warn('Status field is missing or invalid for OXXO payment, setting to AWAITING_OXXO_PAYMENT as fallback');
-          applicationData.status = 'AWAITING_OXXO_PAYMENT'; // Hardcoded fallback
+          applicationData.status = 'AWAITING_OXXO_PAYMENT';
         }
 
-        // Final verification of status value immediately before repository call
         logger.debug('Status value immediately before repository create for OXXO payment:', applicationData.status);
 
-        // Create the application
         const newApplication = await applicationRepository.create(applicationData);
         logger.info(`New application created with ID: ${newApplication.id} for user ${userId} with OXXO payment pending`);
 
-        // Prepare payment data
         const paymentData = {
           customerId: customer.id,
           amount: amount,
@@ -160,17 +140,13 @@ exports.createApplication = async (req, res, next) => {
           referenceId: `APP-${newApplication.id}`
         };
 
-        // Add device_session_id if provided (clone to avoid circular references)
         if (device_session_id) {
-          // Create a new string to avoid any reference to the original object
           paymentData.device_session_id = String(device_session_id).slice(0);
           logger.debug(`Using device fingerprint for OXXO payment: ${paymentData.device_session_id}`);
         }
 
-        // Create OXXO order
         const paymentResult = await paymentService.processOxxoPayment(paymentData);
 
-        // Update application with payment information and OXXO reference
         await paymentRepository.updatePaymentOrder(
           newApplication.id,
           paymentResult.orderId,
@@ -178,7 +154,6 @@ exports.createApplication = async (req, res, next) => {
           { oxxoReference: paymentResult.oxxoReference }
         );
 
-        // Log payment event
         await paymentRepository.logPaymentEvent({
           applicationId: newApplication.id,
           orderId: paymentResult.orderId,
@@ -186,7 +161,6 @@ exports.createApplication = async (req, res, next) => {
           eventData: paymentResult
         });
 
-        // Return success response with OXXO payment details
         return res.status(201).json({
           success: true,
           application: {
@@ -213,7 +187,6 @@ exports.createApplication = async (req, res, next) => {
         });
       } catch (oxxoError) {
         logger.error(`OXXO payment processing error for user ${userId}:`, oxxoError);
-        // Return error response without creating application
         return res.status(400).json({
           success: false,
           message: `Error en el procesamiento del pago OXXO: ${oxxoError.message}`,
@@ -221,7 +194,6 @@ exports.createApplication = async (req, res, next) => {
         });
       }
     } else if (payment_token) {
-      // Card payment flow
       logger.info(`Card payment token provided for application by user ${userId}`);
 
       // Get user email for payment processing
@@ -232,7 +204,7 @@ exports.createApplication = async (req, res, next) => {
 
       if (userRows.length === 0) {
         logger.error(`User ${userId} not found in database`);
-        throw new Error('User not found');
+        throw new Error('Usuario no encontrado');
       }
 
       const user = userRows[0];
@@ -240,10 +212,6 @@ exports.createApplication = async (req, res, next) => {
       const userName = `${user.first_name} ${user.last_name}`;
 
       try {
-        // Create application first using repository with initial status
-        // Use primitive values to avoid circular references
-
-        // Ensure we have a valid status constant - use a hardcoded fallback if needed
         const initialStatus = ApplicationStatus.PROCESSING_PAYMENT || 'PROCESSING_PAYMENT';
 
         const applicationData = {
@@ -257,45 +225,38 @@ exports.createApplication = async (req, res, next) => {
           numero_serie: String(validatedData.numero_serie || ''),
           numero_motor: String(validatedData.numero_motor || ''),
           ano_modelo: Number(validatedData.ano_modelo || 0),
-          status: initialStatus, // Use the validated status value
+          status: initialStatus,
           importe: Number(amount || 0)
         };
 
-        // Log the application data before creating the record to verify status is set
         logger.debug('Creating application with data:', {
           ...applicationData,
-          status: applicationData.status // Explicitly log the status field
+          status: applicationData.status
         });
 
-        // Defensive check - ensure status is never undefined or null before creating the record
         if (!applicationData.status || applicationData.status === 'undefined') {
           logger.warn('Status field is missing or invalid, setting to AWAITING_PAYMENT as fallback');
-          applicationData.status = 'AWAITING_PAYMENT'; // Hardcoded fallback
+          applicationData.status = 'AWAITING_PAYMENT';
         }
 
-        // Final verification of status value immediately before repository call
         logger.debug('Status value immediately before repository create:', applicationData.status);
 
-        // Create the application first to get the integer ID
         const newApplication = await applicationRepository.create(applicationData);
         logger.info(`New application created with ID: ${newApplication.id} for user ${userId}, proceeding to payment`);
 
-        // Now prepare payment data with the actual application ID
         const paymentData = {
           token: payment_token,
           name: validatedData.nombre_completo || userName,
-          email: userEmail || email, // Use email from request if available
-          phone: '+525555555555', // Default phone number in Mexico format (required by Conekta)
+          email: userEmail || email,
+          phone: '+525555555555',
           amount: amount,
           currency: currency,
           description: `Permiso de Circulación - ${validatedData.marca} ${validatedData.linea} ${validatedData.ano_modelo}`,
-          referenceId: `APP-${newApplication.id}`, // Use the actual application ID
-          applicationId: newApplication.id // Pass the integer application ID directly
+          referenceId: `APP-${newApplication.id}`,
+          applicationId: newApplication.id
         };
 
-        // Add device_session_id if provided (clone to avoid circular references)
         if (device_session_id) {
-          // Create a new string to avoid any reference to the original object
           paymentData.device_session_id = String(device_session_id).slice(0);
           logger.debug(`Using device fingerprint for card payment: ${paymentData.device_session_id}`);
         }
@@ -529,57 +490,49 @@ exports.createApplication = async (req, res, next) => {
         importe: Number(DEFAULT_PERMIT_FEE || 0)
       };
 
-      // Log the application data for debugging
       logger.debug('Creating application with data:', {
         ...applicationData,
-        status: applicationData.status // Explicitly log the status field
+        status: applicationData.status
       });
 
-      // Defensive check - ensure status is never undefined or null before creating the record
       if (!applicationData.status || applicationData.status === 'undefined') {
         logger.warn('Status field is missing or invalid, setting to AWAITING_PAYMENT as fallback');
-        applicationData.status = 'AWAITING_PAYMENT'; // Hardcoded fallback
+        applicationData.status = 'AWAITING_PAYMENT';
       }
 
-      // Final verification of status value immediately before repository call
       logger.debug('Status value immediately before repository create:', applicationData.status);
 
       const newApplication = await applicationRepository.create(applicationData);
       logger.info(`New application created with ID: ${newApplication.id} for user ID: ${userId}`);
 
-      // Define payment details
-      const reference = `APP-${newApplication.id}`; // Use the actual ID of the created application
-      const methods = [ // Define the payment methods array
+      const reference = `APP-${newApplication.id}`;
+      const methods = [
         {
-          type: 'Transferencia Bancaria', // Use consistent keys like 'type' and 'details'
-          details: `Transferencia a la cuenta XXXX-XXXX-XXXX-XXXX (CLABE: XXXXXXXXXXXXXXXXXXXX) del banco Nombre del Banco a nombre de Nombre de la Compañía. Referencia: ${reference}` // Example detail string
+          type: 'Transferencia Bancaria',
+          details: `Transferencia a la cuenta XXXX-XXXX-XXXX-XXXX (CLABE: XXXXXXXXXXXXXXXXXXXX) del banco Nombre del Banco a nombre de Nombre de la Compañía. Referencia: ${reference}`
         },
         {
           type: 'Depósito en Efectivo',
-          details: `Depósito en efectivo en la cuenta XXXX-XXXX-XXXX-XXXX del banco Nombre del Banco a nombre de Nombre de la Compañía. Referencia: ${reference}` // Example detail string
+          details: `Depósito en efectivo en la cuenta XXXX-XXXX-XXXX-XXXX del banco Nombre del Banco a nombre de Nombre de la Compañía. Referencia: ${reference}`
         }
       ];
-      // Construct the detailed next steps message
       const steps = `Después de realizar tu pago, regresa a la solicitud en tu dashboard y haz clic en "Subir Comprobante" para enviar evidencia de tu pago. Por favor, incluye tu ID de solicitud (${reference}) en la referencia del pago.`;
 
-
-      // Construct the final JSON response matching API.md structure
       const responseBody = {
-        application: { // Nested application object
+        application: {
           id: newApplication.id,
-          status: newApplication.status, // Ensure status is correctly set on newApplication
-          created_at: newApplication.created_at // Ensure created_at is correctly set
+          status: newApplication.status,
+          created_at: newApplication.created_at
         },
-        paymentInstructions: { // Nested paymentInstructions object
-          amount: amount,       // Send number
-          currency: currency,   // Send string
-          reference: reference, // Send generated reference
-          paymentMethods: methods, // Send the array of methods
-          nextSteps: steps      // Send the detailed steps
+        paymentInstructions: {
+          amount: amount,
+          currency: currency,
+          reference: reference,
+          paymentMethods: methods,
+          nextSteps: steps
         }
       };
 
-      // Send the correctly structured response
       logger.info(`Sending 201 response for application ${newApplication.id} with correct structure.`);
       res.status(201).json(responseBody);
     }
@@ -596,21 +549,16 @@ exports.createApplication = async (req, res, next) => {
   }
 };
 
-// --- GET USER APPLICATIONS ---
 exports.getUserApplications = async (req, res, next) => {
   const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ message: 'Usuario no autenticado.' }); // Should be caught by middleware
+  if (!userId) return res.status(401).json({ message: 'Usuario no autenticado.' });
 
   try {
     logger.debug(`Fetching applications for user ID: ${userId}`);
 
-    // Get regular applications using repository
     const applications = await applicationRepository.findByUserId(userId);
-
-    // Get expiring permits using repository
     const expiringPermits = await applicationRepository.findExpiringPermits(userId);
 
-    // Return in the format expected by the frontend
     res.status(200).json({
       success: true,
       applications: applications,
@@ -621,24 +569,21 @@ exports.getUserApplications = async (req, res, next) => {
   }
 };
 
-// Get status information with detailed next steps
 exports.getApplicationStatus = async (req, res, next) => {
   const userId = req.session.userId;
   const applicationId = parseInt(req.params.id, 10);
 
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid application ID format' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido' });
   }
 
   try {
     logger.debug(`Fetching status for application ID: ${applicationId}, user: ${userId}`);
 
-    // Find application by ID and user ID using repository
     let application;
     try {
       application = await applicationRepository.findById(applicationId);
 
-      // Log the application object for debugging
       logger.debug(`Application ${applicationId} data:`, {
         id: application?.id,
         user_id: application?.user_id,
@@ -664,10 +609,8 @@ exports.getApplicationStatus = async (req, res, next) => {
       return res.status(403).json({ message: 'You do not have permission to access this application' });
     }
 
-    // Ensure application.status is valid and never undefined
     if (!application.status || application.status === 'undefined') {
       logger.warn(`Application ${applicationId} has invalid status: ${application.status}`);
-      // Update application with a valid status if it's invalid
       await applicationRepository.updateStatus(applicationId, ApplicationStatus.AWAITING_PAYMENT);
       application.status = ApplicationStatus.AWAITING_PAYMENT;
     }
@@ -682,7 +625,6 @@ exports.getApplicationStatus = async (req, res, next) => {
 
     switch (application.status) {
     case ApplicationStatus.AWAITING_PAYMENT:
-      // Check if this is a pending Conekta payment or just waiting for payment
       if (application.payment_processor_order_id) {
         statusInfo.displayMessage = 'Su pago está siendo procesado';
         statusInfo.nextSteps = 'El pago está siendo procesado por el banco. Esto puede tomar unos minutos. La página se actualizará automáticamente cuando el pago sea confirmado.';
@@ -703,8 +645,6 @@ exports.getApplicationStatus = async (req, res, next) => {
       statusInfo.nextSteps = 'Por favor realice el pago en OXXO con la referencia proporcionada. Una vez procesado, su permiso será generado automáticamente.';
       statusInfo.allowedActions = ['viewOxxoDetails'];
       break;
-    // Map obsolete statuses to default case
-    // These cases are kept for backward compatibility with existing data
     case 'PROOF_SUBMITTED':
     case 'PROOF_REJECTED':
       statusInfo.displayMessage = 'Su solicitud está siendo procesada';
@@ -797,17 +737,17 @@ exports.downloadPermit = async (req, res, next) => {
   // --- Input Validation ---
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`Download failed: Invalid Application ID format ${req.params.id}`);
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
   if (!userId) {
     // Should be caught by middleware, but double-check
     logger.warn(`Download failed: User not authenticated for AppID ${applicationId}`);
-    return res.status(401).json({ message: 'Unauthorized.' });
+    return res.status(401).json({ message: 'No autorizado.' });
   }
   const allowedTypes = ['permiso', 'recibo', 'certificado', 'placas'];
   if (!requestedTypeParam || !allowedTypes.includes(requestedTypeParam.toLowerCase())) {
     logger.warn(`Download failed: Invalid document type requested '${requestedTypeParam}' for AppID ${applicationId}`);
-    return res.status(400).json({ message: `Invalid document type. Allowed types: ${allowedTypes.join(', ')}` });
+    return res.status(400).json({ message: `Tipo de documento inválido. Tipos permitidos: ${allowedTypes.join(', ')}` });
   }
 
   // --- Determine DB column and filename prefix based on validated type ---
@@ -848,7 +788,7 @@ exports.downloadPermit = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`Download failed: Application ${applicationId} not found.`);
-      return res.status(404).json({ message: 'Application not found.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada.' });
     }
     const app = rows[0];
     logger.debug(`DB Result for App ${applicationId}:`, { status: app.status, permit_path: app.permit_file_path, recibo_path: app.recibo_file_path, cert_path: app.certificado_file_path }); // Log relevant parts
@@ -856,7 +796,7 @@ exports.downloadPermit = async (req, res, next) => {
     // --- Check Ownership ---
     if (app.user_id !== userId) {
       logger.warn(`Security Alert: User ${userId} tried to download ${requestedType} for permit ${applicationId} owned by user ${app.user_id}.`);
-      return res.status(403).json({ message: 'Forbidden: You do not own this application.' });
+      return res.status(403).json({ message: 'Prohibido: No eres propietario de esta solicitud.' });
     }
 
     // --- Extract Correct File Path from DB Result ---
@@ -944,11 +884,11 @@ exports.getPdfUrl = async (req, res, next) => {
   // Input Validation
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`PDF URL request failed: Invalid Application ID format ${req.params.id}`);
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
   if (!userId) {
     logger.warn(`PDF URL request failed: User not authenticated for AppID ${applicationId}`);
-    return res.status(401).json({ message: 'Unauthorized.' });
+    return res.status(401).json({ message: 'No autorizado.' });
   }
 
   try {
@@ -963,7 +903,7 @@ exports.getPdfUrl = async (req, res, next) => {
     // requestedType is already defined above
     if (!typeMapping[requestedType]) {
       logger.warn(`PDF URL request failed: Invalid document type '${requestedTypeParam}' for App ${applicationId}`);
-      return res.status(400).json({ message: `Invalid document type: ${requestedTypeParam}` });
+      return res.status(400).json({ message: `Tipo de documento inválido: ${requestedTypeParam}` });
     }
 
     const { dbColumn, displayName } = typeMapping[requestedType];
@@ -978,7 +918,7 @@ exports.getPdfUrl = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`PDF URL request failed: Application ${applicationId} not found`);
-      return res.status(404).json({ message: 'Application not found.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada.' });
     }
 
     const app = rows[0];
@@ -986,7 +926,7 @@ exports.getPdfUrl = async (req, res, next) => {
     // Check ownership
     if (app.user_id !== userId) {
       logger.warn(`PDF URL request failed: User ${userId} does not own Application ${applicationId}`);
-      return res.status(403).json({ message: 'Access denied. This application does not belong to you.' });
+      return res.status(403).json({ message: 'Acceso denegado. Esta solicitud no te pertenece.' });
     }
 
     // Extract file path from database
@@ -1049,7 +989,7 @@ exports.updateApplication = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
 
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid application ID format' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido' });
   }
 
   try {
@@ -1061,7 +1001,7 @@ exports.updateApplication = async (req, res, next) => {
 
     if (rows.length === 0) {
       return res.status(404).json({
-        message: 'Application not found or does not belong to the current user'
+        message: 'Solicitud no encontrada o no pertenece al usuario actual'
       });
     }
 
@@ -1069,7 +1009,7 @@ exports.updateApplication = async (req, res, next) => {
     // Only allow updates if payment is not yet submitted
     if (currentStatus !== ApplicationStatus.AWAITING_PAYMENT) {
       return res.status(400).json({
-        message: `Cannot update application in ${currentStatus} status. Only applications awaiting payment can be modified.`,
+        message: `No se puede actualizar la solicitud en estado ${currentStatus}. Solo las solicitudes en espera de pago pueden ser modificadas.`,
         currentStatus
       });
     }
@@ -1104,7 +1044,7 @@ exports.updateApplication = async (req, res, next) => {
     // If no fields to update, return early
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
-        message: 'No valid fields provided for update'
+        message: 'No se proporcionaron campos válidos para actualizar'
       });
     }
 
@@ -1137,14 +1077,14 @@ exports.updateApplication = async (req, res, next) => {
     const { rows: updatedRows } = await db.query(updateQuery, values);
 
     if (updatedRows.length === 0) {
-      throw new Error('Failed to update application');
+      throw new Error('Error al actualizar la solicitud');
     }
 
     logger.info(`Application ${applicationId} updated successfully by user ${userId}`);
 
     // Return the updated application data
     res.status(200).json({
-      message: 'Application updated successfully',
+      message: 'Solicitud actualizada exitosamente',
       application: updatedRows[0]
     });
 
@@ -1161,7 +1101,7 @@ exports.renewApplication = async (req, res, next) => {
 
   // Basic validation
   if (isNaN(originalApplicationId)) {
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
 
   try {
@@ -1176,7 +1116,7 @@ exports.renewApplication = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`Renewal failed: Application ${originalApplicationId} not found or not owned by user ${userId}`);
-      return res.status(404).json({ message: 'Application not found or not authorized.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada o no autorizada.' });
     }
 
     const originalApp = rows[0];
@@ -1185,7 +1125,7 @@ exports.renewApplication = async (req, res, next) => {
     if (originalApp.status !== 'PERMIT_READY' && originalApp.status !== 'ACTIVE') { // Assuming ACTIVE might be a future status
       logger.warn(`Renewal failed: Application ${originalApplicationId} has status ${originalApp.status}`);
       return res.status(400).json({
-        message: 'Only active or completed permits can be renewed.'
+        message: 'Solo los permisos activos o completados pueden ser renovados.'
       });
     }
 
@@ -1220,7 +1160,7 @@ exports.renewApplication = async (req, res, next) => {
     const { rows: insertedRows } = await db.query(insertQuery, insertParams);
 
     if (insertedRows.length === 0) {
-      throw new Error('Failed to create renewal application.');
+      throw new Error('Error al crear la solicitud de renovación.');
     }
 
     const newApplication = insertedRows[0];
@@ -1280,7 +1220,7 @@ exports.checkRenewalEligibility = async (req, res, next) => {
 
   // Basic validation
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
 
   try {
@@ -1298,7 +1238,7 @@ exports.checkRenewalEligibility = async (req, res, next) => {
       logger.warn(`Renewal eligibility check failed: Application ${applicationId} not found or not owned by user ${userId}`);
       return res.status(404).json({
         eligible: false,
-        message: 'Application not found or not authorized.'
+        message: 'Solicitud no encontrada o no autorizada.'
       });
     }
 
@@ -1385,13 +1325,13 @@ exports.checkRenewalEligibility = async (req, res, next) => {
 // --- TEMPORARY CONTROLLER FOR DEVELOPMENT - REMOVE LATER --- (Keep AS IS)
 exports.tempMarkPaid = async (req, res, next) => { // Added next
   const applicationId = parseInt(req.params.id, 10);
-  if (isNaN(applicationId)) return res.status(400).json({ message: 'Invalid Application ID.' });
+  if (isNaN(applicationId)) return res.status(400).json({ message: 'ID de solicitud inválido.' });
 
   logger.warn(`--- RUNNING TEMP DEV FUNCTION: Marking Application ${applicationId} as PAID ---`); // Use warn
 
   try {
     const { rows: currentRows } = await db.query('SELECT status FROM permit_applications WHERE id = $1', [applicationId]);
-    if (currentRows.length === 0) return res.status(404).json({ message: 'Application not found.' });
+    if (currentRows.length === 0) return res.status(404).json({ message: 'Solicitud no encontrada.' });
 
     const currentStatus = currentRows[0].status;
     // Allow proceeding even if not AWAITING_PAYMENT during dev
@@ -1403,7 +1343,7 @@ exports.tempMarkPaid = async (req, res, next) => { // Added next
 
 
     const { rowCount } = await db.query('UPDATE permit_applications SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [ApplicationStatus.PAYMENT_RECEIVED, applicationId]);
-    if (rowCount === 0) throw new Error('Application not found during update.');
+    if (rowCount === 0) throw new Error('Solicitud no encontrada durante la actualización.');
     logger.info(`--- TEMP DEV: Application ${applicationId} status updated to PAYMENT_RECEIVED ---`); // Use info
 
 
@@ -1419,7 +1359,7 @@ exports.tempMarkPaid = async (req, res, next) => { // Added next
       }
     });
 
-    res.status(200).json({ message: `Application ${applicationId} marked as PAYMENT_RECEIVED (TEMP). Permit generation triggered.` });
+    res.status(200).json({ message: `Solicitud ${applicationId} marcada como PAYMENT_RECEIVED (TEMP). Generación de permiso activada.` });
 
   } catch (error) {
     logger.error(`Error in TEMP_mark_paid for ${applicationId}:`, error); // Pass error

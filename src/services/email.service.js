@@ -1,16 +1,12 @@
-// src/services/email.service.js
 const nodemailer = require('nodemailer');
 const config = require('../config');
 const { logger } = require('../utils/enhanced-logger');
 
-// Create a transporter object
 let transporter;
 
-// Initialize the email transporter
 function initTransporter() {
   if (transporter) return;
 
-  // Check if SMTP configuration is available
   if (!config.emailHost || !config.emailPort || !config.emailUser || !config.emailPass) {
     logger.warn('SMTP email configuration is incomplete. Email functionality will be disabled.');
     return;
@@ -19,7 +15,7 @@ function initTransporter() {
   transporter = nodemailer.createTransport({
     host: config.emailHost,
     port: config.emailPort,
-    secure: config.emailPort === 465, // true for 465, false for other ports
+    secure: config.emailPort === 465,
     auth: {
       user: config.emailUser,
       pass: config.emailPass,
@@ -29,21 +25,11 @@ function initTransporter() {
   logger.info('Email service initialized with SMTP transport');
 }
 
-/**
- * Send a password reset email
- * @param {string} to - Recipient email address
- * @param {string} resetToken - Password reset token
- * @param {string} resetUrl - URL for password reset page
- * @returns {Promise<boolean>} - True if email was sent successfully
- */
 async function sendPasswordResetEmail(to, resetToken, resetUrl) {
   try {
-    // Construct the reset URL with token
-    // Remove any non-hex characters from the token to ensure compatibility
     const cleanToken = resetToken.replace(/[^a-fA-F0-9]/g, '');
     const fullResetUrl = `${resetUrl}?token=${cleanToken}`;
 
-    // Email content
     return await sendEmail({
       to,
       subject: 'Cambia tu contraseña de Permisos Digitales',

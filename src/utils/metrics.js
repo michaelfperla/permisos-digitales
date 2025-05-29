@@ -1,22 +1,14 @@
-/**
- * Metrics Collection Module
- * Collects and exposes application metrics in Prometheus format
- */
 const promClient = require('prom-client');
 const { logger } = require('./enhanced-logger');
 
-// Create a Registry to register metrics
 const register = new promClient.Registry();
 
-// Add default labels to all metrics
 register.setDefaultLabels({
   app: 'permisos-digitales'
 });
 
-// Enable collection of default metrics
 promClient.collectDefaultMetrics({ register });
 
-// Define custom metrics
 const httpRequestDurationMicroseconds = new promClient.Histogram({
   name: 'http_request_duration_ms',
   help: 'Duration of HTTP requests in ms',
@@ -37,35 +29,31 @@ const databaseQueryDurationMicroseconds = new promClient.Histogram({
   buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000]
 });
 
-// Register the custom metrics
 register.registerMetric(httpRequestDurationMicroseconds);
 register.registerMetric(httpRequestCounter);
 register.registerMetric(databaseQueryDurationMicroseconds);
 
-// Middleware to measure HTTP request duration
 const metricsMiddleware = (req, res, next) => {
   const start = Date.now();
-  
-  // Record end time and increment counter on response finish
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     const route = req.route ? req.route.path : req.path;
     const method = req.method;
     const statusCode = res.statusCode;
-    
+
     httpRequestDurationMicroseconds
       .labels(method, route, statusCode)
       .observe(duration);
-    
+
     httpRequestCounter
       .labels(method, route, statusCode)
       .inc();
   });
-  
+
   next();
 };
 
-// Function to measure database query duration
 const measureDatabaseQuery = async (queryType, table, queryFn) => {
   const start = Date.now();
   try {
@@ -78,7 +66,6 @@ const measureDatabaseQuery = async (queryType, table, queryFn) => {
   }
 };
 
-// Metrics endpoint handler
 const metricsEndpoint = async (req, res) => {
   try {
     res.set('Content-Type', register.contentType);
