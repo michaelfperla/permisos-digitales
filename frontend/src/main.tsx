@@ -30,10 +30,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 // Set up global error handler
 setupGlobalErrorHandler();
 
-// Expose getCsrfToken globally for debugging in development
-if (import.meta.env.DEV) {
-  (window as any).getCsrfToken = getCsrfToken;
-}
+// Expose getCsrfToken globally for debugging and production compatibility
+(window as any).getCsrfToken = getCsrfToken;
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
