@@ -208,7 +208,7 @@ describe('MockRedisClient', () => {
     const now = Date.now();
     mockClient.data.set('expired', 'value1');
     mockClient.data.set('valid', 'value2');
-    mockClient.expirations.set('expired', now - 1000); // Expired 1 second ago
+    mockClient.expirations.set('expired', now - 5000); // Expired 5 seconds ago
     mockClient.expirations.set('valid', now + 30000);  // Valid for 30 more seconds
 
     // Execute

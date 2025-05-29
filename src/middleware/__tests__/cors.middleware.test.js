@@ -134,11 +134,11 @@ describe('CORS Middleware', () => {
       // Act
       const response = await request(app)
         .get('/api/test')
-        .set('Origin', 'http://localhost:3000')
+        .set('Origin', 'https://permisosdigitales.com.mx')
         .expect(200);
 
       // Assert
-      expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+      expect(response.headers['access-control-allow-origin']).toBe('https://permisosdigitales.com.mx');
       expect(response.headers['access-control-allow-credentials']).toBe('true');
       expect(response.body).toEqual({ success: true });
     });
@@ -165,16 +165,16 @@ describe('CORS Middleware', () => {
       expect(response.body).toEqual({ success: true });
     });
 
-    it('should allow requests from file:// URLs in production mode', async () => {
+    it('should block requests from file:// URLs in production mode', async () => {
       // Act
       const response = await request(app)
         .get('/api/test')
         .set('Origin', 'file:///C:/Users/test/index.html')
-        .expect(200);
+        .expect(403);
 
       // Assert
-      expect(response.headers['access-control-allow-origin']).toBe('file:///C:/Users/test/index.html');
-      expect(response.body).toEqual({ success: true });
+      expect(response.body).toEqual({ error: 'CORS not allowed' });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('CORS blocked request from origin'));
     });
   });
 });

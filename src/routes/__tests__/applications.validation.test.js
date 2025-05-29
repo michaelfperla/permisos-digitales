@@ -16,13 +16,7 @@ jest.mock('multer', () => {
   };
 });
 
-// Mock payment-proof-upload
-jest.mock('../../utils/uploads/payment-proof-upload', () => ({
-  paymentProofUpload: {
-    single: () => (req, res, next) => next()
-  },
-  handleMulterError: (req, res, next) => next()
-}));
+// Upload functionality removed since app no longer needs document uploads
 
 const request = require('supertest');
 const express = require('express');
@@ -73,14 +67,14 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'curp_rfc' && e.msg === 'Falta el CURP/RFC.')).toBe(true);
-    expect(errors.some(e => e.param === 'domicilio' && e.msg === 'Falta la dirección.')).toBe(true);
-    expect(errors.some(e => e.param === 'marca' && e.msg === 'Falta la marca.')).toBe(true);
-    expect(errors.some(e => e.param === 'linea' && e.msg === 'Falta el modelo.')).toBe(true);
-    expect(errors.some(e => e.param === 'color' && e.msg === 'Falta el color.')).toBe(true);
-    expect(errors.some(e => e.param === 'numero_serie' && e.msg === 'Falta el número de serie.')).toBe(true);
-    expect(errors.some(e => e.param === 'numero_motor' && e.msg === 'Falta el número de motor.')).toBe(true);
-    expect(errors.some(e => e.param === 'ano_modelo' && e.msg === 'Falta el año.')).toBe(true);
+    expect(errors.some(e => e.path === 'curp_rfc' && e.msg === 'Falta el CURP/RFC.')).toBe(true);
+    expect(errors.some(e => e.path === 'domicilio' && e.msg === 'Falta la dirección.')).toBe(true);
+    expect(errors.some(e => e.path === 'marca' && e.msg === 'Falta la marca.')).toBe(true);
+    expect(errors.some(e => e.path === 'linea' && e.msg === 'Falta el modelo.')).toBe(true);
+    expect(errors.some(e => e.path === 'color' && e.msg === 'Falta el color.')).toBe(true);
+    expect(errors.some(e => e.path === 'numero_serie' && e.msg === 'Falta el número de serie.')).toBe(true);
+    expect(errors.some(e => e.path === 'numero_motor' && e.msg === 'Falta el número de motor.')).toBe(true);
+    expect(errors.some(e => e.path === 'ano_modelo' && e.msg === 'Falta el año.')).toBe(true);
   });
 
   // Test for nombre_completo validation
@@ -106,7 +100,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'nombre_completo' && e.msg === 'El nombre completo no debe pasar de 255 caracteres.')).toBe(true);
+    expect(errors.some(e => e.path === 'nombre_completo' && e.msg === 'El nombre completo no debe pasar de 255 caracteres.')).toBe(true);
   });
 
   // Test for empty nombre_completo
@@ -129,7 +123,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'nombre_completo' && e.msg === 'Falta el nombre completo.')).toBe(true);
+    expect(errors.some(e => e.path === 'nombre_completo' && e.msg === 'Falta el nombre completo.')).toBe(true);
   });
 
   // Test for curp_rfc validation
@@ -152,7 +146,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'curp_rfc' && e.msg === 'El CURP/RFC debe tener entre 10 y 50 caracteres.')).toBe(true);
+    expect(errors.some(e => e.path === 'curp_rfc' && e.msg === 'El CURP/RFC debe tener entre 10 y 50 caracteres.')).toBe(true);
   });
 
   it('should validate curp_rfc length (too long)', async () => {
@@ -177,7 +171,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'curp_rfc' && e.msg === 'El CURP/RFC debe tener entre 10 y 50 caracteres.')).toBe(true);
+    expect(errors.some(e => e.path === 'curp_rfc' && e.msg === 'El CURP/RFC debe tener entre 10 y 50 caracteres.')).toBe(true);
   });
 
   it('should validate curp_rfc format', async () => {
@@ -199,7 +193,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'curp_rfc' && e.msg === 'El CURP/RFC solo debe tener letras y números.')).toBe(true);
+    expect(errors.some(e => e.path === 'curp_rfc' && e.msg === 'El CURP/RFC solo debe tener letras y números.')).toBe(true);
   });
 
   // Test for numero_serie validation
@@ -222,7 +216,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'numero_serie' && e.msg === 'El número de serie debe tener entre 5 y 50 caracteres.')).toBe(true);
+    expect(errors.some(e => e.path === 'numero_serie' && e.msg === 'El número de serie debe tener entre 5 y 50 caracteres.')).toBe(true);
   });
 
   it('should validate numero_serie format', async () => {
@@ -244,7 +238,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'numero_serie' && e.msg === 'El número de serie solo debe tener letras y números.')).toBe(true);
+    expect(errors.some(e => e.path === 'numero_serie' && e.msg === 'El número de serie solo debe tener letras y números.')).toBe(true);
   });
 
   // Test for ano_modelo validation
@@ -268,7 +262,7 @@ describe('Application Validation Rules', () => {
 
     const errors = response.body.errors;
     const currentYear = new Date().getFullYear();
-    expect(errors.some(e => e.param === 'ano_modelo' && e.msg === `El año debe ser válido entre 1900 y ${currentYear + 2}.`)).toBe(true);
+    expect(errors.some(e => e.path === 'ano_modelo' && e.msg === `El año debe ser válido entre 1900 y ${currentYear + 2}.`)).toBe(true);
   });
 
   it('should validate ano_modelo range (too new)', async () => {
@@ -291,7 +285,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'ano_modelo' && e.msg === `El año debe ser válido entre 1900 y ${currentYear + 2}.`)).toBe(true);
+    expect(errors.some(e => e.path === 'ano_modelo' && e.msg === `El año debe ser válido entre 1900 y ${currentYear + 2}.`)).toBe(true);
   });
 
   // Test for empty fields
@@ -314,7 +308,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'domicilio' && e.msg === 'Falta la dirección.')).toBe(true);
+    expect(errors.some(e => e.path === 'domicilio' && e.msg === 'Falta la dirección.')).toBe(true);
   });
 
   it('should validate empty marca', async () => {
@@ -336,7 +330,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'marca' && e.msg === 'Falta la marca.')).toBe(true);
+    expect(errors.some(e => e.path === 'marca' && e.msg === 'Falta la marca.')).toBe(true);
   });
 
   it('should validate empty linea', async () => {
@@ -358,7 +352,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'linea' && e.msg === 'Falta el modelo.')).toBe(true);
+    expect(errors.some(e => e.path === 'linea' && e.msg === 'Falta el modelo.')).toBe(true);
   });
 
   it('should validate empty color', async () => {
@@ -380,7 +374,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'color' && e.msg === 'Falta el color.')).toBe(true);
+    expect(errors.some(e => e.path === 'color' && e.msg === 'Falta el color.')).toBe(true);
   });
 
   it('should validate empty numero_motor', async () => {
@@ -402,7 +396,7 @@ describe('Application Validation Rules', () => {
     expect(response.body).toHaveProperty('errors');
 
     const errors = response.body.errors;
-    expect(errors.some(e => e.param === 'numero_motor' && e.msg === 'Falta el número de motor.')).toBe(true);
+    expect(errors.some(e => e.path === 'numero_motor' && e.msg === 'Falta el número de motor.')).toBe(true);
   });
 
   // Test for valid data

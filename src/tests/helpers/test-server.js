@@ -101,59 +101,9 @@ jest.mock('../../middleware/rate-limit.middleware', () => ({
 
 // No longer mocking controllers - using real controllers for integration tests
 
-// Mock storage service
-const mockSaveFileFromPath = jest.fn().mockResolvedValue({
-  fileName: 'test_file.pdf',
-  relativePath: 'payment-proofs/test_file.pdf',
-  size: 12345
-});
+// Storage and upload services removed since app no longer needs file uploads
 
-jest.mock('../../services/storage.service', () => ({
-  saveFileFromPath: mockSaveFileFromPath,
-  getFileInfo: jest.fn().mockResolvedValue({
-    exists: true,
-    size: 12345,
-    contentType: 'application/pdf'
-  }),
-  deleteFile: jest.fn().mockResolvedValue(true)
-}));
-
-// Export storage mocks so tests can configure them
-global.__mockSaveFileFromPath = mockSaveFileFromPath;
-
-// Mock multer and payment-proof-upload directly
-jest.mock('../../utils/uploads/payment-proof-upload', () => ({
-  paymentProofUpload: {
-    single: () => (req, res, next) => {
-      // Simulate file upload by adding file object to request
-      req.file = {
-        path: '/tmp/test-upload.pdf',
-        originalname: 'test-upload.pdf',
-        mimetype: 'application/pdf',
-        size: 12345
-      };
-      next();
-    }
-  },
-  handleMulterError: (req, res, next) => next()
-}));
-
-// Mock multer middleware
-jest.mock('../../middleware/upload.middleware', () => ({
-  paymentProofUpload: {
-    single: () => (req, res, next) => {
-      // Simulate file upload by adding file object to request
-      req.file = {
-        path: '/tmp/test-upload.pdf',
-        originalname: 'test-upload.pdf',
-        mimetype: 'application/pdf',
-        size: 12345
-      };
-      next();
-    }
-  },
-  handleMulterError: (req, res, next) => next()
-}));
+// Upload middleware is no longer needed since the app doesn't require document uploads
 
 // Mock validation middleware
 jest.mock('../../middleware/validation.middleware', () => ({
@@ -409,9 +359,7 @@ module.exports = {
     exists: mockRedisExists,
     del: mockRedisDel
   },
-  mockStorage: {
-    saveFileFromPath: mockSaveFileFromPath
-  },
+  // Storage mock removed since app no longer needs file uploads
   mockPassword: {
     hashPassword: mockHashPassword,
     verifyPassword: mockVerifyPassword
@@ -437,12 +385,7 @@ module.exports = {
     mockRedisExists.mockReset().mockResolvedValue(0);
     mockRedisDel.mockReset().mockResolvedValue(1);
 
-    // Reset storage mock
-    mockSaveFileFromPath.mockReset().mockResolvedValue({
-      fileName: 'test_file.pdf',
-      relativePath: 'payment-proofs/test_file.pdf',
-      size: 12345
-    });
+    // Storage mock removed since app no longer needs file uploads
 
     // Reset password utility mocks
     mockHashPassword.mockReset().mockImplementation(async (password) => {

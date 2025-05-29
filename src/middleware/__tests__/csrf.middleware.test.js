@@ -37,8 +37,8 @@ jest.mock('../../utils/api-response', () => {
   };
 });
 
-// Mock csurf module
-jest.mock('csurf', () => {
+// Mock @dr.pogodin/csurf module
+jest.mock('@dr.pogodin/csurf', () => {
   return jest.fn().mockImplementation((options) => {
     return (req, res, next) => {
       // Add csrfToken method to request

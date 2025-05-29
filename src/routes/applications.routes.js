@@ -1,7 +1,7 @@
 // src/routes/applications.routes.js
 const express = require('express');
 const applicationController = require('../controllers/application.controller');
-const { paymentProofUpload, handleMulterError } = require('../utils/uploads/payment-proof-upload');
+// Upload functionality removed since app no longer needs document uploads
 const { csrfProtection } = require('../middleware/csrf.middleware');
 const rateLimiters = require('../middleware/rate-limit.middleware');
 // Assuming auth middleware is applied *before* this router is mounted in index.js
@@ -130,30 +130,6 @@ router.post(
 );
 
 // [Refactor - Remove Manual Payment] Route for manual payment proof upload. Obsolete.
-// Define validation rules for payment proof upload
-/*
-const paymentProofValidationRules = [
-  body('paymentReference')
-    .optional({ checkFalsy: true }) // Allow empty string or null/undefined
-    .trim()
-    .isLength({ max: 100 }).withMessage('La referencia no debe pasar de 100 caracteres.')
-    .escape()
-];
-
-// POST /api/applications/:id/payment-proof - Upload payment proof
-// Auth applied in src/routes/index.js
-router.post(
-  '/:id/payment-proof',
-  idParamValidation,
-  paymentProofValidationRules,
-  handleValidationErrors,
-  rateLimiters.upload,
-  paymentProofUpload.single('paymentProof'),
-  handleMulterError, // Handle upload errors first
-  csrfProtection, // Standard CSRF protection
-  applicationController.submitPaymentProof // Controller last
-);
-*/
 
 // Temporary route handler for payment proof upload - returns 410 Gone status
 router.post(

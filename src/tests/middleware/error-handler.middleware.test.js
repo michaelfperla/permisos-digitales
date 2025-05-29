@@ -122,7 +122,7 @@ describe('Error Handler Middleware', () => {
       { field: 'email', message: 'Invalid email format' },
       { field: 'password', message: 'Password too short' }
     ];
-    const error = new ValidationError('Validation failed', validationErrors);
+    const error = new ValidationError('Los datos no son válidos', validationErrors);
 
     // Act
     errorHandler(error, req, res, next);
@@ -133,7 +133,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Validation failed',
+          message: 'Los datos no son válidos',
           errors: validationErrors,
           status: 422
         })
@@ -176,7 +176,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Something went wrong. Please try again later.',
+          message: 'Algo salió mal. Por favor, inténtalo de nuevo más tarde.',
           code: 'INTERNAL_ERROR'
         })
       })

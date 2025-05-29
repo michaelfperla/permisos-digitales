@@ -7,7 +7,7 @@ const {
   validateName,
   validateCURP,
   validateRFC
-} = require('../validation');
+} = require('../validation-utils');
 
 describe('Validation Utilities', () => {
   describe('validateEmail', () => {

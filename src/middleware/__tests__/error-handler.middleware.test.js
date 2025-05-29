@@ -115,7 +115,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Something went wrong. Please try again later.',
+          message: 'Algo salió mal. Por favor, inténtalo de nuevo más tarde.',
           code: 'INTERNAL_ERROR'
         })
       })
@@ -142,7 +142,7 @@ describe('Error Handler Middleware', () => {
       { field: 'email', message: 'Invalid email format' },
       { field: 'password', message: 'Password too short' }
     ];
-    const error = new Error('Validation failed');
+    const error = new Error('Los datos no son válidos');
     error.errors = validationErrors;
     error.statusCode = 422;
 
@@ -155,7 +155,7 @@ describe('Error Handler Middleware', () => {
       expect.objectContaining({
         success: false,
         error: expect.objectContaining({
-          message: 'Validation failed',
+          message: 'Los datos no son válidos',
           errors: validationErrors
         })
       })

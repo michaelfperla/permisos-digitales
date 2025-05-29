@@ -74,7 +74,7 @@ describe('Validation Middleware', () => {
       expect(next).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Validation failed',
+        message: 'Los datos no son válidos',
         errors: validationErrors
       });
       expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -111,7 +111,7 @@ describe('Validation Middleware', () => {
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Validation failed',
+        message: 'Los datos no son válidos',
         errors: []
       });
     });
