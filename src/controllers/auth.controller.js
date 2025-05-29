@@ -1,4 +1,3 @@
-// src/controllers/auth.controller.js
 const crypto = require('crypto');
 const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
@@ -11,17 +10,13 @@ const { handleControllerError, createError } = require('../utils/error-helpers')
 const ApiResponse = require('../utils/api-response');
 const ProductionDebugger = require('../utils/production-debug');
 
-// --- Registration Function ---
 exports.register = async (req, res, next) => {
   const { email, password, first_name, last_name } = req.body;
 
-  // Log detailed request information for production debugging
   ProductionDebugger.logRequestDetails(req, 'registration');
   ProductionDebugger.logRegistrationAttempt(req, { email, first_name, last_name, password });
 
-  // Basic Input Validation (consider adding middleware validation for required fields)
   if (!email || !password || !first_name || !last_name) {
-    // Example: Add basic check here if not using validation middleware
     logger.warn(`Registration attempt failed: Missing required fields - ${email}`);
     ProductionDebugger.logError(new Error('Missing required fields'), 'registration_validation', req);
     return ApiResponse.badRequest(res, 'Faltan campos requeridos (correo, contraseña, nombre, apellido).');
@@ -30,14 +25,12 @@ exports.register = async (req, res, next) => {
   try {
     logger.debug(`Registration attempt for email: ${email}`);
 
-    // Check for rate limiting first
-    const isLimited = await securityService.isRateLimitExceeded(req.ip, 'registration', 5, 60 ); // 5 per hour
+    const isLimited = await securityService.isRateLimitExceeded(req.ip, 'registration', 5, 60);
     if (isLimited) {
       await securityService.logActivity(null, 'registration_rate_limited', req.ip, req.headers['user-agent'], { email });
       return ApiResponse.tooManyRequests(res, 'Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.');
     }
 
-    // Check if user exists
     const checkUserQuery = 'SELECT id FROM users WHERE email = $1';
     ProductionDebugger.logDatabaseOperation('user_check', true, { email, query: 'SELECT id FROM users WHERE email = $1' });
     const { rows: existingUsers } = await db.query(checkUserQuery, [email]);
@@ -50,15 +43,12 @@ exports.register = async (req, res, next) => {
       return ApiResponse.conflict(res, 'Ya existe un usuario con este correo electrónico.');
     }
 
-    // Hash password
     logger.debug(`Hashing password for ${email}`);
     const passwordHash = await hashPassword(password);
 
-    // Generate email verification token and expiry
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Insert user with verification data
     const insertUserQuery = `
             INSERT INTO users (
               email, password_hash, first_name, last_name, account_type, role, is_admin_portal, account_created_at,
@@ -80,10 +70,9 @@ exports.register = async (req, res, next) => {
     const newUser = insertedUserRows[0];
     logger.info(`User registered successfully: ${newUser.email} (ID: ${newUser.id})`);
 
-    // Log successful registration activity
     await securityService.logActivity(newUser.id, 'registration_successful', req.ip, req.headers['user-agent'], { email: newUser.email });
 
-    // Send verification email
+    // Send verification email (non-blocking)
     try {
       const verificationUrl = `${config.frontendUrl}/verify-email`;
       const emailSent = await emailService.sendEmailVerificationEmail(
@@ -98,28 +87,24 @@ exports.register = async (req, res, next) => {
         logger.warn(`Failed to send verification email to ${email}`);
       }
     } catch (emailError) {
-      // Log the error but don't fail the registration process
       logger.error(`Error sending verification email to ${email}:`, emailError);
     }
 
-    // Automatically log in the user after registration
+    // Auto-login after successful registration
     ProductionDebugger.logSessionAction(req, 'pre_regenerate', { userId: newUser.id, email: newUser.email });
     req.session.regenerate(err => {
       if (err) {
         logger.error('Error regenerating session after registration:', err);
         ProductionDebugger.logError(err, 'session_regenerate_registration', req);
-        // Avoid calling next(err) if response already sent by error handler upstream potentially
-        // Maybe return a generic error if session fails?
-        return handleControllerError(err, 'register (session regenerate)', req, res, next); // Delegate error handling
+        return handleControllerError(err, 'register (session regenerate)', req, res, next);
       }
 
       ProductionDebugger.logSessionAction(req, 'post_regenerate', { userId: newUser.id, email: newUser.email, newSessionId: req.session.id });
 
-      // Set session data *after* successful regeneration
       req.session.userId = newUser.id;
       req.session.userEmail = newUser.email;
-      req.session.userName = first_name; // Store consistently
-      req.session.userLastName = last_name; // Store consistently
+      req.session.userName = first_name;
+      req.session.userLastName = last_name;
       req.session.accountType = 'client';
       req.session.isAdminPortal = false;
 
@@ -132,35 +117,31 @@ exports.register = async (req, res, next) => {
 
       logger.info(`👤 AUTO-LOGIN AFTER REGISTRATION: ${newUser.email} (ID: ${newUser.id}), SessionID: ${req.session.id}`);
       ApiResponse.success(res, {
-        user: { // Return consistent user object structure
+        user: {
           id: newUser.id,
           email: newUser.email,
           first_name: first_name,
           last_name: last_name,
-          accountType: 'client', // Use camelCase for consistency
+          accountType: 'client',
           is_admin_portal: false,
           created_at: newUser.created_at
         }
       }, 201, 'User registered successfully!');
     });
   } catch (error) {
-    // Catch errors from DB query, password hash etc.
     handleControllerError(error, 'register', req, res, next);
   }
 };
 
-// --- Login Function ---
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  // Basic validation for required fields
   if (!email) { return ApiResponse.badRequest(res, 'El correo electrónico es requerido'); }
   if (!password) { return ApiResponse.badRequest(res, 'La contraseña es requerida'); }
 
   try {
     logger.debug(`[Login Controller] Login attempt started for email: ${email}`);
 
-    // Check account lockout
     logger.debug(`[Login Controller] Checking account lockout status for email: ${email}`);
     const lockStatus = await authSecurity.checkLockStatus(email);
     logger.debug(`[Login Controller] Lock status for ${email}: ${JSON.stringify(lockStatus)}`);
@@ -168,11 +149,9 @@ exports.login = async (req, res, next) => {
     if (lockStatus.locked) {
       logger.warn(`[Login Controller] Login attempt for locked account: ${email}. Remaining lockout time: ${lockStatus.remainingSeconds} seconds`);
       await securityService.logActivity( null, 'login_account_locked', req.ip, req.headers['user-agent'], { email, remainingSeconds: lockStatus.remainingSeconds });
-      // Return structured error data for frontend if needed
       return ApiResponse.tooManyRequests(res, `Cuenta bloqueada temporalmente. Intente nuevamente en ${lockStatus.remainingSeconds} segundos.`, { locked: true, remainingSeconds: lockStatus.remainingSeconds });
     }
 
-    // Check rate limiting
     logger.debug(`[Login Controller] Checking rate limiting for IP: ${req.ip}`);
     const isLimited = await securityService.isRateLimitExceeded( req.ip, 'failed_login', 5, 15 );
     logger.debug(`[Login Controller] Rate limit check result for IP ${req.ip}: ${isLimited ? 'limited' : 'not limited'}`);
@@ -183,11 +162,9 @@ exports.login = async (req, res, next) => {
       return ApiResponse.tooManyRequests(res, 'Demasiados intentos de inicio de sesión fallidos. Por favor, inténtalo de nuevo más tarde.');
     }
 
-    // Check portal type
     const isAdminPortal = req.get('X-Portal-Type') === 'admin';
     logger.info(`[Login Controller] Login attempt from ${isAdminPortal ? 'ADMIN PORTAL' : 'CLIENT PORTAL'} for user: ${email}`);
 
-    // Get user
     logger.debug(`[Login Controller] Retrieving user data for email: ${email}`);
     const findUserQuery = `
       SELECT id, email, password_hash, first_name, last_name, account_type, role, is_admin_portal,
@@ -222,28 +199,22 @@ exports.login = async (req, res, next) => {
     logger.debug(`[Login Controller] User found for email ${email}: ID=${user.id}, is_email_verified=${user.is_email_verified}, role=${user.role}`);
     logger.debug(`[Login Controller] Password hash exists: ${!!user.password_hash}`);
 
-    // Note: is_active check removed as the column no longer exists in the database
-
-    // Check if email is verified
     logger.debug(`[Login Controller] Checking if email is verified for user ${email}`);
     if (user.is_email_verified === false) {
       logger.warn(`[Login Controller] Login attempt failed: Email ${email} is not verified`);
       await securityService.logActivity(user.id, 'login_unverified_email', req.ip, req.headers['user-agent'], { email });
 
-      // If verification token is expired, generate a new one and send a new verification email
+      // Regenerate verification token if expired
       const now = new Date();
       if (!user.email_verification_expires || now > user.email_verification_expires) {
-        // Generate new token and expiry
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-        // Update user with new token and expiry
         await db.query(
           'UPDATE users SET email_verification_token = $1, email_verification_expires = $2 WHERE id = $3',
           [verificationToken, verificationExpires, user.id]
         );
 
-        // Send new verification email
         try {
           const verificationUrl = `${config.frontendUrl}/verify-email`;
           await emailService.sendEmailVerificationEmail(

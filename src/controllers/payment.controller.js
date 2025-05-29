@@ -1,7 +1,3 @@
-/**
- * Payment Controller
- * Handles payment-related API requests
- */
 const { logger } = require('../utils/enhanced-logger');
 const { handleControllerError } = require('../utils/error-helpers');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants/index');
@@ -10,18 +6,11 @@ const { paymentService } = require('../services');
 const ApiResponse = require('../utils/api-response');
 const config = require('../config');
 
-/**
- * Create a payment order
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {Promise<void>}
- */
 const createPaymentOrder = async (req, res) => {
   try {
     const { applicationId } = req.params;
     const userId = req.session.userId;
 
-    // Validate application exists and belongs to user
     const application = await applicationRepository.findById(applicationId);
     if (!application) {
       return ApiResponse.notFound(res, null, { message: 'Application not found' });
@@ -31,7 +20,6 @@ const createPaymentOrder = async (req, res) => {
       return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
     }
 
-    // Check if application is in a valid state for payment
     if (application.status !== ApplicationStatus.PENDING_PAYMENT) {
       return ApiResponse.badRequest(res, null, {
         message: 'Application is not in a valid state for payment',
@@ -39,7 +27,6 @@ const createPaymentOrder = async (req, res) => {
       });
     }
 
-    // Create customer in Conekta if needed
     const user = await req.userRepository.findById(userId);
     const customerData = {
       name: `${user.first_name} ${user.last_name}`,
@@ -49,16 +36,14 @@ const createPaymentOrder = async (req, res) => {
 
     const customer = await paymentService.createCustomer(customerData);
 
-    // Prepare payment data
     const paymentData = {
       customerId: customer.id,
-      amount: application.importe || DEFAULT_PERMIT_FEE, // Use application amount or default
+      amount: application.importe || DEFAULT_PERMIT_FEE,
       currency: 'MXN',
       description: `Permiso de Circulación - ${application.marca} ${application.linea} ${application.ano_modelo}`,
       referenceId: `APP-${application.id}`
     };
 
-    // Return payment information
     ApiResponse.success(res, null, {
       applicationId: application.id,
       customerId: customer.id,
@@ -72,24 +57,16 @@ const createPaymentOrder = async (req, res) => {
   }
 };
 
-/**
- * Process a card payment
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {Promise<void>}
- */
 const processCardPayment = async (req, res) => {
   try {
     const { applicationId } = req.params;
     const { token, customerId, device_session_id } = req.body;
     const userId = req.session.userId;
 
-    // Validate required fields
     if (!token || !customerId) {
       return ApiResponse.badRequest(res, null, { message: 'Missing required fields: token, customerId' });
     }
 
-    // Validate application exists and belongs to user
     const application = await applicationRepository.findById(applicationId);
     if (!application) {
       return ApiResponse.notFound(res, null, { message: 'Application not found' });
@@ -99,10 +76,8 @@ const processCardPayment = async (req, res) => {
       return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
     }
 
-    // Get user information for the payment
     const user = await req.userRepository.findById(userId);
 
-    // Process card payment
     const paymentData = {
       token,
       name: `${user.first_name} ${user.last_name}`,
@@ -117,7 +92,6 @@ const processCardPayment = async (req, res) => {
 
     const paymentResult = await paymentService.createChargeWithToken(paymentData);
 
-    // If payment was successful, update application with payment information
     if (paymentResult.success) {
       await paymentRepository.updatePaymentOrder(
         application.id,
@@ -125,14 +99,12 @@ const processCardPayment = async (req, res) => {
         paymentResult.paymentStatus
       );
     } else {
-      // If payment failed, return error response
       return ApiResponse.badRequest(res, null, {
         success: false,
         message: paymentResult.failureMessage || 'Error al procesar el pago'
       });
     }
 
-    // Return payment result
     ApiResponse.success(res, null, {
       success: paymentResult.success,
       orderId: paymentResult.orderId,
@@ -144,24 +116,16 @@ const processCardPayment = async (req, res) => {
   }
 };
 
-/**
- * Process a bank transfer payment (SPEI)
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {Promise<void>}
- */
 const processBankTransferPayment = async (req, res) => {
   try {
     const { applicationId } = req.params;
     const { customerId } = req.body;
     const userId = req.session.userId;
 
-    // Validate required fields
     if (!customerId) {
       return ApiResponse.badRequest(res, null, { message: 'Missing required field: customerId' });
     }
 
-    // Validate application exists and belongs to user
     const application = await applicationRepository.findById(applicationId);
     if (!application) {
       return ApiResponse.notFound(res, null, { message: 'Application not found' });
@@ -171,7 +135,6 @@ const processBankTransferPayment = async (req, res) => {
       return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
     }
 
-    // Process bank transfer payment
     const paymentData = {
       customerId,
       amount: application.importe || DEFAULT_PERMIT_FEE,
@@ -182,14 +145,12 @@ const processBankTransferPayment = async (req, res) => {
 
     const paymentResult = await paymentService.processBankTransferPayment(paymentData);
 
-    // Update application with payment information
     await paymentRepository.updatePaymentOrder(
       application.id,
       paymentResult.orderId,
       paymentResult.paymentStatus
     );
 
-    // Return payment result
     ApiResponse.success(res, null, {
       success: paymentResult.success,
       orderId: paymentResult.orderId,

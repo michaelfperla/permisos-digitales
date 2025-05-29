@@ -1,15 +1,8 @@
-// src/controllers/user.controller.js
 const userService = require('../services/user.service');
 const { logger } = require('../utils/enhanced-logger');
 const { handleControllerError } = require('../utils/error-helpers');
 const ApiResponse = require('../utils/api-response');
 
-/**
- * Get user profile
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next function
- */
 exports.getProfile = async (req, res, next) => {
   const userId = req.session.userId;
 
@@ -26,7 +19,6 @@ exports.getProfile = async (req, res, next) => {
       return ApiResponse.notFound(res, 'User profile not found.');
     }
 
-    // Return user profile data without sensitive information
     return ApiResponse.success(res, {
       user: {
         id: user.id,
@@ -43,12 +35,6 @@ exports.getProfile = async (req, res, next) => {
   }
 };
 
-/**
- * Update user profile
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next function
- */
 exports.updateProfile = async (req, res, next) => {
   const userId = req.session.userId;
 
@@ -61,18 +47,15 @@ exports.updateProfile = async (req, res, next) => {
 
     const { first_name, last_name, email } = req.body;
 
-    // Create update data object with only provided fields
     const updateData = {};
     if (first_name !== undefined) updateData.first_name = first_name;
     if (last_name !== undefined) updateData.last_name = last_name;
     if (email !== undefined) updateData.email = email;
 
-    // Check if there's anything to update
     if (Object.keys(updateData).length === 0) {
       return ApiResponse.badRequest(res, 'No valid fields provided for update.');
     }
 
-    // If email is being updated, check if it's already in use
     if (email) {
       const emailExists = await userService.checkEmailExists(email, userId);
       if (emailExists) {
@@ -86,19 +69,16 @@ exports.updateProfile = async (req, res, next) => {
       return ApiResponse.notFound(res, 'User profile not found.');
     }
 
-    // Update session data to match the database
+    // Update session data
     if (updatedUser.first_name) req.session.userName = updatedUser.first_name;
     if (updatedUser.last_name) req.session.userLastName = updatedUser.last_name;
-    // IMPORTANT: Only update email in session if it was actually changed and validated
-    // if (updatedUser.email && email) req.session.userEmail = updatedUser.email; // Be careful if email shouldn't change
-    req.session.accountType = updatedUser.account_type || req.session.accountType; // Ensure accountType persists
+    req.session.accountType = updatedUser.account_type || req.session.accountType;
 
     try {
       await new Promise((resolve, _reject) => {
         req.session.save(err => {
           if (err) {
             logger.error(`[userController.updateProfile] Error saving session: ${err}`);
-            // Resolve even on save error since DB was updated successfully
             resolve();
           } else {
             logger.debug(`Session explicitly saved. Session ID: ${req.session.id}`);
@@ -107,11 +87,9 @@ exports.updateProfile = async (req, res, next) => {
         });
       });
     } catch (saveError) {
-      // Catch potential errors from the Promise wrapper itself
       logger.error(`[userController.updateProfile] Exception during session save promise: ${saveError}`);
     }
 
-    // Return success response
     return ApiResponse.success(res,
       null,
       200,

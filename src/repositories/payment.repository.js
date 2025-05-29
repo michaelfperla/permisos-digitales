@@ -1,7 +1,3 @@
-/**
- * Payment Repository
- * Handles database operations related to payments
- */
 const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
 const { ApplicationStatus } = require('../constants');
@@ -13,21 +9,11 @@ class PaymentRepository extends BaseRepository {
     super('permit_applications');
   }
 
-  /**
-   * Update application with payment order information
-   * @param {number} applicationId - Application ID
-   * @param {string} orderId - Conekta order ID
-   * @param {string} status - Application status
-   * @param {Object} paymentData - Additional payment data (optional)
-   * @param {Object} client - Database client (optional, for transactions)
-   * @returns {Promise<Object>} - Updated application
-   */
   async updatePaymentOrder(applicationId, orderId, status = ApplicationStatus.PENDING_PAYMENT, paymentData = null, client = null) {
     try {
       let query;
       let params;
 
-      // If we have payment data with an OXXO reference, include it in the update
       if (paymentData && paymentData.oxxoReference) {
         query = `
           UPDATE permit_applications
@@ -52,7 +38,6 @@ class PaymentRepository extends BaseRepository {
         params = [orderId, status, applicationId];
       }
 
-      // Use the provided client or the default db connection
       const dbClient = client || db;
       const { rows } = await dbClient.query(query, params);
 
@@ -73,14 +58,6 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Update application status based on payment status
-   * @param {number} applicationId - Application ID
-   * @param {string} status - New application status
-   * @param {Object} paymentData - Payment data (optional)
-   * @param {Object} client - Database client (optional, for transactions)
-   * @returns {Promise<Object>} - Updated application
-   */
   async updatePaymentStatus(applicationId, status, paymentData = {}, client = null) {
     try {
       const query = `
@@ -91,7 +68,6 @@ class PaymentRepository extends BaseRepository {
         RETURNING *
       `;
 
-      // Use the provided client or the default db connection
       const dbClient = client || db;
       const { rows } = await dbClient.query(query, [status, applicationId]);
 
@@ -111,11 +87,6 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find application by Conekta order ID
-   * @param {string} orderId - Conekta order ID
-   * @returns {Promise<Object|null>} - Application or null if not found
-   */
   async findByOrderId(orderId) {
     try {
       const query = `
@@ -131,11 +102,6 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Find application by ID
-   * @param {number} applicationId - Application ID
-   * @returns {Promise<Object|null>} - Application or null if not found
-   */
   async findById(applicationId) {
     try {
       const query = `
@@ -151,12 +117,6 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Get applications with pending payments
-   * @param {number} limit - Maximum number of applications to return
-   * @param {number} offset - Offset for pagination
-   * @returns {Promise<Array>} - Array of applications
-   */
   async getPendingPayments(limit = 10, offset = 0) {
     try {
       const query = `
@@ -179,10 +139,6 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Count applications with pending payments
-   * @returns {Promise<number>} - Count of pending payments
-   */
   async countPendingPayments() {
     try {
       const query = `
@@ -199,24 +155,11 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Log payment event
-   * @param {Object} eventData - Payment event data
-   * @param {number} eventData.applicationId - Application ID
-   * @param {string} eventData.orderId - Conekta order ID
-   * @param {string} eventData.eventType - Event type
-   * @param {Object} eventData.eventData - Event data
-   * @param {Object} client - Database client (optional, for transactions)
-   * @returns {Promise<Object>} - Created log entry
-   */
   async logPaymentEvent(eventData, client = null) {
     try {
       const { applicationId, orderId, eventType, eventData: data } = eventData;
 
-      // Ensure we have valid data to prevent null value constraint violation
       const safeData = data || { empty: true };
-
-      // Generate a fallback order ID if none is provided
       const safeOrderId = orderId || `temp-order-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
 
       const query = `
@@ -226,7 +169,6 @@ class PaymentRepository extends BaseRepository {
         RETURNING *
       `;
 
-      // Use the provided client or the default db connection
       const dbClient = client || db;
       const { rows } = await dbClient.query(query, [
         applicationId,
@@ -247,19 +189,9 @@ class PaymentRepository extends BaseRepository {
     }
   }
 
-  /**
-   * Process payment with transaction
-   * This method wraps the payment processing in a database transaction
-   * to ensure that all database operations are atomic
-   * @param {number} applicationId - Application ID
-   * @param {Object} paymentData - Payment data
-   * @param {Function} paymentProcessor - Function that processes the payment
-   * @returns {Promise<Object>} - Payment result
-   */
   async processPaymentWithTransaction(applicationId, paymentData, paymentProcessor) {
     return withTransaction(async (client) => {
       try {
-        // 1. Update application status to processing payment
         await this.updatePaymentStatus(
           applicationId,
           ApplicationStatus.PROCESSING_PAYMENT,
@@ -267,10 +199,8 @@ class PaymentRepository extends BaseRepository {
           client
         );
 
-        // 2. Process payment with Conekta
         const paymentResult = await paymentProcessor(paymentData);
 
-        // 3. Update application with payment result
         await this.updatePaymentOrder(
           applicationId,
           paymentResult.orderId,
@@ -278,7 +208,6 @@ class PaymentRepository extends BaseRepository {
           client
         );
 
-        // 4. Log payment event
         await this.logPaymentEvent({
           applicationId,
           orderId: paymentResult.orderId,
@@ -294,13 +223,11 @@ class PaymentRepository extends BaseRepository {
 
         return paymentResult;
       } catch (error) {
-        // If there's an error, the transaction will be rolled back automatically
         logger.error('Error processing payment with transaction:', {
           error: error.message,
           applicationId
         });
 
-        // Re-throw the error to be handled by the caller
         throw error;
       }
     });
