@@ -51,8 +51,8 @@ const BeforeMigrationExample: React.FC = () => {
           }}
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Operation Successful</h4>
-          <p style={{ margin: 0 }}>Your changes have been saved.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Operación Exitosa</h4>
+          <p style={{ margin: 0 }}>Sus cambios han sido guardados.</p>
         </div>
         <button
           style={{
@@ -85,8 +85,8 @@ const BeforeMigrationExample: React.FC = () => {
           }}
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Error Occurred</h4>
-          <p style={{ margin: 0 }}>Please try again later.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Error Ocurrido</h4>
+          <p style={{ margin: 0 }}>Por favor intente de nuevo más tarde.</p>
         </div>
         <button
           style={{
@@ -118,8 +118,8 @@ const BeforeMigrationExample: React.FC = () => {
           }}
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Information</h4>
-          <p style={{ margin: 0 }}>This is an informational message.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Información</h4>
+          <p style={{ margin: 0 }}>Este es un mensaje informativo.</p>
         </div>
         <button
           style={{
@@ -160,8 +160,8 @@ const AfterMigrationExample: React.FC = () => {
           className="me-3"
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Operation Successful</h4>
-          <p style={{ margin: 0 }}>Your changes have been saved.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Operación Exitosa</h4>
+          <p style={{ margin: 0 }}>Sus cambios han sido guardados.</p>
         </div>
         <button
           style={{
@@ -193,8 +193,8 @@ const AfterMigrationExample: React.FC = () => {
           className="me-3"
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Error Occurred</h4>
-          <p style={{ margin: 0 }}>Please try again later.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Error Ocurrido</h4>
+          <p style={{ margin: 0 }}>Por favor intente de nuevo más tarde.</p>
         </div>
         <button
           style={{
@@ -225,8 +225,8 @@ const AfterMigrationExample: React.FC = () => {
           className="me-3"
         />
         <div>
-          <h4 style={{ margin: '0 0 4px 0' }}>Information</h4>
-          <p style={{ margin: 0 }}>This is an informational message.</p>
+          <h4 style={{ margin: '0 0 4px 0' }}>Información</h4>
+          <p style={{ margin: 0 }}>Este es un mensaje informativo.</p>
         </div>
         <button
           style={{

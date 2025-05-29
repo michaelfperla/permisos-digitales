@@ -51,15 +51,15 @@ exports.isAdminPortal = (req, res, next) => {
   }
   if (req.session.accountType !== 'admin') {
     logger.warn(`Admin portal access denied: Not an admin account - UserId: ${req.session.userId}`);
-    return ApiResponse.forbidden(res, 'Admin access required');
+    return ApiResponse.forbidden(res, 'Se requiere acceso de administrador');
   }
   if (req.session.isAdminPortal !== true) {
     logger.warn(`Admin portal access denied: Admin account missing portal flag - UserId: ${req.session.userId}`);
-    return ApiResponse.forbidden(res, 'Access denied. Please use the correct portal login.');
+    return ApiResponse.forbidden(res, 'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.');
   }
   // Fallback for unexpected cases
   logger.error('Admin portal check reached unexpected state.');
-  return ApiResponse.forbidden(res, 'Access denied.');
+  return ApiResponse.forbidden(res, 'Acceso denegado.');
 };
 
 // Security middleware to verify client-only routes
@@ -82,7 +82,7 @@ exports.isClient = (req, res, next) => {
 
   // Unknown account type
   logger.warn(`Unknown account type: ${req.session.accountType}`);
-  return ApiResponse.forbidden(res, 'Invalid account type');
+  return ApiResponse.forbidden(res, 'Tipo de cuenta inválido');
 };
 
 // Logs general API access attempts for authenticated users to the main application log (e.g., console, application.log).

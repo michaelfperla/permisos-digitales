@@ -139,8 +139,8 @@ describe('Error Handler Middleware', () => {
   it('should include validation errors in the response', () => {
     // Arrange
     const validationErrors = [
-      { field: 'email', message: 'Invalid email format' },
-      { field: 'password', message: 'Password too short' }
+      { field: 'email', message: 'Formato de correo electrónico inválido' },
+      { field: 'password', message: 'Contraseña muy corta' }
     ];
     const error = new Error('Los datos no son válidos');
     error.errors = validationErrors;

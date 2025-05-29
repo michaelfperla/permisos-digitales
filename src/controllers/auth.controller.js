@@ -192,7 +192,7 @@ exports.login = async (req, res, next) => {
       logger.warn(`[Login Controller] Login attempt failed: User not found for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( null, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'user_not_found' });
-      return ApiResponse.unauthorized(res, 'Invalid email or password.');
+      return ApiResponse.unauthorized(res, 'Correo electrónico o contraseña incorrectos.');
     }
 
     const user = rows[0];
@@ -235,12 +235,12 @@ exports.login = async (req, res, next) => {
     if (isAdminPortal && (user.account_type !== 'admin' || user.is_admin_portal !== true)) {
       logger.warn(`Login attempt failed: Account ${email} attempted admin portal access without proper permissions`);
       await securityService.logActivity( user.id, 'unauthorized_portal_access', req.ip, req.headers['user-agent'], { email, attempted_portal: 'admin' });
-      return ApiResponse.forbidden(res, 'Access Denied: Administrator privileges required for this portal.');
+      return ApiResponse.forbidden(res, 'Acceso denegado: Se requieren privilegios de administrador para este portal.');
     }
     if (!isAdminPortal && user.account_type === 'admin') {
       logger.warn(`Login attempt failed: Admin account ${email} attempted client portal access`);
       await securityService.logActivity( user.id, 'unauthorized_portal_access', req.ip, req.headers['user-agent'], { email, attempted_portal: 'client' });
-      return ApiResponse.forbidden(res, 'Access Denied: Admin accounts must use the admin portal.');
+      return ApiResponse.forbidden(res, 'Acceso denegado: Las cuentas de administrador deben usar el portal de administración.');
     }
 
     // Verify password
@@ -259,14 +259,14 @@ exports.login = async (req, res, next) => {
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity(user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'password_verify_error' });
       // Return generic unauthorized for security, don't expose internal error details
-      return ApiResponse.unauthorized(res, 'Authentication error occurred.');
+      return ApiResponse.unauthorized(res, 'Ocurrió un error de autenticación.');
     }
 
     if (!isMatch) {
       logger.warn(`[Login Controller] Login attempt failed: Invalid password for email ${email}`);
       await authSecurity.recordFailedAttempt(email);
       await securityService.logActivity( user.id, 'failed_login', req.ip, req.headers['user-agent'], { email, reason: 'invalid_password' });
-      return ApiResponse.unauthorized(res, 'Invalid email or password.');
+      return ApiResponse.unauthorized(res, 'Correo electrónico o contraseña incorrectos.');
     }
 
     logger.debug(`[Login Controller] Password verified successfully for user ${email}`);
@@ -288,7 +288,7 @@ exports.login = async (req, res, next) => {
         });
         // Destroy potentially partially populated session data if regenerate fails
         for (let key in req.session) { if (key !== 'cookie') delete req.session[key]; }
-        return next(createError('Session initialization failed during login.', 500)); // Use createError helper
+        return next(createError('Error al inicializar la sesión durante el inicio de sesión.', 500)); // Use createError helper
       }
 
       logger.debug(`[Login Controller] Session regenerated successfully for user ${email}, new session ID: ${req.session.id}`);
@@ -361,7 +361,7 @@ exports.login = async (req, res, next) => {
             sessionId: req.session.id
           }
         }
-      }, 200, 'Login successful!'); // Consistent message
+      }, 200, '¡Inicio de sesión exitoso!'); // Consistent message
     });
   } catch (error) {
     // Catch errors from DB queries, security checks etc. before regenerate
@@ -393,12 +393,12 @@ exports.logout = (req, res, next) => {
     if (err) {
       logger.error(`Session destruction error for user ID ${userId || 'N/A'}:`, err);
       // Avoid sending response after error passed to next
-      return next(createError('Failed to log out properly.', 500));
+      return next(createError('Error al cerrar sesión correctamente.', 500));
     }
     logger.info(`User logged out successfully: ID ${userId || 'N/A'}`);
     // Ensure cookie is cleared (adjust 'connect.sid' if using different name)
     res.clearCookie('connect.sid', { path: '/' }); // Add path etc. if needed
-    ApiResponse.success(res, null, 200, 'Logout successful.');
+    ApiResponse.success(res, null, 200, 'Cierre de sesión exitoso.');
   });
 };
 
@@ -609,7 +609,7 @@ exports.changePassword = async (req, res, next) => {
   // Check if user is authenticated
   if (!userId) {
     logger.warn('Change password attempt without authentication');
-    return ApiResponse.unauthorized(res, 'You must be logged in to change your password.');
+    return ApiResponse.unauthorized(res, 'Debes iniciar sesión para cambiar tu contraseña.');
   }
 
   const { currentPassword, newPassword } = req.body;
@@ -625,9 +625,9 @@ exports.changePassword = async (req, res, next) => {
 
       // Determine appropriate status code based on the error
       if (result.reason === 'INVALID_CURRENT_PASSWORD') {
-        return ApiResponse.unauthorized(res, result.message || 'Current password is incorrect.');
+        return ApiResponse.unauthorized(res, result.message || 'La contraseña actual es incorrecta.');
       } else {
-        return ApiResponse.badRequest(res, result.message || 'Failed to change password.');
+        return ApiResponse.badRequest(res, result.message || 'Error al cambiar la contraseña.');
       }
     }
 
@@ -641,7 +641,7 @@ exports.changePassword = async (req, res, next) => {
     );
 
     logger.info(`Password changed successfully for user ID: ${userId}`);
-    return ApiResponse.success(res, null, 200, 'Password changed successfully.');
+    return ApiResponse.success(res, null, 200, 'Contraseña cambiada exitosamente.');
   } catch (error) {
     handleControllerError(error, 'changePassword', req, res, next);
   }

@@ -277,21 +277,21 @@ const LoginPage: React.FC = () => {
   if (USE_SIMPLE_RENDERING) {
     return (
       <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto' }}>
-        <h1>Login Page Test</h1>
-        <p>Authentication Status: {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</p>
-        <p>Loading Status: {isAuthLoading ? 'Loading' : 'Not Loading'}</p>
+        <h1>Prueba de Página de Inicio de Sesión</h1>
+        <p>Estado de Autenticación: {isAuthenticated ? 'Autenticado' : 'No Autenticado'}</p>
+        <p>Estado de Carga: {isAuthLoading ? 'Cargando' : 'No Cargando'}</p>
         <form
           onSubmit={handleSubmit(onSubmit)}
           style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
         >
-          <input type="email" placeholder="Email" required {...register('email')} />
-          <input type="password" placeholder="Password" required {...register('password')} />
+          <input type="email" placeholder="Correo electrónico" required {...register('email')} />
+          <input type="password" placeholder="Contraseña" required {...register('password')} />
           <Button
             variant="primary"
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : 'Login'}
+            {isLoading ? 'Procesando...' : 'Iniciar Sesión'}
           </Button>
           {error && (
             <div style={{ color: error.includes('successful') ? 'green' : 'red' }}>{error}</div>
