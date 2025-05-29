@@ -113,7 +113,7 @@ app.use(metricsMiddleware); // Add metrics collection
 if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
     // Only monitor specific routes for debugging
-    if (req.path === '/api/user/profile' && req.method === 'PUT') {
+    if (req.path === '/user/profile' && req.method === 'PUT') {
       const originalEnd = res.end;
 
       res.end = function(...args) {
@@ -159,14 +159,14 @@ app.use(session({
     httpOnly: true,
     sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax', // Use lax in development for cross-origin
     maxAge: 1000 * 60 * 60, // Example: 1 hour activity timeout
-    // domain: config.nodeEnv === 'production' ? '.yourdomain.com' : undefined // Set domain in production
+    domain: config.nodeEnv === 'production' ? '.permisosdigitales.com.mx' : undefined // Set domain in production
   }
 }));
 
 // --- Session Absolute Timeout Middleware ---
 app.use((req, res, next) => {
   // Debug logging for development only
-  if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+  if (process.env.NODE_ENV === 'development' && req.path === '/user/profile' && req.method === 'PUT') {
     logger.debug(`[SessionTimeout] Checking session timeout for ${req.path}. Session ID: ${req.session?.id}, User ID: ${req.session?.userId}`);
   }
 
@@ -194,14 +194,14 @@ app.use((req, res, next) => {
         }
       });
     } else {
-      if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+      if (process.env.NODE_ENV === 'development' && req.path === '/user/profile' && req.method === 'PUT') {
         logger.debug(`[SessionTimeout] Session is valid (age: ${sessionAge}ms). Continuing to next middleware.`);
       }
       next(); // Session is valid
     }
   } else {
     // Set creation time for new sessions if needed (often handled by store)
-    if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+    if (process.env.NODE_ENV === 'development' && req.path === '/user/profile' && req.method === 'PUT') {
       logger.debug(`[SessionTimeout] No session createdAt timestamp found. Session ID: ${req.session?.id}`);
     }
     next();
@@ -246,12 +246,12 @@ const ApiResponse = require('./utils/api-response');
 // CSRF token endpoint is defined in auth.routes.js
 // Removed duplicate endpoint to avoid conflicts
 
-// Mount main API routes with rate limiting
-app.use('/api', limiters.api, apiRoutes);
+// Mount main API routes with rate limiting (industry standard: clean subdomain routing)
+app.use('/', limiters.api, apiRoutes);
 
 // Apply specific rate limiters to specific routes
-app.use('/api/auth', limiters.auth);
-app.use('/api/admin', limiters.admin);
+app.use('/auth', limiters.auth);
+app.use('/admin', limiters.admin);
 
 
 // =========================================
@@ -311,10 +311,29 @@ app.get(['/admin', '/admin/*'], (req, res) => {
 // allowing client-side routing (like react-router or our hash router) to take over.
 
 // Catch-all route handler for HTML requests
+// IMPORTANT: This should only serve frontend files when the request is NOT for an API endpoint
 app.get('*', (req, res, next) => {
-  // Simple check: If it's not an API request (doesn't start with /api)
-  // and accepts HTML, serve the SPA shell.
-  if (!req.path.startsWith('/api') && req.accepts('html')) {
+  // Skip serving frontend for API routes - let them 404 properly if not found
+  // This is critical for industry standard clean subdomain routing
+  const isApiRoute = req.path.startsWith('/auth') ||
+                     req.path.startsWith('/applications') ||
+                     req.path.startsWith('/user') ||
+                     req.path.startsWith('/admin') ||
+                     req.path.startsWith('/payments') ||
+                     req.path.startsWith('/notifications') ||
+                     req.path.startsWith('/status') ||
+                     req.path.startsWith('/health') ||
+                     req.path.startsWith('/metrics') ||
+                     req.path.startsWith('/debug');
+
+  if (isApiRoute) {
+    // Let API routes handle themselves (or 404 if not found)
+    next();
+    return;
+  }
+
+  // For non-API requests that accept HTML, serve the SPA shell
+  if (req.accepts('html')) {
     res.sendFile(path.join(__dirname, '../frontend/index.html'), (err) => {
       if (err) {
         // Handle potential error sending the file (e.g., file not found)
@@ -325,7 +344,7 @@ app.get('*', (req, res, next) => {
       }
     });
   } else {
-    // If it's not an API request but doesn't accept HTML (e.g., browser asking for sourcemap),
+    // If it doesn't accept HTML (e.g., browser asking for sourcemap),
     // or for any other unhandled case, let it proceed (likely to 404 or error handler).
     next();
   }
