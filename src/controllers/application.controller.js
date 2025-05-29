@@ -1,18 +1,14 @@
 // src/controllers/application.controller.js
 const path = require('path');
-const fs = require('fs'); // Use synchronous existsSync for check before response
 const puppeteerService = require('../services/puppeteer.service');
-const applicationService = require('../services/application.service');
 const paymentService = require('../services/payment.service');
 const pdfService = require('../services/pdf-service');
 const storageService = require('../services/storage/storage-service');
-const pdfStorageService = require('../services/storage/pdf-storage-service');
 const { logger } = require('../utils/enhanced-logger');
 const { handleControllerError, createError } = require('../utils/error-helpers');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants');
 const { applicationRepository, paymentRepository } = require('../repositories');
-const db = require('../db'); // Add database connection
-const config = require('../config');
+const db = require('../db');
 
 // --- CREATE APPLICATION FUNCTION ---
 exports.createApplication = async (req, res, next) => {

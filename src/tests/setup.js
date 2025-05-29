@@ -87,26 +87,7 @@ jest.mock('nodemailer', () => ({
   }))
 }));
 
-// Mock multer
-jest.mock('multer', () => {
-  const multerMock = {
-    single: jest.fn().mockReturnValue((req, res, next) => {
-      req.file = req.file || {
-        fieldname: 'file',
-        originalname: 'test.pdf',
-        encoding: '7bit',
-        mimetype: 'application/pdf',
-        destination: '/tmp/uploads',
-        filename: 'test-123456.pdf',
-        path: '/tmp/uploads/test-123456.pdf',
-        size: 12345
-      };
-      next();
-    }),
-    diskStorage: jest.fn().mockReturnValue({})
-  };
-  return jest.fn().mockImplementation(() => multerMock);
-});
+// Multer is no longer used in the codebase
 
 // Create a helper to reset all mocks between tests
 global.resetAllMocks = () => {

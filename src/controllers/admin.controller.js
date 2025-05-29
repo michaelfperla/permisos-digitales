@@ -1,10 +1,5 @@
 // src/controllers/admin.controller.js
-const path = require('path');
-const fs = require('fs');
-const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
-const puppeteerService = require('../services/puppeteer.service');
-const { ApplicationStatus } = require('../constants');
 const ApiResponse = require('../utils/api-response');
 const applicationRepository = require('../repositories/application.repository');
 

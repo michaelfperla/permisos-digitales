@@ -195,8 +195,12 @@ export const getAllApplications = async (
     if (searchTerm) params.search = searchTerm;
 
     const response = await api.get<any>('/applications', { params });
-    console.log('[getAllApplications] Raw API response:', response.data); // Temporarily changed to log for debugging
-    console.log('[getAllApplications] Request params:', params); // Temporarily changed to log for debugging
+
+    // Debug logging for development only
+    if (import.meta.env.DEV) {
+      console.debug('[getAllApplications] Raw API response:', response.data);
+      console.debug('[getAllApplications] Request params:', params);
+    }
 
     // Check for ApiResponse.success format: { success: true, data: { applications: [...], total: X, page: Y, limit: Z, totalPages: W } }
     if (response.data?.success && response.data?.data) {

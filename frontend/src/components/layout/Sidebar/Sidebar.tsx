@@ -3,8 +3,8 @@ import { FaHome, FaClipboardList, FaUser, FaInfoCircle, FaQuestionCircle } from 
 import { NavLink } from 'react-router-dom';
 
 import styles from './Sidebar.module.css';
-import { useUserAuth } from '../../../shared/hooks/useAuth';
 import Icon from '../../../shared/components/ui/Icon';
+import { useUserAuth } from '../../../shared/hooks/useAuth';
 
 interface SidebarProps {
   isMobileView: boolean;

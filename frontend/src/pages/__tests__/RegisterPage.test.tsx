@@ -4,9 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import components and mocked service after mocks are defined
+import authService from '../../services/authService'; // Import the mocked service
 import { AuthProvider } from '../../shared/contexts/AuthContext';
 import { ToastProvider } from '../../shared/contexts/ToastContext';
-import authService from '../../services/authService'; // Import the mocked service
 import RegisterPage from '../RegisterPage';
 
 // --- Mocking Dependencies ---

@@ -3,7 +3,7 @@
  * Handles payment-related API requests
  */
 const { logger } = require('../utils/enhanced-logger');
-const { handleControllerError, createError } = require('../utils/error-helpers');
+const { handleControllerError } = require('../utils/error-helpers');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants/index');
 const { paymentRepository, applicationRepository } = require('../repositories');
 const { paymentService } = require('../services');

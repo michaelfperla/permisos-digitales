@@ -102,7 +102,6 @@ describe('CSRF Token Test', () => {
 
     // Store the CSRF token for the next test
     csrfToken = response.body.data.csrfToken;
-    console.log(`CSRF Token: ${csrfToken}`);
   });
 
   it('should accept a request with a valid CSRF token', async () => {
@@ -115,7 +114,6 @@ describe('CSRF Token Test', () => {
       .expect(200);
 
     const token = tokenResponse.body.data.csrfToken;
-    console.log(`Using CSRF Token: ${token}`);
 
     // Now use the token in a request with the same agent
     const response = await agent

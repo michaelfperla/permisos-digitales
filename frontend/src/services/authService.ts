@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 import { api } from './api'; // Use the main API instance with CSRF interceptor
-import { debugLog, errorLog } from '../utils/debug';
 import { getCsrfToken } from '../utils/csrf';
+import { debugLog, errorLog } from '../utils/debug';
 
 // Define types for our API responses and requests
 interface RegisterRequest {

@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 
-import { ApplicationFormRawData, ApplicationFormData } from '../types/application.types';
+import { ApplicationFormRawData } from '../types/application.types';
 import {
   validateFullName,
   validateCurpRfc,

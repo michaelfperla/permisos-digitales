@@ -8,8 +8,8 @@ import App from './App';
 import authService from './services/authService';
 import { AuthProvider } from './shared/contexts/AuthContext';
 import { ToastProvider } from './shared/contexts/ToastContext';
-import { setupGlobalErrorHandler, debugLog, errorLog } from './utils/debug';
 import { getCsrfToken } from './utils/csrf';
+import { setupGlobalErrorHandler, debugLog, errorLog } from './utils/debug';
 
 import './styles/global.css'; // Import global styles
 

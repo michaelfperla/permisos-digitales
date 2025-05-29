@@ -1,13 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
 import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
+import Card from '../components/ui/Card/Card';
 import TextLogo from '../components/ui/TextLogo/TextLogo';
 import useResponsive from '../hooks/useResponsive';
-import Card from '../components/ui/Card/Card';
 import Icon from '../shared/components/ui/Icon/Icon';
 
 const ContactPage: React.FC = () => {

@@ -1,12 +1,12 @@
 import React from 'react';
 
-import styles from '../../layouts/AuthLayout.module.css';
 import AppHeaderMobile, {
   NavLinkItem,
 } from '../../components/navigation/AppHeaderMobile/AppHeaderMobile';
 import Card from '../../components/ui/Card/Card';
 import TextLogo from '../../components/ui/TextLogo/TextLogo';
 import useResponsive from '../../hooks/useResponsive';
+import styles from '../../layouts/AuthLayout.module.css';
 
 interface AdminAuthLayoutProps {
   children: React.ReactNode;

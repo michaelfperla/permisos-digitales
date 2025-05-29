@@ -1,7 +1,7 @@
 // src/controllers/user.controller.js
 const userService = require('../services/user.service');
 const { logger } = require('../utils/enhanced-logger');
-const { handleControllerError, createError } = require('../utils/error-helpers');
+const { handleControllerError } = require('../utils/error-helpers');
 const ApiResponse = require('../utils/api-response');
 
 /**
@@ -93,18 +93,15 @@ exports.updateProfile = async (req, res, next) => {
     // if (updatedUser.email && email) req.session.userEmail = updatedUser.email; // Be careful if email shouldn't change
     req.session.accountType = updatedUser.account_type || req.session.accountType; // Ensure accountType persists
 
-    console.log(`[userController.updateProfile] DEBUG: Session updated. New name: ${req.session.userName} ${req.session.userLastName}`);
-
     try {
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve, _reject) => {
         req.session.save(err => {
           if (err) {
             logger.error(`[userController.updateProfile] Error saving session: ${err}`);
-            // Decide how to handle - maybe reject or allow response anyway?
-            // For now, let's log and continue to send success, as DB was updated.
-            resolve(); // Resolve even on save error for this test
+            // Resolve even on save error since DB was updated successfully
+            resolve();
           } else {
-            console.log(`[userController.updateProfile] DEBUG: Session explicitly saved. Session ID: ${req.session.id}`);
+            logger.debug(`Session explicitly saved. Session ID: ${req.session.id}`);
             resolve();
           }
         });
@@ -114,20 +111,12 @@ exports.updateProfile = async (req, res, next) => {
       logger.error(`[userController.updateProfile] Exception during session save promise: ${saveError}`);
     }
 
-    // Log before sending the response
-    console.log(`[userController.updateProfile] DEBUG: About to send success response for user ${userId}. Session ID: ${req.session.id}`);
-
     // Return success response
-    const result = ApiResponse.success(res,
+    return ApiResponse.success(res,
       null,
       200,
       'Perfil actualizado exitosamente.'
     );
-
-    // This might not execute if res.json() ends the request cycle
-    console.log(`[userController.updateProfile] DEBUG: Success response sent for user ${userId}. Session still exists? ID: ${req.session?.id}`);
-
-    return result;
   } catch (error) {
     handleControllerError(error, 'updateProfile', req, res, next, {
       errorMappings: {

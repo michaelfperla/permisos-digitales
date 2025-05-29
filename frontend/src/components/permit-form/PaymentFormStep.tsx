@@ -8,10 +8,10 @@ import {
 } from 'react-icons/fa';
 
 import styles from './CompleteForm.module.css';
+import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../../constants';
 import Icon from '../../shared/components/ui/Icon';
 import TestCardInfo from '../payment/TestCardInfo';
 import Button from "../ui/Button/Button";
-import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../../constants';
 
 // Define Conekta types for TypeScript
 declare global {

@@ -4,10 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Import components and mocked services after mocks are defined
-import { AuthProvider } from '../../shared/contexts/AuthContext';
-import { ToastProvider } from '../../shared/contexts/ToastContext';
 import applicationService, { Application } from '../../services/applicationService';
 import authService from '../../services/authService';
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import PermitDetailsPage from '../PermitDetailsPage';
 import styles from '../PermitDetailsPage.module.css';
 
@@ -44,7 +44,7 @@ global.URL.createObjectURL = vi.fn(() => 'mock-url');
 global.URL.revokeObjectURL = vi.fn();
 
 // Create mock application data for different statuses
-const createMockApplication = (status: string, overrides = {}): Application => ({
+const _createMockApplication = (status: string, overrides = {}): Application => ({
   id: '123',
   user_id: '456',
   status: status as any,

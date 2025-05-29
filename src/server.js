@@ -25,30 +25,32 @@ const sessionStore = new PgSession({
   tableName: 'user_sessions', // Make sure this matches your DB table name
 });
 
-// Add logging to session store methods
-const originalDestroy = sessionStore.destroy.bind(sessionStore);
-sessionStore.destroy = function(sid, callback) {
-  console.error(`[SessionStore] Attempting to DESTROY session: ${sid}, Stack:`, new Error().stack);
-  return originalDestroy(sid, callback);
-};
+// Session store logging only in development
+if (process.env.NODE_ENV === 'development') {
+  const originalDestroy = sessionStore.destroy.bind(sessionStore);
+  sessionStore.destroy = function(sid, callback) {
+    logger.debug(`[SessionStore] Destroying session: ${sid}`);
+    return originalDestroy(sid, callback);
+  };
 
-const originalSet = sessionStore.set.bind(sessionStore);
-sessionStore.set = function(sid, sess, callback) {
-  console.log(`[SessionStore] Attempting to SET session: ${sid}, User: ${sess.userId || 'none'}`);
-  return originalSet(sid, sess, callback);
-};
+  const originalSet = sessionStore.set.bind(sessionStore);
+  sessionStore.set = function(sid, sess, callback) {
+    logger.debug(`[SessionStore] Setting session: ${sid}, User: ${sess.userId || 'none'}`);
+    return originalSet(sid, sess, callback);
+  };
 
-const originalGet = sessionStore.get.bind(sessionStore);
-sessionStore.get = function(sid, callback) {
-  console.log(`[SessionStore] Attempting to GET session: ${sid}`);
-  return originalGet(sid, callback);
-};
+  const originalGet = sessionStore.get.bind(sessionStore);
+  sessionStore.get = function(sid, callback) {
+    logger.debug(`[SessionStore] Getting session: ${sid}`);
+    return originalGet(sid, callback);
+  };
 
-const originalTouch = sessionStore.touch.bind(sessionStore);
-sessionStore.touch = function(sid, sess, callback) {
-  console.log(`[SessionStore] Attempting to TOUCH session: ${sid}, User: ${sess.userId || 'none'}`);
-  return originalTouch(sid, sess, callback);
-};
+  const originalTouch = sessionStore.touch.bind(sessionStore);
+  sessionStore.touch = function(sid, sess, callback) {
+    logger.debug(`[SessionStore] Touching session: ${sid}, User: ${sess.userId || 'none'}`);
+    return originalTouch(sid, sess, callback);
+  };
+}
 
 // --- Initialize Express App ---
 const app = express();
@@ -102,10 +104,10 @@ app.use((req, _res, next) => { httpContext.set('requestId', req.id); next(); });
 app.use(correlationMiddleware); // Set correlation IDs and log requests
 app.use(metricsMiddleware); // Add metrics collection
 
-// Add response finish event listener for debugging session issues (development only)
-if (process.env.NODE_ENV !== 'production') {
+// Response monitoring for debugging (development only)
+if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
-    // Only monitor specific routes
+    // Only monitor specific routes for debugging
     if (req.path === '/api/user/profile' && req.method === 'PUT') {
       const originalEnd = res.end;
 
@@ -113,14 +115,14 @@ if (process.env.NODE_ENV !== 'production') {
         // Call the original end method
         originalEnd.apply(res, args);
 
-        // Log after response is sent
-        console.log(`[ResponseFinish] ${req.method} ${req.path} completed with status ${res.statusCode}. Session ID: ${req.session?.id}`);
+        // Log after response is sent using proper logger
+        logger.debug(`[ResponseFinish] ${req.method} ${req.path} completed with status ${res.statusCode}. Session ID: ${req.session?.id}`);
 
         // Check if session still exists
         if (req.session) {
-          console.log(`[ResponseFinish] Session still exists after response. User ID: ${req.session.userId}`);
+          logger.debug(`[ResponseFinish] Session still exists after response. User ID: ${req.session.userId}`);
         } else {
-          console.log('[ResponseFinish] Session was destroyed during or after response!');
+          logger.debug('[ResponseFinish] Session was destroyed during or after response!');
         }
       };
     }
@@ -156,29 +158,27 @@ app.use(session({
   }
 }));
 
-// --- Session Absolute Timeout Middleware (Optional) ---
+// --- Session Absolute Timeout Middleware ---
 app.use((req, res, next) => {
-  // Log for debugging session issues with profile update
-  if (req.path === '/api/user/profile' && req.method === 'PUT') {
-    console.log(`[SessionTimeout] Checking session timeout for ${req.path}. Session ID: ${req.session?.id}, User ID: ${req.session?.userId}`);
+  // Debug logging for development only
+  if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+    logger.debug(`[SessionTimeout] Checking session timeout for ${req.path}. Session ID: ${req.session?.id}, User ID: ${req.session?.userId}`);
   }
 
   if (req.session && req.session.createdAt) {
     const now = Date.now();
     const createdAt = new Date(req.session.createdAt).getTime();
     const sessionAge = now - createdAt;
-    const absoluteTimeout = 1000 * 60 * 60 * 8; // Example: 8 hours absolute timeout
+    const absoluteTimeout = 1000 * 60 * 60 * 8; // 8 hours absolute timeout
 
     if (sessionAge > absoluteTimeout) {
       logger.info(`Session expired due to absolute timeout for user ID: ${req.session.userId}`);
-      console.log(`[SessionTimeout] Session expired due to absolute timeout. Session ID: ${req.session.id}, User ID: ${req.session.userId}, Path: ${req.path}`);
 
       req.session.destroy(err => {
         if (err) {
           logger.error('Error destroying expired session:', err);
-          console.error('[SessionTimeout] Error destroying expired session:', err);
         } else {
-          console.log(`[SessionTimeout] Successfully destroyed expired session ID: ${req.session?.id}`);
+          logger.debug(`Successfully destroyed expired session ID: ${req.session?.id}`);
         }
 
         // Respond consistently for API vs HTML requests
@@ -189,16 +189,15 @@ app.use((req, res, next) => {
         }
       });
     } else {
-      if (req.path === '/api/user/profile' && req.method === 'PUT') {
-        console.log(`[SessionTimeout] Session is valid (age: ${sessionAge}ms). Continuing to next middleware.`);
+      if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+        logger.debug(`[SessionTimeout] Session is valid (age: ${sessionAge}ms). Continuing to next middleware.`);
       }
       next(); // Session is valid
     }
   } else {
     // Set creation time for new sessions if needed (often handled by store)
-    // if (req.session && !req.session.createdAt) { req.session.createdAt = new Date(); }
-    if (req.path === '/api/user/profile' && req.method === 'PUT') {
-      console.log(`[SessionTimeout] No session createdAt timestamp found. Session ID: ${req.session?.id}`);
+    if (process.env.NODE_ENV === 'development' && req.path === '/api/user/profile' && req.method === 'PUT') {
+      logger.debug(`[SessionTimeout] No session createdAt timestamp found. Session ID: ${req.session?.id}`);
     }
     next();
   }

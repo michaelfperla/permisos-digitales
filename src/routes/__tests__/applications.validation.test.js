@@ -3,19 +3,6 @@
  * These tests focus specifically on the validation rules for the application routes
  */
 
-// Mock multer before importing any modules that use it
-jest.mock('multer', () => {
-  return function() {
-    return {
-      single: () => (req, res, next) => next(),
-      array: () => (req, res, next) => next(),
-      fields: () => (req, res, next) => next(),
-      none: () => (req, res, next) => next(),
-      any: () => (req, res, next) => next()
-    };
-  };
-});
-
 // Upload functionality removed since app no longer needs document uploads
 
 const request = require('supertest');

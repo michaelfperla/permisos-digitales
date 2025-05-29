@@ -4,10 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Import components and mocked services after mocks
-import { AuthProvider } from '../../shared/contexts/AuthContext';
-import { ToastProvider } from '../../shared/contexts/ToastContext';
 import applicationService, { Application, ApplicationStatus } from '../../services/applicationService';
 import authService from '../../services/authService';
+import { AuthProvider } from '../../shared/contexts/AuthContext';
+import { ToastProvider } from '../../shared/contexts/ToastContext';
 import DashboardPage from '../UserDashboardPage';
 
 // --- Mocking Dependencies ---

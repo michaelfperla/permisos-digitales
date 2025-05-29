@@ -38,7 +38,7 @@ exports.requestReset = async (req, res, next) => {
     }
 
     // Request password reset
-    const success = await passwordResetService.requestPasswordReset(email);
+    await passwordResetService.requestPasswordReset(email);
 
     // Log the activity
     await securityService.logActivity(

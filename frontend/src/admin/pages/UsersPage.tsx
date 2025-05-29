@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import styles from './UsersPage.module.css';
 import Button from '../../components/ui/Button/Button';
 import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
-import Icon from '../../shared/components/ui/Icon';
 import useResponsive from '../../hooks/useResponsive';
+import Icon from '../../shared/components/ui/Icon';
 import { useToast } from '../../shared/hooks/useToast';
 import adminService, { AdminUserListItem, PaginatedUsers } from '../services/adminService';
 
