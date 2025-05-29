@@ -98,7 +98,7 @@ exports.createApplication = async (req, res, next) => {
 
           if (userRows.length === 0) {
             logger.error(`User ${userId} not found in database`);
-            throw new Error('User not found');
+            throw new Error('Usuario no encontrado');
           }
 
           const user = userRows[0];
@@ -232,7 +232,7 @@ exports.createApplication = async (req, res, next) => {
 
       if (userRows.length === 0) {
         logger.error(`User ${userId} not found in database`);
-        throw new Error('User not found');
+        throw new Error('Usuario no encontrado');
       }
 
       const user = userRows[0];
@@ -627,7 +627,7 @@ exports.getApplicationStatus = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
 
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid application ID format' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido' });
   }
 
   try {
@@ -797,17 +797,17 @@ exports.downloadPermit = async (req, res, next) => {
   // --- Input Validation ---
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`Download failed: Invalid Application ID format ${req.params.id}`);
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
   if (!userId) {
     // Should be caught by middleware, but double-check
     logger.warn(`Download failed: User not authenticated for AppID ${applicationId}`);
-    return res.status(401).json({ message: 'Unauthorized.' });
+    return res.status(401).json({ message: 'No autorizado.' });
   }
   const allowedTypes = ['permiso', 'recibo', 'certificado', 'placas'];
   if (!requestedTypeParam || !allowedTypes.includes(requestedTypeParam.toLowerCase())) {
     logger.warn(`Download failed: Invalid document type requested '${requestedTypeParam}' for AppID ${applicationId}`);
-    return res.status(400).json({ message: `Invalid document type. Allowed types: ${allowedTypes.join(', ')}` });
+    return res.status(400).json({ message: `Tipo de documento inválido. Tipos permitidos: ${allowedTypes.join(', ')}` });
   }
 
   // --- Determine DB column and filename prefix based on validated type ---
@@ -848,7 +848,7 @@ exports.downloadPermit = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`Download failed: Application ${applicationId} not found.`);
-      return res.status(404).json({ message: 'Application not found.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada.' });
     }
     const app = rows[0];
     logger.debug(`DB Result for App ${applicationId}:`, { status: app.status, permit_path: app.permit_file_path, recibo_path: app.recibo_file_path, cert_path: app.certificado_file_path }); // Log relevant parts
@@ -856,7 +856,7 @@ exports.downloadPermit = async (req, res, next) => {
     // --- Check Ownership ---
     if (app.user_id !== userId) {
       logger.warn(`Security Alert: User ${userId} tried to download ${requestedType} for permit ${applicationId} owned by user ${app.user_id}.`);
-      return res.status(403).json({ message: 'Forbidden: You do not own this application.' });
+      return res.status(403).json({ message: 'Prohibido: No eres propietario de esta solicitud.' });
     }
 
     // --- Extract Correct File Path from DB Result ---
@@ -944,11 +944,11 @@ exports.getPdfUrl = async (req, res, next) => {
   // Input Validation
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`PDF URL request failed: Invalid Application ID format ${req.params.id}`);
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
   if (!userId) {
     logger.warn(`PDF URL request failed: User not authenticated for AppID ${applicationId}`);
-    return res.status(401).json({ message: 'Unauthorized.' });
+    return res.status(401).json({ message: 'No autorizado.' });
   }
 
   try {
@@ -963,7 +963,7 @@ exports.getPdfUrl = async (req, res, next) => {
     // requestedType is already defined above
     if (!typeMapping[requestedType]) {
       logger.warn(`PDF URL request failed: Invalid document type '${requestedTypeParam}' for App ${applicationId}`);
-      return res.status(400).json({ message: `Invalid document type: ${requestedTypeParam}` });
+      return res.status(400).json({ message: `Tipo de documento inválido: ${requestedTypeParam}` });
     }
 
     const { dbColumn, displayName } = typeMapping[requestedType];
@@ -978,7 +978,7 @@ exports.getPdfUrl = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`PDF URL request failed: Application ${applicationId} not found`);
-      return res.status(404).json({ message: 'Application not found.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada.' });
     }
 
     const app = rows[0];
@@ -986,7 +986,7 @@ exports.getPdfUrl = async (req, res, next) => {
     // Check ownership
     if (app.user_id !== userId) {
       logger.warn(`PDF URL request failed: User ${userId} does not own Application ${applicationId}`);
-      return res.status(403).json({ message: 'Access denied. This application does not belong to you.' });
+      return res.status(403).json({ message: 'Acceso denegado. Esta solicitud no te pertenece.' });
     }
 
     // Extract file path from database
@@ -1049,7 +1049,7 @@ exports.updateApplication = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
 
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid application ID format' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido' });
   }
 
   try {
@@ -1061,7 +1061,7 @@ exports.updateApplication = async (req, res, next) => {
 
     if (rows.length === 0) {
       return res.status(404).json({
-        message: 'Application not found or does not belong to the current user'
+        message: 'Solicitud no encontrada o no pertenece al usuario actual'
       });
     }
 
@@ -1069,7 +1069,7 @@ exports.updateApplication = async (req, res, next) => {
     // Only allow updates if payment is not yet submitted
     if (currentStatus !== ApplicationStatus.AWAITING_PAYMENT) {
       return res.status(400).json({
-        message: `Cannot update application in ${currentStatus} status. Only applications awaiting payment can be modified.`,
+        message: `No se puede actualizar la solicitud en estado ${currentStatus}. Solo las solicitudes en espera de pago pueden ser modificadas.`,
         currentStatus
       });
     }
@@ -1104,7 +1104,7 @@ exports.updateApplication = async (req, res, next) => {
     // If no fields to update, return early
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
-        message: 'No valid fields provided for update'
+        message: 'No se proporcionaron campos válidos para actualizar'
       });
     }
 
@@ -1137,14 +1137,14 @@ exports.updateApplication = async (req, res, next) => {
     const { rows: updatedRows } = await db.query(updateQuery, values);
 
     if (updatedRows.length === 0) {
-      throw new Error('Failed to update application');
+      throw new Error('Error al actualizar la solicitud');
     }
 
     logger.info(`Application ${applicationId} updated successfully by user ${userId}`);
 
     // Return the updated application data
     res.status(200).json({
-      message: 'Application updated successfully',
+      message: 'Solicitud actualizada exitosamente',
       application: updatedRows[0]
     });
 
@@ -1161,7 +1161,7 @@ exports.renewApplication = async (req, res, next) => {
 
   // Basic validation
   if (isNaN(originalApplicationId)) {
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
 
   try {
@@ -1176,7 +1176,7 @@ exports.renewApplication = async (req, res, next) => {
 
     if (rows.length === 0) {
       logger.warn(`Renewal failed: Application ${originalApplicationId} not found or not owned by user ${userId}`);
-      return res.status(404).json({ message: 'Application not found or not authorized.' });
+      return res.status(404).json({ message: 'Solicitud no encontrada o no autorizada.' });
     }
 
     const originalApp = rows[0];
@@ -1185,7 +1185,7 @@ exports.renewApplication = async (req, res, next) => {
     if (originalApp.status !== 'PERMIT_READY' && originalApp.status !== 'ACTIVE') { // Assuming ACTIVE might be a future status
       logger.warn(`Renewal failed: Application ${originalApplicationId} has status ${originalApp.status}`);
       return res.status(400).json({
-        message: 'Only active or completed permits can be renewed.'
+        message: 'Solo los permisos activos o completados pueden ser renovados.'
       });
     }
 
@@ -1220,7 +1220,7 @@ exports.renewApplication = async (req, res, next) => {
     const { rows: insertedRows } = await db.query(insertQuery, insertParams);
 
     if (insertedRows.length === 0) {
-      throw new Error('Failed to create renewal application.');
+      throw new Error('Error al crear la solicitud de renovación.');
     }
 
     const newApplication = insertedRows[0];
@@ -1280,7 +1280,7 @@ exports.checkRenewalEligibility = async (req, res, next) => {
 
   // Basic validation
   if (isNaN(applicationId)) {
-    return res.status(400).json({ message: 'Invalid Application ID format.' });
+    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
   }
 
   try {
@@ -1298,7 +1298,7 @@ exports.checkRenewalEligibility = async (req, res, next) => {
       logger.warn(`Renewal eligibility check failed: Application ${applicationId} not found or not owned by user ${userId}`);
       return res.status(404).json({
         eligible: false,
-        message: 'Application not found or not authorized.'
+        message: 'Solicitud no encontrada o no autorizada.'
       });
     }
 
@@ -1385,13 +1385,13 @@ exports.checkRenewalEligibility = async (req, res, next) => {
 // --- TEMPORARY CONTROLLER FOR DEVELOPMENT - REMOVE LATER --- (Keep AS IS)
 exports.tempMarkPaid = async (req, res, next) => { // Added next
   const applicationId = parseInt(req.params.id, 10);
-  if (isNaN(applicationId)) return res.status(400).json({ message: 'Invalid Application ID.' });
+  if (isNaN(applicationId)) return res.status(400).json({ message: 'ID de solicitud inválido.' });
 
   logger.warn(`--- RUNNING TEMP DEV FUNCTION: Marking Application ${applicationId} as PAID ---`); // Use warn
 
   try {
     const { rows: currentRows } = await db.query('SELECT status FROM permit_applications WHERE id = $1', [applicationId]);
-    if (currentRows.length === 0) return res.status(404).json({ message: 'Application not found.' });
+    if (currentRows.length === 0) return res.status(404).json({ message: 'Solicitud no encontrada.' });
 
     const currentStatus = currentRows[0].status;
     // Allow proceeding even if not AWAITING_PAYMENT during dev
@@ -1403,7 +1403,7 @@ exports.tempMarkPaid = async (req, res, next) => { // Added next
 
 
     const { rowCount } = await db.query('UPDATE permit_applications SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [ApplicationStatus.PAYMENT_RECEIVED, applicationId]);
-    if (rowCount === 0) throw new Error('Application not found during update.');
+    if (rowCount === 0) throw new Error('Solicitud no encontrada durante la actualización.');
     logger.info(`--- TEMP DEV: Application ${applicationId} status updated to PAYMENT_RECEIVED ---`); // Use info
 
 
@@ -1419,7 +1419,7 @@ exports.tempMarkPaid = async (req, res, next) => { // Added next
       }
     });
 
-    res.status(200).json({ message: `Application ${applicationId} marked as PAYMENT_RECEIVED (TEMP). Permit generation triggered.` });
+    res.status(200).json({ message: `Solicitud ${applicationId} marcada como PAYMENT_RECEIVED (TEMP). Generación de permiso activada.` });
 
   } catch (error) {
     logger.error(`Error in TEMP_mark_paid for ${applicationId}:`, error); // Pass error

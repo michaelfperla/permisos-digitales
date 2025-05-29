@@ -14,7 +14,7 @@ exports.getProfile = async (req, res, next) => {
   const userId = req.session.userId;
 
   if (!userId) {
-    return ApiResponse.unauthorized(res, 'User not authenticated.');
+    return ApiResponse.unauthorized(res, 'Usuario no autenticado.');
   }
 
   try {
@@ -23,7 +23,7 @@ exports.getProfile = async (req, res, next) => {
     const user = await userService.getUserProfile(userId);
 
     if (!user) {
-      return ApiResponse.notFound(res, 'User profile not found.');
+      return ApiResponse.notFound(res, 'Perfil de usuario no encontrado.');
     }
 
     // Return user profile data without sensitive information
@@ -53,7 +53,7 @@ exports.updateProfile = async (req, res, next) => {
   const userId = req.session.userId;
 
   if (!userId) {
-    return ApiResponse.unauthorized(res, 'User not authenticated.');
+    return ApiResponse.unauthorized(res, 'Usuario no autenticado.');
   }
 
   try {
@@ -69,21 +69,21 @@ exports.updateProfile = async (req, res, next) => {
 
     // Check if there's anything to update
     if (Object.keys(updateData).length === 0) {
-      return ApiResponse.badRequest(res, 'No valid fields provided for update.');
+      return ApiResponse.badRequest(res, 'No se proporcionaron campos válidos para actualizar.');
     }
 
     // If email is being updated, check if it's already in use
     if (email) {
       const emailExists = await userService.checkEmailExists(email, userId);
       if (emailExists) {
-        return ApiResponse.conflict(res, 'Email is already in use by another account.');
+        return ApiResponse.conflict(res, 'El correo electrónico ya está en uso por otra cuenta.');
       }
     }
 
     const updatedUser = await userService.updateUserProfile(userId, updateData);
 
     if (!updatedUser) {
-      return ApiResponse.notFound(res, 'User profile not found.');
+      return ApiResponse.notFound(res, 'Perfil de usuario no encontrado.');
     }
 
     // Update session data to match the database

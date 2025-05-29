@@ -19,19 +19,19 @@ const profileUpdateValidationRules = [
   body('first_name')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 100 }).withMessage('First name must be between 1 and 100 characters.')
+    .isLength({ min: 1, max: 100 }).withMessage('El nombre debe tener entre 1 y 100 caracteres.')
     .escape(),
   body('last_name')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 100 }).withMessage('Last name must be between 1 and 100 characters.')
+    .isLength({ min: 1, max: 100 }).withMessage('El apellido debe tener entre 1 y 100 caracteres.')
     .escape(),
   body('email')
     .optional()
     .trim()
-    .isEmail().withMessage('Must be a valid email address.')
+    .isEmail().withMessage('Debe ser una dirección de correo electrónico válida.')
     .normalizeEmail()
-    .isLength({ max: 255 }).withMessage('Email cannot exceed 255 characters.')
+    .isLength({ max: 255 }).withMessage('El correo electrónico no puede exceder 255 caracteres.')
 ];
 
 // GET /api/user/profile - Get user profile

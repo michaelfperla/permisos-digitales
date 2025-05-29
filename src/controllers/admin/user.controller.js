@@ -24,11 +24,11 @@ exports.getUsers = async (req, res, next) => {
     const limitNum = parseInt(limit, 10);
 
     if (isNaN(pageNum) || pageNum < 1) {
-      return ApiResponse.badRequest(res, 'Invalid page parameter');
+      return ApiResponse.badRequest(res, 'Parámetro de página inválido');
     }
 
     if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-      return ApiResponse.badRequest(res, 'Invalid limit parameter (must be between 1 and 100)');
+      return ApiResponse.badRequest(res, 'Parámetro de límite inválido (debe estar entre 1 y 100)');
     }
 
     // Get users with pagination and filtering
@@ -65,7 +65,7 @@ exports.getUserById = async (req, res, next) => {
     const userId = parseInt(req.params.id, 10);
 
     if (isNaN(userId)) {
-      return ApiResponse.badRequest(res, 'Invalid user ID');
+      return ApiResponse.badRequest(res, 'ID de usuario inválido');
     }
 
     logger.info(`Admin ${adminId} requested details for user ${userId}`);
@@ -98,7 +98,7 @@ exports.getUserApplications = async (req, res, next) => {
     const userId = parseInt(req.params.userId, 10);
 
     if (isNaN(userId)) {
-      return ApiResponse.badRequest(res, 'Invalid user ID');
+      return ApiResponse.badRequest(res, 'ID de usuario inválido');
     }
 
     logger.info(`Admin ${adminId} requested applications for user ${userId}`);
@@ -133,7 +133,7 @@ exports.enableUser = async (req, res, next) => {
     const userId = parseInt(req.params.id, 10);
 
     if (isNaN(userId)) {
-      return ApiResponse.badRequest(res, 'Invalid user ID');
+      return ApiResponse.badRequest(res, 'ID de usuario inválido');
     }
 
     logger.info(`Admin ${adminId} is enabling user ${userId}`);
@@ -172,7 +172,7 @@ exports.disableUser = async (req, res, next) => {
     const userId = parseInt(req.params.id, 10);
 
     if (isNaN(userId)) {
-      return ApiResponse.badRequest(res, 'Invalid user ID');
+      return ApiResponse.badRequest(res, 'ID de usuario inválido');
     }
 
     // Prevent admins from disabling their own account
