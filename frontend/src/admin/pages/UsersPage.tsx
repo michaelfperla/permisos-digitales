@@ -159,7 +159,15 @@ const UsersPage: React.FC = () => {
                 <div
                   key={user.id}
                   className={styles.mobileCard}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => navigate(`/users/${user.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`/users/${user.id}`);
+                    }
+                  }}
                 >
                   <div className={styles.mobileCardHeader}>
                     <div className={styles.mobileCardTitle}>

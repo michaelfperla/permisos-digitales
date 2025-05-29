@@ -942,72 +942,103 @@ const PermitDetailsPage: React.FC = () => {
             // Customize based on status
             switch (currentStatus) {
               case 'AWAITING_OXXO_PAYMENT':
-                instructionsTitle = 'Pago Pendiente en OXXO';
-                instructionsIcon = <FaStore className={styles.statusInstructionsIcon} />;
-                instructionsContent = (
-                  <>
-                    <p>
-                      Para completar tu solicitud, realiza el pago en cualquier tienda OXXO usando
-                      la referencia proporcionada a continuación. Una vez procesado el pago, tu
-                      permiso será generado automáticamente.
-                    </p>
+                // Check if this is a pending Conekta payment
+                if ((application as any)?.payment_processor_order_id) {
+                  instructionsTitle = 'Pago en Proceso';
+                  instructionsIcon = (
+                    <FaInfoCircle
+                      className={styles.statusInstructionsIcon}
+                      style={{ color: 'var(--color-warning)' }}
+                    />
+                  );
+                  instructionsContent = (
+                    <div className={styles.statusInstructionsContent}>
+                      <p>
+                        Tu pago está siendo procesado por el banco. Este proceso puede tomar unos
+                        minutos. La página se actualizará automáticamente cuando el pago sea
+                        confirmado.
+                      </p>
+                      <p>
+                        No es necesario realizar ninguna acción adicional. Una vez que el banco
+                        confirme tu pago, tu permiso comenzará a generarse automáticamente.
+                      </p>
+                      <button
+                        type="button"
+                        className={styles.refreshButton}
+                        onClick={() => refetch()}
+                      >
+                        <FaSync className={styles.refreshIcon} /> Verificar estado del pago
+                      </button>
+                    </div>
+                  );
+                } else {
+                  instructionsTitle = 'Pago Pendiente en OXXO';
+                  instructionsIcon = <FaStore className={styles.statusInstructionsIcon} />;
+                  instructionsContent = (
+                    <>
+                      <p>
+                        Para completar tu solicitud, realiza el pago en cualquier tienda OXXO usando
+                        la referencia proporcionada a continuación. Una vez procesado el pago, tu
+                        permiso será generado automáticamente.
+                      </p>
 
-                    <div className={styles.oxxoInstructions}>
-                      <div className={styles.oxxoInstructionsHeader}>
-                        <FaMoneyBill className={styles.oxxoInstructionsIcon} />
-                        <h3 className={styles.oxxoInstructionsTitle}>
-                          Instrucciones para Pago en OXXO
-                        </h3>
-                      </div>
+                      <div className={styles.oxxoInstructions}>
+                        <div className={styles.oxxoInstructionsHeader}>
+                          <FaMoneyBill className={styles.oxxoInstructionsIcon} />
+                          <h3 className={styles.oxxoInstructionsTitle}>
+                            Instrucciones para Pago en OXXO
+                          </h3>
+                        </div>
 
-                      <div className={styles.oxxoReferenceContainer}>
-                        <div className={styles.infoItem}>
-                          <span className={styles.infoLabel}>Referencia OXXO para Pago:</span>
-                          <div className={styles.infoValue}>
-                            {(applicationData?.application as any)?.paymentReference ? (
-                              <>
-                                <span className={styles.infoValueImportant}>
-                                  {(applicationData.application as any).paymentReference}
+                        <div className={styles.oxxoReferenceContainer}>
+                          <div className={styles.infoItem}>
+                            <span className={styles.infoLabel}>Referencia OXXO para Pago:</span>
+                            <div className={styles.infoValue}>
+                              {(applicationData?.application as any)?.paymentReference ? (
+                                <>
+                                  <span className={styles.infoValueImportant}>
+                                    {(applicationData.application as any).paymentReference}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className={styles.copyButton}
+                                    onClick={handleCopyReference}
+                                    aria-label="Copiar referencia de pago OXXO"
+                                  >
+                                    {copied ? 'Copiado' : 'Copiar'}{' '}
+                                    <FaCopy className={styles.copyButtonIcon} />
+                                  </button>
+                                </>
+                              ) : (
+                                <span className={styles.infoValueWarning}>
+                                  Cargando referencia OXXO...
                                 </span>
-                                <button
-                                  type="button"
-                                  className={styles.copyButton}
-                                  onClick={handleCopyReference}
-                                  aria-label="Copiar referencia de pago OXXO"
-                                >
-                                  {copied ? 'Copiado' : 'Copiar'}{' '}
-                                  <FaCopy className={styles.copyButtonIcon} />
-                                </button>
-                              </>
-                            ) : (
-                              <span className={styles.infoValueWarning}>
-                                Cargando referencia OXXO...
-                              </span>
-                            )}
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={styles.infoItem}>
+                            <span className={styles.infoLabel}>Monto a Pagar:</span>
+                            <span className={styles.infoValueImportant}>
+                              {formatCurrency(application?.importe)}
+                            </span>
                           </div>
                         </div>
 
-                        <div className={styles.infoItem}>
-                          <span className={styles.infoLabel}>Monto a Pagar:</span>
-                          <span className={styles.infoValueImportant}>
-                            {formatCurrency(application?.importe)}
-                          </span>
-                        </div>
+                        <p>
+                          Presenta esta referencia en la caja de cualquier tienda OXXO. El cajero
+                          escaneará o ingresará la referencia y te indicará el monto a pagar. Conserva
+                          tu recibo como comprobante de pago.
+                        </p>
+                        <p>
+                          Una vez que realices el pago, nuestro sistema recibirá la confirmación
+                          automáticamente y tu permiso será procesado. Este proceso puede tomar hasta
+                          24 horas hábiles.
+                        </p>
                       </div>
-
-                      <p>
-                        Presenta esta referencia en la caja de cualquier tienda OXXO. El cajero
-                        escaneará o ingresará la referencia y te indicará el monto a pagar. Conserva
-                        tu recibo como comprobante de pago.
-                      </p>
-                      <p>
-                        Una vez que realices el pago, nuestro sistema recibirá la confirmación
-                        automáticamente y tu permiso será procesado. Este proceso puede tomar hasta
-                        24 horas hábiles.
-                      </p>
-                    </div>
-                  </>
-                );
+                    </>
+                  );
+                }
                 break;
 
               case 'PAYMENT_FAILED':
@@ -1053,59 +1084,34 @@ const PermitDetailsPage: React.FC = () => {
                 );
                 break;
 
-              case 'AWAITING_OXXO_PAYMENT':
-                // Check if this is a pending Conekta payment
-                if ((application as any)?.payment_processor_order_id) {
-                  instructionsTitle = 'Pago en Proceso';
-                  instructionsIcon = (
-                    <FaInfoCircle
-                      className={styles.statusInstructionsIcon}
-                      style={{ color: 'var(--color-warning)' }}
-                    />
-                  );
-                  instructionsContent = (
-                    <div className={styles.statusInstructionsContent}>
-                      <p>
-                        Tu pago está siendo procesado por el banco. Este proceso puede tomar unos
-                        minutos. La página se actualizará automáticamente cuando el pago sea
-                        confirmado.
-                      </p>
-                      <p>
-                        No es necesario realizar ninguna acción adicional. Una vez que el banco
-                        confirme tu pago, tu permiso comenzará a generarse automáticamente.
-                      </p>
-                      <button
-                        type="button"
-                        className={styles.refreshButton}
-                        onClick={() => refetch()}
-                      >
-                        <FaSync className={styles.refreshIcon} /> Verificar estado del pago
-                      </button>
-                    </div>
-                  );
-                } else {
-                  instructionsTitle = 'Pago Pendiente';
-                  instructionsIcon = <FaInfoCircle className={styles.statusInstructionsIcon} />;
-                  instructionsContent = (
-                    <div className={styles.statusInstructionsContent}>
-                      <p>
-                        Tu solicitud está pendiente de pago. Por favor, realiza el pago para
-                        continuar con el proceso.
-                      </p>
-                      <p>
-                        Puedes realizar el pago con tarjeta de crédito o débito, o generar una
-                        referencia para pago en OXXO.
-                      </p>
-                      <button
-                        type="button"
-                        className={styles.paymentButton}
-                        onClick={() => navigate(`/permits/${id}/payment`)}
-                      >
-                        <FaCreditCard className={styles.paymentIcon} /> Realizar Pago
-                      </button>
-                    </div>
-                  );
-                }
+              case 'PAYMENT_PROCESSING':
+                instructionsTitle = 'Pago en Proceso';
+                instructionsIcon = (
+                  <FaInfoCircle
+                    className={styles.statusInstructionsIcon}
+                    style={{ color: 'var(--color-warning)' }}
+                  />
+                );
+                instructionsContent = (
+                  <div className={styles.statusInstructionsContent}>
+                    <p>
+                      Tu pago está siendo procesado por el banco. Este proceso puede tomar unos
+                      minutos. La página se actualizará automáticamente cuando el pago sea
+                      confirmado.
+                    </p>
+                    <p>
+                      No es necesario realizar ninguna acción adicional. Una vez que el banco
+                      confirme tu pago, tu permiso comenzará a generarse automáticamente.
+                    </p>
+                    <button
+                      type="button"
+                      className={styles.refreshButton}
+                      onClick={() => refetch()}
+                    >
+                      <FaSync className={styles.refreshIcon} /> Verificar estado del pago
+                    </button>
+                  </div>
+                );
                 break;
 
               case 'PAYMENT_RECEIVED':

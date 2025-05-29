@@ -948,6 +948,9 @@ exports.downloadPermit = async (req, res, next) => {
   // --- Read type parameter ---
   const requestedTypeParam = req.params.type; // Get type from URL parameter
 
+  // Initialize requestedType for error handling
+  let requestedType = requestedTypeParam ? requestedTypeParam.toLowerCase() : 'unknown';
+
   // --- Input Validation ---
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`Download failed: Invalid Application ID format ${req.params.id}`);
@@ -965,7 +968,7 @@ exports.downloadPermit = async (req, res, next) => {
   }
 
   // --- Determine DB column and filename prefix based on validated type ---
-  const requestedType = requestedTypeParam.toLowerCase(); // Use validated lowercase type
+  // requestedType is already defined above
   let dbColumn;
   let filenamePrefix;
 
@@ -1092,6 +1095,9 @@ exports.getPdfUrl = async (req, res, next) => {
   const applicationId = parseInt(req.params.id, 10);
   const requestedTypeParam = req.params.type;
 
+  // Initialize requestedType for error handling
+  let requestedType = requestedTypeParam ? requestedTypeParam.toLowerCase() : 'unknown';
+
   // Input Validation
   if (isNaN(applicationId) || applicationId <= 0) {
     logger.warn(`PDF URL request failed: Invalid Application ID format ${req.params.id}`);
@@ -1111,7 +1117,7 @@ exports.getPdfUrl = async (req, res, next) => {
       'placas': { dbColumn: 'placas_file_path', displayName: 'Placas' }
     };
 
-    const requestedType = requestedTypeParam.toLowerCase();
+    // requestedType is already defined above
     if (!typeMapping[requestedType]) {
       logger.warn(`PDF URL request failed: Invalid document type '${requestedTypeParam}' for App ${applicationId}`);
       return res.status(400).json({ message: `Invalid document type: ${requestedTypeParam}` });

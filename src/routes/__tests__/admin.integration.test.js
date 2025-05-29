@@ -300,6 +300,7 @@ describe('Admin API Integration Tests', () => {
           });
         }
         // 4. Mock INSERT into verification log
+        else if (query.includes('INSERT INTO payment_verification_log')) {
           return Promise.resolve({
             rows: [{ id: 1 }],
             rowCount: 1
@@ -443,6 +444,7 @@ describe('Admin API Integration Tests', () => {
           });
         }
         // 4. Mock INSERT into verification log
+        else if (query.includes('INSERT INTO payment_verification_log')) {
           return Promise.resolve({
             rows: [{ id: 1 }],
             rowCount: 1

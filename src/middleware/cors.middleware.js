@@ -13,24 +13,24 @@ const corsOptions = {
     // Industry Standard: Allow all frontend domains to access canonical API
     const allowedOrigins = process.env.NODE_ENV === 'production'
       ? [
-          // All frontend domains (.com.mx)
-          'https://permisosdigitales.com.mx',
-          'https://www.permisosdigitales.com.mx',
-          // All frontend domains (.com)
-          'https://permisosdigitales.com',
-          'https://www.permisosdigitales.com',
-          // CloudFront distribution
-          'https://d2gtd1yvnspajh.cloudfront.net',
-          // Add any staging/preview domains if needed
-        ]
+        // All frontend domains (.com.mx)
+        'https://permisosdigitales.com.mx',
+        'https://www.permisosdigitales.com.mx',
+        // All frontend domains (.com)
+        'https://permisosdigitales.com',
+        'https://www.permisosdigitales.com',
+        // CloudFront distribution
+        'https://d2gtd1yvnspajh.cloudfront.net',
+        // Add any staging/preview domains if needed
+      ]
       : [
-          'http://localhost:3000',
-          'http://localhost:3001',
-          'http://localhost:3002',
-          'http://127.0.0.1:3000',
-          'http://127.0.0.1:3001',
-          'http://127.0.0.1:3002',
-        ];
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        'http://127.0.0.1:3002',
+      ];
 
     // Check if the origin is allowed
     if (allowedOrigins.indexOf(origin) !== -1) {

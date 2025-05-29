@@ -233,8 +233,16 @@ const ApplicationsPage: React.FC = () => {
                 <div
                   key={application.id || Math.random()}
                   className={styles.mobileCard}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     if (application.id) {
+                      navigate(`/applications/${application.id}`);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && application.id) {
+                      e.preventDefault();
                       navigate(`/applications/${application.id}`);
                     }
                   }}
