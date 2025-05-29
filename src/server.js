@@ -56,6 +56,11 @@ if (process.env.NODE_ENV === 'development') {
 const app = express();
 const PORT = config.port;
 
+// Trust proxy for production (nginx reverse proxy)
+if (config.nodeEnv === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy (nginx)
+}
+
 // Import metrics middleware
 const { metricsMiddleware } = require('./utils/metrics');
 
