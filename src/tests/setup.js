@@ -2,6 +2,7 @@
  * Test setup file
  * Configures the test environment and provides utilities for testing
  */
+
 const { Pool } = require('pg');
 const path = require('path');
 const fs = require('fs');
@@ -86,6 +87,8 @@ jest.mock('nodemailer', () => ({
     verify: jest.fn().mockResolvedValue(true)
   }))
 }));
+
+
 
 // Multer is no longer used in the codebase
 

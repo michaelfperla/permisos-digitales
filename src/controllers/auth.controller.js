@@ -126,7 +126,7 @@ exports.register = async (req, res, next) => {
           is_admin_portal: false,
           created_at: newUser.created_at
         }
-      }, 201, 'User registered successfully!');
+      }, 201, '¡Usuario registrado exitosamente!');
     });
   } catch (error) {
     handleControllerError(error, 'register', req, res, next);

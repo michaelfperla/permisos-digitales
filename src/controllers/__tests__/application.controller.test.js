@@ -187,7 +187,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid application ID format' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Formato de ID de solicitud inválido' });
       expect(applicationRepository.findById).not.toHaveBeenCalled();
     });
 
@@ -563,7 +563,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid Application ID format.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Formato de ID de solicitud inválido.' });
       expect(db.query).not.toHaveBeenCalled();
     });
 
@@ -577,7 +577,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid document type. Allowed types: permiso, recibo, certificado, placas' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Tipo de documento inválido. Tipos permitidos: permiso, recibo, certificado, placas' });
       expect(db.query).not.toHaveBeenCalled();
     });
 
@@ -592,7 +592,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Application not found.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Solicitud no encontrada.' });
     });
 
     it('should return 403 if application belongs to different user', async () => {
@@ -615,7 +615,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Forbidden: You do not own this application.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Prohibido: No eres propietario de esta solicitud.' });
     });
 
     it('should return 400 if application status is not PERMIT_READY', async () => {
@@ -1173,7 +1173,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid Application ID.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'ID de solicitud inválido.' });
       expect(db.query).not.toHaveBeenCalled();
     });
 
@@ -1187,7 +1187,7 @@ describe('Application Controller', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Application not found.' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Solicitud no encontrada.' });
     });
 
     it('should successfully mark application as paid', async () => {
@@ -1211,7 +1211,7 @@ describe('Application Controller', () => {
       expect(db.query).toHaveBeenCalledTimes(2);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        message: expect.stringContaining('marked as PAYMENT_RECEIVED')
+        message: 'Solicitud 1 marcada como PAYMENT_RECEIVED (TEMP). Generación de permiso activada.'
       });
     });
 

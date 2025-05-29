@@ -128,7 +128,7 @@ describe('CSRF Middleware', () => {
         .expect(403);
 
       // Assert
-      expect(response.body).toHaveProperty('message', 'Invalid or missing CSRF token');
+      expect(response.body).toHaveProperty('message', 'Token CSRF inválido o faltante');
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('CSRF error'),
         expect.any(Object)

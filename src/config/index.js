@@ -1,4 +1,12 @@
-require('dotenv-flow').config();
+// Only load dotenv-flow in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  try {
+    require('dotenv-flow').config();
+  } catch (error) {
+    // Silently fail in test environment or if dotenv-flow has issues
+    console.warn('Warning: dotenv-flow failed to load:', error.message);
+  }
+}
 
 const { logger } = require('../utils/enhanced-logger');
 

@@ -140,7 +140,7 @@ describe('Error Helpers', () => {
       // Assert
       expect(next).toHaveBeenCalledWith(expect.any(AppError));
       expect(next.mock.calls[0][0].statusCode).toBe(404);
-      expect(next.mock.calls[0][0].message).toBe('Resource not found.');
+      expect(next.mock.calls[0][0].message).toBe('No se encontró lo que buscas.');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(`Error in ${context} for user ${req.session.userId}:`),
         error
@@ -256,7 +256,7 @@ describe('Error Helpers', () => {
       // Assert
       expect(next).toHaveBeenCalledWith(expect.any(UnauthorizedError));
       expect(next.mock.calls[0][0].statusCode).toBe(401);
-      expect(next.mock.calls[0][0].message).toBe('Authentication required.');
+      expect(next.mock.calls[0][0].message).toBe('Necesitas iniciar sesión.');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(`Error in ${context} for user ${req.session.userId}:`),
         error
@@ -275,7 +275,7 @@ describe('Error Helpers', () => {
       // Assert
       expect(next).toHaveBeenCalledWith(expect.any(ForbiddenError));
       expect(next.mock.calls[0][0].statusCode).toBe(403);
-      expect(next.mock.calls[0][0].message).toBe('You do not have permission to perform this action.');
+      expect(next.mock.calls[0][0].message).toBe('No tienes permiso para realizar esta acción.');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining(`Error in ${context} for user ${req.session.userId}:`),
         error

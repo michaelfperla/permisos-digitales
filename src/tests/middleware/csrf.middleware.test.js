@@ -126,7 +126,7 @@ describe('CSRF Middleware', () => {
       const result = handleCsrfError(error, req, res, next);
 
       // Assert
-      expect(mockForbidden).toHaveBeenCalledWith(res, 'Invalid or missing CSRF token');
+      expect(mockForbidden).toHaveBeenCalledWith(res, 'Token CSRF inválido o faltante');
       expect(result).toBe('forbidden-response');
       expect(res.redirect).not.toHaveBeenCalled();
     });

@@ -163,7 +163,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Admin access required');
+      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Se requiere acceso de administrador');
       expect(result).toBe('forbidden-response');
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Admin portal access denied'));
     });
@@ -181,7 +181,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Access denied. Please use the correct portal login.');
+      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.');
       expect(result).toBe('forbidden-response');
     });
   });
@@ -244,7 +244,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Invalid account type');
+      expect(ApiResponse.forbidden).toHaveBeenCalledWith(res, 'Tipo de cuenta inválido');
       expect(result).toBe('forbidden-response');
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unknown account type'));
     });

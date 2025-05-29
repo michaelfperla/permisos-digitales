@@ -121,7 +121,7 @@ describe('Auth Controller', () => {
       req.body = { email: 'nonexistent@example.com', password: 'password123' };
       db.query.mockResolvedValueOnce({ rows: [] });
       await authController.login(req, res, next);
-      expect(ApiResponse.unauthorized).toHaveBeenCalledWith(res, expect.stringContaining('Invalid email or password.'));
+      expect(ApiResponse.unauthorized).toHaveBeenCalledWith(res, 'Correo electrónico o contraseña incorrectos.');
       expect(authSecurity.recordFailedAttempt).toHaveBeenCalledWith(req.body.email);
       expect(res.locals.statusCode).toBe(401);
     });
@@ -132,7 +132,7 @@ describe('Auth Controller', () => {
       db.query.mockResolvedValueOnce({ rows: [mockUser] });
       verifyPassword.mockResolvedValueOnce(false);
       await authController.login(req, res, next);
-      expect(ApiResponse.unauthorized).toHaveBeenCalledWith(res, expect.stringContaining('Invalid email or password.'));
+      expect(ApiResponse.unauthorized).toHaveBeenCalledWith(res, 'Correo electrónico o contraseña incorrectos.');
       expect(authSecurity.recordFailedAttempt).toHaveBeenCalledWith(req.body.email);
       expect(res.locals.statusCode).toBe(401);
     });
@@ -149,12 +149,26 @@ describe('Auth Controller', () => {
       verifyPassword.mockResolvedValueOnce(true);
       authSecurity.resetAttempts.mockResolvedValueOnce({});
 
+      // Mock session methods
+      req.session.regenerate = jest.fn((errCb) => {
+        console.log('Test Log: Mocked regenerate called for LOGIN');
+        if (errCb) { process.nextTick(() => { errCb(null); }); }
+      });
+      req.session.save = jest.fn((errCb) => {
+        if (errCb) { process.nextTick(() => { errCb(null); }); }
+      });
+
       // Promisify the session regeneration
-      const regeneratePromise = new Promise((resolve, reject) => {
+      const regeneratePromise = new Promise((resolve) => {
+        const originalRegenerate = req.session.regenerate;
         req.session.regenerate = jest.fn((errCb) => {
           console.log('Test Log: Mocked regenerate called for LOGIN');
-          if (errCb) { process.nextTick(() => { errCb(null); resolve(true); }); }
-          else { reject(new Error('Login Regenerate mock called without callback')); }
+          if (errCb) {
+            process.nextTick(() => {
+              errCb(null);
+              resolve(true);
+            });
+          }
         });
       });
 
@@ -178,7 +192,7 @@ describe('Auth Controller', () => {
         res,
         expect.objectContaining({ user: expect.objectContaining({ id: mockUser.id, email: mockUser.email }) }),
         200,
-        'Login successful!'
+        '¡Inicio de sesión exitoso!'
       );
       expect(next).not.toHaveBeenCalled();
     }, 10000); // Added timeout just in case
@@ -203,7 +217,7 @@ describe('Auth Controller', () => {
       await authController.logout(req, res, next);
       expect(req.session.destroy).toHaveBeenCalled();
       expect(securityService.logActivity).toHaveBeenCalledWith(1, 'logout', req.ip, req.headers['user-agent'], { email: 'test@example.com' });
-      expect(ApiResponse.success).toHaveBeenCalledWith(res, null, 200, 'Logout successful.');
+      expect(ApiResponse.success).toHaveBeenCalledWith(res, null, 200, 'Cierre de sesión exitoso.');
       expect(res.clearCookie).toHaveBeenCalledWith('connect.sid', { path: '/' });
       expect(next).not.toHaveBeenCalled();
     });
@@ -215,7 +229,7 @@ describe('Auth Controller', () => {
       await authController.logout(req, res, next);
       expect(next).toHaveBeenCalledWith(expect.any(Error));
       const errorArg = next.mock.calls[0][0];
-      expect(errorArg.message).toContain('Failed to log out properly');
+      expect(errorArg.message).toContain('Error al cerrar sesión correctamente');
       expect(errorArg.status).toBe(500);
       expect(ApiResponse.success).not.toHaveBeenCalled();
     });
@@ -275,19 +289,25 @@ describe('Auth Controller', () => {
         .mockResolvedValueOnce({ rows: [mockNewUserDbResult] }); // Insert user - return new user
       hashPassword.mockResolvedValueOnce(mockHashedPassword);
 
+      // Mock session methods
+      req.session.regenerate = jest.fn((errCb) => {
+        console.log('Test Log: Mocked regenerate called for REGISTER');
+        if (errCb) { process.nextTick(() => { errCb(null); }); }
+      });
+      req.session.save = jest.fn((errCb) => {
+        if (errCb) { process.nextTick(() => { errCb(null); }); }
+      });
+
       // Promisify session regeneration
-      let regenerationCompleted = false;
-      const regeneratePromise = new Promise((resolve, reject) => {
+      const regeneratePromise = new Promise((resolve) => {
+        const originalRegenerate = req.session.regenerate;
         req.session.regenerate = jest.fn((errCb) => {
           console.log('Test Log: Mocked regenerate called for REGISTER');
           if (errCb) {
-            process.nextTick(() => { // Ensure async
-              errCb(null); // Pass null for error
-              regenerationCompleted = true;
+            process.nextTick(() => {
+              errCb(null);
               resolve(true);
             });
-          } else {
-            reject(new Error('Register Regenerate mock called without callback'));
           }
         });
       });
@@ -302,7 +322,10 @@ describe('Auth Controller', () => {
       // 1. Dependencies called correctly
       expect(hashPassword).toHaveBeenCalledWith(req.body.password);
       expect(db.query).toHaveBeenCalledWith(expect.stringContaining('SELECT id FROM users'), [req.body.email]);
-      expect(db.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO users'), [req.body.email, mockHashedPassword, req.body.first_name, req.body.last_name]);
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO users'),
+        expect.arrayContaining([req.body.email, mockHashedPassword, req.body.first_name, req.body.last_name])
+      );
 
       // 2. Session state is correct after regenerate
       expect(req.session.regenerate).toHaveBeenCalled();
@@ -319,7 +342,7 @@ describe('Auth Controller', () => {
         res,
         { user: expectedUserApiResponse }, // Check response data structure
         201, // Status 201 Created
-        'User registered successfully!' // Match exact message
+        '¡Usuario registrado exitosamente!' // Match exact message
       );
       // 4. No errors passed to middleware
       expect(next).not.toHaveBeenCalled();

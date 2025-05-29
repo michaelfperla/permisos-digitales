@@ -258,7 +258,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(mockForbidden).toHaveBeenCalledWith(res, 'Admin access required');
+      expect(mockForbidden).toHaveBeenCalledWith(res, 'Se requiere acceso de administrador');
       expect(mockWarn).toHaveBeenCalledWith(
         expect.stringContaining(`Admin portal access denied: Not an admin account - UserId: ${req.session.userId}`)
       );
@@ -277,7 +277,7 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
       expect(mockForbidden).toHaveBeenCalledWith(
         res,
-        'Access denied. Please use the correct portal login.'
+        'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.'
       );
       expect(mockWarn).toHaveBeenCalledWith(
         expect.stringContaining(`Admin portal access denied: Admin account missing portal flag - UserId: ${req.session.userId}`)
@@ -297,7 +297,7 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
       expect(mockForbidden).toHaveBeenCalledWith(
         res,
-        'Access denied. Please use the correct portal login.'
+        'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.'
       );
     });
 
@@ -313,7 +313,7 @@ describe('Auth Middleware', () => {
       authMiddleware.isAdminPortal = jest.fn((req, res, next) => {
         // Simulate the fallback case
         mockErrorLog('Admin portal check reached unexpected state.');
-        return mockForbidden(res, 'Access denied. Please use the correct portal login.');
+        return mockForbidden(res, 'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.');
       });
 
       // Act
@@ -321,7 +321,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(mockForbidden).toHaveBeenCalledWith(res, 'Access denied. Please use the correct portal login.');
+      expect(mockForbidden).toHaveBeenCalledWith(res, 'Acceso denegado. Por favor usa el portal de inicio de sesión correcto.');
       expect(mockErrorLog).toHaveBeenCalledWith('Admin portal check reached unexpected state.');
 
       // Restore the original implementation
@@ -430,7 +430,7 @@ describe('Auth Middleware', () => {
 
       // Assert
       expect(next).not.toHaveBeenCalled();
-      expect(mockForbidden).toHaveBeenCalledWith(res, 'Invalid account type');
+      expect(mockForbidden).toHaveBeenCalledWith(res, 'Tipo de cuenta inválido');
       expect(mockWarn).toHaveBeenCalledWith(
         expect.stringContaining(`Unknown account type: ${req.session.accountType}`)
       );
