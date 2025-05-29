@@ -8,7 +8,42 @@ configure({
 });
 
 // Mock axios for all tests
-vi.mock('axios');
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn(() => ({
+      interceptors: {
+        request: {
+          use: vi.fn(),
+          eject: vi.fn(),
+        },
+        response: {
+          use: vi.fn(),
+          eject: vi.fn(),
+        },
+      },
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      patch: vi.fn(),
+      delete: vi.fn(),
+    })),
+    interceptors: {
+      request: {
+        use: vi.fn(),
+        eject: vi.fn(),
+      },
+      response: {
+        use: vi.fn(),
+        eject: vi.fn(),
+      },
+    },
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
 
 // Setup before each test
 beforeEach(() => {

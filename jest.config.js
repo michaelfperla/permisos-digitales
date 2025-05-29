@@ -18,50 +18,26 @@ module.exports = {
   ],
 
   // An array of regexp pattern strings that are matched against all test paths
-  // matched tests are skipped
+  // matched tests are skipped - Reduced list to focus on critical failures only
   testPathIgnorePatterns: [
     '/node_modules/',
-    // Puppeteer and external service dependent tests
+    // Puppeteer and external service dependent tests (require external services)
     'src/services/__tests__/puppeteer.login.test.js',
     'src/services/__tests__/pdf-service.comprehensive.test.js',
     'src/services/__tests__/pdf-service.simple.test.js',
-    // Integration tests with missing dependencies
+    // Integration tests requiring full database setup
     'src/routes/__tests__/applications.integration.test.js',
     'src/routes/__tests__/admin.integration.test.js',
     'src/routes/__tests__/user.integration.test.js',
     'src/routes/__tests__/auth-change-password.integration.test.js',
     'src/routes/__tests__/admin-auth.integration.test.js',
-    'src/routes/__tests__/ano_modelo_validation.test.js',
-    'src/routes/__tests__/auth.csrf.test.js',
-    // Controller tests with status mismatches
-    'src/controllers/__tests__/application.controller.test.js',
-    'src/controllers/payment.controller.test.js',
-    'src/services/payment.service.test.js',
-    // Tests with missing modules
-    'src/utils/__tests__/validation.test.js',
-    'src/utils/__tests__/redis-client.test.js',
-    'src/middleware/__tests__/csrf.middleware.test.js',
-    'src/middleware/__tests__/upload.middleware.full.test.js',
-    'src/services/__tests__/email.service.test.js',
-    // Tests with localization mismatches
-    'src/routes/__tests__/validation-rules.test.js',
-    'src/routes/__tests__/application-validation.test.js',
-    'src/tests/middleware/validation.middleware.test.js',
-    'src/middleware/__tests__/validation.middleware.test.js',
-    'src/tests/middleware/error-handler.middleware.test.js',
-    'src/middleware/__tests__/error-handler.middleware.test.js',
-    'src/middleware/__tests__/cors.middleware.test.js',
-    // Additional problematic tests
-    'src/controllers/__tests__/auth.controller.test.js',
-    'src/routes/__tests__/applications.validation.test.js',
-    'src/tests/repositories/application.repository.test.js',
-    'src/repositories/__tests__/application.repository.test.js',
-    'src/utils/__tests__/error-helpers.test.js',
     'src/routes/__tests__/auth.integration.test.js',
     'src/routes/__tests__/application-status.integration.test.js',
     'src/routes/__tests__/application-status-auth.integration.test.js',
-    // Temporarily exclude failing password reset test
-    'src/services/__tests__/password-reset.service.test.js'
+    // Tests with complex external dependencies
+    'src/controllers/payment.controller.test.js',
+    'src/services/payment.service.test.js',
+    'src/services/__tests__/email.service.test.js'
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths
@@ -97,13 +73,13 @@ module.exports = {
     'clover'
   ],
 
-  // Coverage thresholds
+  // Coverage thresholds - Gradually increased for better test quality
   coverageThreshold: {
     global: {
-      statements: 23,
-      branches: 25,
-      functions: 38,
-      lines: 23
+      statements: 32,  // Current: 32.8% - Set slightly below current
+      branches: 70,    // Current: 73.7% - Set slightly below current
+      functions: 45,   // Current: 45.4% - Set slightly below current
+      lines: 32        // Current: 32.8% - Set slightly below current
     }
   },
 
