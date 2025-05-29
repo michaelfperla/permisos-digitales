@@ -1,4 +1,5 @@
 // frontend/src/test/test-utils.tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, RenderOptions } from '@testing-library/react';
 import React, { ReactElement, ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
@@ -120,17 +121,36 @@ const useMockAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   authContextProps?: UseMockAuthOptions;
+  queryClient?: QueryClient;
+  initialEntries?: string[];
 }
 
+// Create a default query client for tests
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      gcTime: 0,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
+
 const customRender = (ui: ReactElement, options?: CustomRenderOptions) => {
+  const queryClient = options?.queryClient ?? createTestQueryClient();
+
   const WrapperComponent = ({ children }: { children: ReactNode }) => {
     const authValue = useMockAuthContext(options?.authContextProps);
     return (
-      <BrowserRouter>
-        <AuthContext.Provider value={authValue}>
-          <ToastProvider>{children}</ToastProvider>
-        </AuthContext.Provider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AuthContext.Provider value={authValue}>
+            <ToastProvider>{children}</ToastProvider>
+          </AuthContext.Provider>
+        </BrowserRouter>
+      </QueryClientProvider>
     );
   };
 
@@ -139,4 +159,33 @@ const customRender = (ui: ReactElement, options?: CustomRenderOptions) => {
 
 export * from '@testing-library/react';
 
-export { customRender as render };
+export { customRender as render, createTestQueryClient };
+
+// Additional test utilities
+export const waitForLoadingToFinish = () =>
+  new Promise(resolve => setTimeout(resolve, 0));
+
+// Helper to create admin auth context
+export const createAdminAuthContext = (options?: UseMockAuthOptions) => {
+  // This would be similar to useMockAuthContext but for admin
+  // Implementation would depend on admin auth structure
+  return useMockAuthContext(options);
+};
+
+// Helper to render with admin context
+export const renderWithAdminAuth = (ui: ReactElement, options?: CustomRenderOptions) => {
+  const authValue = createAdminAuthContext(options?.authContextProps);
+  const queryClient = options?.queryClient ?? createTestQueryClient();
+
+  const WrapperComponent = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthContext.Provider value={authValue}>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthContext.Provider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+
+  return render(ui, { wrapper: WrapperComponent, ...options });
+};

@@ -1,14 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Import components and mocked services after mocks
 import applicationService, { Application, ApplicationStatus } from '../../services/applicationService';
 import authService from '../../services/authService';
-import { AuthProvider } from '../../shared/contexts/AuthContext';
-import { ToastProvider } from '../../shared/contexts/ToastContext';
 import DashboardPage from '../UserDashboardPage';
+import { render } from '../../test/test-utils';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -71,15 +69,18 @@ const mockAuthService = {
 
 // Render helper
 const renderDashboardPage = () => {
-  render(
-    <BrowserRouter>
-      <AuthProvider type="user" authService={mockAuthService}>
-        <ToastProvider>
-          <DashboardPage />
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>,
-  );
+  render(<DashboardPage />, {
+    authContextProps: {
+      isAuthenticatedByDefault: true,
+      initialUser: {
+        id: '123',
+        email: 'test@test.com',
+        first_name: 'Test',
+        last_name: 'User',
+        accountType: 'citizen',
+      },
+    },
+  });
 };
 
 describe('DashboardPage', () => {

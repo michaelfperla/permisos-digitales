@@ -5,44 +5,57 @@ import { afterEach, beforeEach, vi } from 'vitest';
 // Configure testing library
 configure({
   asyncUtilTimeout: 5000, // Default is 1000ms
+  testIdAttribute: 'data-testid',
+});
+
+// Create a proper axios mock that matches the real axios structure
+const createAxiosInstance = () => ({
+  interceptors: {
+    request: {
+      use: vi.fn(),
+      eject: vi.fn(),
+    },
+    response: {
+      use: vi.fn(),
+      eject: vi.fn(),
+    },
+  },
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  patch: vi.fn(),
+  delete: vi.fn(),
+  defaults: {
+    headers: {
+      common: {},
+      get: {},
+      post: {},
+      put: {},
+      patch: {},
+      delete: {},
+    },
+  },
 });
 
 // Mock axios for all tests
 vi.mock('axios', () => ({
   default: {
-    create: vi.fn(() => ({
-      interceptors: {
-        request: {
-          use: vi.fn(),
-          eject: vi.fn(),
-        },
-        response: {
-          use: vi.fn(),
-          eject: vi.fn(),
-        },
-      },
-      get: vi.fn(),
-      post: vi.fn(),
-      put: vi.fn(),
-      patch: vi.fn(),
-      delete: vi.fn(),
-    })),
-    interceptors: {
-      request: {
-        use: vi.fn(),
-        eject: vi.fn(),
-      },
-      response: {
-        use: vi.fn(),
-        eject: vi.fn(),
-      },
-    },
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
+    create: vi.fn(() => createAxiosInstance()),
+    ...createAxiosInstance(),
+    isAxiosError: vi.fn((error: any) => !!error?.isAxiosError),
   },
+}));
+
+// Mock the API service specifically
+vi.mock('../services/api', () => ({
+  api: createAxiosInstance(),
+  default: createAxiosInstance(),
+}));
+
+// Mock CSRF utilities
+vi.mock('../utils/csrf', () => ({
+  getCsrfToken: vi.fn().mockResolvedValue('mock-csrf-token'),
+  addCsrfTokenInterceptor: vi.fn(),
 }));
 
 // Setup before each test
