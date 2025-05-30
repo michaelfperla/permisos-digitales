@@ -75,7 +75,8 @@ const PrivacyPolicyPage: React.FC = () => {
             </li>
             <li>
               <strong>Datos de pago:</strong> Información de tarjeta de crédito o débito (procesada
-              por nuestro proveedor de pagos Conekta).
+              de forma segura por nuestro proveedor de pagos certificado Conekta, quien cumple con
+              estándares PCI DSS de seguridad).
             </li>
             <li>
               <strong>Datos de navegación:</strong> Información técnica como dirección IP, tipo de
@@ -243,7 +244,22 @@ const PrivacyPolicyPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>7. CAMBIOS AL AVISO DE PRIVACIDAD</h2>
+          <h2>7. TRANSFERENCIAS INTERNACIONALES</h2>
+          <p>
+            Para la prestación de nuestros servicios, algunos de sus datos personales pueden ser
+            transferidos y procesados en servidores ubicados en Estados Unidos (Amazon Web Services),
+            los cuales cuentan con certificaciones de seguridad internacionales y medidas de
+            protección equivalentes a las exigidas por la legislación mexicana.
+          </p>
+          <p>
+            Estas transferencias se realizan únicamente para las finalidades descritas en este aviso
+            y bajo estrictas medidas de seguridad que garantizan la confidencialidad e integridad de
+            sus datos personales.
+          </p>
+        </section>
+
+        <section className={styles.legalSection}>
+          <h2>8. CAMBIOS AL AVISO DE PRIVACIDAD</h2>
           <p>
             El presente aviso de privacidad puede sufrir modificaciones, cambios o actualizaciones
             derivadas de nuevos requerimientos legales; de nuestras propias necesidades por los
@@ -261,7 +277,7 @@ const PrivacyPolicyPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>8. MARCO LEGAL</h2>
+          <h2>9. MARCO LEGAL</h2>
           <p>
             Este Aviso de Privacidad se rige por la Ley Número 466 de Protección de Datos Personales
             en Posesión de Sujetos Obligados del Estado de Guerrero, la Ley General de Protección de
@@ -270,7 +286,7 @@ const PrivacyPolicyPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>9. CONTACTO</h2>
+          <h2>10. CONTACTO</h2>
           <p>
             Si tiene alguna duda o comentario respecto a este Aviso de Privacidad, puede
             contactarnos a través de:

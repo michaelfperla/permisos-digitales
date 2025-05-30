@@ -224,7 +224,61 @@ const TermsAndConditionsPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>8. PROTECCIÓN DE DATOS PERSONALES</h2>
+          <h2>8. CANCELACIONES Y DEVOLUCIONES</h2>
+          <p>
+            <strong>8.1. Política de No Cancelación:</strong> Una vez que el Permiso Digital de
+            Circulación Provisional ha sido emitido y entregado al Usuario, NO se aceptarán
+            cancelaciones ni se realizarán devoluciones del pago efectuado.
+          </p>
+          <p>
+            <strong>8.2. Carácter Definitivo del Pago:</strong> El pago realizado por el Usuario
+            para la obtención del Permiso tiene carácter definitivo e irrevocable. Al completar
+            el proceso de pago, el Usuario acepta expresamente esta condición.
+          </p>
+          <p>
+            <strong>8.3. Justificación:</strong> Esta política se fundamenta en que:
+          </p>
+          <ul className={styles.legalList}>
+            <li>El Permiso es un documento oficial que se genera inmediatamente tras el pago confirmado.</li>
+            <li>Los recursos administrativos y tecnológicos se emplean de manera inmediata para la emisión.</li>
+            <li>El documento otorga derechos de circulación que entran en vigor de forma inmediata.</li>
+            <li>La naturaleza del servicio público no permite reversión una vez prestado.</li>
+          </ul>
+          <p>
+            <strong>8.4. Excepciones:</strong> Únicamente en casos de error técnico comprobable
+            del sistema o duplicación involuntaria de pagos, se evaluará la procedencia de
+            ajustes, previa verificación y autorización de la Autoridad Emisora.
+          </p>
+          <p>
+            <strong>8.5. Derechos del Consumidor:</strong> Sin perjuicio de lo anterior, el Usuario
+            conserva sus derechos como consumidor conforme a la Ley Federal de Protección al
+            Consumidor, en lo que resulte aplicable a servicios públicos digitales.
+          </p>
+        </section>
+
+        <section className={styles.legalSection}>
+          <h2>9. LIMITACIÓN DE RESPONSABILIDAD</h2>
+          <p>
+            <strong>9.1. Alcance del Servicio:</strong> La Autoridad Emisora se limita a proporcionar
+            el servicio de emisión de Permisos Digitales de Circulación Provisional conforme a la
+            normatividad aplicable. No garantiza que el Permiso exima al Usuario de cumplir con
+            otras obligaciones legales o administrativas relacionadas con la circulación vehicular.
+          </p>
+          <p>
+            <strong>9.2. Responsabilidad del Usuario:</strong> El Usuario es el único responsable del
+            uso adecuado del Permiso y del cumplimiento de las disposiciones de tránsito vigentes.
+            La Autoridad Emisora no se hace responsable por infracciones, accidentes o daños que
+            pudieran derivarse del uso del vehículo durante la vigencia del Permiso.
+          </p>
+          <p>
+            <strong>9.3. Disponibilidad del Sistema:</strong> Si bien procuramos mantener la
+            Plataforma disponible las 24 horas, no garantizamos su funcionamiento ininterrumpido
+            debido a mantenimientos programados, fallas técnicas o causas de fuerza mayor.
+          </p>
+        </section>
+
+        <section className={styles.legalSection}>
+          <h2>10. PROTECCIÓN DE DATOS PERSONALES</h2>
           <p>
             El tratamiento de los datos personales proporcionados por el Usuario para la emisión del
             Permiso se regirá por nuestro{' '}
@@ -234,7 +288,7 @@ const TermsAndConditionsPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>9. MODIFICACIONES A LOS TÉRMINOS</h2>
+          <h2>11. MODIFICACIONES A LOS TÉRMINOS</h2>
           <p>
             Nos reservamos el derecho de modificar estos Términos en cualquier momento. Cualquier
             modificación será efectiva a partir de su publicación en la Plataforma. Es
@@ -245,7 +299,7 @@ const TermsAndConditionsPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>10. LEY APLICABLE Y JURISDICCIÓN</h2>
+          <h2>12. LEY APLICABLE Y JURISDICCIÓN</h2>
           <p>
             Estos Términos se regirán e interpretarán de conformidad con las leyes vigentes en los
             Estados Unidos Mexicanos y, en particular, del Estado de Guerrero. Para cualquier
@@ -257,7 +311,7 @@ const TermsAndConditionsPage: React.FC = () => {
         </section>
 
         <section className={styles.legalSection}>
-          <h2>11. CONTACTO</h2>
+          <h2>13. CONTACTO</h2>
           <p>
             Para cualquier duda o aclaración respecto a estos Términos o el uso del Permiso, puede
             contactarnos a través de:

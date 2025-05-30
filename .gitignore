@@ -10,14 +10,13 @@ dist/
 build/
 public/build/
 
-# Environment variables
+# Environment variables (CRITICAL: Never commit secrets!)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.production
-frontend/.env.production
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 
 # Security - Private keys and sensitive files
 *.pem
@@ -105,3 +104,16 @@ cookies.txt
 # Additional temporary files
 *.tmp
 *.bak
+
+# Cleanup and migration artifacts
+frontend-dist*/
+database_export.json
+*_test_user.js
+check_*.js
+export_data.js
+import_data.js
+cleanup_*.ps1
+*.tar.gz
+
+# Conekta testing files
+CONEKTA_TESTING_GUIDE.md
