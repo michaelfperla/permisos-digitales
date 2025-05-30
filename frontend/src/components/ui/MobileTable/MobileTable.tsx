@@ -93,7 +93,7 @@ function MobileTable<T>({
   itemsPerPage = 10,
   initialSortColumn,
   initialSortDirection = 'asc',
-  emptyMessage = 'No data available',
+  emptyMessage = 'No hay datos disponibles',
   className = '',
 }: MobileTableProps<T>) {
   // Sort state
@@ -252,20 +252,20 @@ function MobileTable<T>({
                 className={styles.paginationButton}
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                aria-label="Previous page"
+                aria-label="Página anterior"
               >
                 <Icon IconComponent={FaChevronLeft} size="sm" />
               </button>
 
               <span className={styles.paginationInfo}>
-                Page {currentPage} of {totalPages}
+                Página {currentPage} de {totalPages}
               </span>
 
               <button
                 className={styles.paginationButton}
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                aria-label="Next page"
+                aria-label="Página siguiente"
               >
                 <Icon IconComponent={FaChevronRight} size="sm" />
               </button>

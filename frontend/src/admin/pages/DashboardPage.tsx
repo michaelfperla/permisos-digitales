@@ -126,7 +126,7 @@ const DashboardPage: React.FC = () => {
   return (
     <ResponsiveContainer maxWidth="xxl">
       <header className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>Dashboard</h1>
+        <h1 className={styles.pageTitle}>Panel de Control</h1>
         <p className={styles.pageSubtitle}>Resumen de actividad del sistema</p>
       </header>
 
