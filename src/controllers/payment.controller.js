@@ -17,12 +17,12 @@ const createPaymentOrder = async (req, res) => {
     }
 
     if (application.user_id !== userId) {
-      return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
+      return ApiResponse.forbidden(res, null, { message: 'No tienes permiso para acceder a esta solicitud.' });
     }
 
     if (application.status !== ApplicationStatus.PENDING_PAYMENT) {
       return ApiResponse.badRequest(res, null, {
-        message: 'Application is not in a valid state for payment',
+        message: 'La solicitud no está en un estado válido para el pago.',
         currentStatus: application.status
       });
     }
@@ -64,7 +64,7 @@ const processCardPayment = async (req, res) => {
     const userId = req.session.userId;
 
     if (!token || !customerId) {
-      return ApiResponse.badRequest(res, null, { message: 'Missing required fields: token, customerId' });
+      return ApiResponse.badRequest(res, null, { message: 'Faltan campos requeridos.' });
     }
 
     const application = await applicationRepository.findById(applicationId);
@@ -73,7 +73,7 @@ const processCardPayment = async (req, res) => {
     }
 
     if (application.user_id !== userId) {
-      return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
+      return ApiResponse.forbidden(res, null, { message: 'No tienes permiso para acceder a esta solicitud.' });
     }
 
     const user = await req.userRepository.findById(userId);
@@ -123,7 +123,7 @@ const processBankTransferPayment = async (req, res) => {
     const userId = req.session.userId;
 
     if (!customerId) {
-      return ApiResponse.badRequest(res, null, { message: 'Missing required field: customerId' });
+      return ApiResponse.badRequest(res, null, { message: 'Faltan campos requeridos.' });
     }
 
     const application = await applicationRepository.findById(applicationId);
@@ -132,7 +132,7 @@ const processBankTransferPayment = async (req, res) => {
     }
 
     if (application.user_id !== userId) {
-      return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
+      return ApiResponse.forbidden(res, null, { message: 'No tienes permiso para acceder a esta solicitud.' });
     }
 
     const paymentData = {
@@ -178,7 +178,7 @@ const processOxxoPayment = async (req, res) => {
 
     // Validate required fields
     if (!customerId) {
-      return ApiResponse.badRequest(res, null, { message: 'Missing required field: customerId' });
+      return ApiResponse.badRequest(res, null, { message: 'Faltan campos requeridos.' });
     }
 
     // Validate application exists and belongs to user
@@ -188,7 +188,7 @@ const processOxxoPayment = async (req, res) => {
     }
 
     if (application.user_id !== userId) {
-      return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
+      return ApiResponse.forbidden(res, null, { message: 'No tienes permiso para acceder a esta solicitud.' });
     }
 
     // Process OXXO payment
@@ -264,16 +264,16 @@ const checkPaymentStatus = async (req, res) => {
     // Validate application exists and belongs to user
     const application = await applicationRepository.findById(applicationId);
     if (!application) {
-      return ApiResponse.notFound(res, null, { message: 'Application not found' });
+        return ApiResponse.error(res, 'Solicitud no encontrada.', 404);
     }
 
     if (application.user_id !== userId) {
-      return ApiResponse.forbidden(res, null, { message: 'You do not have permission to access this application' });
+      return ApiResponse.forbidden(res, null, { message: 'No tienes permiso para acceder a esta solicitud.' });
     }
 
     // Check if application has a payment order
     if (!application.payment_processor_order_id) {
-      return ApiResponse.badRequest(res, null, { message: 'No payment order found for this application' });
+      return ApiResponse.badRequest(res, null, { message: 'No se encontró una orden de pago para esta solicitud.' });
     }
 
     // Check payment status

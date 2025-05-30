@@ -147,7 +147,7 @@ const UserDashboardPage: React.FC = () => {
     <div className={styles.dashboardPage}>
       <div className={styles.dashboardContentWrapper}>
         <header className={`${styles.pageHeader} page-header-main-content ${styles.centeredText}`}>
-          <h1 className={`${styles.pageTitle} page-title-h1`}>Dashboard</h1>
+          <h1 className={`${styles.pageTitle} page-title-h1`}>Panel de Usuario</h1>
           <h2 className={`${styles.pageSubtitle} page-subtitle-h2`}>
             Bienvenido, {user?.first_name || 'Usuario'}. Aquí está el resumen de tus permisos.
           </h2>

@@ -26,7 +26,7 @@ function DataTable<T>({
   data,
   columns,
   keyField,
-  emptyMessage = 'No data available',
+  emptyMessage = 'No hay datos disponibles',
   pageSize = 10,
   onRowClick,
 }: DataTableProps<T>) {
@@ -102,7 +102,7 @@ function DataTable<T>({
         </Button>
 
         <span className={styles.paginationInfo}>
-          Page {currentPage} of {totalPages}
+          Página {currentPage} de {totalPages}
         </span>
 
         <Button
@@ -157,7 +157,7 @@ function DataTable<T>({
     }
 
     if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No';
+      return value ? 'Sí' : 'No';
     }
 
     if (value instanceof Date) {
