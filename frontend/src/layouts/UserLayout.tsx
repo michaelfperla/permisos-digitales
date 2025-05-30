@@ -114,13 +114,25 @@ const UserLayout: React.FC = () => {
     { to: "/profile", label: "Mi Perfil", icon: <Icon IconComponent={FaUserCircle} className={styles.navIcon} /> },
   ];
 
+  // Mobile navigation items (includes logout for mobile accessibility)
+  const mobileNavItems: NavLinkItem[] = [
+    ...userNavItems,
+    {
+      to: "/login",
+      label: "Cerrar Sesión",
+      icon: <Icon IconComponent={FaSignOutAlt} className={styles.navIcon} />,
+      type: "button-secondary",
+      onClick: handleLogout
+    },
+  ];
+
 
   return (
     <div className={styles.userLayout}>
       {isMdDown && (
         <AppHeaderMobile
           logoPath="/dashboard"
-          navLinks={[]}
+          navLinks={mobileNavItems}
           externalPanelControl={true}
           onExternalPanelToggle={toggleSidebar}
           isExternalPanelOpen={sidebarOpen}
