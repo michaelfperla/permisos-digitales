@@ -1,11 +1,11 @@
-const { v4: uuidv4 } = require('uuid');
+// UUID generation available but not currently used
 const { logger } = require('../utils/enhanced-logger');
 const { ApplicationStatus } = require('../constants');
 const conektaConfig = require('../config/conekta');
 const config = require('../config');
 const { mapConektaErrorToUserMessage } = require('../utils/conekta-error-mapper');
 const { CircuitBreaker } = require('../utils/circuit-breaker');
-const { calculateRiskScore, RISK_THRESHOLDS } = require('../utils/fraud-detection');
+const { calculateRiskScore } = require('../utils/fraud-detection');
 
 class PaymentService {
   constructor() {
@@ -925,7 +925,7 @@ class PaymentService {
             logger.debug('OXXO payment request device fingerprint (for helper):', {
               deviceFingerprint: orderDataForHelper.deviceFingerprint ? 'Present' : 'Not provided'
             });
-            
+
             const result = await this.conekta.createOrderWithOxxo(orderDataForHelper, {
               idempotencyKey: orderIdempotencyKey // Use the consistent idempotency key
             });
@@ -1051,12 +1051,12 @@ class PaymentService {
     // (which shouldn't happen with the current return statements in the else block)
     // However, to be safe, if it's ever reached, log and return/throw.
     this.metrics.failedPayments++;
-    const finalErrorMessage = mapConektaErrorToUserMessage(lastError).message || 
+    const finalErrorMessage = mapConektaErrorToUserMessage(lastError).message ||
                               'Error al generar referencia para pago en OXXO después de múltiples intentos';
-    
-    logger.error('Exhausted retries for OXXO payment. Final error:', { 
-      message: lastError.message, 
-      idempotencyKey: orderIdempotencyKey 
+
+    logger.error('Exhausted retries for OXXO payment. Final error:', {
+      message: lastError.message,
+      idempotencyKey: orderIdempotencyKey
     });
 
     return { // Return final error object

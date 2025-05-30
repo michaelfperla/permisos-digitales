@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   FaTachometerAlt, FaClipboardList, FaUserCircle, FaSignOutAlt,
   FaTimes, FaPlus, FaChevronLeft, FaChevronRight // FaCar removed from here
@@ -17,14 +17,14 @@ const UserLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { isMdDown } = useResponsive();
-  const [sidebarOpen, setSidebarOpen] = useState(!isMdDown); 
+  const [sidebarOpen, setSidebarOpen] = useState(!isMdDown);
   const [showOverlay, setShowOverlay] = useState(false);
 
   const sidebarCloseButtonRef = useRef<HTMLButtonElement>(null);
-  const userSidebarRef = useRef<HTMLElement>(null); 
+  const userSidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setSidebarOpen(!isMdDown); 
+    setSidebarOpen(!isMdDown);
   }, [isMdDown]);
 
   useEffect(() => {
@@ -38,9 +38,9 @@ const UserLayout: React.FC = () => {
         const timer = setTimeout(() => setShowOverlay(false), 300);
         return () => clearTimeout(timer);
       }
-    } else { 
-      setShowOverlay(false); 
-      document.body.style.overflow = ''; 
+    } else {
+      setShowOverlay(false);
+      document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
@@ -51,12 +51,12 @@ const UserLayout: React.FC = () => {
     setSidebarOpen(prev => !prev);
   };
 
-  const closeSidebarAndFocusHamburger = () => {
+  const closeSidebarAndFocusHamburger = useCallback(() => {
     setSidebarOpen(false);
-  };
+  }, []);
 
   const handleLogout = async () => {
-    if (isMdDown && sidebarOpen) setSidebarOpen(false); 
+    if (isMdDown && sidebarOpen) setSidebarOpen(false);
     await logout();
     navigate('/login');
   };
@@ -77,17 +77,17 @@ const UserLayout: React.FC = () => {
 
       if (focusableElements.length === 0) return;
 
-      const firstElement = focusableElements[0]; 
+      const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
       const trapFocus = (e: KeyboardEvent) => {
         if (e.key === 'Tab') {
-          if (e.shiftKey) { 
+          if (e.shiftKey) {
             if (document.activeElement === firstElement) {
               e.preventDefault();
               lastElement.focus();
             }
-          } else { 
+          } else {
             if (document.activeElement === lastElement) {
               e.preventDefault();
               firstElement.focus();
@@ -120,7 +120,7 @@ const UserLayout: React.FC = () => {
       {isMdDown && (
         <AppHeaderMobile
           logoPath="/dashboard"
-          navLinks={[]} 
+          navLinks={[]}
           externalPanelControl={true}
           onExternalPanelToggle={toggleSidebar}
           isExternalPanelOpen={sidebarOpen}
@@ -138,7 +138,7 @@ const UserLayout: React.FC = () => {
       <aside
         ref={userSidebarRef}
         className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''} ${isMdDown ? styles.mobile : ''}`}
-        aria-hidden={isMdDown ? !sidebarOpen : undefined} 
+        aria-hidden={isMdDown ? !sidebarOpen : undefined}
         role={isMdDown ? "dialog" : undefined}
         aria-modal={isMdDown ? sidebarOpen : undefined}
         aria-label={isMdDown ? "Menú de usuario" : undefined}
@@ -148,7 +148,7 @@ const UserLayout: React.FC = () => {
             <div className={styles.sidebarLogo}>
               <TextLogo
                 to="/dashboard"
-                className={styles.textLogoInSidebar} 
+                className={styles.textLogoInSidebar}
                 variant="light"
                 compact={isDesktopCollapsed}
                 initialsOnly={isDesktopCollapsed}
@@ -166,7 +166,7 @@ const UserLayout: React.FC = () => {
                 onClick={closeSidebarAndFocusHamburger}
                 aria-label="Cerrar menú"
               >
-                <FaTimes /> 
+                <FaTimes />
               </button>
             </>
           )}
@@ -184,7 +184,7 @@ const UserLayout: React.FC = () => {
             <NavLink
               key={item.to.toString()}
               to={item.to}
-              end={item.to === "/dashboard"} 
+              end={item.to === "/dashboard"}
               className={({ isActive }) =>
                 `${styles.navLink} ${isActive ? styles.active : ''}`
               }
@@ -198,9 +198,9 @@ const UserLayout: React.FC = () => {
 
         <div className={styles.sidebarFooter}>
           <div className={styles.footerActions}>
-            {!isMdDown && ( 
+            {!isMdDown && (
               <Button
-                variant="text" 
+                variant="text"
                 size="icon"
                 className={styles.sidebarToggleButton}
                 onClick={toggleSidebar}
@@ -212,10 +212,10 @@ const UserLayout: React.FC = () => {
               />
             )}
             <Button
-              variant="danger" 
+              variant="danger"
               className={styles.logoutButton}
               onClick={handleLogout}
-              icon={<Icon IconComponent={FaSignOutAlt} size="md" />} 
+              icon={<Icon IconComponent={FaSignOutAlt} size="md" />}
             >
               <span className={styles.logoutText}>Cerrar Sesión</span>
             </Button>

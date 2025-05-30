@@ -5,8 +5,8 @@ import { vi, describe, test, expect, beforeEach } from 'vitest';
 // Import components and mocked services after mocks
 import applicationService, { Application, ApplicationStatus } from '../../services/applicationService';
 import authService from '../../services/authService';
-import DashboardPage from '../UserDashboardPage';
 import { render } from '../../test/test-utils';
+import DashboardPage from '../UserDashboardPage';
 
 // --- Mocking Dependencies ---
 vi.mock('../../services/applicationService');
@@ -58,8 +58,8 @@ const mockApplications: Application[] = [
   },
 ];
 
-// Mock auth service
-const mockAuthService = {
+// Mock auth service (unused but kept for potential future use)
+const _mockAuthService = {
   login: vi.fn(),
   logout: vi.fn(),
   checkStatus: vi.fn(),

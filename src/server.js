@@ -10,10 +10,10 @@ const apiRoutes = require('./routes');
 const { dbPool, testConnection } = require('./db');
 const { logger, correlationMiddleware } = require('./utils/enhanced-logger');
 const requestIdMiddleware = require('./middleware/request-id.middleware');
-const { csrfProtection, handleCsrfError } = require('./middleware/csrf.middleware');
+const { handleCsrfError } = require('./middleware/csrf.middleware');
 const corsMiddleware = require('./middleware/cors.middleware');
 const { initScheduledJobs } = require('./jobs/scheduler');
-const Conekta = require('./config/conekta');
+// Conekta configuration available but not used in server setup
 
 const PgSession = connectPgSimple(session);
 
@@ -203,7 +203,7 @@ const { setupSwagger } = require('./utils/swagger');
 setupSwagger(app);
 
 const limiters = require('./middleware/rate-limit.middleware');
-const ApiResponse = require('./utils/api-response');
+// ApiResponse utility available but not used in server setup
 
 app.use('/', limiters.api, apiRoutes);
 app.use('/auth', limiters.auth);

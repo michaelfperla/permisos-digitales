@@ -3,7 +3,6 @@ const { logger } = require('../utils/enhanced-logger');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants');
 const { applicationRepository, paymentRepository } = require('../repositories');
 const paymentService = require('./payment.service');
-const puppeteerService = require('./puppeteer.service');
 const notificationService = require('./notification.service');
 
 exports.getExpiringPermits = async (userId, daysThreshold = 30) => {

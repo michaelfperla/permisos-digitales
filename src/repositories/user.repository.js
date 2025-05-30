@@ -219,7 +219,8 @@ class UserRepository extends BaseRepository {
     }
   }
 
-  async setUserStatus(userId, isActive) {
+  async setUserStatus(userId, _isActive) {
+    // Legacy method kept for compatibility - isActive parameter no longer used since is_active column was removed
     logger.warn(`setUserStatus called for user ${userId} but is_active column no longer exists`);
     return true;
   }

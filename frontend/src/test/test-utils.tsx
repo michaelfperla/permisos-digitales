@@ -157,6 +157,7 @@ const customRender = (ui: ReactElement, options?: CustomRenderOptions) => {
   return render(ui, { wrapper: WrapperComponent, ...options });
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- This is a test utility file that legitimately exports both components and utilities
 export * from '@testing-library/react';
 
 export { customRender as render, createTestQueryClient };
@@ -169,7 +170,15 @@ export const waitForLoadingToFinish = () =>
 export const createAdminAuthContext = (options?: UseMockAuthOptions) => {
   // This would be similar to useMockAuthContext but for admin
   // Implementation would depend on admin auth structure
-  return useMockAuthContext(options);
+  // Note: This is a factory function, not a hook, so we create the mock directly
+  return {
+    user: options?.user || null,
+    isAuthenticated: options?.isAuthenticated || false,
+    isLoading: options?.isLoading || false,
+    login: options?.login || vi.fn(),
+    logout: options?.logout || vi.fn(),
+    checkAuthStatus: options?.checkAuthStatus || vi.fn(),
+  };
 };
 
 // Helper to render with admin context

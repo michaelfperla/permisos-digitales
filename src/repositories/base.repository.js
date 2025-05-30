@@ -24,7 +24,7 @@ class BaseRepository {
     const params = [];
 
     const whereClauses = [];
-    Object.entries(criteria).forEach(([column, value], index) => {
+    Object.entries(criteria).forEach(([column, value], _index) => {
       params.push(value);
       whereClauses.push(`${column} = $${params.length}`);
     });
@@ -146,7 +146,7 @@ class BaseRepository {
     const params = [];
 
     const whereClauses = [];
-    Object.entries(criteria).forEach(([column, value], index) => {
+    Object.entries(criteria).forEach(([column, value], _index) => {
       params.push(value);
       whereClauses.push(`${column} = $${params.length}`);
     });

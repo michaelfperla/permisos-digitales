@@ -129,7 +129,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     const response = await api.get<any>('/dashboard-stats');
 
     if (import.meta.env.DEV) {
-      console.log('[getDashboardStats] Raw API response:', response.data);
+      console.debug('[getDashboardStats] Raw API response:', response.data);
     }
 
     let stats: DashboardStats;

@@ -36,8 +36,8 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: { ...globals.node }, 
-      parser: tseslint.parser,    
+      globals: { ...globals.node },
+      parser: tseslint.parser,
       parserOptions: {
         project: false,
         ecmaFeatures: { jsx: false },
@@ -49,25 +49,25 @@ export default tseslint.config(
     },
     rules: {
       ...js.configs.recommended.rules,
-      'no-unused-vars': 'off', 
+      'no-unused-vars': 'off',
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_', 
-        varsIgnorePattern: '^_', 
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^ignore',
-        destructuredArrayIgnorePattern: '^_', 
+        destructuredArrayIgnorePattern: '^_',
       }],
       '@typescript-eslint/no-var-requires': 'off',
-      'import/no-extraneous-dependencies': ['error', { 
+      'import/no-extraneous-dependencies': ['error', {
         'devDependencies': true,
         'optionalDependencies': true,
         'peerDependencies': true,
       }],
-      'import/order': ['warn', { 
+      'import/order': ['warn', {
         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
-        'newlines-between': 'always', 
+        'newlines-between': 'always',
         alphabetize: { order: 'asc', caseInsensitive: true },
       }],
       'no-console': 'off',
@@ -89,11 +89,11 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: { ...globals.browser }, 
-      parser: tseslint.parser,      
+      globals: { ...globals.browser },
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: { jsx: true },
-        project: ['./tsconfig.app.json'], 
+        project: ['./tsconfig.app.json'],
         tsconfigRootDir: import.meta.dirname,
         noWarnOnMultipleProjects: true,
       },
@@ -116,10 +116,10 @@ export default tseslint.config(
       ...reactHooksPlugin.configs.recommended.rules,
       ...jsxA11yPlugin.configs.recommended.rules,
 
-      'no-unused-vars': 'off', 
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_', 
-        varsIgnorePattern: '^_', 
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^ignore',
         destructuredArrayIgnorePattern: '^_',
       }],
@@ -134,11 +134,20 @@ export default tseslint.config(
         'newlines-between': 'always',
         alphabetize: { order: 'asc', caseInsensitive: true },
       }],
-      'import/no-duplicates': 'error', 
-      'import/first': 'error',         
+      'import/no-duplicates': 'error',
+      'import/first': 'error',
       'import/newline-after-import': 'warn',
       'import/no-useless-path-segments': 'warn',
-      'import/no-extraneous-dependencies': ['error', { 'devDependencies': false }],
+      'import/no-extraneous-dependencies': ['error', {
+        'devDependencies': [
+          '**/*.test.{ts,tsx}',
+          '**/__tests__/**/*.{ts,tsx}',
+          '**/test/**/*.{ts,tsx}',
+          '**/*.config.{ts,js}',
+          'vite.config.ts',
+          'vitest.config.ts'
+        ]
+      }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'no-console': ['warn', { allow: ['warn', 'error', 'info', 'debug'] }],
       'eqeqeq': ['error', 'always'],
@@ -164,10 +173,10 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: { ...vitestPlugin.environments.env.globals }, 
-      parser: tseslint.parser,                               
+      globals: { ...vitestPlugin.environments.env.globals },
+      parser: tseslint.parser,
       parserOptions: {
-        project: false, 
+        project: false,
         ecmaFeatures: { jsx: true },
       },
     },
@@ -180,12 +189,12 @@ export default tseslint.config(
     rules: {
       ...js.configs.recommended.rules,
       ...tseslint.configs.eslintRecommended.rules,
-      ...tseslint.configs.recommended.rules, 
+      ...tseslint.configs.recommended.rules,
       ...vitestPlugin.configs.recommended.rules,
 
-      'no-unused-vars': 'off', 
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        varsIgnorePattern: '^_', 
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        varsIgnorePattern: '^_',
         argsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^ignore',
         destructuredArrayIgnorePattern: '^_',
@@ -197,7 +206,7 @@ export default tseslint.config(
     },
     settings: {
       'import/resolver': {
-        typescript: { alwaysTryTypes: true, project: ['./tsconfig.json'] }, 
+        typescript: { alwaysTryTypes: true, project: ['./tsconfig.json'] },
         node: true,
       },
       'import/parsers': { '@typescript-eslint/parser': ['.ts', '.tsx'] },

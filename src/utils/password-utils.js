@@ -2,12 +2,9 @@ const crypto = require('crypto');
 const { promisify } = require('util');
 const bcrypt = require('bcrypt');
 
-const randomBytes = promisify(crypto.randomBytes);
 const pbkdf2 = promisify(crypto.pbkdf2);
 
-const SALT_LENGTH = 32;
 const KEY_LENGTH = 64;
-const ITERATIONS = 100000;
 const DIGEST = 'sha512';
 
 async function hashPassword(password) {

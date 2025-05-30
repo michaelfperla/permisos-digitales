@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const ApiResponse = require('../utils/api-response');
 
-const { isAuthenticated, isAdmin, isClient, isAdminPortal, auditRequest } = require('../middleware/auth.middleware');
+const { isAuthenticated, isClient, isAdminPortal, auditRequest } = require('../middleware/auth.middleware');
 const rateLimiters = require('../middleware/rate-limit.middleware');
 const authRoutes = require('./auth.routes');
 const passwordResetRoutes = require('./password-reset.routes');

@@ -19,6 +19,7 @@ const PaymentSuccessPage: React.FC = () => {
   useEffect(() => {
     // Show success toast when component mounts
     showToast('¡Pago completado exitosamente!', 'success');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- showToast is stable but adding it would cause infinite re-renders
   }, []);
 
   // Navigate to the specific permit details if ID is available, otherwise to dashboard

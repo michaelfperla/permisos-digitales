@@ -2,7 +2,7 @@ const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
 const { ApplicationStatus } = require('../constants');
 const BaseRepository = require('./base.repository');
-const { withTransaction, withClient } = require('../utils/db-transaction');
+const { withTransaction } = require('../utils/db-transaction');
 
 class PaymentRepository extends BaseRepository {
   constructor() {

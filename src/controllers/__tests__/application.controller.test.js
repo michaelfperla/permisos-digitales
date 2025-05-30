@@ -98,7 +98,7 @@ jest.mock('path', () => ({
 
 describe('Application Controller', () => {
   let req, res, next;
-  let applicationRepository, applicationService, storageService, handleControllerError, logger, db;
+  let applicationRepository, applicationService, storageService, logger, db;
 
   beforeEach(() => {
     // Reset all mocks before each test
@@ -127,7 +127,7 @@ describe('Application Controller', () => {
     puppeteerService.generatePermit = jest.fn().mockResolvedValue(true);
 
     const errorHelpers = require('../../utils/error-helpers');
-    handleControllerError = errorHelpers.handleControllerError = jest.fn();
+    errorHelpers.handleControllerError = jest.fn();
     errorHelpers.createError = jest.fn();
 
     logger = require('../../utils/enhanced-logger').logger;
@@ -875,17 +875,7 @@ describe('Application Controller', () => {
 
     it('should create a new application successfully', async () => {
       // Arrange
-      const validatedData = {
-        ...req.body,
-        status: ApplicationStatus.AWAITING_PAYMENT
-      };
-
-      const newApplication = {
-        id: 1,
-        user_id: 123,
-        ...validatedData,
-        created_at: new Date().toISOString()
-      };
+      // Test data setup for mock response
 
       // Mock the controller implementation directly
       const mockController = jest.spyOn(applicationController, 'createApplication');
@@ -1033,19 +1023,9 @@ describe('Application Controller', () => {
 
     it('should successfully submit payment proof without desired start date', async () => {
       // Arrange
-      const fileInfo = {
-        relativePath: 'payment-proofs/app-1_12345.pdf',
-        fileName: 'app-1_12345.pdf',
-        size: 12345
-      };
+      // Test file info setup for mock response
 
-      const updatedApplication = {
-        id: 1,
-        user_id: 123,
-        status: ApplicationStatus.PROOF_SUBMITTED,
-        payment_proof_path: fileInfo.relativePath,
-        payment_reference: 'REF123456',
-      };
+      // Test data setup for mock response
 
       // Mock the controller implementation directly
       const mockController = jest.spyOn(applicationController, 'submitPaymentProof');

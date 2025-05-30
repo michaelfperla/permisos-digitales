@@ -4,7 +4,6 @@ const router = express.Router();
 const { logger } = require('../utils/enhanced-logger');
 const conektaConfig = require('../config/conekta');
 const { ApplicationStatus } = require('../constants');
-const paymentService = require('../services/payment.service');
 const paymentRepository = require('../repositories/payment.repository');
 
 /**

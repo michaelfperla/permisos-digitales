@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, ReactNode } from 'react';
+import React, { useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { Link, To, useLocation } from 'react-router-dom';
 
@@ -58,7 +58,7 @@ const AppHeaderMobile: React.FC<AppHeaderMobileProps> = ({
     }
   };
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     if (externalPanelControl && onExternalPanelToggle) {
       // Parent is responsible for closing, but we can still request focus return
       onExternalPanelToggle();
@@ -66,7 +66,7 @@ const AppHeaderMobile: React.FC<AppHeaderMobileProps> = ({
       setIsInternalMenuOpen(false);
     }
     menuButtonRef.current?.focus();
-  };
+  }, [externalPanelControl, onExternalPanelToggle]);
 
   // Effect for body scroll and initial focus in panel
   useEffect(() => {

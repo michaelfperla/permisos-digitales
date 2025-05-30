@@ -35,7 +35,8 @@ let measureDatabaseQuery;
 try {
   const metrics = require('../utils/metrics');
   measureDatabaseQuery = metrics.measureDatabaseQuery;
-} catch (error) {
+} catch (_error) {
+  // Metrics module not available, use fallback
   measureDatabaseQuery = async (queryType, table, queryFn) => queryFn();
 }
 

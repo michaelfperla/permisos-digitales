@@ -5,9 +5,9 @@ import React, { ReactElement, ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 
-import { createMockAdminUser } from '../../test/factories';
 import { AdminAuthContext, AdminAuthContextType } from '../../shared/contexts/AuthContext';
 import { ToastProvider } from '../../shared/contexts/ToastContext';
+import { createMockAdminUser } from '../../test/factories';
 
 // Define the initial state type for the admin auth hook
 interface UseMockAdminAuthOptions {
@@ -122,7 +122,7 @@ const createAdminTestQueryClient = () => new QueryClient({
 
 const customAdminRender = (ui: ReactElement, options?: CustomAdminRenderOptions) => {
   const queryClient = options?.queryClient ?? createAdminTestQueryClient();
-  
+
   const WrapperComponent = ({ children }: { children: ReactNode }) => {
     const authValue = useMockAdminAuthContext(options?.authContextProps);
     return (
@@ -139,16 +139,17 @@ const customAdminRender = (ui: ReactElement, options?: CustomAdminRenderOptions)
   return render(ui, { wrapper: WrapperComponent, ...options });
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- This is a test utility file that legitimately exports both components and utilities
 export * from '@testing-library/react';
 
-export { 
-  customAdminRender as renderAdmin, 
+export {
+  customAdminRender as renderAdmin,
   createAdminTestQueryClient,
-  useMockAdminAuthContext 
+  useMockAdminAuthContext
 };
 
 // Additional admin test utilities
-export const waitForAdminLoadingToFinish = () => 
+export const waitForAdminLoadingToFinish = () =>
   new Promise(resolve => setTimeout(resolve, 0));
 
 // Helper to create mock admin service

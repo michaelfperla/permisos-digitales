@@ -5,9 +5,7 @@
  * This service provides a backward-compatible interface for PDF operations,
  * delegating to the new PDF storage service for actual implementation.
  */
-const fs = require('fs');
 const path = require('path');
-const { logger } = require('../utils/enhanced-logger');
 const pdfStorageService = require('./storage/pdf-storage-service');
 
 // Constants for backward compatibility

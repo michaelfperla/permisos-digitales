@@ -91,7 +91,9 @@ const defaultAdminAuthContext: AdminAuthContextType = {
   setUser: () => {},
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context files legitimately export both contexts and provider components
 export const UserAuthContext = createContext<UserAuthContextType>(defaultUserAuthContext);
+// eslint-disable-next-line react-refresh/only-export-components -- Context files legitimately export both contexts and provider components
 export const AdminAuthContext = createContext<AdminAuthContextType>(defaultAdminAuthContext);
 
 interface AuthProviderProps {

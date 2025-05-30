@@ -28,6 +28,7 @@ export interface ToastContextType {
   position: ToastPosition;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context files legitimately export both contexts and provider components
 export const ToastContext = createContext<ToastContextType>({
   showToast: () => {},
   hideToast: () => {},
@@ -52,7 +53,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     message: string,
     type: ToastType = 'info',
     options?: {
-      duration?: number; 
+      duration?: number;
       action?: {
         label: string;
         onClick: () => void;
@@ -119,7 +120,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
       <ToastContainer
         toasts={toasts}
         onClose={hideToast}
-        position="top-right" 
+        position="top-right"
         maxToasts={5}
       />
     </ToastContext.Provider>

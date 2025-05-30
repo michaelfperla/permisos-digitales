@@ -36,6 +36,7 @@ const PaymentErrorPage: React.FC = () => {
   useEffect(() => {
     // Show error toast when component mounts
     showToast('Hubo un problema con tu pago', 'error');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- showToast is stable but adding it would cause infinite re-renders
   }, []);
 
   // Navigate to the specific permit details if ID is available, otherwise to dashboard

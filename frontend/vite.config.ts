@@ -25,6 +25,7 @@ export default defineConfig({
 
           const DEBUG_PROXY = process.env.VITE_DEBUG_PROXY === 'true' || process.env.DEBUG_PROXY === 'true';
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- import.meta typing is complex in Vite config context
           if (DEBUG_PROXY && (import.meta as any).env?.DEV !== false) {
             proxy.on('proxyReq', (proxyReq, req, _res) => {
               console.log(`[Proxy Req]: ${req.method} ${req.url}`);

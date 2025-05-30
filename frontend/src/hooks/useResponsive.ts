@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 import useMediaQuery from './useMediaQuery';
 
@@ -39,7 +39,7 @@ const useResponsive = () => {
   const isLgUp = useMediaQuery(`(min-width: ${getCSSBreakpoint('md')})`);
   const isXlUp = useMediaQuery(`(min-width: ${getCSSBreakpoint('lg')})`);
 
-  const is = (breakpoint: Breakpoint): boolean => {
+  const is = useCallback((breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
       case 'xs':
         return isXs;
@@ -54,9 +54,9 @@ const useResponsive = () => {
       default:
         return false;
     }
-  };
+  }, [isXs, isSm, isMd, isLg, isXl]);
 
-  const down = (breakpoint: Breakpoint): boolean => {
+  const down = useCallback((breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
       case 'xs':
         return isXsDown;
@@ -71,9 +71,9 @@ const useResponsive = () => {
       default:
         return false;
     }
-  };
+  }, [isXsDown, isSmDown, isMdDown, isLgDown, isXlDown]);
 
-  const up = (breakpoint: Breakpoint): boolean => {
+  const up = useCallback((breakpoint: Breakpoint): boolean => {
     switch (breakpoint) {
       case 'xs':
         return isXsUp;
@@ -88,15 +88,15 @@ const useResponsive = () => {
       default:
         return false;
     }
-  };
+  }, [isXsUp, isSmUp, isMdUp, isLgUp, isXlUp]);
 
-  const between = (start: Breakpoint, end: Breakpoint): boolean => {
+  const between = useCallback((start: Breakpoint, end: Breakpoint): boolean => {
     return up(start) && down(end);
-  };
+  }, [up, down]);
 
-  const only = (breakpoint: Breakpoint): boolean => {
+  const only = useCallback((breakpoint: Breakpoint): boolean => {
     return is(breakpoint);
-  };
+  }, [is]);
 
   return useMemo(
     () => ({
@@ -121,7 +121,12 @@ const useResponsive = () => {
       between,
       only,
     }),
-    [isXs, isSm, isMd, isLg, isXl, isSmDown, isMdDown, isLgDown, isSmUp, isMdUp, isLgUp, isXlUp],
+    [
+      isXs, isSm, isMd, isLg, isXl,
+      isXsDown, isSmDown, isMdDown, isLgDown, isXlDown,
+      isXsUp, isSmUp, isMdUp, isLgUp, isXlUp,
+      is, down, up, between, only
+    ],
   );
 };
 

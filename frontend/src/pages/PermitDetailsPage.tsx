@@ -449,7 +449,7 @@ const PermitDetailsPage: React.FC = () => {
     };
 
     checkPaymentStatus();
-  }, [id, location.search, refetch, showToast]);
+  }, [id, location.search, refetch, showToast, applicationData]);
 
   // Separate effect to check payment status for AWAITING_OXXO_PAYMENT or PAYMENT_PROCESSING
   // This prevents infinite loops by using a ref to track if we've already checked
