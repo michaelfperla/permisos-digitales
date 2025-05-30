@@ -14,6 +14,12 @@ import { ToastProvider } from '../shared/contexts/ToastContext';
 interface UseMockAuthOptions {
   isAuthenticatedByDefault?: boolean;
   initialUser?: any;
+  user?: any;
+  isAuthenticated?: boolean;
+  isLoading?: boolean;
+  login?: any;
+  logout?: any;
+  checkAuthStatus?: any;
 }
 
 // Custom Hook to provide mock auth context value
@@ -167,7 +173,7 @@ export const waitForLoadingToFinish = () =>
   new Promise(resolve => setTimeout(resolve, 0));
 
 // Helper to create admin auth context
-export const createAdminAuthContext = (options?: UseMockAuthOptions) => {
+export const createAdminAuthContext = (options?: UseMockAuthOptions): AuthContextType => {
   // This would be similar to useMockAuthContext but for admin
   // Implementation would depend on admin auth structure
   // Note: This is a factory function, not a hook, so we create the mock directly
@@ -175,9 +181,14 @@ export const createAdminAuthContext = (options?: UseMockAuthOptions) => {
     user: options?.user || null,
     isAuthenticated: options?.isAuthenticated || false,
     isLoading: options?.isLoading || false,
+    error: null,
     login: options?.login || vi.fn(),
+    register: vi.fn(),
     logout: options?.logout || vi.fn(),
-    checkAuthStatus: options?.checkAuthStatus || vi.fn(),
+    checkAuth: options?.checkAuthStatus || vi.fn(),
+    clearError: vi.fn(),
+    setUser: vi.fn(),
+    resendVerificationEmail: vi.fn(),
   };
 };
 
