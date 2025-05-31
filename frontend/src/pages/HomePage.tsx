@@ -7,6 +7,7 @@ import {
   BsPlus,
   BsDash,
 } from 'react-icons/bs';
+import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import styles from './HomePage.module.css';
@@ -25,8 +26,12 @@ const HomePage: React.FC = () => {
   const { isMdDown } = useResponsive();
 
   const homeNavLinks: NavLinkItem[] = [
+    { to: '/', label: 'Inicio', icon: <Icon IconComponent={FaHome} size="sm" /> },
+    { to: '/contacto', label: 'Contacto', icon: <Icon IconComponent={FaEnvelope} size="sm" /> },
+    { to: '/terminos-y-condiciones', label: 'Términos y Condiciones', icon: <Icon IconComponent={FaFileAlt} size="sm" /> },
+    { to: '/politica-de-privacidad', label: 'Política de Privacidad', icon: <Icon IconComponent={FaShieldAlt} size="sm" /> },
     { to: '/register', label: 'Crear cuenta', type: 'button-secondary' },
-    { to: '/login', label: 'Entrar', type: 'link' },
+    { to: '/login', label: 'Entrar', type: 'button-primary' },
   ];
 
   const faqs = [

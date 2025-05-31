@@ -76,7 +76,7 @@ const defaultUserAuthContext: UserAuthContextType = {
   checkAuth: async () => {},
   clearError: () => {},
   setUser: () => {},
-  resendVerificationEmail: async () => ({ success: false, message: 'Not implemented' }),
+  resendVerificationEmail: async () => ({ success: false, message: 'No implementado' }),
 };
 
 const defaultAdminAuthContext: AdminAuthContextType = {
@@ -264,14 +264,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         setIsLoading(false);
         return true;
       }
-      setError(response.message || 'Login failed.');
+      setError(response.message || 'Error al iniciar sesión.');
       setIsLoading(false);
       return false;
     } catch (errLogin) {
       if (loadingTimeout) clearTimeout(loadingTimeout);
       loadingTimeout = null;
       errorLog('AuthContext', 'User login error', errLogin);
-      setError('Network error during login.');
+      setError('Error de conexión durante el inicio de sesión.');
       setIsLoading(false);
       return false;
     }
@@ -311,7 +311,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   }, [type, authService, debugLog, errorLog, setIsLoading, setError]);
 
   const userResendVerificationEmail = useCallback(async (email: string): Promise<{ success: boolean; message: string }> => {
-    if (type !== 'user') return { success: false, message: 'Invalid operation for admin type' };
+    if (type !== 'user') return { success: false, message: 'Operación inválida para tipo administrador' };
     try {
       debugLog('AuthContext', `Resending verification email for: ${email}`);
       return await authService.resendVerificationEmail(email);

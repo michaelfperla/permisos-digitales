@@ -5,37 +5,21 @@
   background-color: var(--color-background);
 }
 
-.desktopHeader {
-  background-color: var(--color-white);
-  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
-  padding: 1rem 2rem;
+/* Add padding-top for fixed header on desktop only */
+@media (min-width: 768px) {
+  .legalPageContainer {
+    padding-top: var(--mobile-header-height, 56px);
+  }
 }
 
-.headerContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+/* Mobile uses AppHeaderMobile which handles its own padding */
+@media (max-width: 767px) {
+  .legalPageContainer {
+    padding-top: var(--mobile-header-height, 56px);
+  }
 }
 
-.headerLinks {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.headerLink {
-  color: var(--color-text);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.headerLink:hover {
-  color: var(--color-primary);
-}
+/* Old desktop header styles removed - now using StandardDesktopHeader component */
 
 .legalContent {
   flex: 1;

@@ -1,27 +1,44 @@
 // src/middleware/auth.middleware.js
 const { logger } = require('../utils/enhanced-logger');
 const ApiResponse = require('../utils/api-response');
+const { getCookieDomain, logDomainInfo } = require('../utils/domain-utils');
 
 // This middleware checks if a user is authenticated by looking for session data.
 exports.isAuthenticated = (req, res, next) => {
-  // Debug session data
+  // Log domain information for debugging
+  logDomainInfo(req, 'auth');
+
+  // Debug session data with domain information
   console.log('Auth middleware - Request session:', {
     hasSession: !!req.session,
     sessionId: req.session?.id,
     userId: req.session?.userId,
     path: req.path,
     method: req.method,
-    cookies: req.cookies
+    host: req.get('host'),
+    origin: req.get('origin'),
+    cookieDomain: getCookieDomain(req),
+    cookies: req.cookies ? Object.keys(req.cookies) : 'none',
+    sessionCookie: req.cookies ? req.cookies['permisos.sid'] : 'none'
   });
 
   // Check if the session exists and if userId is stored in the session
   if (req.session && req.session.userId) {
     // User is authenticated, allow the request to proceed to the next handler
-    console.log(`Auth middleware - Authentication successful for user ID: ${req.session.userId}`);
+    console.log(`Auth middleware - Authentication successful for user ID: ${req.session.userId} on domain: ${req.get('host')}`);
     return next();
   } else {
-    // User is not authenticated
-    logger.warn('Authentication failed: No valid session found.');
+    // User is not authenticated - log detailed information for debugging
+    logger.warn('Authentication failed: No valid session found.', {
+      host: req.get('host'),
+      origin: req.get('origin'),
+      cookieDomain: getCookieDomain(req),
+      hasSession: !!req.session,
+      sessionId: req.session?.id,
+      cookies: req.cookies ? Object.keys(req.cookies) : 'none',
+      path: req.path,
+      method: req.method
+    });
     // Send a 401 Unauthorized response
     return ApiResponse.unauthorized(res);
   }

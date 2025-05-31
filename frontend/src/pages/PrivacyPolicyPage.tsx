@@ -1,17 +1,29 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt } from 'react-icons/fa';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
 import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
-import TextLogo from '../components/ui/TextLogo/TextLogo';
+import StandardDesktopHeader, {
+  HeaderNavLink,
+} from '../components/navigation/StandardDesktopHeader';
 import useResponsive from '../hooks/useResponsive';
+import Icon from '../shared/components/ui/Icon/Icon';
 
 const PrivacyPolicyPage: React.FC = () => {
   const { isMdDown } = useResponsive();
   const currentDate = new Date().toLocaleDateString('es-MX');
 
-  const authNavLinks: NavLinkItem[] = [
+  const mobileNavLinks: NavLinkItem[] = [
+    { to: '/', label: 'Inicio', icon: <Icon IconComponent={FaHome} size="sm" /> },
+    { to: '/contacto', label: 'Contacto', icon: <Icon IconComponent={FaEnvelope} size="sm" /> },
+    { to: '/terminos-y-condiciones', label: 'Términos y Condiciones', icon: <Icon IconComponent={FaFileAlt} size="sm" /> },
+    { to: '/politica-de-privacidad', label: 'Política de Privacidad', icon: <Icon IconComponent={FaShieldAlt} size="sm" /> },
+    { to: '/login', label: 'Iniciar Sesión', type: 'button-primary' },
+    { to: '/register', label: 'Registrarse', type: 'button-secondary' },
+  ];
+
+  const desktopNavLinks: HeaderNavLink[] = [
     { to: '/login', label: 'Iniciar Sesión', type: 'link' },
     { to: '/register', label: 'Registrarse', type: 'button-secondary' },
   ];
@@ -19,21 +31,9 @@ const PrivacyPolicyPage: React.FC = () => {
   return (
     <div className={styles.legalPageContainer}>
       {isMdDown ? (
-        <AppHeaderMobile logoPath="/" navLinks={authNavLinks} />
+        <AppHeaderMobile logoPath="/" navLinks={mobileNavLinks} />
       ) : (
-        <header className={styles.desktopHeader}>
-          <div className={styles.headerContent}>
-            <TextLogo />
-            <div className={styles.headerLinks}>
-              <Link to="/login" className={styles.headerLink}>
-                Iniciar Sesión
-              </Link>
-              <Link to="/register" className={styles.headerLink}>
-                Registrarse
-              </Link>
-            </div>
-          </div>
-        </header>
+        <StandardDesktopHeader logoPath="/" navLinks={desktopNavLinks} />
       )}
 
       <main className={styles.legalContent}>
@@ -43,8 +43,8 @@ const PrivacyPolicyPage: React.FC = () => {
         <section className={styles.legalSection}>
           <p>
             La Dirección de Tránsito del H. Ayuntamiento de Huitzuco de los Figueroa, Guerrero (en
-            adelante, &quot;Nosotros&quot; o la &quot;Autoridad Emisora&quot;), con domicilio en Calle Benito Juárez No.
-            4, Col. Centro, C.P. 40140, Huitzuco de los Figueroa, Guerrero, es el responsable del
+            adelante, &quot;Nosotros&quot; o la &quot;Autoridad Emisora&quot;), con domicilio en Palacio Municipal S/N,
+            Col. Centro, C.P. 40130, Huitzuco de los Figueroa, Guerrero, es el responsable del
             tratamiento de los datos personales que nos proporcione a través de la plataforma de
             Permisos Digitales de Circulación Provisional (en adelante, la &quot;Plataforma&quot;).
           </p>
@@ -67,7 +67,7 @@ const PrivacyPolicyPage: React.FC = () => {
               <strong>Datos de identificación:</strong> Nombre completo, CURP o RFC.
             </li>
             <li>
-              <strong>Datos de contacto:</strong> Domicilio, correo electrónico, teléfono.
+              <strong>Datos de contacto:</strong> Domicilio, correo electrónico.
             </li>
             <li>
               <strong>Datos del vehículo:</strong> Marca, línea, color, número de serie, número de
@@ -167,7 +167,7 @@ const PrivacyPolicyPage: React.FC = () => {
           <ul className={styles.legalList}>
             <li>Correo electrónico: contacto@permisosdigitales.com.mx</li>
             <li>
-              Presencialmente en: Calle Benito Juárez No. 4, Col. Centro, C.P. 40140, Huitzuco de
+              Presencialmente en: Palacio Municipal S/N, Col. Centro, C.P. 40130, Huitzuco de
               los Figueroa, Guerrero
             </li>
             <li>
@@ -292,9 +292,8 @@ const PrivacyPolicyPage: React.FC = () => {
             contactarnos a través de:
           </p>
           <p>Correo electrónico: contacto@permisosdigitales.com.mx</p>
-          <p>Teléfono: (727) 333-0142</p>
           <p>
-            Dirección: Calle Benito Juárez No. 4, Col. Centro, C.P. 40140, Huitzuco de los Figueroa,
+            Dirección: Palacio Municipal S/N, Col. Centro, C.P. 40130, Huitzuco de los Figueroa,
             Guerrero
           </p>
         </section>

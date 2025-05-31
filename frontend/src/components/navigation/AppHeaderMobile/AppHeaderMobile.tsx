@@ -205,44 +205,69 @@ const AppHeaderMobile: React.FC<AppHeaderMobileProps> = ({
               </button>
             </div>
             <ul className={styles.linkList}>
-              {navLinks.map((link, index) => {
-                const isActive = link.isActive
-                  ? link.isActive(location.pathname, link.to)
-                  : location.pathname ===
-                    (typeof link.to === 'string' ? link.to : link.to.pathname || '');
+              {navLinks
+                .filter(link => link.type !== 'button-primary' && link.type !== 'button-secondary')
+                .map((link, index) => {
+                  const isActive = link.isActive
+                    ? link.isActive(location.pathname, link.to)
+                    : location.pathname ===
+                      (typeof link.to === 'string' ? link.to : link.to.pathname || '');
 
-                let linkClass = styles.navLinkBase;
-                if (link.type === 'button-primary')
-                  linkClass += ` ${styles.navButton} ${styles.navButtonPrimary}`;
-                else if (link.type === 'button-secondary')
-                  linkClass += ` ${styles.navButton} ${styles.navButtonSecondary}`;
-                else linkClass += ` ${styles.navLinkText}`;
+                  let linkClass = styles.navLinkBase + ` ${styles.navLinkText}`;
 
-                if (
-                  isActive &&
-                  link.type !== 'button-primary' &&
-                  link.type !== 'button-secondary'
-                ) {
-                  linkClass += ` ${styles.activeLink}`;
-                }
+                  if (isActive) {
+                    linkClass += ` ${styles.activeLink}`;
+                  }
 
-                return (
-                  <li key={typeof link.to === 'string' ? link.to : (link.to.pathname || '') + index}>
-                    <Link
-                      to={link.to}
-                      className={linkClass}
-                      onClick={() => {
-                        if (link.onClick) link.onClick();
-                        closeMenu();
-                      }}
-                    >
-                      {link.icon && <span className={styles.navLinkIcon}>{link.icon}</span>}
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
+                  return (
+                    <li key={typeof link.to === 'string' ? link.to : (link.to.pathname || '') + index}>
+                      <Link
+                        to={link.to}
+                        className={linkClass}
+                        onClick={() => {
+                          if (link.onClick) link.onClick();
+                          closeMenu();
+                        }}
+                      >
+                        {link.icon && <span className={styles.navLinkIcon}>{link.icon}</span>}
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
+
+            {/* Footer with action buttons */}
+            {navLinks.some(link => link.type === 'button-primary' || link.type === 'button-secondary') && (
+              <div className={styles.panelFooter}>
+                <div className={styles.footerButtons}>
+                  {navLinks
+                    .filter(link => link.type === 'button-primary' || link.type === 'button-secondary')
+                    .map((link, index) => {
+                      let linkClass = styles.navLinkBase + ` ${styles.navButton}`;
+                      if (link.type === 'button-primary')
+                        linkClass += ` ${styles.navButtonPrimary}`;
+                      else if (link.type === 'button-secondary')
+                        linkClass += ` ${styles.navButtonSecondary}`;
+
+                      return (
+                        <Link
+                          key={typeof link.to === 'string' ? link.to : (link.to.pathname || '') + index}
+                          to={link.to}
+                          className={linkClass}
+                          onClick={() => {
+                            if (link.onClick) link.onClick();
+                            closeMenu();
+                          }}
+                        >
+                          {link.icon && <span className={styles.navLinkIcon}>{link.icon}</span>}
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
             {children && <div className={styles.panelFooter}>{children}</div>}
           </nav>
         </div>

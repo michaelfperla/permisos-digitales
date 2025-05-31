@@ -7,10 +7,12 @@
 }
 
 .dashboardContentWrapper {
-  max-width: 960px; /* Max width for the centered content column */
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 var(--space-2); /* Add some side padding for smaller screens if wrapper is edge-to-edge */
+  /* Full-width layout for better desktop space utilization */
+  width: 100%;
+  max-width: none; /* Remove width constraint for full-width layout */
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0 var(--space-2); /* Maintain side padding for content spacing */
 }
 
 /* Page Header */
@@ -403,6 +405,36 @@
 }
 
 /* Responsive Styles */
+
+/* Desktop optimizations for full-width layout */
+@media (width >= 1200px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-4); /* Increased padding on large screens for better content spacing */
+  }
+
+  .statsOverview {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Larger cards on wide screens */
+    gap: var(--space-5); /* More generous spacing */
+  }
+
+  .linksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Larger quick link cards */
+    gap: var(--space-5);
+  }
+}
+
+/* Medium desktop screens - balanced layout */
+@media (width >= 992px) and (width < 1200px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-3); /* Moderate padding for medium screens */
+  }
+
+  .statsOverview {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Medium-sized cards */
+    gap: var(--space-4);
+  }
+}
+
 @media (width <= 768px) {
   .dashboardContentWrapper {
     padding: 0 var(--space-3); /* Adjust side padding for tablets */

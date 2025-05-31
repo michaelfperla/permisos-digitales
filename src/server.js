@@ -126,22 +126,37 @@ app.use(express.urlencoded({ extended: true }));
 // Cookie parser for CSRF protection
 app.use(cookieParser(config.sessionSecret));
 
-// Session configuration
-app.use(session({
-  store: sessionStore,
-  secret: config.sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  name: 'permisos.sid',
-  cookie: {
-    secure: config.nodeEnv === 'production',
-    httpOnly: true,
-    sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax',
-    maxAge: 1000 * 60 * 60, // 1 hour activity timeout
-    domain: config.nodeEnv === 'production' ? '.permisosdigitales.com.mx' : undefined
+// Import domain utilities for multi-domain support
+const { getCookieDomain, logDomainInfo } = require('./utils/domain-utils');
+
+// Session configuration with dynamic domain support
+app.use((req, res, next) => {
+  // Log domain information for debugging
+  logDomainInfo(req, 'session');
+
+  const cookieDomain = getCookieDomain(req);
+  const sessionConfig = {
+    store: sessionStore,
+    secret: config.sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    name: 'permisos.sid',
+    cookie: {
+      secure: config.nodeEnv === 'production',
+      httpOnly: true,
+      sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax',
+      maxAge: 1000 * 60 * 60, // 1 hour activity timeout
+      domain: cookieDomain
+    }
+  };
+
+  if (config.nodeEnv === 'development') {
+    console.log(`[SESSION] Cookie domain set to: ${cookieDomain || 'undefined (no domain restriction)'}`);
   }
-}));
+
+  session(sessionConfig)(req, res, next);
+});
 
 // Session timeout enforcement
 app.use((req, res, next) => {

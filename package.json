@@ -37,8 +37,7 @@
     "validate:production": "node scripts/validate-production-config.js",
     "prepare:production": "bash scripts/prepare-production.sh",
     "deploy:production": "bash scripts/deploy-production-final.sh",
-    "health:check": "node scripts/production-health-check.js",
-    "prepare": "husky && husky install"
+    "health:check": "node scripts/production-health-check.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.682.0",
@@ -78,9 +77,7 @@
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "eslint": "^9.27.0",
-    "husky": "^9.1.7",
     "jest": "^29.7.0",
-    "lint-staged": "^16.1.0",
     "memorystore": "^1.6.7",
     "nodemon": "^3.1.10",
     "puppeteer": "^24.8.1",

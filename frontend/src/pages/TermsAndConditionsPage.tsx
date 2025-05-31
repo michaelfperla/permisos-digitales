@@ -1,17 +1,30 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt } from 'react-icons/fa';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
 import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
-import TextLogo from '../components/ui/TextLogo/TextLogo';
+import StandardDesktopHeader, {
+  HeaderNavLink,
+} from '../components/navigation/StandardDesktopHeader';
 import useResponsive from '../hooks/useResponsive';
+import Icon from '../shared/components/ui/Icon/Icon';
 
 const TermsAndConditionsPage: React.FC = () => {
   const { isMdDown } = useResponsive();
   const currentDate = new Date().toLocaleDateString('es-MX');
 
-  const authNavLinks: NavLinkItem[] = [
+  const mobileNavLinks: NavLinkItem[] = [
+    { to: '/', label: 'Inicio', icon: <Icon IconComponent={FaHome} size="sm" /> },
+    { to: '/contacto', label: 'Contacto', icon: <Icon IconComponent={FaEnvelope} size="sm" /> },
+    { to: '/terminos-y-condiciones', label: 'Términos y Condiciones', icon: <Icon IconComponent={FaFileAlt} size="sm" /> },
+    { to: '/politica-de-privacidad', label: 'Política de Privacidad', icon: <Icon IconComponent={FaShieldAlt} size="sm" /> },
+    { to: '/login', label: 'Iniciar Sesión', type: 'button-primary' },
+    { to: '/register', label: 'Registrarse', type: 'button-secondary' },
+  ];
+
+  const desktopNavLinks: HeaderNavLink[] = [
     { to: '/login', label: 'Iniciar Sesión', type: 'link' },
     { to: '/register', label: 'Registrarse', type: 'button-secondary' },
   ];
@@ -19,21 +32,9 @@ const TermsAndConditionsPage: React.FC = () => {
   return (
     <div className={styles.legalPageContainer}>
       {isMdDown ? (
-        <AppHeaderMobile logoPath="/" navLinks={authNavLinks} />
+        <AppHeaderMobile logoPath="/" navLinks={mobileNavLinks} />
       ) : (
-        <header className={styles.desktopHeader}>
-          <div className={styles.headerContent}>
-            <TextLogo />
-            <div className={styles.headerLinks}>
-              <Link to="/login" className={styles.headerLink}>
-                Iniciar Sesión
-              </Link>
-              <Link to="/register" className={styles.headerLink}>
-                Registrarse
-              </Link>
-            </div>
-          </div>
-        </header>
+        <StandardDesktopHeader logoPath="/" navLinks={desktopNavLinks} />
       )}
 
       <main className={styles.legalContent}>
@@ -317,7 +318,6 @@ const TermsAndConditionsPage: React.FC = () => {
             contactarnos a través de:
           </p>
           <p>Correo electrónico: contacto@permisosdigitales.com.mx</p>
-          <p>Teléfono: (727) 333-0142</p>
         </section>
 
         <div className={styles.legalFootnote}>

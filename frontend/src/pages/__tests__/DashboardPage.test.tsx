@@ -371,4 +371,43 @@ describe('DashboardPage', () => {
     // Check that navigation was called with the correct path
     expect(mockNavigate).toHaveBeenCalledWith('/permits/1/renew');
   });
+
+  test('renders with full-width layout structure', async () => {
+    // Mock successful response
+    vi.mocked(applicationService.getApplications).mockResolvedValue({
+      success: true,
+      applications: mockApplications,
+    });
+
+    renderDashboardPage();
+
+    // Wait for dashboard content to load (no table in UserDashboardPage)
+    await waitFor(() => {
+      expect(screen.getByText('Panel de Usuario')).toBeInTheDocument();
+    });
+
+    // Check that the dashboard page container exists
+    const dashboardPage = document.querySelector('.dashboardPage');
+    expect(dashboardPage).toBeInTheDocument();
+
+    // Check that the content wrapper exists and has full-width styling
+    const contentWrapper = document.querySelector('.dashboardContentWrapper');
+    expect(contentWrapper).toBeInTheDocument();
+
+    // Verify that the page header is present
+    expect(screen.getByText('Panel de Usuario')).toBeInTheDocument();
+    expect(screen.getByText(/Bienvenido, Test/)).toBeInTheDocument();
+
+    // Verify that the stats overview section is present
+    expect(screen.getByText('Permisos Activos')).toBeInTheDocument();
+    expect(screen.getByText('Pagos Pendientes')).toBeInTheDocument();
+
+    // Verify that the status section is present
+    expect(screen.getByText('Estado de Mis Permisos')).toBeInTheDocument();
+
+    // Verify that the quick actions section is present
+    expect(screen.getByText('Acciones Rápidas')).toBeInTheDocument();
+    expect(screen.getByText('Solicitar Nuevo Permiso')).toBeInTheDocument();
+    expect(screen.getByText('Ver Todos Mis Permisos')).toBeInTheDocument();
+  });
 });

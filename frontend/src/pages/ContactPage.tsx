@@ -1,19 +1,30 @@
 import React from 'react';
-import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import { FaEnvelope, FaMapMarkerAlt, FaClock, FaHome, FaFileAlt, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import styles from './LegalPage.module.css';
 import Footer from '../components/layout/Footer';
 import AppHeaderMobile, { NavLinkItem } from '../components/navigation/AppHeaderMobile/AppHeaderMobile';
+import StandardDesktopHeader, {
+  HeaderNavLink,
+} from '../components/navigation/StandardDesktopHeader';
 import Card from '../components/ui/Card/Card';
-import TextLogo from '../components/ui/TextLogo/TextLogo';
 import useResponsive from '../hooks/useResponsive';
 import Icon from '../shared/components/ui/Icon/Icon';
 
 const ContactPage: React.FC = () => {
   const { isMdDown } = useResponsive();
 
-  const authNavLinks: NavLinkItem[] = [
+  const mobileNavLinks: NavLinkItem[] = [
+    { to: '/', label: 'Inicio', icon: <Icon IconComponent={FaHome} size="sm" /> },
+    { to: '/contacto', label: 'Contacto', icon: <Icon IconComponent={FaEnvelope} size="sm" /> },
+    { to: '/terminos-y-condiciones', label: 'Términos y Condiciones', icon: <Icon IconComponent={FaFileAlt} size="sm" /> },
+    { to: '/politica-de-privacidad', label: 'Política de Privacidad', icon: <Icon IconComponent={FaShieldAlt} size="sm" /> },
+    { to: '/login', label: 'Iniciar Sesión', type: 'button-primary' },
+    { to: '/register', label: 'Registrarse', type: 'button-secondary' },
+  ];
+
+  const desktopNavLinks: HeaderNavLink[] = [
     { to: '/login', label: 'Iniciar Sesión', type: 'link' },
     { to: '/register', label: 'Registrarse', type: 'button-secondary' },
   ];
@@ -21,21 +32,9 @@ const ContactPage: React.FC = () => {
   return (
     <div className={styles.legalPageContainer}>
       {isMdDown ? (
-        <AppHeaderMobile logoPath="/" navLinks={authNavLinks} />
+        <AppHeaderMobile logoPath="/" navLinks={mobileNavLinks} />
       ) : (
-        <header className={styles.desktopHeader}>
-          <div className={styles.headerContent}>
-            <TextLogo />
-            <div className={styles.headerLinks}>
-              <Link to="/login" className={styles.headerLink}>
-                Iniciar Sesión
-              </Link>
-              <Link to="/register" className={styles.headerLink}>
-                Registrarse
-              </Link>
-            </div>
-          </div>
-        </header>
+        <StandardDesktopHeader logoPath="/" navLinks={desktopNavLinks} />
       )}
 
       <main className={styles.legalContent}>
@@ -65,34 +64,24 @@ const ContactPage: React.FC = () => {
           <Card>
             <div style={{ padding: '1.5rem' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <Icon IconComponent={FaPhone} size="md" />
-                Teléfono
-              </h2>
-              <p style={{ marginBottom: '0.5rem' }}>
-                Atención telefónica para consultas urgentes:
-              </p>
-              <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--bs-primary)' }}>
-                <a href="tel:+527273330142">(727) 333-0142</a>
-              </p>
-            </div>
-          </Card>
-
-          <Card>
-            <div style={{ padding: '1.5rem' }}>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                 <Icon IconComponent={FaClock} size="md" />
                 Horarios de Atención
               </h2>
-              <div style={{ lineHeight: '1.6' }}>
+              <p style={{ marginBottom: '1rem' }}>
+                Nuestro equipo de soporte está disponible para atenderte:
+              </p>
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
                 <p><strong>Lunes a Viernes:</strong> 8:00 AM - 6:00 PM</p>
                 <p><strong>Sábados:</strong> 9:00 AM - 2:00 PM</p>
                 <p><strong>Domingos:</strong> Cerrado</p>
               </div>
-              <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--bs-gray-600)' }}>
-                * Horario de la zona centro de México (GMT-6)
+              <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+                Tiempo de respuesta promedio: 2-4 horas en días hábiles
               </p>
             </div>
           </Card>
+
+
 
           <Card>
             <div style={{ padding: '1.5rem' }}>
@@ -105,8 +94,8 @@ const ContactPage: React.FC = () => {
               </p>
               <div style={{ lineHeight: '1.6' }}>
                 <p><strong>Dirección:</strong></p>
-                <p>Calle Benito Juárez No. 4, Col. Centro</p>
-                <p>C.P. 40140, Huitzuco de los Figueroa, Guerrero</p>
+                <p>Palacio Municipal S/N, Col. Centro</p>
+                <p>C.P. 40130, Huitzuco de los Figueroa, Guerrero</p>
               </div>
             </div>
           </Card>
