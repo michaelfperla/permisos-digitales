@@ -34,7 +34,7 @@ const StandardDesktopHeader: React.FC<StandardDesktopHeaderProps> = ({
                 if (link.type === 'button-primary') {
                   return (
                     <Link key={index} to={link.to}>
-                      <Button variant="primary" size="sm">
+                      <Button variant="primary" size="small">
                         {link.label}
                       </Button>
                     </Link>
@@ -44,7 +44,7 @@ const StandardDesktopHeader: React.FC<StandardDesktopHeaderProps> = ({
                 if (link.type === 'button-secondary') {
                   return (
                     <Link key={index} to={link.to}>
-                      <Button variant="secondary" size="sm">
+                      <Button variant="secondary" size="small">
                         {link.label}
                       </Button>
                     </Link>
