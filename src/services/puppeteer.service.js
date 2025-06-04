@@ -127,7 +127,7 @@ exports.generatePermit = async (applicationId) => {
     // Use application data instead of trying to extract it from the page
     const permitData = {
       folio: `HTZ-${applicationId}`, // Use a simple format based on application ID
-      importe: appData.importe || 197.00, // Use the importe from the application data
+      importe: appData.importe || 150.00, // Use the importe from the application data
       fechaExpedicion: new Date().toISOString().split('T')[0], // Today's date
       fechaVencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0] // 1 year from today
     };
@@ -365,7 +365,7 @@ async function fillPermitForm(page, appData) {
       await page.waitForSelector(importeSelector, { visible: true, timeout: 5000 });
 
       // Use the importe from appData if available, otherwise use default value
-      const importeValue = appData.importe ? appData.importe.toString() : '197.00';
+      const importeValue = appData.importe ? appData.importe.toString() : '150.00';
       logger.info(`Setting importe field to: ${importeValue}`);
 
       // Clear the field first (it might have a default value)
@@ -643,12 +643,12 @@ async function extractPermitData(page, detailsPageUrl) {
 
       // If not found, set a default value
       if (!permitData.importe) {
-        permitData.importe = 197.00;
+        permitData.importe = 150.00;
         logger.info(`Using default importe: ${permitData.importe}`);
       }
     } catch (importeError) {
       logger.error('Error extracting importe:', importeError);
-      permitData.importe = 197.00; // Default fallback
+      permitData.importe = 150.00; // Default fallback
     }
 
     // Extract fechaExpedicion (issue date)

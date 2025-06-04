@@ -7,7 +7,7 @@ import {
   BsPlus,
   BsDash,
 } from 'react-icons/bs';
-import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt } from 'react-icons/fa';
+import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt, FaMoneyBillWave } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import styles from './HomePage.module.css';
@@ -20,10 +20,19 @@ import Card from '../components/ui/Card/Card';
 import TextLogo from '../components/ui/TextLogo';
 import useResponsive from '../hooks/useResponsive';
 import Icon from '../shared/components/ui/Icon';
+import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../constants';
 
 const HomePage: React.FC = () => {
   const [openAccordionId, setOpenAccordionId] = useState<number | null>(null);
   const { isMdDown } = useResponsive();
+
+  // Format currency for display
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: DEFAULT_CURRENCY,
+    }).format(amount);
+  };
 
   const homeNavLinks: NavLinkItem[] = [
     { to: '/', label: 'Inicio', icon: <Icon IconComponent={FaHome} size="sm" /> },
@@ -105,58 +114,63 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className={styles.overlappingContent}>
-          {/* Stats Section */}
-          <section className={styles.statsSection}>
-            <h2 className={styles.statsHeading}>Únete a Miles de Usuarios Satisfechos</h2>
-            <div className={styles.valuePropsGrid}>
-              <Link to="/register" className={styles.cardLink}>
-                <Card hoverable>
-                  <div className={styles.statCard}>
-                    <div className={styles.statIconContainer}>
-                      <div className={styles.statCardIcon}>
-                        <Icon IconComponent={BsPeopleFill} size="xl" className={styles.statIcon} />
-                      </div>
+          {/* Combined Social Proof & Pricing Section */}
+          <section className={styles.socialProofPricingSection}>
+            <div className={styles.socialProofPricingContainer}>
+              <div className={styles.socialProofHeader}>
+                <h2>Únete a Miles de Usuarios Satisfechos</h2>
+                <p className={styles.socialProofSubtitle}>
+                  Más de 10,000 permisos emitidos con la confianza de nuestros usuarios
+                </p>
+              </div>
+
+              <div className={styles.socialProofStats}>
+                <div className={styles.socialProofStat}>
+                  <div className={styles.socialProofNumber}>+10,000</div>
+                  <div className={styles.socialProofLabel}>Permisos Emitidos</div>
+                </div>
+                <div className={styles.socialProofStat}>
+                  <div className={styles.socialProofNumber}>24/7</div>
+                  <div className={styles.socialProofLabel}>Disponibilidad</div>
+                </div>
+                <div className={styles.socialProofStat}>
+                  <div className={styles.socialProofNumber}>100%</div>
+                  <div className={styles.socialProofLabel}>Validez Legal</div>
+                </div>
+              </div>
+
+              <div className={styles.pricingCardContainer}>
+                <div className={styles.pricingCard}>
+                  <div className={styles.pricingHeader}>
+                    <div className={styles.pricingBadge}>Precio Oficial</div>
+                    <h3>Permiso Digital de Circulación</h3>
+                    <div className={styles.pricingAmount}>
+                      <span className={styles.pricingCurrency}>$</span>
+                      <span className={styles.pricingNumber}>150</span>
+                      <span className={styles.pricingCurrency}>MXN</span>
                     </div>
-                    <h3 className={styles.statTitle}>+10,000 Permisos Emitidos</h3>
-                    <p className={styles.statDescription}>
-                      Miles de usuarios confían en nuestra plataforma segura y eficiente cada mes.
-                    </p>
+                    <p className={styles.pricingDescription}>Pago único • Sin mensualidades • Sin comisiones ocultas</p>
                   </div>
-                </Card>
-              </Link>
-              <Link to="/register" className={styles.cardLink}>
-                <Card hoverable>
-                  <div className={styles.statCard}>
-                    <div className={styles.statIconContainer}>
-                      <div className={styles.statCardIcon}>
-                        <Icon IconComponent={BsRocket} size="xl" className={styles.statIcon} />
-                      </div>
-                    </div>
-                    <h3 className={styles.statTitle}>Proceso Rápido Garantizado</h3>
-                    <p className={styles.statDescription}>
-                      Completa tu solicitud y recibe tu permiso temporal en minutos, no en días.
-                    </p>
+                  <div className={styles.pricingFeatures}>
+                    <div className={styles.pricingFeature}>✓ Válido por 30 días naturales</div>
+                    <div className={styles.pricingFeature}>✓ Procesamiento inmediato con tarjeta</div>
+                    <div className={styles.pricingFeature}>✓ Documento oficial imprimible</div>
+                    <div className={styles.pricingFeature}>✓ Soporte técnico incluido</div>
                   </div>
-                </Card>
-              </Link>
-              <Link to="/register" className={styles.cardLink}>
-                <Card hoverable>
-                  <div className={styles.statCard}>
-                    <div className={styles.statIconContainer}>
-                      <div className={styles.statCardIcon}>
-                        <Icon IconComponent={BsShieldCheck} size="xl" className={styles.statIcon} />
-                      </div>
-                    </div>
-                    <h3 className={styles.statTitle}>Seguro, Válido y Confiable</h3>
-                    <p className={styles.statDescription}>
-                      Protegemos tus datos y aseguramos la validez oficial de tu permiso de
-                      circulación.
-                    </p>
+                  <div className={styles.pricingAction}>
+                    <Link to="/register">
+                      <Button variant="primary" size="large">
+                        Solicitar Permiso Ahora
+                      </Button>
+                    </Link>
+                    <p className={styles.pricingNote}>Procesamiento inmediato disponible</p>
                   </div>
-                </Card>
-              </Link>
+                </div>
+              </div>
             </div>
           </section>
+
+
 
           {/* How It Works Timeline */}
           <section className={styles.howItWorksTimeline}>

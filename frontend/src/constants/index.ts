@@ -7,7 +7,7 @@
  */
 
 // Payment constants
-export const DEFAULT_PERMIT_FEE = 197.0;
+export const DEFAULT_PERMIT_FEE = 150.0;
 export const DEFAULT_CURRENCY = 'MXN';
 
 // Application status constants

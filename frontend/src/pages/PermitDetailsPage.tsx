@@ -101,7 +101,7 @@ const mockPermits: Record<string, MockApplicationResponse> = {
         updated: '2023-05-15T10:30:00Z',
       },
       paymentReference: '93847562',
-      importe: 197.0,
+      importe: 150.0,
     },
     status: {
       currentStatus: PermitStatus.AWAITING_OXXO_PAYMENT,
@@ -338,7 +338,7 @@ const PermitDetailsPage: React.FC = () => {
         // Other fields with default values or from mock data
         // Use type assertion to access properties that might not exist in the ApplicationDetails type
         folio: (applicationData.application as any).folio || '',
-        importe: (applicationData.application as any).importe || 197.0, // Default amount
+        importe: (applicationData.application as any).importe || 150.0, // Default amount
         fecha_expedicion: (applicationData.application as any).fecha_expedicion || '',
         fecha_vencimiento: (applicationData.application as any).fecha_vencimiento || '',
       }
@@ -1915,7 +1915,7 @@ const PermitDetailsPage: React.FC = () => {
         isOpen={isOxxoModalOpen}
         onClose={() => setIsOxxoModalOpen(false)}
         oxxoReference={applicationData?.application?.paymentReference || ''}
-        amount={application?.importe || 197.0}
+        amount={application?.importe || 150.0}
         currency="MXN"
         permitFolio={application?.folio || `Permiso #${id}`}
         // Use a default barcode URL for demonstration purposes

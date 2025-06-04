@@ -27,7 +27,7 @@ const DocumentType = {
   RECEIPT: 'RECEIPT',
 };
 
-const DEFAULT_PERMIT_FEE = 197.00;
+const DEFAULT_PERMIT_FEE = 150.00;
 
 module.exports = {
   ...ApplicationStatus,

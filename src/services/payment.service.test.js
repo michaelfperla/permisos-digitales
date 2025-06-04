@@ -126,7 +126,7 @@ describe('Payment Service', () => {
       const orderData = {
         customerId: 'cus_2qnvwvnvKzsKzsDER',
         currency: 'MXN',
-        amount: 197.00,
+        amount: 150.00,
         description: 'Permiso de Circulación - Toyota Corolla 2023',
         referenceId: 'APP-123',
         paymentMethod: {
@@ -138,13 +138,13 @@ describe('Payment Service', () => {
       const mockOrder = {
         id: 'ord_2tYvtxUTgcPWzKDER',
         currency: 'MXN',
-        amount: 19700, // In cents
+        amount: 15000, // In cents
         customer_info: {
           customer_id: orderData.customerId
         },
         line_items: [{
           name: 'Permiso de Circulación',
-          unit_price: 19700,
+          unit_price: 15000,
           quantity: 1
         }],
         charges: [{

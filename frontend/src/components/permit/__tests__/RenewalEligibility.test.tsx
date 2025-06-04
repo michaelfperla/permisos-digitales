@@ -33,7 +33,7 @@ describe('RenewalEligibility', () => {
     numero_motor: 'MOTOR123',
     ano_modelo: 2023,
     folio: 'F123',
-    importe: 1000,
+    importe: 150,
     fecha_expedicion: '2023-01-01T00:00:00.000Z',
     fecha_vencimiento: '2023-12-31T00:00:00.000Z',
   };

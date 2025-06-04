@@ -59,7 +59,7 @@ const _createMockApplication = (status: string, overrides = {}): Application => 
   numero_serie: 'ABC123456789',
   numero_motor: 'M123456',
   ano_modelo: 2023,
-  importe: 1500.0,
+  importe: 150.0,
   ...overrides,
 });
 

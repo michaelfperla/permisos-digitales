@@ -399,7 +399,7 @@ describe('Payment Controller', () => {
         paymentStatus: ApplicationStatus.PAYMENT_PENDING,
         paymentId: 'chr_2tYvwKBp9IeGMKDER',
         paymentMethod: 'spei',
-        amount: 197.00,
+        amount: 150.00,
         currency: 'MXN',
         status: 'pending_payment',
         speiReference: '646180111812345678',
