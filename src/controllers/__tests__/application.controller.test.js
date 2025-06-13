@@ -714,51 +714,8 @@ describe('Application Controller', () => {
       expect(res.send).toHaveBeenCalledWith(fileBuffer);
     });
 
-    it('should successfully send receipt file', async () => {
-      // Arrange
-      req.params.id = '1';
-      req.params.type = 'recibo';
-      req.session.userId = 123;
-      const filePath = '/path/to/receipt.pdf';
-      const fileBuffer = Buffer.from('mock file content');
 
-      db.query.mockResolvedValue({
-        rows: [{
-          user_id: 123,
-          status: ApplicationStatus.PERMIT_READY,
-          permit_file_path: '/path/to/permit.pdf',
-          recibo_file_path: filePath,
-          certificado_file_path: '/path/to/certificate.pdf',
-          folio: 'ABC123'
-        }]
-      });
 
-      // Mock the fileInfo object that would be returned by storageService.getFile
-      const fileInfo = {
-        filePath,
-        buffer: fileBuffer,
-        size: fileBuffer.length,
-        mimetype: 'application/pdf'
-      };
-
-      // Mock pdfService.getPdf to return the fileInfo
-      const pdfService = require('../../services/pdf-service');
-      pdfService.getPdf.mockImplementation(() => Promise.resolve(fileInfo));
-
-      // Mock response methods for file download
-      res.setHeader = jest.fn();
-      res.send = jest.fn();
-
-      // Act
-      await applicationController.downloadPermit(req, res, next);
-
-      // Assert
-      expect(pdfService.getPdf).toHaveBeenCalled();
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/pdf');
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename='));
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Length', fileBuffer.length);
-      expect(res.send).toHaveBeenCalledWith(fileBuffer);
-    });
 
     it('should successfully send certificate file', async () => {
       // Arrange
@@ -773,8 +730,8 @@ describe('Application Controller', () => {
           user_id: 123,
           status: ApplicationStatus.PERMIT_READY,
           permit_file_path: '/path/to/permit.pdf',
-          recibo_file_path: '/path/to/receipt.pdf',
           certificado_file_path: filePath,
+          placas_file_path: '/path/to/placas.pdf',
           folio: 'ABC123'
         }]
       });
@@ -818,8 +775,8 @@ describe('Application Controller', () => {
           user_id: 123,
           status: ApplicationStatus.PERMIT_READY,
           permit_file_path: filePath,
-          recibo_file_path: '/path/to/receipt.pdf',
           certificado_file_path: '/path/to/certificate.pdf',
+          placas_file_path: '/path/to/placas.pdf',
           folio: 'ABC123'
         }]
       });

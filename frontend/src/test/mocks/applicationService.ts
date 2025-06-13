@@ -137,8 +137,7 @@ const applicationServiceMock = {
         paymentMethods: ['Transferencia Bancaria', 'Depósito en Banco', 'Pago en Línea'],
         nextSteps: [
           'Realice el pago utilizando la referencia proporcionada.',
-          'Guarde su comprobante de pago (recibo, captura de pantalla, etc.).',
-          'Suba su comprobante de pago en la sección "Mis Solicitudes".',
+          'Guarde su comprobante de pago (captura de pantalla, etc.).',
           'Una vez verificado el pago, su permiso estará disponible para descargar.',
         ],
       },
@@ -221,7 +220,7 @@ const applicationServiceMock = {
   downloadPermit: vi
     .fn()
     .mockImplementation(
-      (id: string, type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso') => {
+      (id: string, type: 'permiso' | 'certificado' | 'placas' = 'permiso') => {
         const application = mockApplications.find((app) => app.id === id);
 
         if (!application) {
@@ -237,7 +236,6 @@ const applicationServiceMock = {
         // Create a mock PDF blob based on document type
         const typeLabels: Record<string, string> = {
           permiso: 'Permiso',
-          recibo: 'Recibo',
           certificado: 'Certificado',
           placas: 'Placas',
         };

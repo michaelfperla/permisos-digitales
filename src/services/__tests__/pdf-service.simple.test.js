@@ -162,9 +162,9 @@ describe('PDF Service', () => {
 
     it('should handle different document types', async () => {
       // Arrange
-      const sourceFilename = 'receipt_123.pdf';
+      const sourceFilename = 'placas_123.pdf';
       const applicationId = 123;
-      const type = 'recibo';
+      const type = 'placas';
       const folio = 'ABC123';
       const isSample = false;
 
@@ -182,7 +182,7 @@ describe('PDF Service', () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.filename).toBe('Recibo_ABC123.pdf');
+      expect(result.filename).toBe('Placas_ABC123.pdf');
       expect(fs.copyFileSync).toHaveBeenCalled();
     });
 

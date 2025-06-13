@@ -2,7 +2,7 @@
  * Payment Simulation Utilities
  *
  * This module provides utilities for simulating payment flows in development
- * without requiring actual Conekta API keys.
+ * without requiring actual payment gateway API keys.
  */
 
 // Check if simulation mode is active

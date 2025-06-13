@@ -40,24 +40,25 @@ class S3StorageProvider extends StorageProvider {
     if (!options.region) {
       throw new Error('AWS region is required');
     }
-    if (!options.accessKeyId) {
-      throw new Error('AWS access key ID is required');
-    }
-    if (!options.secretAccessKey) {
-      throw new Error('AWS secret access key is required');
-    }
 
     this.bucket = options.bucket;
     this.region = options.region;
 
     // Initialize S3 client
     const clientConfig = {
-      region: options.region,
-      credentials: {
+      region: options.region
+    };
+
+    // Only set explicit credentials if provided, otherwise use default credential chain (IAM roles, etc.)
+    if (options.accessKeyId && options.secretAccessKey) {
+      clientConfig.credentials = {
         accessKeyId: options.accessKeyId,
         secretAccessKey: options.secretAccessKey
-      }
-    };
+      };
+      logger.info('S3 storage provider using explicit credentials');
+    } else {
+      logger.info('S3 storage provider using default AWS credential chain (IAM instance profile, environment, etc.)');
+    }
 
     // Add custom endpoint if provided (useful for testing with LocalStack)
     if (options.endpoint) {

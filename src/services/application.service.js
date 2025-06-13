@@ -2,7 +2,7 @@ const db = require('../db');
 const { logger } = require('../utils/enhanced-logger');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants');
 const { applicationRepository, paymentRepository } = require('../repositories');
-const paymentService = require('./payment.service');
+const stripePaymentService = require('./stripe-payment.service');
 const notificationService = require('./notification.service');
 
 exports.getExpiringPermits = async (userId, daysThreshold = 30) => {
@@ -199,6 +199,136 @@ exports.notifyExpiringOxxoPayments = async (hoursUntilExpiration = 24) => {
     logger.error('Error notifying expiring OXXO payments:', {
       error: error.message,
       hoursUntilExpiration
+    });
+
+    return {
+      success: false,
+      notified: 0,
+      failed: 0,
+      total: 0,
+      message: `Error: ${error.message}`,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Notify users about expiring permits
+ * @param {number} daysUntilExpiration - Days until permit expiration (default: 5)
+ * @returns {Promise<Object>} - Notification results
+ */
+exports.notifyExpiringPermits = async (daysUntilExpiration = 5) => {
+  try {
+    logger.info(`Starting notification process for permits expiring within ${daysUntilExpiration} days`);
+
+    // Query for expiring permits with user information
+    const query = `
+      SELECT
+        pa.id as application_id,
+        pa.folio,
+        pa.marca,
+        pa.linea,
+        pa.ano_modelo,
+        pa.fecha_vencimiento,
+        (pa.fecha_vencimiento - CURRENT_DATE) AS days_remaining,
+        u.email as user_email,
+        u.first_name,
+        u.last_name
+      FROM permit_applications pa
+      JOIN users u ON pa.user_id = u.id
+      WHERE pa.status = 'PERMIT_READY'
+        AND pa.fecha_vencimiento IS NOT NULL
+        AND pa.fecha_vencimiento > CURRENT_DATE
+        AND pa.fecha_vencimiento <= (CURRENT_DATE + INTERVAL '${daysUntilExpiration} days')
+      ORDER BY pa.fecha_vencimiento ASC
+    `;
+
+    const { rows: expiringPermits } = await db.query(query);
+
+    if (expiringPermits.length === 0) {
+      logger.info('No expiring permits found');
+      return {
+        success: true,
+        notified: 0,
+        failed: 0,
+        total: 0,
+        message: 'No expiring permits found'
+      };
+    }
+
+    const results = {
+      success: true,
+      notified: 0,
+      failed: 0,
+      total: expiringPermits.length,
+      permits: []
+    };
+
+    for (const permit of expiringPermits) {
+      try {
+        const notificationSent = await notificationService.sendPermitExpirationReminder(permit);
+
+        if (notificationSent) {
+          results.notified++;
+          results.permits.push({
+            applicationId: permit.application_id,
+            status: 'notified',
+            email: permit.user_email,
+            folio: permit.folio,
+            expirationDate: permit.fecha_vencimiento,
+            daysRemaining: permit.days_remaining
+          });
+        } else {
+          results.failed++;
+          results.permits.push({
+            applicationId: permit.application_id,
+            status: 'failed',
+            email: permit.user_email,
+            folio: permit.folio,
+            expirationDate: permit.fecha_vencimiento,
+            daysRemaining: permit.days_remaining
+          });
+        }
+
+        // Log the notification attempt
+        logger.info(`Permit expiration notification ${notificationSent ? 'sent' : 'failed'} for application ${permit.application_id}`, {
+          applicationId: permit.application_id,
+          userEmail: permit.user_email,
+          folio: permit.folio,
+          daysRemaining: permit.days_remaining,
+          expirationDate: permit.fecha_vencimiento
+        });
+
+      } catch (notificationError) {
+        logger.error(`Error sending permit expiration notification for application ${permit.application_id}:`, {
+          error: notificationError.message,
+          applicationId: permit.application_id,
+          userEmail: permit.user_email,
+          folio: permit.folio
+        });
+
+        results.failed++;
+        results.permits.push({
+          applicationId: permit.application_id,
+          status: 'error',
+          email: permit.user_email,
+          folio: permit.folio,
+          expirationDate: permit.fecha_vencimiento,
+          daysRemaining: permit.days_remaining,
+          error: notificationError.message
+        });
+      }
+    }
+
+    results.success = results.failed === 0;
+    results.message = `Processed ${results.total} expiring permits: ${results.notified} notified, ${results.failed} failed`;
+    logger.info(results.message);
+
+    return results;
+  } catch (error) {
+    logger.error('Error notifying expiring permits:', {
+      error: error.message,
+      daysUntilExpiration
     });
 
     return {

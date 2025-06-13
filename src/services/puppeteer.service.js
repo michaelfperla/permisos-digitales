@@ -19,7 +19,7 @@ const SCREENSHOT_DIR = path.join(__dirname, '../../storage/permit_screenshots');
 /**
  * Generate S3 object key for PDF files
  * @param {number} applicationId - Application ID
- * @param {string} type - PDF type (permiso, recibo, certificado, placas)
+ * @param {string} type - PDF type (permiso, certificado, placas)
  * @param {string} permitId - Permit ID from government system
  * @param {number} timestamp - Timestamp for uniqueness
  * @returns {string} S3 object key
@@ -33,7 +33,7 @@ function generatePdfS3Key(applicationId, type, permitId, timestamp) {
  * Save PDF buffer to storage (S3 or local based on configuration)
  * @param {Buffer} pdfBuffer - PDF content as buffer
  * @param {number} applicationId - Application ID
- * @param {string} type - PDF type (permiso, recibo, certificado, placas)
+ * @param {string} type - PDF type (permiso, certificado, placas)
  * @param {string} permitId - Permit ID from government system
  * @param {number} timestamp - Timestamp for uniqueness
  * @returns {Promise<string>} Storage identifier (S3 key or local filename)
@@ -822,7 +822,6 @@ async function findPdfLinks(page, detailsPageUrl) {
 
       const baseUrl = 'https://www.direcciondetransitohuitzucodelosfigueroa.gob.mx/panel/digitales/';
       const urlSuffixes = {
-        recibo: '/recibo-pdf',
         permiso: '/formato-pdf',
         certificado: '/certificacion-pdf',
         placas: '/placas-en-proceso-pdf'
@@ -1084,7 +1083,6 @@ async function downloadPermitPdfs(page, pdfLinks, cookies, applicationId) {
   logger.info('Downloading PDF files...');
 
   const pdfFilePaths = {
-    recibo: null,
     permiso: null,
     certificado: null,
     placas: null
@@ -1167,11 +1165,10 @@ async function updateApplicationWithPermitData(applicationId, permitData, pdfFil
                 fecha_expedicion = $3,
                 fecha_vencimiento = $4,
                 permit_file_path = $5,
-                recibo_file_path = $6,
-                certificado_file_path = $7,
-                placas_file_path = $8,
+                certificado_file_path = $6,
+                placas_file_path = $7,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = $9
+            WHERE id = $8
             RETURNING id, status;
         `;
 
@@ -1181,7 +1178,6 @@ async function updateApplicationWithPermitData(applicationId, permitData, pdfFil
       permitData.fechaExpedicion || null,
       permitData.fechaVencimiento || null,
       pdfFilePaths.permiso || null,
-      pdfFilePaths.recibo || null,
       pdfFilePaths.certificado || null,
       pdfFilePaths.placas || null,
       applicationId

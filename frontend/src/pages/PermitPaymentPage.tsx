@@ -3,7 +3,7 @@ import { FaCreditCard, FaArrowLeft } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import styles from '../components/permit-form/CompleteForm.module.css';
-import PaymentFormStep from '../components/permit-form/PaymentFormStep';
+import StripePaymentFormStep from '../components/permit-form/StripePaymentFormStep';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import applicationService from '../services/applicationService';
 import { useToast } from '../shared/hooks/useToast';
@@ -106,7 +106,7 @@ const PermitPaymentPage: React.FC = () => {
           </div>
         )}
 
-        <PaymentFormStep
+        <StripePaymentFormStep
           onPrevious={handlePrevious}
           onSubmit={handlePaymentToken}
           isSubmitting={isSubmitting}

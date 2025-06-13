@@ -32,7 +32,7 @@ const idParamValidation = [
   param('id').isInt({ gt: 0 }).withMessage('El ID del permiso debe ser un número positivo.')
 ];
 const typeParamValidation = [
-  param('type').isIn(['permiso', 'recibo', 'certificado', 'placas']).withMessage('Tipo de documento no válido.')
+  param('type').isIn(['permiso', 'certificado', 'placas']).withMessage('Tipo de documento no válido.')
 ];
 
 router.get('/test', (req, res) => {

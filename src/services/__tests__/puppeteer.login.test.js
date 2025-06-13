@@ -1485,7 +1485,6 @@ describe.skip('Puppeteer PDF Download from Existing Permit', () => {
       // Check for the presence of PDF download links as a more reliable indicator
       // that we're on a permit details page
       const pdfLinkSelectors = [
-        'a[href*="recibo-pdf"]',
         'a[href*="formato-pdf"]',
         'a[href*="certificado-pdf"]',
         'a[href*="placas-pdf"]'

@@ -13,4 +13,11 @@ const notificationController = require('../controllers/notification.controller')
  */
 router.get('/oxxo-expiring', notificationController.processExpiringOxxoPayments);
 
+/**
+ * @route GET /api/notifications/permits-expiring
+ * @description Process expiring permits and send notifications
+ * @access Private (API key required)
+ */
+router.get('/permits-expiring', notificationController.processExpiringPermits);
+
 module.exports = router;

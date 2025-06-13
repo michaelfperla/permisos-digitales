@@ -33,9 +33,12 @@ const config = {
   redisPort: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
   redisPassword: process.env.REDIS_PASSWORD,
 
-  conektaPublicKey: process.env.CONEKTA_PUBLIC_KEY,
-  conektaPrivateKey: process.env.CONEKTA_PRIVATE_KEY,
-  conektaWebhookSecret: process.env.CONEKTA_WEBHOOK_SECRET,
+
+
+  // Stripe configuration
+  stripePublicKey: process.env.STRIPE_PUBLIC_KEY,
+  stripePrivateKey: process.env.STRIPE_PRIVATE_KEY,
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 
   appUrl: process.env.APP_URL || `http://localhost:${process.env.PORT || 3002}`,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -50,15 +53,21 @@ const config = {
   s3Endpoint: process.env.S3_ENDPOINT,
   s3UrlExpiration: process.env.S3_URL_EXPIRATION ? parseInt(process.env.S3_URL_EXPIRATION, 10) : 3600,
 
-  internalApiKey: process.env.INTERNAL_API_KEY || 'dev-internal-api-key-change-in-production'
+  internalApiKey: process.env.INTERNAL_API_KEY || 'dev-internal-api-key-change-in-production',
+
+  // Permit expiration notification settings
+  permitExpirationWarningDays: process.env.PERMIT_EXPIRATION_WARNING_DAYS ?
+    process.env.PERMIT_EXPIRATION_WARNING_DAYS.split(',').map(d => parseInt(d.trim(), 10)) :
+    [7, 3, 1], // Default: warn at 7, 3, and 1 days before expiration
+  permitExpirationJobEnabled: process.env.PERMIT_EXPIRATION_JOB_ENABLED !== 'false' // Default: enabled
 };
 
 if (config.nodeEnv === 'production') {
   const criticalVariables = [
     { name: 'DATABASE_URL', value: config.databaseUrl },
     { name: 'SESSION_SECRET', value: config.sessionSecret, customCheck: (val) => val === DEFAULT_SESSION_SECRET, customMessage: 'is using the default value' },
-    { name: 'CONEKTA_PRIVATE_KEY', value: config.conektaPrivateKey },
-    { name: 'CONEKTA_PUBLIC_KEY', value: config.conektaPublicKey },
+    { name: 'STRIPE_PRIVATE_KEY', value: config.stripePrivateKey },
+    { name: 'STRIPE_PUBLIC_KEY', value: config.stripePublicKey },
     { name: 'APP_URL', value: config.appUrl },
     { name: 'INTERNAL_API_KEY', value: config.internalApiKey, customCheck: (val) => val === 'dev-internal-api-key-change-in-production', customMessage: 'is using the default value' }
   ];

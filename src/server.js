@@ -13,7 +13,7 @@ const requestIdMiddleware = require('./middleware/request-id.middleware');
 const { handleCsrfError } = require('./middleware/csrf.middleware');
 const corsMiddleware = require('./middleware/cors.middleware');
 const { initScheduledJobs } = require('./jobs/scheduler');
-// Conekta configuration available but not used in server setup
+// Payment configuration available but not used in server setup
 
 const PgSession = connectPgSimple(session);
 

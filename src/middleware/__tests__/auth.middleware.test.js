@@ -96,8 +96,20 @@ describe('Auth Middleware', () => {
       method: 'GET',
       ip: '192.168.1.1',
       headers: {
-        'user-agent': 'Mozilla/5.0'
-      }
+        'user-agent': 'Mozilla/5.0',
+        'host': 'localhost:3000',
+        'origin': 'http://localhost:3000'
+      },
+      cookies: {},
+      // Mock Express req.get() method
+      get: jest.fn((headerName) => {
+        const headers = {
+          'host': 'localhost:3000',
+          'origin': 'http://localhost:3000',
+          'user-agent': 'Mozilla/5.0'
+        };
+        return headers[headerName.toLowerCase()];
+      })
     };
 
     res = {
@@ -145,7 +157,8 @@ describe('Auth Middleware', () => {
           userId: 123,
           path: '/test/path',
           method: 'GET',
-          cookies: { 'connect.sid': 'test-cookie' }
+          host: 'localhost:3000',
+          origin: 'http://localhost:3000'
         })
       );
 
@@ -166,7 +179,12 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
       expect(mockUnauthorized).toHaveBeenCalledWith(res);
       expect(mockWarn).toHaveBeenCalledWith(
-        expect.stringContaining('Authentication failed')
+        'Authentication failed: No valid session found.',
+        expect.objectContaining({
+          hasSession: false,
+          path: '/test/path',
+          method: 'GET'
+        })
       );
 
       // Verify console.log was called with session info
@@ -175,7 +193,9 @@ describe('Auth Middleware', () => {
         expect.objectContaining({
           hasSession: false,
           path: '/test/path',
-          method: 'GET'
+          method: 'GET',
+          host: 'localhost:3000',
+          origin: 'http://localhost:3000'
         })
       );
     });
@@ -198,7 +218,9 @@ describe('Auth Middleware', () => {
           hasSession: true,
           userId: undefined,
           path: '/test/path',
-          method: 'GET'
+          method: 'GET',
+          host: 'localhost:3000',
+          origin: 'http://localhost:3000'
         })
       );
     });

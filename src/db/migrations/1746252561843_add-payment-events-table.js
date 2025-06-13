@@ -5,7 +5,7 @@ exports.shorthands = undefined;
 
 /**
  * Migration to add payment_events table and payment_processor_order_id column
- * to permit_applications table for Conekta payment gateway integration
+ * to permit_applications table for payment gateway integration
  *
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  * @param run {() => void | undefined}
@@ -16,7 +16,7 @@ exports.up = (pgm) => {
   pgm.addColumns('permit_applications', {
     payment_processor_order_id: {
       type: 'varchar(255)',
-      comment: 'Order ID from the payment processor (e.g., Conekta)'
+      comment: 'Order ID from the payment processor (e.g., Stripe Payment Intent ID)'
     }
   }, {
     ifNotExists: true
@@ -34,7 +34,7 @@ exports.up = (pgm) => {
     order_id: {
       type: 'varchar(255)',
       notNull: true,
-      comment: 'Order ID from the payment processor (e.g., Conekta)'
+      comment: 'Order ID from the payment processor (e.g., Stripe Payment Intent ID)'
     },
     event_type: {
       type: 'varchar(100)',

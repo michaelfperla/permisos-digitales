@@ -1,6 +1,6 @@
 const path = require('path');
 const puppeteerService = require('../services/puppeteer.service');
-const paymentService = require('../services/payment.service');
+const stripePaymentService = require('../services/stripe-payment.service');
 const pdfService = require('../services/pdf-service');
 const storageService = require('../services/storage/storage-service');
 const { logger } = require('../utils/enhanced-logger');
@@ -94,7 +94,7 @@ exports.createApplication = async (req, res, next) => {
           userName = userName || `${user.first_name} ${user.last_name}`;
         }
 
-        const customer = await paymentService.createCustomer({
+        const customer = await stripePaymentService.createCustomer({
           name: userName,
           email: userEmail,
           phone: ''
@@ -145,7 +145,7 @@ exports.createApplication = async (req, res, next) => {
           logger.debug(`Using device fingerprint for OXXO payment: ${paymentData.device_session_id}`);
         }
 
-        const paymentResult = await paymentService.processOxxoPayment(paymentData);
+        const paymentResult = await stripePaymentService.processOxxoPayment(paymentData);
 
         await paymentRepository.updatePaymentOrder(
           newApplication.id,
@@ -261,11 +261,11 @@ exports.createApplication = async (req, res, next) => {
           logger.debug(`Using device fingerprint for card payment: ${paymentData.device_session_id}`);
         }
 
-        // Process payment with Conekta
+        // Process payment with Stripe
         let paymentResult;
         try {
-          // Log the payment data being sent to Conekta (without sensitive info)
-          logger.debug('Sending payment data to Conekta:', {
+          // Log the payment data being sent to Stripe (without sensitive info)
+          logger.debug('Sending payment data to Stripe:', {
             amount: paymentData.amount,
             currency: paymentData.currency,
             description: paymentData.description,
@@ -275,16 +275,16 @@ exports.createApplication = async (req, res, next) => {
             hasDeviceSessionId: !!paymentData.device_session_id
           });
 
-          paymentResult = await paymentService.createChargeWithToken(paymentData);
+          paymentResult = await stripePaymentService.processCardPayment(paymentData);
 
-          // Log the full Conekta order object for debugging
-          if (paymentResult && paymentResult.conektaOrder) {
-            logger.info('Full Conekta order object received:', JSON.stringify(paymentResult.conektaOrder, null, 2));
+          // Log the payment result for debugging
+          if (paymentResult) {
+            logger.info('Payment result received:', JSON.stringify(paymentResult, null, 2));
           } else {
-            logger.warn('No Conekta order object found in payment result');
+            logger.warn('No payment result found');
           }
         } catch (paymentError) {
-          logger.error(`Error processing payment with Conekta: ${paymentError.message}`, {
+          logger.error(`Error processing payment with Stripe: ${paymentError.message}`, {
             error: paymentError,
             errorDetails: paymentError.details || 'No details available',
             errorCode: paymentError.code || 'No error code',
@@ -395,15 +395,12 @@ exports.createApplication = async (req, res, next) => {
           });
         }
 
-        // Get the Conekta order object from the payment result
-        const conektaOrder = paymentResult.conektaOrder;
-
         // Log the payment status for debugging
         logger.debug(`Payment status: ${paymentResult.status}`);
 
-        // Determine payment success based directly on payment_status
-        const paymentIsSuccessful = conektaOrder &&
-                                   conektaOrder.payment_status === 'paid';
+        // Determine payment success based on payment result status
+        const paymentIsSuccessful = paymentResult &&
+                                   (paymentResult.status === 'succeeded' || paymentResult.status === 'paid');
 
         // Set application status based on payment result
         let applicationStatusToSet;
@@ -756,10 +753,6 @@ exports.downloadPermit = async (req, res, next) => {
   let filenamePrefix;
 
   switch (requestedType) {
-  case 'recibo':
-    dbColumn = 'recibo_file_path';
-    filenamePrefix = 'Recibo';
-    break;
   case 'certificado':
     dbColumn = 'certificado_file_path';
     filenamePrefix = 'Certificado';
@@ -782,7 +775,7 @@ exports.downloadPermit = async (req, res, next) => {
   try {
     // --- Query DB ---
     // Fetch all path columns + status + ownership info
-    const query = `SELECT user_id, status, permit_file_path, recibo_file_path, certificado_file_path, placas_file_path
+    const query = `SELECT user_id, status, permit_file_path, certificado_file_path, placas_file_path
                        FROM permit_applications WHERE id = $1;`;
     const { rows } = await db.query(query, [applicationId]);
 
@@ -895,7 +888,6 @@ exports.getPdfUrl = async (req, res, next) => {
     // Map frontend type to database column and user-friendly name
     const typeMapping = {
       'permiso': { dbColumn: 'permit_file_path', displayName: 'Permiso' },
-      'recibo': { dbColumn: 'recibo_file_path', displayName: 'Recibo' },
       'certificado': { dbColumn: 'certificado_file_path', displayName: 'Certificado' },
       'placas': { dbColumn: 'placas_file_path', displayName: 'Placas' }
     };

@@ -1,6 +1,6 @@
 /**
  * Migration to add placas_file_path column to permit_applications table
- * 
+ *
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
 exports.shorthands = undefined;

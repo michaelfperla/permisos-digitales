@@ -1,6 +1,6 @@
 // src/controllers/oxxo-payment.controller.js
 const { logger } = require('../utils/enhanced-logger');
-const paymentService = require('../services/payment.service');
+const { stripePaymentService } = require('../services');
 const { ApplicationStatus } = require('../constants');
 
 /**
@@ -42,7 +42,7 @@ class OxxoPaymentController {
       const idempotencyKey = `oxxo-${referenceId}-${Date.now()}`;
 
       // Process OXXO payment
-      const paymentResult = await paymentService.processOxxoPayment({
+      const paymentResult = await stripePaymentService.processOxxoPayment({
         customerId,
         amount,
         currency: 'MXN',
@@ -109,10 +109,22 @@ class OxxoPaymentController {
           { oxxoReference: paymentResult.oxxoReference }
         );
 
-        logger.info(`Updated application ${applicationId} status to AWAITING_OXXO_PAYMENT`);
+        logger.info(`Updated application ${applicationId} status to AWAITING_OXXO_PAYMENT with OXXO reference: ${paymentResult.oxxoReference}`);
       } catch (updateError) {
-        // Don't fail the request if status update fails
-        logger.error('Error updating application status:', updateError);
+        // Database update failure is critical - fail the entire request
+        logger.error('Critical error updating application status:', {
+          error: updateError.message,
+          stack: updateError.stack,
+          applicationId: referenceId.replace('APP-', ''),
+          oxxoReference: paymentResult.oxxoReference,
+          orderId: paymentResult.orderId
+        });
+
+        // Return error response since database is inconsistent
+        return res.status(500).json({
+          success: false,
+          message: 'El pago OXXO fue creado pero hubo un error al actualizar el estado. Por favor contacte soporte con la referencia: ' + paymentResult.oxxoReference
+        });
       }
 
       // Return success response with standardized OXXO payment details
@@ -146,11 +158,11 @@ class OxxoPaymentController {
           referenceId: req.body.referenceId,
           amount: req.body.amount
         },
-        conektaErrorCode: error.details?.code || error.code || 'unknown'
+        paymentErrorCode: error.details?.code || error.code || 'unknown'
       });
 
       // Return a generic user-friendly error message
-      // Don't expose sensitive Conekta error details to the client
+      // Don't expose sensitive payment error details to the client
       return res.status(500).json({
         success: false,
         message: 'Error al procesar la solicitud de pago OXXO. Por favor intente de nuevo más tarde.'
@@ -174,8 +186,8 @@ class OxxoPaymentController {
         });
       }
 
-      // Get payment status from Conekta
-      const paymentStatus = await paymentService.checkPaymentStatus(orderId);
+      // Get payment status from Stripe
+      const paymentStatus = await stripePaymentService.checkPaymentStatus(orderId);
 
       // Check if it's an OXXO payment
       if (paymentStatus.paymentMethod !== 'oxxo_cash') {
@@ -214,7 +226,7 @@ class OxxoPaymentController {
         context: {
           orderId: req.params.orderId
         },
-        conektaErrorCode: error.details?.code || error.code || 'unknown'
+        paymentErrorCode: error.details?.code || error.code || 'unknown'
       });
 
       // Return a generic user-friendly error message

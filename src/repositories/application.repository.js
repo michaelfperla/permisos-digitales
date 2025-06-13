@@ -111,7 +111,6 @@ class ApplicationRepository extends BaseRepository {
           created_at,
           updated_at,
           permit_file_path,
-          recibo_file_path,
           certificado_file_path,
           placas_file_path
         FROM permit_applications

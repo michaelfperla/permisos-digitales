@@ -588,7 +588,7 @@ const PermitDetailsPage: React.FC = () => {
   // Handle permit download
   const handleDownloadPermit = async (
     permitId: string = id!,
-    type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso',
+    type: 'permiso' | 'certificado' | 'placas' = 'permiso',
   ) => {
     if (!permitId || (!application && !applicationData)) return;
 
@@ -605,7 +605,6 @@ const PermitDetailsPage: React.FC = () => {
       // Set the filename based on the document type
       const typeLabels: Record<string, string> = {
         permiso: 'Permiso',
-        recibo: 'Recibo',
         certificado: 'Certificado',
         placas: 'Placas',
       };
@@ -656,7 +655,7 @@ const PermitDetailsPage: React.FC = () => {
 
   // Handle copying OXXO reference
   const handleCopyReference = () => {
-    // Always use the Conekta-generated OXXO reference
+    // Always use the payment-generated OXXO reference
     const reference = (applicationData?.application as any)?.paymentReference;
 
     if (reference) {
@@ -934,7 +933,7 @@ const PermitDetailsPage: React.FC = () => {
             // Customize based on status
             switch (currentStatus) {
               case 'AWAITING_OXXO_PAYMENT':
-                // Check if this is a pending Conekta payment
+                // Check if this is a pending payment
                 if ((application as any)?.payment_processor_order_id) {
                   instructionsTitle = 'Pago en Proceso';
                   instructionsIcon = (
@@ -1833,25 +1832,7 @@ const PermitDetailsPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Recibo (Receipt) */}
-              {((applicationData?.application as any)?.recibo_file_path ||
-                application?.recibo_file_path) && (
-                <div className={styles.documentItem}>
-                  <div className={styles.documentInfo}>
-                    <FaFileInvoice className={styles.documentIcon} />
-                    <span className={styles.documentName}>Comprobante de Pago.pdf</span>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.downloadButton}
-                    onClick={() => handleDownloadPermit(id!, 'recibo')}
-                    disabled={isDownloading}
-                  >
-                    <FaDownload className={styles.downloadIcon} />
-                    <span>{isDownloading ? 'Descargando...' : 'Descargar'}</span>
-                  </button>
-                </div>
-              )}
+
 
               {/* Certificado (Certificate) */}
               {((applicationData?.application as any)?.certificado_file_path ||
@@ -1918,11 +1899,8 @@ const PermitDetailsPage: React.FC = () => {
         amount={application?.importe || 150.0}
         currency="MXN"
         permitFolio={application?.folio || `Permiso #${id}`}
-        // Use a default barcode URL for demonstration purposes
-        // In a production environment, this would come from the API
-        barcodeUrl="https://s3.amazonaws.com/cash_payment_barcodes/sandbox_reference.png"
-        // Set a default expiration date 48 hours from now
-        expiresAt={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()}
+        barcodeUrl={applicationData?.oxxo?.barcodeUrl || null}
+        expiresAt={applicationData?.oxxo?.expiresAt || null}
       />
     </ResponsiveContainer>
   );

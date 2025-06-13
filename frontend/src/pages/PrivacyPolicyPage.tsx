@@ -75,7 +75,7 @@ const PrivacyPolicyPage: React.FC = () => {
             </li>
             <li>
               <strong>Datos de pago:</strong> Información de tarjeta de crédito o débito (procesada
-              de forma segura por nuestro proveedor de pagos certificado Conekta, quien cumple con
+              de forma segura por nuestro proveedor de pagos certificado Stripe, quien cumple con
               estándares PCI DSS de seguridad).
             </li>
             <li>

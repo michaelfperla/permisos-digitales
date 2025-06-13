@@ -4,11 +4,13 @@
 exports.shorthands = undefined;
 
 /**
- * Initial schema migration
+ * Initial schema migration - UPDATED TIMESTAMP
  *
  * This migration creates the baseline schema for the Permisos Digitales application.
  * It includes all tables, indexes, constraints, functions, and triggers that
  * currently exist in the production database.
+ *
+ * Updated timestamp to resolve migration order conflict.
  *
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  * @returns {Promise<void> | void}

@@ -12,11 +12,6 @@ router.get(
   paymentController.checkPaymentStatus
 );
 
-// Webhook endpoint for Conekta payment notifications
-router.post(
-  '/webhook/conekta',
-  express.raw({ type: 'application/json' }),
-  paymentController.handleWebhook
-);
+
 
 module.exports = router;

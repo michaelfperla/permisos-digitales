@@ -115,5 +115,5 @@ import_data.js
 cleanup_*.ps1
 *.tar.gz
 
-# Conekta testing files
-CONEKTA_TESTING_GUIDE.md
+# Payment testing files
+PAYMENT_TESTING_GUIDE.md

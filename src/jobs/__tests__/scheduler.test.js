@@ -14,11 +14,13 @@ jest.mock('node-cron', () => ({
   schedule: mockSchedule
 }));
 
-// Mock logger
+// Mock logger with all required methods
 jest.mock('../../utils/enhanced-logger', () => ({
   logger: {
     info: jest.fn(),
-    error: jest.fn()
+    error: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn()
   }
 }));
 

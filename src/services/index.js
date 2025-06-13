@@ -11,7 +11,7 @@ const passwordResetService = require('./password-reset.service');
 const pdfService = require('./pdf-service');
 const securityService = require('./security.service');
 const storageService = require('./storage.service');
-const paymentService = require('./payment.service');
+const stripePaymentService = require('./stripe-payment.service');
 
 // Create an auth service that combines auth-related functionality
 const authService = {
@@ -43,5 +43,5 @@ module.exports = {
   pdfService,
   securityService,
   storageService,
-  paymentService
+  stripePaymentService
 };

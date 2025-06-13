@@ -277,9 +277,179 @@ El equipo de Permisos Digitales
   }
 }
 
+/**
+ * Send a permit expiration reminder email
+ * @param {string} to - Recipient email address
+ * @param {Object} permitDetails - Permit details
+ * @param {string} permitDetails.userName - User's full name
+ * @param {string} permitDetails.folio - Permit folio number
+ * @param {string} permitDetails.vehicleDescription - Vehicle description (make, model, year)
+ * @param {string} permitDetails.expirationDate - Formatted expiration date
+ * @param {number} permitDetails.daysRemaining - Days until expiration
+ * @param {string} permitDetails.renewalUrl - URL to renew the permit
+ * @returns {Promise<boolean>} - True if email was sent successfully
+ */
+async function sendPermitExpirationReminder(to, permitDetails) {
+  try {
+    const {
+      userName,
+      folio,
+      vehicleDescription,
+      expirationDate,
+      daysRemaining,
+      renewalUrl
+    } = permitDetails;
+
+    // Determine urgency level and messaging
+    const isUrgent = daysRemaining <= 3;
+    const urgencyText = isUrgent ? '¡URGENTE!' : 'Recordatorio';
+    const daysText = daysRemaining === 1 ? 'día' : 'días';
+
+    const subject = `${urgencyText} Tu permiso de circulación vence en ${daysRemaining} ${daysText}`;
+
+    // Email content
+    return await sendEmail({
+      to,
+      subject,
+      text: `
+Hola ${userName},
+
+${isUrgent ? '¡ATENCIÓN! ' : ''}Tu permiso de circulación está por vencer.
+
+Detalles del permiso:
+Folio: ${folio}
+Vehículo: ${vehicleDescription}
+Fecha de vencimiento: ${expirationDate}
+Días restantes: ${daysRemaining} ${daysText}
+
+${isUrgent ?
+  'Es importante que renueves tu permiso antes de que expire para evitar multas o problemas legales.' :
+  'Te recomendamos renovar tu permiso con anticipación para evitar inconvenientes.'
+}
+
+Para renovar tu permiso, visita nuestra plataforma:
+${renewalUrl}
+
+El proceso de renovación es rápido y sencillo. Solo necesitas actualizar la información de tu vehículo y realizar el pago correspondiente.
+
+Si ya renovaste tu permiso, puedes ignorar este mensaje.
+
+Saludos,
+El equipo de Permisos Digitales
+      `,
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio de Vencimiento de Permiso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: ${isUrgent ? '#d32f2f' : '#852d2d'};
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .permit-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid ${isUrgent ? '#d32f2f' : '#A72B31'};
+        }
+        .button {
+            display: inline-block;
+            background-color: #A72B31;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .urgent-notice {
+            background-color: #ffebee;
+            border: 1px solid #d32f2f;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Permisos Digitales</h2>
+        <h3>${urgencyText} - Vencimiento de Permiso</h3>
+    </div>
+    <div class="content">
+        <p>Hola ${userName},</p>
+
+        ${isUrgent ? `
+        <div class="urgent-notice">
+            ¡ATENCIÓN! Tu permiso de circulación vence en solo ${daysRemaining} ${daysText}.
+            Es importante que lo renueves inmediatamente para evitar multas.
+        </div>
+        ` : `
+        <p>Tu permiso de circulación está próximo a vencer. Te recomendamos renovarlo con anticipación.</p>
+        `}
+
+        <div class="permit-details">
+            <p><strong>Folio del Permiso:</strong> ${folio}</p>
+            <p><strong>Vehículo:</strong> ${vehicleDescription}</p>
+            <p><strong>Fecha de Vencimiento:</strong> ${expirationDate}</p>
+            <p><strong>Días Restantes:</strong> ${daysRemaining} ${daysText}</p>
+        </div>
+
+        <p>El proceso de renovación es rápido y sencillo. Solo necesitas actualizar la información de tu vehículo y realizar el pago correspondiente.</p>
+
+        <div style="text-align: center;">
+            <a href="${renewalUrl}" class="button">Renovar Permiso Ahora</a>
+        </div>
+
+        <p>Si ya renovaste tu permiso, puedes ignorar este mensaje.</p>
+    </div>
+    <div class="footer">
+        <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+        <p>&copy; ${new Date().getFullYear()} Permisos Digitales. Todos los derechos reservados.</p>
+    </div>
+</body>
+</html>
+      `
+    });
+  } catch (error) {
+    logger.error(`Error sending permit expiration reminder to ${to}:`, error);
+    return false;
+  }
+}
+
 module.exports = {
   sendPasswordResetEmail,
   sendEmailVerificationEmail,
+  sendPermitExpirationReminder,
   sendEmail,
   initTransporter,
   _setTransporterForTesting // Only used in tests

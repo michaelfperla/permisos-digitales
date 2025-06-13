@@ -253,9 +253,9 @@ describe('PDF Service', () => {
 
     it('should handle different document types', async () => {
       // Arrange
-      const sourceFilename = 'receipt_123.pdf';
+      const sourceFilename = 'certificado_123.pdf';
       const applicationId = 123;
-      const type = 'recibo';
+      const type = 'certificado';
       const folio = 'ABC123';
       const isSample = false;
 
@@ -279,7 +279,7 @@ describe('PDF Service', () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.filename).toBe('Recibo_ABC123.pdf');
+      expect(result.filename).toBe('Certificado_ABC123.pdf');
       expect(mockFs.copyFileSync).toHaveBeenCalled();
     });
 

@@ -46,7 +46,6 @@ export interface Application {
 
   // File paths
   permit_file_path?: string;
-  recibo_file_path?: string;
   certificado_file_path?: string;
   placas_file_path?: string;
 }
@@ -625,7 +624,7 @@ export const uploadPaymentProof = async (
  */
 export const downloadPermit = async (
   id: string,
-  type: 'permiso' | 'recibo' | 'certificado' | 'placas' = 'permiso',
+  type: 'permiso' | 'certificado' | 'placas' = 'permiso',
   options?: { signal?: AbortSignal },
 ): Promise<Blob> => {
   try {
@@ -633,7 +632,6 @@ export const downloadPermit = async (
 
     const typeMap: Record<string, string> = {
       permiso: 'permiso',
-      recibo: 'recibo',
       certificado: 'certificado',
       placas: 'placas',
     };

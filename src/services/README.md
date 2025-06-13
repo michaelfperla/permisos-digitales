@@ -15,7 +15,7 @@ The services layer contains the core business logic of the Permisos Digitales ba
 *   **`auth.service.js`** (or `auth-security.service.js`): Handles user registration logic, password hashing and comparison, session management logic, and security token generation/validation.
 *   **`user.service.js`**: Manages user profile data updates and retrieval.
 *   **`application.service.js`**: Contains logic for creating, processing, and managing permit applications, including status transitions and business rule enforcement.
-*   **`payment.service.js`**: Implements payment processing workflows, interacts with the Conekta payment gateway, verifies payment statuses, and updates application records accordingly.
+*   **`stripe-payment.service.js`**: Implements payment processing workflows, interacts with the Stripe payment gateway, verifies payment statuses, and updates application records accordingly.
 *   **`email.service.js`**: Responsible for sending emails (e.g., account verification, password reset, notifications) using `nodemailer`.
 *   **`pdf-service.js`**: Generates PDF documents, such as digital permits, potentially using libraries like Puppeteer.
 *   **`storage.service.js`** (and `storage/pdf-storage-service.js`): Manages file uploads and storage, providing an abstraction over storage providers (e.g., local disk, S3). This is used for payment proofs and generated PDFs.

@@ -298,7 +298,7 @@ class PaymentRepository extends BaseRepository {
    */
   async tryRecordEvent(eventId, eventType, client = null) {
     try {
-      // Skip if no event ID (shouldn't happen with Conekta)
+      // Skip if no event ID (shouldn't happen with Stripe)
       if (!eventId) {
         logger.warn('Attempted to record webhook event with no ID');
         return true; // Process it anyway

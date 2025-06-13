@@ -100,7 +100,7 @@ export const initiatePayment = async (
 };
 
 /**
- * Process card payment with Conekta
+ * Process card payment with Stripe
  */
 export const processCardPayment = async (
   applicationId: string,
@@ -203,14 +203,17 @@ export const processOxxoPayment = async (
     if (isSimulationMode()) {
       console.info('SIMULATION: Bypassing real OXXO payment processing.');
 
+      // Generate a realistic-looking simulated OXXO reference
+      const simulatedReference = `9300${Math.floor(Math.random() * 1000000000).toString().padStart(9, '0')}`;
+
       const simulatedResponse: PaymentMethodResponse = {
         success: true,
         orderId: `sim_ord_${Math.random().toString(36).substring(2, 10)}`,
         status: 'pending_payment',
         paymentMethod: 'oxxo_cash',
-        oxxoReference: '93000123456789',
+        oxxoReference: simulatedReference,
         expiresAt: Math.floor(Date.now() / 1000) + 172800,
-        checkoutUrl: `/checkout?order_id=sim_ord&method=oxxo&reference=93000123456789`,
+        checkoutUrl: `/checkout?order_id=sim_ord&method=oxxo&reference=${simulatedReference}`,
       };
 
       return simulatedResponse;
@@ -249,13 +252,23 @@ export const processOxxoPayment = async (
 
     if (response.data && 'success' in response.data && response.data.success) {
       const data = response.data as any;
+
+      // Validate required OXXO fields are present
+      if (!data.oxxoReference) {
+        throw new Error('El servidor no generó una referencia OXXO válida. Por favor intente de nuevo.');
+      }
+
+      if (!data.barcodeUrl) {
+        throw new Error('El servidor no generó un código de barras válido. Por favor intente de nuevo.');
+      }
+
       return {
         success: true,
-        orderId: data.orderId || `oxxo-${Date.now()}`,
-        status: 'pending_payment',
+        orderId: data.orderId,
+        status: data.status || 'pending_payment',
         paymentMethod: 'oxxo_cash',
-        oxxoReference: data.oxxoReference || '93000123456789',
-        expiresAt: data.expiresAt || Math.floor(Date.now() / 1000) + 172800,
+        oxxoReference: data.oxxoReference,
+        expiresAt: data.expiresAt,
         barcodeUrl: data.barcodeUrl,
         checkoutUrl: undefined,
       };

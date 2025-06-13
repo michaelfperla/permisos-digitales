@@ -24,7 +24,7 @@ import CompleteReviewStep from '../components/permit-form/CompleteReviewStep';
 import CompleteVehicleInfoStep from '../components/permit-form/CompleteVehicleInfoStep';
 import ConfirmationStep from '../components/permit-form/ConfirmationStep';
 import OxxoConfirmationStep from '../components/permit-form/OxxoConfirmationStep';
-import PaymentFormStep from '../components/permit-form/PaymentFormStep';
+import StripePaymentFormStep from '../components/permit-form/StripePaymentFormStep';
 import PersonalInfoStep from '../components/permit-form/PersonalInfoStep';
 import Button from '../components/ui/Button/Button';
 import { DEFAULT_PERMIT_FEE, DEFAULT_CURRENCY } from '../constants';
@@ -432,7 +432,7 @@ const CompletePermitFormPage: React.FC = () => {
       case 'personal': return <PersonalInfoStep onNext={handleNextStep} onPrevious={handlePreviousStep} />;
       case 'vehicle': return <CompleteVehicleInfoStep onNext={handleNextStep} onPrevious={handlePreviousStep} />;
       case 'review': return <CompleteReviewStep onPrevious={handlePreviousStep} onSubmit={handleSubmit} isSubmitting={isSubmitting} goToStep={goToStep} />;
-      case 'payment': return <PaymentFormStep onPrevious={handlePreviousStep} onSubmit={handlePaymentToken} isSubmitting={isSubmitting} />;
+      case 'payment': return <StripePaymentFormStep onPrevious={handlePreviousStep} onSubmit={handlePaymentToken} isSubmitting={isSubmitting} />;
       case 'confirmation':
         return <ConfirmationStep applicationId={applicationId} formData={{ nombre_completo: methods.getValues('nombre_completo'), marca: methods.getValues('marca'), linea: methods.getValues('linea'), ano_modelo: methods.getValues('ano_modelo')}} />;
       case 'oxxo-confirmation':

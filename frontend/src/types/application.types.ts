@@ -27,9 +27,9 @@ export interface ApplicationFormRawData {
   // Other optional fields that might be present
   parent_application_id?: string; // For renewals
   payment_reference?: string; // For payment uploads
-  payment_token?: string; // Conekta payment token for card payments
-  payment_method?: string; // Payment method ('card' or 'oxxo')
-  device_session_id?: string; // Conekta device fingerprint for fraud prevention
+  payment_token?: string; // Payment token for card payments
+  payment_method?: string; // Payment method ('card', 'oxxo', 'spei')
+  device_session_id?: string; // Device fingerprint for fraud prevention
 }
 
 /**
@@ -38,9 +38,9 @@ export interface ApplicationFormRawData {
  */
 export interface ApplicationFormData extends Omit<ApplicationFormRawData, 'ano_modelo'> {
   ano_modelo: number; // Must be a number when sent to API
-  payment_token?: string; // Conekta payment token for card payments
+  payment_token?: string; // Payment token for card payments
   payment_method?: string; // Payment method ('card' or 'oxxo')
-  device_session_id?: string; // Conekta device fingerprint for fraud prevention
+  device_session_id?: string; // Device fingerprint for fraud prevention
   email?: string; // User email for notifications
 }
 

@@ -58,7 +58,6 @@ export interface PermitListItem {
 
   // Document Paths
   permit_file_path?: string;
-  recibo_file_path?: string;
   certificado_file_path?: string;
   placas_file_path?: string;
 }
@@ -126,7 +125,7 @@ export interface CtaProps {
  * Interface for document information
  */
 export interface DocumentInfo {
-  type: 'permiso' | 'recibo' | 'certificado' | 'placas';
+  type: 'permiso' | 'certificado' | 'placas';
   displayName: string;
   path?: string;
   icon: string;

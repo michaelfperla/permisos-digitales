@@ -24,7 +24,7 @@ function ensureUserPdfDir() {
  * Copy a permit PDF to the user download directory with a user-friendly name
  * @param {string} sourceFilename - The source PDF filename in storage/pdfs
  * @param {number} applicationId - The application ID
- * @param {string} type - The type of document (permiso, recibo, certificado)
+ * @param {string} type - The type of document (permiso, certificado, placas)
  * @param {string} folio - The permit folio number
  * @param {boolean} isSample - Whether this is a sample permit
  * @returns {Promise<{success: boolean, path: string, error: string}>}

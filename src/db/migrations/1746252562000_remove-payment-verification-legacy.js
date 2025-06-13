@@ -7,10 +7,10 @@ exports.shorthands = undefined;
  * Migration to remove legacy payment verification system
  * 
  * This migration removes the old manual payment verification system that was
- * replaced by direct Conekta payment processing. The legacy system required
+ * replaced by direct payment processing. The legacy system required
  * users to upload payment proofs and admins to manually verify them.
- * 
- * Current system uses direct Conekta integration with automatic webhook
+ *
+ * Current system uses direct payment gateway integration with automatic webhook
  * confirmation, making manual verification obsolete.
  *
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
@@ -43,7 +43,7 @@ exports.up = (pgm) => {
   // Add comment documenting the change
   pgm.sql(`
     COMMENT ON TABLE permit_applications IS 
-    'Permit applications table. Legacy manual payment verification columns removed in favor of direct Conekta payment processing.';
+    'Permit applications table. Legacy manual payment verification columns removed in favor of direct payment processing.';
   `);
 };
 

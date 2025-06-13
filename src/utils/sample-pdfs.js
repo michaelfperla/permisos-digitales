@@ -14,7 +14,7 @@ if (!fs.existsSync(SAMPLE_PDF_DIR)) {
 
 /**
  * Get the most recent sample PDF of a specific type
- * @param {string} type - The type of PDF (permiso, recibo, certificado)
+ * @param {string} type - The type of PDF (permiso, certificado, placas)
  * @returns {string|null} - The filename of the sample PDF or null if not found
  */
 function getSamplePdfFilename(type) {
@@ -76,10 +76,10 @@ async function assignSamplePdfsToApplication(applicationId, db) {
 
     // Get sample PDF filenames
     const permisoFilename = getSamplePdfFilename('permiso');
-    const reciboFilename = getSamplePdfFilename('recibo');
     const certificadoFilename = getSamplePdfFilename('certificado');
+    const placasFilename = getSamplePdfFilename('placas');
 
-    if (!permisoFilename || !reciboFilename || !certificadoFilename) {
+    if (!permisoFilename || !certificadoFilename || !placasFilename) {
       logger.error(`Could not find all required sample PDFs for application ${applicationId}`);
       return false;
     }
@@ -89,8 +89,8 @@ async function assignSamplePdfsToApplication(applicationId, db) {
       UPDATE permit_applications
       SET status = 'PERMIT_READY',
           permit_file_path = $1,
-          recibo_file_path = $2,
-          certificado_file_path = $3,
+          certificado_file_path = $2,
+          placas_file_path = $3,
           is_sample_permit = TRUE,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = $4
@@ -99,8 +99,8 @@ async function assignSamplePdfsToApplication(applicationId, db) {
 
     const { rows } = await db.query(updateQuery, [
       permisoFilename,
-      reciboFilename,
       certificadoFilename,
+      placasFilename,
       applicationId
     ]);
 

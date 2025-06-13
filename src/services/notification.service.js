@@ -181,6 +181,74 @@ Equipo de Permisos Digitales
   }
 }
 
+/**
+ * Send a permit expiration reminder
+ * @param {Object} permitDetails - Permit details
+ * @param {number} permitDetails.application_id - Application ID
+ * @param {string} permitDetails.user_email - User email
+ * @param {string} permitDetails.first_name - User first name
+ * @param {string} permitDetails.last_name - User last name
+ * @param {string} permitDetails.folio - Permit folio number
+ * @param {string} permitDetails.marca - Vehicle make
+ * @param {string} permitDetails.linea - Vehicle model
+ * @param {string} permitDetails.ano_modelo - Vehicle year
+ * @param {string} permitDetails.fecha_vencimiento - Expiration date
+ * @param {number} permitDetails.days_remaining - Days until expiration
+ * @returns {Promise<boolean>} - True if notification was sent successfully
+ */
+async function sendPermitExpirationReminder(permitDetails) {
+  try {
+    logger.debug(`Sending permit expiration reminder for application ${permitDetails.application_id}`);
+
+    // Format expiration date for display
+    const expirationDate = new Date(permitDetails.fecha_vencimiento);
+    const formattedDate = formatDate(expirationDate);
+
+    // Get user's name or use a default
+    const userName = permitDetails.first_name
+      ? `${permitDetails.first_name} ${permitDetails.last_name || ''}`.trim()
+      : 'Estimado usuario';
+
+    // Vehicle description
+    const vehicleDescription = `${permitDetails.marca} ${permitDetails.linea} ${permitDetails.ano_modelo}`;
+
+    // Construct the renewal URL
+    const renewalUrl = `${config.frontendUrl}/applications/${permitDetails.application_id}/renew`;
+
+    // Prepare email details
+    const emailDetails = {
+      userName,
+      folio: permitDetails.folio || `APP-${permitDetails.application_id}`,
+      vehicleDescription,
+      expirationDate: formattedDate,
+      daysRemaining: permitDetails.days_remaining,
+      renewalUrl
+    };
+
+    // Send email notification
+    const emailSent = await emailService.sendPermitExpirationReminder(
+      permitDetails.user_email,
+      emailDetails
+    );
+
+    if (emailSent) {
+      logger.info(`Permit expiration reminder sent to ${permitDetails.user_email} for application ${permitDetails.application_id}`);
+    } else {
+      logger.warn(`Failed to send permit expiration reminder to ${permitDetails.user_email} for application ${permitDetails.application_id}`);
+    }
+
+    return emailSent;
+  } catch (error) {
+    logger.error(`Error sending permit expiration reminder for application ${permitDetails.application_id}:`, {
+      error: error.message,
+      applicationId: permitDetails.application_id,
+      userEmail: permitDetails.user_email
+    });
+    return false;
+  }
+}
+
 module.exports = {
-  sendOxxoExpirationReminder
+  sendOxxoExpirationReminder,
+  sendPermitExpirationReminder
 };

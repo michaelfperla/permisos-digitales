@@ -11,6 +11,7 @@ const applicationRoutes = require('./applications.routes');
 const adminRoutes = require('./admin.routes');
 const userRoutes = require('./user.routes');
 const paymentRoutes = require('./payment.routes');
+const stripePaymentRoutes = require('./stripe-payment.routes');
 const oxxoPaymentRoutes = require('./oxxo-payment.routes');
 const notificationRoutes = require('./notification.routes');
 // const tempDevRoutes = require('./DEPRECATED_dev.routes'); // Disabled for security
@@ -43,6 +44,9 @@ router.use('/user', isAuthenticated, userRoutes);
 // Payment routes - some require authentication, webhook doesn't
 // Mount directly to /api since these routes are already prefixed with /applications
 router.use('/', paymentRoutes);
+
+// Stripe payment routes - some require authentication, webhook doesn't
+router.use('/', stripePaymentRoutes);
 
 // OXXO payment routes - requires authentication
 router.use('/payments', isAuthenticated, isClient, oxxoPaymentRoutes);
