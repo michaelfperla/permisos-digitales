@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permisos Digitales - Video Player</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        #player-container {
+            width: 90%;
+            max-width: 1280px;
+            aspect-ratio: 16/9;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #B5384D;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #8B2D3D;
+            transform: scale(1.05);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 20px;
+            background: #111;
+            border-radius: 10px;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .loading {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Permisos Digitales - Promo Video</h1>
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
+    <div class="controls">
+        <button onclick="playVideo()">▶ Play</button>
+        <button onclick="pauseVideo()">⏸ Pause</button>
+        <button onclick="restartVideo()">↺ Restart</button>
+        <button onclick="renderMP4()">💾 Render MP4</button>
+    </div>
+    <div id="status" class="status">
+        <p class="loading">Loading Remotion Player...</p>
+    </div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script type="module">
+        // For now, let's create a simple preview system
+        const status = document.getElementById('status');
+        
+        async function initPlayer() {
+            status.innerHTML = '<p>Ready! Click Play to start the video preview.</p>';
+            
+            // Create a canvas-based preview
+            const container = document.getElementById('player-container');
+            const canvas = document.createElement('canvas');
+            canvas.width = 1280;
+            canvas.height = 720;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            container.innerHTML = '';
+            container.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Simple preview animation
+            window.animatePreview = function(time = 0) {
+                const scene = Math.floor(time / 1000 / 10); // Change scene every 10 seconds
+                
+                // Clear canvas
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw scene indicator
+                ctx.fillStyle = '#B5384D';
+                ctx.fillRect(0, 0, (time / 60000) * canvas.width, 10);
+                
+                // Draw scene content
+                ctx.fillStyle = '#fff';
+                ctx.font = '48px Arial';
+                ctx.textAlign = 'center';
+                
+                switch(scene) {
+                    case 0:
+                        ctx.fillText('Scene 1: Office Waiting Room', canvas.width/2, canvas.height/2);
+                        ctx.font = '24px Arial';
+                        ctx.fillText('4 horas perdidas...', canvas.width/2, canvas.height/2 + 60);
+                        break;
+                    case 1:
+                        ctx.fillText('Scene 2: Phone Discovery', canvas.width/2, canvas.height/2);
+                        ctx.font = '24px Arial';
+                        ctx.fillText('Permisos Digitales - 5 minutos', canvas.width/2, canvas.height/2 + 60);
+                        break;
+                    case 2:
+                        ctx.fillText('Scene 3: 3 Simple Steps', canvas.width/2, canvas.height/2);
+                        ctx.font = '24px Arial';
+                        ctx.fillText('Register → Vehicle → Payment', canvas.width/2, canvas.height/2 + 60);
+                        break;
+                    case 3:
+                        ctx.fillText('Scene 4: Success!', canvas.width/2, canvas.height/2);
+                        ctx.font = '24px Arial';
+                        ctx.fillText('Your permit is ready', canvas.width/2, canvas.height/2 + 60);
+                        break;
+                    case 4:
+                        ctx.fillText('Scene 5: Get Your Permit Now!', canvas.width/2, canvas.height/2);
+                        ctx.font = '24px Arial';
+                        ctx.fillText('permisosdigitales.com.mx', canvas.width/2, canvas.height/2 + 60);
+                        break;
+                }
+                
+                // Show time
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Time: ${(time/1000).toFixed(1)}s / 60s`, 20, 40);
+            };
+            
+            animatePreview(0);
+        }
+        
+        let startTime = null;
+        let animationId = null;
+        let isPaused = false;
+        let pausedTime = 0;
+        
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime + pausedTime;
+            
+            if (elapsed < 60000 && !isPaused) { // 60 seconds
+                animatePreview(elapsed);
+                animationId = requestAnimationFrame(animate);
+            } else if (elapsed >= 60000) {
+                // Loop
+                startTime = timestamp;
+                pausedTime = 0;
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        window.playVideo = function() {
+            if (isPaused) {
+                isPaused = false;
+                startTime = null;
+                animate(performance.now());
+            } else if (!animationId) {
+                animate(performance.now());
+            }
+            status.innerHTML = '<p>▶ Playing...</p>';
+        };
+        
+        window.pauseVideo = function() {
+            isPaused = true;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                pausedTime += performance.now() - startTime;
+            }
+            status.innerHTML = '<p>⏸ Paused</p>';
+        };
+        
+        window.restartVideo = function() {
+            if (animationId) cancelAnimationFrame(animationId);
+            startTime = null;
+            pausedTime = 0;
+            isPaused = false;
+            animatePreview(0);
+            status.innerHTML = '<p>↺ Restarted</p>';
+        };
+        
+        window.renderMP4 = async function() {
+            status.innerHTML = '<p class="loading">Rendering MP4... This will take a few minutes.</p>';
+            
+            try {
+                const response = await fetch('/render-video');
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.innerHTML = `
+                        <p>✅ Video rendered successfully!</p>
+                        <a href="${result.videoPath}" download style="color: #B5384D;">Download MP4</a>
+                    `;
+                } else {
+                    status.innerHTML = `<p>❌ Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                status.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+            }
+        };
+        
+        // Initialize on load
+        initPlayer();
+    </script>
+</body>
+</html>

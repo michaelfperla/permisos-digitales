@@ -1,0 +1,119 @@
+/* Main Layout Styles - Simplified for New Dashboard */
+
+/* Optimized for mobile responsiveness, especially for Mexican market (360px width devices) */
+
+/* Main Layout Container */
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-neutral-100);
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Full Width Content Area */
+.mainContentFullWidth {
+  flex-grow: 1;
+  width: 100%;
+  padding: 2rem;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  transition: padding 0.3s ease; /* Smooth transition for padding changes */
+}
+
+/* Add bottom padding when mobile navigation is present */
+.hasBottomNav {
+  padding-bottom: calc(2rem + 60px); /* Add space for the bottom navigation */
+}
+
+/* Mobile Navigation Container */
+.mobileNavContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-fixed);
+  background-color: transparent;
+}
+
+/* Content Section - Common styles for content containers */
+.contentSection {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive styles for tablets */
+@media (width <= 768px) {
+  .mainContentFullWidth {
+    padding: 1.5rem;
+  }
+
+  .hasBottomNav {
+    padding-bottom: calc(1.5rem + 60px); /* Adjust space for the bottom navigation */
+  }
+
+  .contentSection {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Small Mobile Devices */
+@media (width <= 480px) {
+  .mainContentFullWidth {
+    padding: 1rem;
+  }
+
+  .hasBottomNav {
+    padding-bottom: calc(1rem + 60px); /* Adjust space for the bottom navigation */
+  }
+
+  .contentSection {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px; /* Smaller border radius on mobile */
+  }
+
+  /* Add spacing utilities for mobile */
+  .mobileSpacingTop {
+    margin-top: 1rem;
+  }
+
+  .mobileSpacingBottom {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Extra Small Mobile Devices - Optimized for Mexican market (360px width) */
+@media (width <= 360px) {
+  .mainContentFullWidth {
+    padding: 0.75rem;
+  }
+
+  .hasBottomNav {
+    padding-bottom: calc(0.75rem + 56px); /* Adjust space for the bottom navigation */
+  }
+
+  .contentSection {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Adjust font sizes for very small screens */
+  :global(h1) {
+    font-size: 1.5rem !important;
+  }
+
+  :global(h2) {
+    font-size: 1.25rem !important;
+  }
+
+  :global(h3) {
+    font-size: 1.1rem !important;
+  }
+}

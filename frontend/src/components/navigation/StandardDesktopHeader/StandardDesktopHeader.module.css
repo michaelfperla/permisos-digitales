@@ -1,0 +1,110 @@
+/* Standard Desktop Header Styles */
+.desktopHeader {
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-neutral-200);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-header-height, 56px);
+  z-index: var(--z-fixed);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+}
+
+.headerNav {
+  display: flex;
+  align-items: center;
+}
+
+.headerLinks {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.headerLink {
+  color: var(--color-neutral-700);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+
+.headerLink:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-lightest);
+}
+
+.headerLink:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--breakpoint-lg)) {
+  .desktopHeader {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+@media (max-width: var(--breakpoint-md)) {
+  .desktopHeader {
+    padding: var(--space-3);
+  }
+  
+  .headerLinks {
+    gap: var(--space-2);
+  }
+  
+  .headerLink {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .headerContent {
+    max-width: none;
+    padding: 0 var(--space-2);
+  }
+  
+  .headerLinks {
+    gap: var(--space-1);
+  }
+}
+
+/* Variant for non-fixed headers (if needed) */
+.desktopHeader.static {
+  position: static;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+
+/* Variant for minimal headers (logo only) */
+.desktopHeader.minimal .headerContent {
+  justify-content: flex-start;
+}
+
+/* Ensure buttons in header have proper spacing */
+.headerLinks > * + * {
+  margin-left: var(--space-2);
+}

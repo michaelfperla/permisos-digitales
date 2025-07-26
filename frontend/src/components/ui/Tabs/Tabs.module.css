@@ -1,0 +1,155 @@
+/* Tabs Component Styles - Modern Segmented Control Design */
+.tabsContainer {
+  width: 100%;
+}
+
+.tabsHeader {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  margin-bottom: var(--space-5);
+  background-color: var(--color-neutral-100);
+  border-radius: 12px;
+  border: 1px solid var(--color-neutral-200);
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  max-width: 100%;
+}
+
+.tabsHeader::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  flex: 0 1 auto;
+  min-width: fit-content;
+  max-width: 250px;
+  padding: var(--space-2) var(--space-4);
+  background-color: transparent;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Hover state - clearly interactive */
+.tabButton:hover:not(.tabActive) {
+  color: var(--color-neutral-700);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Focus state */
+.tabButton:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Active state - unmistakably selected */
+.tabActive {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  border-color: var(--color-neutral-200);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+/* Add active indicator bar at bottom */
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 3px;
+  background-color: var(--color-primary);
+  border-radius: 2px 2px 0 0;
+}
+
+.tabsContent {
+  position: relative;
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.tabPanel {
+  display: none;
+}
+
+.tabPanelActive {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .tabsHeader {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabButton {
+    flex: 0 0 auto;
+    min-width: fit-content;
+    max-width: 200px;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.75rem;
+    min-height: 44px;
+  }
+
+  .tabsContent {
+    padding: var(--space-4);
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+  .tabButton {
+    flex: 0 0 auto;
+    min-width: fit-content;
+    max-width: 150px;
+    padding: var(--space-2);
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+  }
+
+  .tabsContent {
+    padding: var(--space-3);
+  }
+}

@@ -1,0 +1,485 @@
+/*
+ * Modern Button Design System
+ * Cohesive, accessible, and beautiful interactive elements
+ * 
+ * Design Principles:
+ * - Clear visual hierarchy
+ * - Consistent interaction patterns
+ * - Smooth, meaningful animations
+ * - Mobile-first approach
+ */
+
+/*
+ * Base Button Styles
+ * Foundation for all interactive elements
+ */
+.btn,
+[role='button'] {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  
+  /* Sizing - Mobile First */
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  
+  /* Typography */
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 40px;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  
+  /* Styling */
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  
+  /* Transitions */
+  transition: var(--transition-fast);
+  transform-origin: center;
+  
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Extra small screens (360px and below) */
+@media (max-width: var(--breakpoint-xs)) {
+  .btn,
+  [role='button'] {
+    min-height: 36px;
+    padding: 0 var(--space-3);
+    font-size: var(--font-size-xs);
+    line-height: 36px;
+  }
+}
+
+/* Tablet and above */
+@media (min-width: 480px) { /* breakpoint-sm */
+  .btn,
+  [role='button'] {
+    width: auto;
+    min-width: 80px;
+    padding: 0 var(--space-4);
+  }
+}
+
+/* Desktop and above */
+@media (min-width: 768px) { /* breakpoint-md */
+  .btn,
+  [role='button'] {
+    padding: 0 var(--space-5);
+    font-size: var(--font-size-base);
+  }
+}
+
+/*
+ * Button Variants - Refined Hierarchy
+ */
+
+/* Primary Button - Main CTA */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01em;
+  box-shadow: var(--box-shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Secondary Button - Secondary Actions */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-neutral-700);
+  border-color: var(--color-neutral-300);
+  font-weight: var(--font-weight-medium);
+  box-shadow: none;
+}
+
+/* Ghost Button - Tertiary Actions */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-neutral-700);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Success Button - Positive Actions */
+.btn-success {
+  background-color: var(--color-success);
+  color: var(--color-white);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Danger Button - Destructive Actions */
+.btn-danger {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Info Button - Informational Actions */
+.btn-info {
+  background-color: var(--color-info);
+  color: var(--color-white);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Warning Button - Caution Actions */
+.btn-warning {
+  background-color: var(--color-warning);
+  color: var(--color-white);
+  border-color: transparent;
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Text Button - Inline Actions */
+.btn-text {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: none;
+  padding: var(--space-1) var(--space-2);
+  min-height: auto;
+  width: auto;
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  box-shadow: none;
+  border-radius: var(--border-radius-sm);
+}
+
+/*
+ * Button Sizes - Consistent Scale
+ */
+
+/* Small Button */
+.btn-sm {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-xs);
+  line-height: 32px;
+  border-radius: var(--border-radius);
+}
+
+/* Large Button */
+.btn-lg {
+  min-height: 48px;
+  padding: 0 var(--space-6);
+  font-size: var(--font-size-lg);
+  line-height: 48px;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Icon Button */
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  min-width: unset;
+  border-radius: var(--border-radius-lg);
+}
+
+.btn-icon.btn-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius);
+}
+
+.btn-icon.btn-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-xl);
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: var(--breakpoint-xs)) {
+  .btn-sm {
+    min-height: 28px;
+    padding: 0 var(--space-2);
+    font-size: 11px;
+    line-height: 28px;
+  }
+
+  .btn-lg {
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    font-size: var(--font-size-base);
+    line-height: 44px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-icon.btn-sm {
+    width: 28px;
+    height: 28px;
+  }
+
+  .btn-icon.btn-lg {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/*
+ * Unified Hover System
+ * Consistent, elegant interactions
+ */
+@media (hover: hover) {
+  /* Primary buttons - Stripe-style subtle depth */
+  .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Secondary buttons - Minimal interaction */
+  .btn-secondary:hover {
+    background-color: var(--color-neutral-50);
+    border-color: var(--color-neutral-400);
+    color: var(--color-neutral-900);
+  }
+
+  /* Ghost buttons - Gentle background */
+  .btn-ghost:hover {
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-900);
+  }
+
+  /* Status buttons - Stripe-style depth on hover */
+  .btn-success:hover {
+    background-color: var(--color-success-dark);
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .btn-danger:hover {
+    background-color: var(--color-danger-dark);
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .btn-info:hover {
+    background-color: var(--color-info-dark);
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .btn-warning:hover {
+    background-color: var(--color-warning-dark);
+    box-shadow: var(--box-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* Text buttons - Underline animation */
+  .btn-text {
+    position: relative;
+  }
+
+  .btn-text::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-primary);
+    transition: width var(--transition-base);
+  }
+
+  .btn-text:hover {
+    color: var(--color-primary-dark);
+    background-color: transparent;
+  }
+
+  .btn-text:hover::after {
+    width: 100%;
+  }
+
+  /* Icon buttons - Rotate effect */
+  .btn-icon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Smooth hover transition for all buttons */
+  .btn:hover,
+  [role='button']:hover {
+    transition: var(--transition-smooth);
+  }
+}
+
+/*
+ * Focus States - Clean & Accessible
+ */
+.btn:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:focus-visible {
+  outline-color: var(--color-primary-dark);
+}
+
+.btn-secondary:focus-visible {
+  outline-color: var(--color-neutral-600);
+}
+
+.btn-ghost:focus-visible {
+  outline-color: var(--color-neutral-400);
+}
+
+.btn-success:focus-visible {
+  outline-color: var(--color-success);
+}
+
+.btn-danger:focus-visible {
+  outline-color: var(--color-danger);
+}
+
+.btn-info:focus-visible {
+  outline-color: var(--color-info);
+}
+
+.btn-warning:focus-visible {
+  outline-color: var(--color-warning);
+}
+
+.btn-text:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm);
+}
+
+/*
+ * Active States - Pressed Feedback
+ */
+.btn:active,
+button:active,
+[role="button"]:active {
+  transform: scale(0.98);
+  transition: transform var(--transition-fast);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(167, 43, 49, 0.2);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  background-color: var(--color-neutral-100);
+}
+
+.btn-ghost:active {
+  background-color: var(--color-neutral-200);
+}
+
+.btn-success:active,
+.btn-danger:active,
+.btn-info:active,
+.btn-warning:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-text:active {
+  background-color: var(--color-primary-lighter);
+  transform: none;
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+/*
+ * Disabled States - Clear Unavailability
+ */
+.btn:disabled,
+button:disabled,
+[role="button"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn:disabled:hover,
+button:disabled:hover,
+[role="button"]:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Specific disabled styles */
+.btn-primary:disabled,
+.btn-success:disabled,
+.btn-danger:disabled,
+.btn-info:disabled,
+.btn-warning:disabled {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-500);
+  border-color: transparent;
+}
+
+.btn-secondary:disabled,
+.btn-ghost:disabled {
+  background-color: transparent;
+  color: var(--color-neutral-400);
+  border-color: var(--color-neutral-200);
+}
+
+.btn-text:disabled {
+  background-color: transparent;
+  color: var(--color-neutral-400);
+}
+
+.btn-text:disabled::after {
+  display: none;
+}
+
+/* Loading state styles */
+.btn-loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin var(--animation-duration-base) linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

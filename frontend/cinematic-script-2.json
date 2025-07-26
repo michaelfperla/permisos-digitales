@@ -1,0 +1,287 @@
+{
+  "title": "LA HISTORIA DE MARÍA - A Personal Journey",
+  "duration": "60 seconds",
+  "style": "Intimate Documentary Drama",
+  "music": "Acoustic guitar with orchestral build",
+  
+  "protagonist": {
+    "name": "María",
+    "age": 32,
+    "occupation": "Madre trabajadora",
+    "motivation": "Needs permit for new job across town"
+  },
+  
+  "scenes": [
+    {
+      "id": 1,
+      "title": "THE OPPORTUNITY",
+      "duration": "6s",
+      "time": "Evening",
+      "shots": [
+        {
+          "type": "close-up",
+          "description": "María's face lit by phone screen, eyes widening with hope",
+          "dialogue": "¡Conseguí el trabajo!",
+          "emotion": "joy mixed with worry"
+        },
+        {
+          "type": "cutaway",
+          "description": "Job offer email on phone: 'Comenzar el lunes'",
+          "detail": "Today is Friday"
+        },
+        {
+          "type": "medium-shot",
+          "description": "María looks at sleeping children",
+          "internal-thought": "But I need the permit by Monday..."
+        }
+      ],
+      "color": "Warm indoor lighting, amber tones"
+    },
+    
+    {
+      "id": 2,
+      "title": "THE DILEMMA",
+      "duration": "8s",
+      "shots": [
+        {
+          "type": "montage",
+          "description": "María researching options",
+          "elements": [
+            "Google: 'oficina tránsito horarios' - CERRADO SÁBADO Y DOMINGO",
+            "Asking neighbor for advice",
+            "Looking at kids' school schedule",
+            "Checking bank account - can't afford to miss work"
+          ]
+        },
+        {
+          "type": "extreme-close-up",
+          "description": "Single tear, quickly wiped away",
+          "symbolism": "Strength in adversity"
+        }
+      ],
+      "music": "Tension building, minor chords"
+    },
+    
+    {
+      "id": 3,
+      "title": "THE DISCOVERY",
+      "duration": "7s",
+      "shots": [
+        {
+          "type": "over-shoulder",
+          "description": "Friend's WhatsApp message with link",
+          "text": "Mari! Mira esto - Permisos Digitales 24/7 📱",
+          "reaction": "Skeptical but curious"
+        },
+        {
+          "type": "POV-shot",
+          "description": "María exploring the website",
+          "UI_elements": [
+            "Simple, clear design",
+            "'Obtén tu permiso en minutos'",
+            "Testimonials from real users"
+          ]
+        },
+        {
+          "type": "close-up",
+          "description": "Hope returning to her eyes",
+          "lighting": "Screen glow creating halo effect"
+        }
+      ],
+      "sound": "Heartbeat, then calming music"
+    },
+    
+    {
+      "id": 4,
+      "title": "THE DECISION",
+      "duration": "5s",
+      "shots": [
+        {
+          "type": "wide-shot",
+          "description": "María at kitchen table, laptop open, kids playing nearby",
+          "time": "Saturday morning",
+          "atmosphere": "Determined, focused"
+        },
+        {
+          "type": "insert-shots",
+          "description": "Hands typing, filling forms",
+          "speed": "Confident, no hesitation"
+        },
+        {
+          "type": "reaction-shot",
+          "description": "Kids curious: '¿Qué haces, mamá?'",
+          "response": "Preparándome para mi nuevo trabajo"
+        }
+      ]
+    },
+    
+    {
+      "id": 5,
+      "title": "THE PROCESS",
+      "duration": "10s",
+      "type": "split-screen-montage",
+      "left_side": "María's Journey",
+      "right_side": "Traditional Way",
+      "comparisons": [
+        {
+          "digital": "Sipping coffee at home",
+          "traditional": "Standing in hot sun"
+        },
+        {
+          "digital": "Kids doing homework beside her",
+          "traditional": "Kids crying in line"
+        },
+        {
+          "digital": "Clicking 'submit'",
+          "traditional": "Wrong form, start over"
+        },
+        {
+          "digital": "Payment confirmed ✓",
+          "traditional": "Office closing, come Monday"
+        }
+      ],
+      "music": "Uplifting, rhythmic"
+    },
+    
+    {
+      "id": 6,
+      "title": "THE MOMENT",
+      "duration": "8s",
+      "shots": [
+        {
+          "type": "close-up",
+          "description": "Email notification arrives",
+          "sound": "Gentle chime"
+        },
+        {
+          "type": "slow-motion",
+          "description": "María's smile spreading",
+          "detail": "Kids notice mom's happiness"
+        },
+        {
+          "type": "POV",
+          "description": "Permit PDF on screen",
+          "text": "PERMISO OFICIAL - VÁLIDO 30 DÍAS"
+        },
+        {
+          "type": "wide-shot",
+          "description": "Family group hug",
+          "emotion": "Pure joy, relief"
+        }
+      ],
+      "lighting": "Golden hour through window"
+    },
+    
+    {
+      "id": 7,
+      "title": "THE NEW BEGINNING",
+      "duration": "8s",
+      "time": "Monday morning",
+      "shots": [
+        {
+          "type": "exterior-wide",
+          "description": "María driving to new job, sunrise",
+          "prop": "Permit visible on dashboard"
+        },
+        {
+          "type": "medium-shot",
+          "description": "Confident smile in rearview mirror",
+          "symbolism": "Looking forward, not back"
+        },
+        {
+          "type": "drone-shot",
+          "description": "Car merging into traffic flow",
+          "metaphor": "Joining the stream of progress"
+        }
+      ],
+      "music": "Triumphant, hopeful"
+    },
+    
+    {
+      "id": 8,
+      "title": "THE MESSAGE",
+      "duration": "8s",
+      "shots": [
+        {
+          "type": "text-on-black",
+          "text": "La historia de María es real.",
+          "timing": "2s hold"
+        },
+        {
+          "type": "testimonial-montage",
+          "description": "Quick cuts of different people",
+          "diversity": "Young, old, families, workers",
+          "common_element": "All holding permits, smiling"
+        },
+        {
+          "type": "center-frame",
+          "logo": "Permisos Digitales",
+          "tagline": "Tu tiempo vale. Tu familia importa.",
+          "CTA": "Únete a miles como María"
+        },
+        {
+          "type": "end-card",
+          "elements": [
+            "permisosdigitales.com.mx",
+            "WhatsApp button",
+            "Disponible 24/7"
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "visual_style": {
+    "cinematography": "Handheld for intimacy, stable for triumph",
+    "color_grading": {
+      "struggle": "Desaturated, blue tones",
+      "discovery": "Warming up gradually",
+      "success": "Warm, golden, saturated"
+    },
+    "lighting": {
+      "natural": "Window light, practicals",
+      "emotional": "Phone/laptop glow as hope metaphor"
+    }
+  },
+  
+  "sound_design": {
+    "ambient": [
+      "Children playing",
+      "Mexico City evening sounds",
+      "Morning birds for new beginning"
+    ],
+    "emotional_cues": [
+      "Heartbeat during stress",
+      "Breathing calming down",
+      "Children's laughter as motivation"
+    ],
+    "music_arc": "Solo guitar → String quartet → Full orchestra"
+  },
+  
+  "key_messages": [
+    "Real people, real struggles",
+    "Technology serving families",
+    "Time with family is precious",
+    "Opportunity shouldn't wait",
+    "We understand your life"
+  ],
+  
+  "cultural_elements": [
+    "WhatsApp as primary communication",
+    "Family-centered decision making",
+    "Kitchen table as heart of home",
+    "Community support (friend's message)",
+    "Work ethic and determination"
+  ],
+  
+  "emotional_journey": [
+    {"beat": "Hope", "scene": 1},
+    {"beat": "Despair", "scene": 2},
+    {"beat": "Curiosity", "scene": 3},
+    {"beat": "Determination", "scene": 4},
+    {"beat": "Confidence", "scene": 5},
+    {"beat": "Joy", "scene": 6},
+    {"beat": "Pride", "scene": 7},
+    {"beat": "Community", "scene": 8}
+  ]
+}

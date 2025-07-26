@@ -1,0 +1,244 @@
+.pageWrapper {
+  composes: pageWrapper from './PermitDetailsPage.module.css';
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-primary-light);
+  width: 100%;
+  background-color: var(--color-neutral-50);
+  padding: var(--space-4);
+  border-radius: var(--border-radius-lg);
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--color-primary-dark);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-white);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius);
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  min-height: 44px;
+}
+
+.backButton:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.2);
+}
+
+.statusInstructionsPanel {
+  composes: statusInstructionsPanel from './PermitDetailsPage.module.css';
+}
+
+.statusInstructionsTitle {
+  composes: statusInstructionsTitle from './PermitDetailsPage.module.css';
+}
+
+.statusInstructionsIcon {
+  composes: statusInstructionsIcon from './PermitDetailsPage.module.css';
+}
+
+.statusInstructionsContent {
+  composes: statusInstructionsContent from './PermitDetailsPage.module.css';
+}
+
+.oxxoReferenceContainer {
+  composes: oxxoReferenceContainer from './PermitDetailsPage.module.css';
+}
+
+.oxxoPaymentDetails {
+  composes: oxxoPaymentDetails from './PermitDetailsPage.module.css';
+}
+
+.oxxoPaymentItem {
+  composes: oxxoPaymentItem from './PermitDetailsPage.module.css';
+}
+
+.oxxoPaymentLabel {
+  composes: oxxoPaymentLabel from './PermitDetailsPage.module.css';
+}
+
+.oxxoPaymentValue {
+  composes: oxxoPaymentValue from './PermitDetailsPage.module.css';
+}
+
+.infoValue {
+  composes: infoValue from './PermitDetailsPage.module.css';
+}
+
+.copyButton {
+  composes: copyButton from './PermitDetailsPage.module.css';
+}
+
+.copyButtonIcon {
+  composes: copyButtonIcon from './PermitDetailsPage.module.css';
+}
+
+.paymentStatusCard {
+  composes: paymentStatusCard from './PermitDetailsPage.module.css';
+}
+
+.paymentStatusMessage {
+  composes: paymentStatusMessage from './PermitDetailsPage.module.css';
+}
+
+.primaryActionButton {
+  composes: primaryActionButton from './PermitDetailsPage.module.css';
+}
+
+/* Specific to OXXO confirmation page */
+.voucherCard {
+  margin-top: var(--space-4);
+}
+
+.voucherCard .cardBody {
+  padding: var(--space-4);
+}
+
+.voucherContainer {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: white;
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.voucherIframe {
+  width: 100%;
+  height: 400px;
+  border: none;
+  border-radius: var(--border-radius);
+}
+
+.voucherHeader {
+  margin-top: 0;
+}
+
+.voucherIcon {
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.voucherDescription {
+  margin-bottom: var(--space-3);
+  color: var(--color-neutral-600);
+}
+
+.introText {
+  margin-bottom: var(--space-4);
+}
+
+.referenceValueContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.referenceNumber {
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+.amountValue {
+  color: var(--color-success);
+  font-size: 1.5rem;
+}
+
+.expirationContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.expirationIcon {
+  color: var(--color-warning);
+}
+
+.warningCard {
+  margin-top: var(--space-4);
+  background-color: rgb(var(--color-warning-rgb), 0.05);
+  border-color: var(--color-warning-light);
+}
+
+.warningIcon {
+  color: var(--color-warning);
+  font-size: 1.5rem;
+}
+
+.warningTitle {
+  font-weight: var(--font-weight-semibold);
+}
+
+.warningText {
+  font-weight: normal;
+  margin-top: 0.5rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Processing time notification card */
+.processingTimeCard {
+  margin-top: var(--space-4);
+  background-color: rgba(var(--color-info-rgb, 59, 130, 246), 0.05);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.processingIcon {
+  color: rgb(59, 130, 246);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.processingTitle {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
+  margin: 0 0 0.5rem 0;
+}
+
+.processingText {
+  font-weight: normal;
+  color: var(--color-neutral-700);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.processingText strong {
+  color: rgb(59, 130, 246);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Mobile responsive action buttons */
+@media (max-width: 640px) {
+  .actionButtons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

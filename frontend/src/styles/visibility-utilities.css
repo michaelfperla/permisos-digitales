@@ -1,0 +1,141 @@
+/*
+ * Visibility Utilities
+ * Consolidated responsive visibility classes for showing/hiding elements at different breakpoints
+ */
+
+/*
+ * Simple hide/show utilities
+ */
+.hidden {
+  display: none !important;
+}
+
+.hidden-xs {
+  display: none;
+}
+
+@media (min-width: var(--breakpoint-sm)) {
+  .hidden-xs {
+    display: block;
+  }
+}
+
+/*
+ * Hide at specific breakpoints and below
+ * These classes hide elements at the specified breakpoint and smaller screens
+ */
+
+/* Hide at extra small devices (360px) and below */
+.hide-xs-down {
+  display: block; /* Default: visible */
+}
+
+@media (max-width: var(--breakpoint-xs)) {
+  .hide-xs-down {
+    display: none !important;
+  }
+}
+
+/* Hide at small devices (480px) and below */
+.hide-sm-down {
+  display: block;
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .hide-sm-down {
+    display: none !important;
+  }
+}
+
+/* Hide at medium devices (768px) and below */
+.hide-md-down {
+  display: block;
+}
+
+@media (max-width: var(--breakpoint-md)) {
+  .hide-md-down {
+    display: none !important;
+  }
+}
+
+/* Hide at large devices (1024px) and below */
+.hide-lg-down {
+  display: block;
+}
+
+@media (max-width: var(--breakpoint-lg)) {
+  .hide-lg-down {
+    display: none !important;
+  }
+}
+
+/* Hide at extra large devices (1200px) and below */
+.hide-xl-down {
+  display: block;
+}
+
+@media (max-width: var(--breakpoint-xl)) {
+  .hide-xl-down {
+    display: none !important;
+  }
+}
+
+/*
+ * Show only at specific breakpoints and below
+ * These classes show elements only at the specified breakpoint and smaller screens
+ */
+
+/* Show only at extra small devices (360px) and below */
+.show-xs-down {
+  display: none; /* Default: hidden */
+}
+
+@media (max-width: var(--breakpoint-xs)) {
+  .show-xs-down {
+    display: block !important;
+  }
+}
+
+/* Show only at small devices (480px) and below */
+.show-sm-down {
+  display: none;
+}
+
+@media (max-width: var(--breakpoint-sm)) {
+  .show-sm-down {
+    display: block !important;
+  }
+}
+
+/* Show only at medium devices (768px) and below */
+.show-md-down {
+  display: none;
+}
+
+@media (max-width: var(--breakpoint-md)) {
+  .show-md-down {
+    display: block !important;
+  }
+}
+
+/* Show only at large devices (1024px) and below */
+.show-lg-down {
+  display: none;
+}
+
+@media (max-width: var(--breakpoint-lg)) {
+  .show-lg-down {
+    display: block !important;
+  }
+}
+
+/* Show only at extra large devices (1200px) and below */
+.show-xl-down {
+  display: none;
+}
+
+@media (max-width: var(--breakpoint-xl)) {
+  .show-xl-down {
+    display: block !important;
+  }
+}

@@ -1,0 +1,454 @@
+/* UserLayout.module.css */
+.userLayout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-neutral-100);
+  overflow-x: hidden;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 40%);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.overlayVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--color-neutral-900);
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease;
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  z-index: var(--z-modal);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar:not(.mobile) {
+  left: 0;
+  transform: translateX(0);
+}
+
+.sidebar:not(.mobile, .open) {
+  width: 60px;
+}
+
+.sidebar.mobile {
+  left: auto;
+  right: 0;
+  width: 280px;
+  max-width: 85vw;
+  transform: translateX(100%);
+  box-shadow: -2px 0 12px rgb(0 0 0 / 10%);
+  /* Ensure mobile sidebar maintains dark theme */
+  background-color: var(--color-neutral-900);
+  color: var(--color-white);
+}
+
+.sidebar.mobile.open {
+  transform: translateX(0);
+}
+
+.sidebarHeader {
+  padding: 0 var(--space-3);
+  height: var(--mobile-header-height, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.panelLogoContainerInSidebar {
+  display: flex;
+  align-items: center;
+}
+
+.sidebarPanelCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-300);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.sidebarPanelCloseButton:hover {
+  background-color: rgb(255 255 255 / 10%);
+  color: var(--color-white);
+}
+
+.sidebarPanelCloseButton:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.sidebar:not(.mobile) .sidebarLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.textLogoInSidebar {
+  /* New class if needed for specific styling of TextLogo in this sidebar */
+
+  /* Example:
+    font-size: 1.1rem !important; 
+    */
+}
+
+.sidebar:not(.mobile) .sidebarHeader .textLogoInSidebar {
+  /* Target specific TextLogo instance */
+  color: var(--color-white);
+  font-size: 1.25rem;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) {
+  transform: scale(0.8);
+  width: 40px;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar:not(.initialsLogo) .secondWord {
+  display: none;
+}
+
+.sidebar:not(.mobile, .open) .sidebarHeader .textLogoInSidebar.initialsLogo {
+  font-size: 1.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebarUser {
+  padding: var(--space-3);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  flex-shrink: 0;
+  /* Ensure proper text colors */
+  color: var(--color-white);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 70%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebarNav {
+  flex-grow: 1;
+  padding: var(--space-2) 0;
+  overflow-y: auto;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  color: rgb(255 255 255 / 80%);
+  text-decoration: none;
+  transition: all 0.15s ease;
+  min-height: 44px;
+  margin: 0 var(--space-2) var(--space-1);
+  border-radius: var(--border-radius-sm);
+}
+
+.navLink:hover {
+  background-color: rgb(255 255 255 / 10%);
+  color: var(--color-white);
+}
+
+.navLink.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Navigation icon styling */
+.navIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-3);
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 1.1rem;
+}
+
+.navText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
+.sidebar:not(.mobile, .open) .navText,
+.sidebar:not(.mobile, .open) .userInfo,
+.sidebar:not(.mobile, .open) .logoutText {
+  display: none;
+}
+
+.sidebar:not(.mobile, .open) .sidebarUser {
+  padding: 0;
+  border-bottom: none;
+  height: 0;
+  overflow: hidden;
+}
+
+.sidebar:not(.mobile, .open) .navLink {
+  justify-content: center;
+  padding: var(--space-3) 0;
+  margin: 0 auto var(--space-1);
+  width: 40px;
+  height: 40px;
+}
+
+.sidebar:not(.mobile, .open) .navIcon :global(svg),
+.sidebar:not(.mobile, .open) .navIcon {
+  margin-right: 0;
+  font-size: 1.3rem;
+}
+
+.sidebarFooter {
+  padding: var(--space-3);
+  padding-bottom: calc(var(--space-3) + var(--safe-area-inset-bottom));
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  margin-top: auto;
+  flex-shrink: 0;
+  background-color: rgb(0 0 0 / 10%);
+}
+
+.footerActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sidebar:not(.mobile, .open) .sidebarFooter {
+  padding: var(--space-2);
+  background-color: transparent;
+}
+
+.sidebar:not(.mobile, .open) .footerActions {
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logoutButton {
+  width: 100%;
+  justify-content: center;
+}
+
+.sidebar:not(.mobile, .open) .logoutButton {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+/* Ensure icon inside button is centered when text is hidden */
+.sidebar:not(.mobile, .open) .logoutButton :global(.buttonIcon) {
+  margin: 0 !important; /* Override Button.tsx default margin for icon */
+}
+
+.sidebar:not(.mobile, .open) .logoutButton :global(.buttonContent) {
+  gap: 0 !important; /* Remove gap for icon-only button */
+}
+
+.sidebarToggleButton {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid rgb(255 255 255 / 20%);
+  color: rgb(255 255 255 / 60%);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: var(--border-radius-sm);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebarToggleButton:hover {
+  background-color: rgb(255 255 255 / 5%);
+  border-color: rgb(255 255 255 / 40%);
+  color: var(--color-white);
+}
+
+.sidebar:not(.mobile, .open) .sidebarToggleButton {
+  margin-bottom: var(--space-3);
+}
+
+.mainContent {
+  flex: 1;
+  padding: var(--space-4);
+  background-color: var(--color-neutral-100);
+  transition: margin-left 0.3s ease;
+  margin-left: 250px;
+}
+
+.mainContent.expanded {
+  margin-left: 60px;
+}
+
+.mobileContentPadded {
+  margin-left: 0;
+  padding: var(--space-4);
+  padding-top: calc(var(--mobile-header-height, 56px) + var(--space-4) + var(--safe-area-inset-top));
+  padding-bottom: calc(var(--space-4) + var(--safe-area-inset-bottom));
+}
+
+@media (width <= 768px) {
+  .mainContent {
+    margin-left: 0;
+  }
+}
+
+@media (width <= 480px) {
+  .mainContent,
+  .mobileContentPadded {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+    padding-bottom: calc(var(--space-3) + var(--safe-area-inset-bottom));
+  }
+
+  .mobileContentPadded {
+    padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-3) + var(--safe-area-inset-top));
+  }
+
+  .sidebar.mobile {
+    width: 260px;
+  }
+
+  .sidebarHeader,
+  .sidebarUser,
+  .sidebarFooter {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .navLink {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  /* Ensure mobile sidebar maintains proper text colors and layout */
+  .sidebar.mobile .navLink {
+    color: rgb(255 255 255 / 80%);
+    display: flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .sidebar.mobile .navLink:hover {
+    background-color: rgb(255 255 255 / 10%);
+    color: var(--color-white);
+  }
+
+  .sidebar.mobile .navLink.active {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+  
+  .sidebar.mobile .navIcon {
+    margin-right: 0;
+  }
+  
+  /* Mobile footer specific styling */
+  .sidebar.mobile .sidebarFooter {
+    padding: var(--space-4) var(--space-3);
+    background-color: transparent;
+    border-top: 2px solid rgb(255 255 255 / 15%);
+  }
+  
+  .sidebar.mobile .footerActions {
+    gap: var(--space-2); /* Maintain some spacing for better touch targets */
+  }
+
+  /* Ensure logout button has proper touch target size on mobile */
+  .sidebar.mobile .logoutButton {
+    min-height: 48px; /* Increased for better touch accessibility */
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .userName {
+    font-size: 0.85rem;
+  }
+
+  .userEmail {
+    font-size: 0.75rem;
+  }
+
+  .navText {
+    font-size: 0.85rem;
+  }
+}
+
+@media (width <= 360px) {
+  .mainContent,
+  .mobileContentPadded {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    padding-bottom: calc(var(--space-2) + var(--safe-area-inset-bottom));
+  }
+
+  .mobileContentPadded {
+    padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-2) + var(--safe-area-inset-top));
+  }
+
+  /* Ensure logout button remains accessible on very small screens */
+  .sidebar.mobile .logoutButton {
+    min-height: 44px; /* WCAG minimum touch target */
+    font-size: 0.9rem; /* Ensure text remains readable */
+  }
+}

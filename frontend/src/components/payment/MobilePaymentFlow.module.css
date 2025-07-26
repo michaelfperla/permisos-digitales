@@ -1,0 +1,504 @@
+/* Mobile-First Payment Flow Design */
+
+.paymentContainer {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-neutral-100);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Progress header */
+.progressHeader {
+  background: var(--color-white);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.progressStep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.progressStep:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--color-neutral-300);
+  z-index: -1;
+}
+
+.progressStep.completed:not(:last-child)::after {
+  background: var(--color-success);
+}
+
+.stepCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-neutral-300);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  transition: all 0.3s ease;
+}
+
+.progressStep.active .stepCircle {
+  background: var(--color-primary);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.3);
+}
+
+.progressStep.completed .stepCircle {
+  background: var(--color-success);
+}
+
+.stepLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin-top: var(--space-2);
+  text-align: center;
+}
+
+.progressStep.active .stepLabel {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Payment content */
+.paymentContent {
+  flex: 1;
+  padding: var(--space-5);
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Amount display */
+.amountCard {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.amountLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin-bottom: var(--space-2);
+}
+
+.amountValue {
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.amountCurrency {
+  font-size: 0.6em;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-neutral-600);
+  margin-left: var(--space-1);
+}
+
+/* Payment methods */
+.paymentMethods {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: var(--space-5);
+}
+
+.methodOption {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  border: none;
+  background: none;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 72px;
+}
+
+.methodOption:not(:last-child) {
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.methodOption:hover {
+  background: var(--color-neutral-100);
+}
+
+.methodOption:active {
+  transform: scale(0.98);
+}
+
+.methodOption.selected {
+  background: var(--color-primary-lightest);
+  border-color: var(--color-primary);
+}
+
+.methodOption.selected::after {
+  content: '✓';
+  position: absolute;
+  right: var(--space-5);
+  color: var(--color-primary);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.methodIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-neutral-100);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-4);
+  font-size: 1.5rem;
+  color: var(--color-neutral-700);
+}
+
+.methodOption.selected .methodIcon {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.methodInfo {
+  flex: 1;
+  text-align: left;
+}
+
+.methodName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-1);
+}
+
+.methodDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+/* Card input form */
+.cardForm {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: var(--space-5);
+}
+
+.cardInputGroup {
+  margin-bottom: var(--space-4);
+}
+
+.cardInputLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-2);
+}
+
+.cardInput {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-lg);
+  border: 2px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-lg);
+  background: var(--color-white);
+  transition: all 0.2s ease;
+  
+  /* Prevent zoom on iOS */
+  font-size: 16px;
+}
+
+.cardInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(167, 43, 49, 0.1);
+}
+
+.cardInput.error {
+  border-color: var(--color-danger);
+}
+
+/* Card preview */
+.cardPreview {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto var(--space-5);
+  aspect-ratio: 1.586;
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--color-white);
+  box-shadow: 0 8px 24px rgba(167, 43, 49, 0.3);
+  transform: perspective(1000px) rotateY(0deg);
+  transition: transform 0.6s ease;
+}
+
+.cardPreview.flipped {
+  transform: perspective(1000px) rotateY(180deg);
+}
+
+.cardChip {
+  width: 50px;
+  height: 40px;
+  background: var(--color-accent);
+  border-radius: var(--border-radius);
+  opacity: 0.8;
+}
+
+.cardNumber {
+  font-size: clamp(1rem, 4vw, 1.25rem);
+  letter-spacing: 0.2em;
+  margin: var(--space-4) 0;
+  font-family: var(--font-family-mono);
+}
+
+.cardDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cardHolder {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.cardExpiry {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-mono);
+}
+
+/* Trust signals */
+.trustSignals {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.trustBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+.trustBadge svg {
+  color: var(--color-success);
+  font-size: 1.25rem;
+}
+
+/* Action buttons */
+.paymentActions {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-white);
+  padding: var(--space-5);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  margin: 0 calc(var(--space-5) * -1);
+}
+
+.payButton {
+  width: 100%;
+  padding: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.payButton:not(:disabled):hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.2);
+}
+
+.payButton:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.payButton:disabled {
+  background: var(--color-neutral-400);
+  cursor: not-allowed;
+}
+
+.payButton.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-white);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin var(--animation-duration-fast) linear infinite;
+}
+
+/* Success animation */
+.successAnimation {
+  position: fixed;
+  inset: 0;
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+.successIcon {
+  width: 100px;
+  height: 100px;
+  background: var(--color-success);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  font-size: 3rem;
+  margin-bottom: var(--space-6);
+  animation: scaleIn 0.5s ease;
+}
+
+.successTitle {
+  font-size: var(--font-size-fluid-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-3);
+}
+
+.successMessage {
+  font-size: var(--font-size-lg);
+  color: var(--color-neutral-600);
+  text-align: center;
+  margin: 0 0 var(--space-6);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+}
+
+/* Tablet and desktop adjustments */
+@media (min-width: 768px) {
+  .paymentContainer {
+    background: var(--color-neutral-100);
+    padding: var(--space-6);
+  }
+  
+  .paymentContent {
+    background: var(--color-white);
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    padding: var(--space-8);
+  }
+  
+  .progressHeader {
+    border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+  }
+  
+  .paymentActions {
+    margin: 0;
+    border-radius: 0 0 var(--border-radius-xl) var(--border-radius-xl);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .paymentContainer {
+    background: var(--color-neutral-900);
+  }
+  
+  .progressHeader,
+  .amountCard,
+  .paymentMethods,
+  .cardForm,
+  .paymentActions {
+    background: var(--color-neutral-800);
+  }
+  
+  .methodOption:hover {
+    background: var(--color-neutral-700);
+  }
+  
+  .cardInput {
+    background: var(--color-neutral-700);
+    border-color: var(--color-neutral-600);
+    color: var(--color-white);
+}
+}
+}
+}
+}
+}

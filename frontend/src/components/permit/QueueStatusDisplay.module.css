@@ -1,0 +1,274 @@
+/* QueueStatusDisplay.module.css */
+.queueStatus {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.queueStatus.queued {
+  border-color: var(--color-info);
+}
+
+.queueStatus.processing {
+  border-color: var(--color-warning);
+  background-color: var(--color-warning-light);
+}
+
+.queueStatus.completed {
+  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.queueStatus.failed {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.statusIcon {
+  font-size: 1.5rem;
+}
+
+.statusTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.statusContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.queueInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border-radius: 6px;
+}
+
+.position,
+.waitTime {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.positionLabel,
+.waitLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.positionNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.waitValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.processingAnimation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bg-primary);
+  border-radius: 6px;
+}
+
+.processingAnimation span {
+  font-weight: 500;
+  color: var(--color-warning-dark);
+}
+
+.tip {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 0.75rem;
+  background-color: var(--bg-info-light);
+  border-radius: 6px;
+  border-left: 3px solid var(--color-info);
+}
+
+/* Error state */
+.queueStatus.error {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+/* Loading state */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.loadingText {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Error display */
+.errorMessage {
+  color: var(--color-danger-dark);
+  font-weight: 500;
+  margin: 0;
+}
+
+.retryInfo {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+}
+
+.errorActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Header actions */
+.statusHeader {
+  position: relative;
+}
+
+.statusActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.refreshButton,
+.pollingToggle {
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover,
+.pollingToggle:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--color-primary);
+}
+
+/* Error banner within content */
+.errorBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-danger-light);
+  border: 1px solid var(--color-danger);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.errorText {
+  color: var(--color-danger-dark);
+  font-size: 0.875rem;
+  margin: 0;
+  flex: 1;
+}
+
+.retryBadge {
+  background-color: var(--color-danger);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Last update info */
+.lastUpdate {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.lastUpdateLabel {
+  font-weight: 500;
+}
+
+.lastUpdateTime {
+  font-family: monospace;
+  color: var(--text-primary);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .queueStatus {
+    padding: 1rem;
+  }
+
+  .queueInfo {
+    gap: 1rem;
+  }
+
+  .positionNumber {
+    font-size: 1.25rem;
+  }
+
+  .waitValue {
+    font-size: 1rem;
+  }
+
+  .statusHeader {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .statusActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .errorBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .retryBadge {
+    align-self: flex-end;
+  }
+}

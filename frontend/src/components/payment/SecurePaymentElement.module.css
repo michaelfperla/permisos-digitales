@@ -1,0 +1,334 @@
+/* Secure Payment Element Styles */
+.paymentContainer {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--bs-white);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -1px rgb(0 0 0 / 6%);
+}
+
+/* Security Notice */
+.securityNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.securityIcon {
+  color: #0ea5e9;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.securityText h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.securityText p {
+  margin: 0;
+  font-size: 13px;
+  color: #075985;
+  line-height: 1.4;
+}
+
+/* Error Container */
+.errorContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #f87171;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.errorIcon {
+  color: #dc2626;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.errorMessage {
+  margin: 0;
+  font-size: 14px;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+/* Payment Form */
+.paymentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardInputSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cardInputTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bs-gray-800);
+  margin: 0 0 8px 0;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.inputLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bs-gray-700);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inputHelp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bs-gray-200);
+  color: var(--bs-gray-600);
+  font-size: 11px;
+  cursor: help;
+  margin-left: 4px;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.stripeInput {
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: var(--bs-white);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.stripeInput:hover {
+  border-color: #c0c0c0;
+}
+
+.stripeInput:focus-within {
+  border-color: var(--rojo);
+  box-shadow: 0 0 0 3px rgba(193, 0, 0, 0.1);
+}
+
+.stripeInput.StripeElement--invalid {
+  border-color: #e5424d;
+}
+
+.stripeInput.StripeElement--complete {
+  border-color: #10b981;
+}
+
+.cardBrand {
+  position: absolute;
+  right: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bs-gray-500);
+  background: var(--bs-white);
+  padding: 0 4px;
+}
+
+.inputRow {
+  display: flex;
+  gap: 16px;
+}
+
+.postalInput {
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: var(--bs-white);
+  font-size: 16px;
+  color: #424770;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 150px;
+}
+
+.postalInput::placeholder {
+  color: #aab7c4;
+}
+
+.postalInput:hover {
+  border-color: #c0c0c0;
+}
+
+.postalInput:focus {
+  border-color: var(--rojo);
+  box-shadow: 0 0 0 3px rgba(193, 0, 0, 0.1);
+  outline: none;
+}
+
+.securityInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bs-gray-50);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--bs-gray-600);
+  margin-top: 8px;
+}
+
+.securityInfo svg {
+  color: var(--bs-success);
+}
+
+/* Submit Button */
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  min-height: 52px;
+  transition: all 0.2s ease;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.loadingContainer p {
+  margin: 16px 0 0 0;
+  color: var(--bs-gray-600);
+  font-size: 14px;
+}
+
+.loadingSpinner,
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin var(--animation-duration-base) linear infinite;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  color: var(--rojo);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+  .paymentContainer {
+    margin: 0;
+    padding: 16px;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid var(--bs-gray-200);
+  }
+
+  .securityNotice,
+  .errorContainer {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .securityText h4 {
+    font-size: 13px;
+  }
+
+  .securityText p {
+    font-size: 12px;
+  }
+
+  .errorMessage {
+    font-size: 13px;
+  }
+
+  .submitButton {
+    padding: 14px 20px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .cardInputTitle {
+    font-size: 16px;
+  }
+
+  .inputRow {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .postalInput {
+    max-width: 100%;
+  }
+
+  .securityInfo {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .securityNotice {
+    background: var(--bs-white);
+    border-width: 2px;
+  }
+
+  .errorContainer {
+    background: var(--bs-white);
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .loadingSpinner {
+    animation: none;
+  }
+
+  .submitButton {
+    transition: none;
+  }
+}

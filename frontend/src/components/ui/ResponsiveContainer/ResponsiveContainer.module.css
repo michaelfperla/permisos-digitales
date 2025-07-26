@@ -1,0 +1,78 @@
+/* ResponsiveContainer styles */
+
+/* Base container styles */
+.fixed,
+.fluid {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+}
+
+/* Fixed width container with max-width at breakpoints */
+.fixed {
+  width: 100%;
+}
+
+/* Fluid width container (always 100% with padding) */
+.fluid {
+  width: 100%;
+}
+
+/* Container with responsive padding */
+.withPadding {
+  padding-left: var(--space-fluid-3);
+  padding-right: var(--space-fluid-3);
+}
+
+/* Max width variants for fixed containers */
+.maxSM {
+  max-width: 540px;
+}
+
+.maxMD {
+  max-width: 720px;
+}
+
+.maxLG {
+  max-width: 960px;
+}
+
+.maxXL {
+  max-width: 1140px;
+}
+
+.maxXXL {
+  max-width: 1200px;
+}
+
+/* Responsive adjustments */
+@media (width <= 768px) {
+  .withPadding {
+    padding-left: var(--space-fluid-2);
+    padding-right: var(--space-fluid-2);
+  }
+}
+
+@media (width <= 480px) {
+  .withPadding {
+    padding-left: var(--space-fluid-2);
+    padding-right: var(--space-fluid-2);
+  }
+}
+
+@media (width <= 360px) {
+  .withPadding {
+    padding-left: var(--space-fluid-1);
+    padding-right: var(--space-fluid-1);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .fluid,
+  .fixed {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

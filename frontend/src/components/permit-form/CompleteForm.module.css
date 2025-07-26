@@ -1,0 +1,1463 @@
+/* CompleteForm.module.css - A comprehensive, user-friendly form design */
+
+/* Removed duplicate CSS variables - now using design system variables directly */
+
+/* Main Container */
+.formContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+}
+
+/* Breadcrumbs styles */
+.breadcrumbs {
+  margin-bottom: var(--space-4);
+}
+
+/* Form Header */
+.formHeader {
+  text-align: left;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-neutral-300);
+}
+
+.formTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin-bottom: var(--space-1);
+}
+
+.formSubtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+}
+
+/* Form Layout */
+.formLayout {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.confirmationLayout {
+  padding-top: var(--space-4);
+}
+
+.formMain {
+  flex: 1;
+}
+
+.formSidebar {
+  width: 300px;
+  position: sticky;
+  top: var(--space-6);
+  align-self: flex-start;
+  height: fit-content;
+}
+
+/* Step Indicator */
+.stepIndicator {
+  display: flex;
+  margin-bottom: var(--space-8);
+  position: relative;
+  z-index: 1;
+}
+
+.stepIndicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px; /* Thinner line */
+  background-color: var(--color-neutral-300, #dee2e6); /* Lighter color */
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 0 var(--space-2);
+}
+
+.stepMarker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-300); /* Thinner border */
+  color: var(--color-neutral-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%); /* Subtle shadow */
+  transition: all var(--transition-base);
+}
+
+.stepLabel {
+  font-size: 0.8rem;
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: all var(--transition-base);
+}
+
+.stepActive .stepMarker {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgb(167 43 49 / 20%); /* Enhanced shadow for active step */
+}
+
+.stepActive .stepLabel {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.stepCompleted .stepMarker {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+  box-shadow: 0 1px 4px rgb(92 184 92 / 20%); /* Subtle shadow for completed step */
+}
+
+.stepCompleted .stepLabel {
+  color: var(--color-success);
+}
+
+/* Form Sections */
+.formSection {
+  background-color: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--box-shadow-sm);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.formSection:hover {
+  box-shadow: 0 4px 12px var(--box-shadow-sm);
+}
+
+.formSectionHeader {
+  padding: 1rem 1.25rem;
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-neutral-300);
+  display: flex;
+  align-items: center;
+}
+
+.formSectionIcon {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  margin-right: 0.75rem;
+}
+
+.formSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0;
+  flex: 1;
+}
+
+.formSectionContent {
+  padding: 1.25rem;
+}
+
+/* Form Fields */
+.formFields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.formGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin-bottom: 0.4rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem 1rem; /* Increased padding for better touch targets */
+  font-size: 0.95rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  transition: all var(--transition-base);
+  min-height: 44px; /* Minimum height for touch targets */
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 10%);
+}
+
+.formInput.invalid {
+  border-color: var(--color-danger);
+}
+
+.formInput.valid {
+  border-color: var(--color-success);
+}
+
+.validationIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.validIcon {
+  color: var(--color-success);
+  font-size: 1.1rem;
+}
+
+.invalidIcon {
+  color: var(--color-danger);
+  font-size: 1.1rem;
+}
+
+.formHelperText {
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+  margin-top: 0.35rem;
+}
+
+.formErrorText {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  margin-top: 0.35rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  background-color: rgb(220 53 69 / 10%);
+  border: 1px solid var(--color-danger);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.errorText {
+  color: var(--color-danger);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-neutral-200);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.inputWithIcon {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+  font-size: 1rem;
+  opacity: 0.8;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.inputWithIcon .formInput {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Quick Select Buttons */
+.quickSelectContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.quickSelectButton {
+  background-color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-neutral-900);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.quickSelectButton:hover {
+  background-color: rgb(167 43 49 / 10%);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.quickSelectActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* Form Navigation */
+.formNavigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.formButton {
+  padding: 0.75rem 1.5rem; /* Increased padding for better touch targets */
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content horizontally */
+  border: none;
+  transition: all var(--transition-base);
+  min-height: 44px; /* Minimum height for touch targets */
+  min-width: 44px; /* Minimum width for touch targets */
+}
+
+.buttonPrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.buttonPrimary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.buttonSecondary {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+  border: 1px solid var(--color-neutral-300);
+}
+
+.buttonSecondary:hover {
+  background-color: #e9ecef;
+}
+
+.buttonSuccess {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.buttonSuccess:hover {
+  background-color: #4cae4c;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+}
+
+.buttonIconRight {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Summary Card */
+.summaryCard {
+  background-color: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--box-shadow-sm);
+  padding: 1.25rem;
+}
+
+.summaryTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+  display: flex;
+  align-items: center;
+}
+
+.summaryIcon {
+  margin-right: 0.5rem;
+  color: var(--color-primary);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.summaryLabel {
+  color: var(--color-neutral-600);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.summaryProgress {
+  margin-top: 1rem;
+}
+
+.progressBar {
+  height: 6px;
+  background-color: var(--color-neutral-300);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+  transition: width var(--transition-base);
+  width: 0%; /* Default width */
+}
+
+/* Progress fill width classes */
+.progressFill0 {
+  width: 0%;
+}
+
+.progressFill10 {
+  width: 10%;
+}
+
+.progressFill20 {
+  width: 20%;
+}
+
+.progressFill30 {
+  width: 30%;
+}
+
+.progressFill40 {
+  width: 40%;
+}
+
+.progressFill50 {
+  width: 50%;
+}
+
+.progressFill60 {
+  width: 60%;
+}
+
+.progressFill70 {
+  width: 70%;
+}
+
+.progressFill80 {
+  width: 80%;
+}
+
+.progressFill90 {
+  width: 90%;
+}
+
+.progressFill100 {
+  width: 100%;
+}
+
+.summarySteps {
+  margin-top: 1.5rem;
+}
+
+.summaryStep {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.summaryStepIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.summaryStepActive .summaryStepIcon {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.summaryStepCompleted .summaryStepIcon {
+  background-color: var(--color-success);
+  color: white;
+}
+
+.summaryStepText {
+  flex: 1;
+  color: var(--color-neutral-600);
+}
+
+.summaryStepActive .summaryStepText {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.summaryStepCompleted .summaryStepText {
+  color: var(--color-success);
+}
+
+.summaryStepEdit {
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.summaryStep:hover .summaryStepEdit {
+  opacity: 1;
+}
+
+/* Introduction Section */
+.introSection {
+  background-color: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--box-shadow-sm);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.introTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.introIcon {
+  margin-right: 0.75rem;
+  color: var(--color-primary);
+}
+
+.introText {
+  font-size: 0.95rem;
+  color: var(--color-neutral-900);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.introList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.introListItem {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--color-neutral-900);
+}
+
+.introListIcon {
+  color: var(--color-primary);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* Review Section */
+.reviewSection {
+  margin-bottom: 1.5rem;
+}
+
+.reviewSectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-neutral-300);
+  display: flex;
+  align-items: center;
+}
+
+.reviewSectionIcon {
+  margin-right: 0.75rem;
+  color: var(--color-primary);
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.reviewItem {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  background-color: var(--color-neutral-100);
+  border-radius: 4px;
+}
+
+.reviewItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.reviewLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-neutral-600);
+  margin-bottom: 0.25rem;
+}
+
+.reviewValue {
+  font-size: 0.95rem;
+  color: var(--color-neutral-900);
+  font-weight: 500;
+}
+
+.reviewEdit {
+  align-self: flex-end;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.reviewEditIcon {
+  margin-right: 0.25rem;
+}
+
+/* Confirmation Section */
+.confirmationSection {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--box-shadow-sm);
+  max-width: 800px;
+  margin: 2rem auto 0;
+}
+
+.confirmationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.confirmationHeader.confirmationHeaderError {
+  color: var(--color-danger);
+}
+
+.confirmationIcon {
+  font-size: 2.5rem;
+  color: var(--color-success);
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.confirmationTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.confirmationText {
+  font-size: 1rem;
+  color: var(--color-neutral-900);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirmationDetails {
+  background-color: var(--color-neutral-100);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.confirmationDetailItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.confirmationDetailLabel {
+  font-weight: 600;
+  color: var(--color-neutral-600);
+}
+
+.confirmationDetailValue {
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.confirmationActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Info Box */
+.infoBox {
+  background-color: rgb(91 192 222 / 10%);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.infoIcon {
+  color: var(--color-info);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.infoText {
+  color: var(--color-neutral-900);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Warning Box */
+.warningBox {
+  background-color: #fff8e1; /* Light yellow background */
+  border: 1px solid #ffc107; /* Warning yellow border */
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.warningIcon {
+  color: #ff9800; /* Warning orange */
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.warningText {
+  color: #d32f2f; /* Red for emphasis */
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Save Progress */
+.saveProgress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-neutral-300);
+}
+
+.saveProgressButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.saveProgressIcon {
+  margin-right: 0.5rem;
+}
+
+/* Loading Spinner */
+.loadingSpinner {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid rgb(255 255 255 / 30%);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin var(--animation-duration-fast) linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* OXXO Payment Styles */
+.oxxoPaymentBox {
+  background-color: #f8f9fa;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.oxxoPaymentTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.oxxoPaymentIcon {
+  color: #e74c3c;
+  margin-right: 0.5rem;
+}
+
+.oxxoPaymentDetails {
+  margin-bottom: 1.5rem;
+}
+
+.oxxoPaymentItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid var(--color-neutral-300);
+}
+
+.oxxoPaymentItemIcon {
+  color: var(--color-primary);
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+}
+
+.oxxoPaymentItemLabel {
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin-right: 0.5rem;
+}
+
+.oxxoPaymentItemValue {
+  flex: 1;
+  text-align: right;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.oxxoReferenceContainer {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.oxxoReferenceValue {
+  font-weight: 700;
+  font-size: 1.2rem;
+  font-family: monospace;
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  margin-right: 0.5rem;
+  flex: 1;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background-color: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  background-color: #dee2e6;
+}
+
+.copyIcon {
+  margin-right: 0.25rem;
+}
+
+.copyText {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.oxxoBarcode {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.oxxoBarcode img {
+  max-width: 100%;
+  height: auto;
+}
+
+.oxxoInstructions {
+  background-color: rgb(240 173 78 / 10%);
+  border: 1px solid var(--color-warning);
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.oxxoInstructionsIcon {
+  color: var(--color-warning);
+  margin-right: 0.75rem;
+  font-size: 1.2rem;
+  margin-top: 0.2rem;
+}
+
+.oxxoInstructionsText {
+  margin: 0;
+  color: var(--color-neutral-900);
+  font-size: 0.9rem;
+}
+
+/* Payment Method Selection */
+.paymentMethodSelector {
+  margin-bottom: 1.5rem;
+}
+
+.paymentMethodTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-neutral-900);
+}
+
+.paymentMethodOptions {
+  display: flex;
+  gap: 1rem;
+}
+
+.paymentMethodOption {
+  flex: 1;
+  border: 2px solid var(--color-neutral-300);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.paymentMethodOption:hover {
+  border-color: var(--color-primary);
+  background-color: rgb(167 43 49 / 5%);
+}
+
+.paymentMethodOptionSelected {
+  border-color: var(--color-primary);
+  background-color: rgb(167 43 49 / 5%);
+}
+
+.paymentMethodRadio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.paymentMethodLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.paymentMethodIcon {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.paymentMethodName {
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  text-align: center;
+}
+
+.paymentMethodDescription {
+  font-size: 0.8rem;
+  color: var(--color-neutral-600);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Mobile Step Indicator */
+.mobileStepIndicator {
+  display: none;
+  background-color: var(--color-neutral-100);
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-neutral-900);
+  border: 1px solid var(--color-neutral-300);
+}
+
+/* Responsive Styles */
+@media (width <= 900px) {
+  .formLayout {
+    flex-direction: column;
+  }
+
+  .formSidebar {
+    width: 100%;
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+
+  .formFields {
+    grid-template-columns: 1fr;
+  }
+
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepLabel {
+    font-size: 0.7rem;
+  }
+
+  .paymentMethodOptions {
+    flex-direction: column;
+  }
+}
+
+/* Mobile Optimizations */
+@media (width <= 768px) {
+  /* Step Indicator */
+  .stepIndicator {
+    display: none; /* Hide the desktop step indicator */
+  }
+
+  .mobileStepIndicator {
+    display: block; /* Show the mobile step indicator */
+  }
+
+  /* Navigation Buttons */
+  .formNavigation {
+    flex-direction: column-reverse; /* Stack buttons with primary on top */
+    gap: 12px;
+  }
+
+  .formNavigation .formButton {
+    width: 100%; /* Full-width buttons */
+    padding: 12px;
+    font-size: 1rem;
+    justify-content: center;
+  }
+
+  .formNavigation .buttonPrimary {
+    order: 1; /* Ensure primary button appears first (top) */
+  }
+
+  .formNavigation .buttonSecondary {
+    order: 2;
+    background-color: transparent;
+    border: 1px solid var(--color-neutral-300);
+    color: var(--color-neutral-600);
+  }
+
+  /* Form Fields */
+  .formFields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .formGroup {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  /* Label Positioning */
+  .formLabel {
+    display: block;
+    text-align: left;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  /* Input Field Width */
+  .formInput {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px 14px;
+  }
+
+  .inputWithIcon .formInput {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+
+  /* Error Messages */
+  .formErrorText {
+    font-size: 0.8rem;
+    margin-top: 6px;
+    display: block;
+    width: 100%;
+  }
+
+  /* Helper Text */
+  .formHelperText {
+    font-size: 0.8rem;
+    margin-top: 6px;
+  }
+
+  /* Info Box */
+  .infoBox {
+    padding: 12px;
+    margin: 16px 0;
+    gap: 12px;
+  }
+
+  .infoText {
+    font-size: 0.85rem;
+  }
+
+  /* Quick Select Buttons */
+  .quickSelectContainer {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .quickSelectButton {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  /* Form Section */
+  .formSectionHeader {
+    padding: 12px 16px;
+  }
+
+  .formSectionContent {
+    padding: 16px;
+  }
+
+  .formSectionTitle {
+    font-size: 1rem;
+  }
+
+  /* Review Step Mobile Optimizations */
+  .reviewSection {
+    margin-bottom: 20px;
+    padding: 16px;
+    background-color: var(--color-neutral-100);
+    border-radius: 8px;
+    border: 1px solid var(--color-neutral-300);
+  }
+
+  .reviewSectionTitle {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  .reviewGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reviewItem {
+    position: relative;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid var(--color-neutral-300);
+  }
+
+  .reviewLabel {
+    display: block;
+    width: 100%;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .reviewValue {
+    display: block;
+    width: 100%;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .reviewEdit {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: var(--color-neutral-100);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    margin-top: 0;
+  }
+
+  /* Payment Step Mobile Optimizations */
+  .paymentMethodOptions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .paymentMethodOption {
+    width: 100%;
+    padding: 16px;
+    border-radius: 8px;
+    min-height: 60px;
+  }
+
+  .paymentMethodLabel {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
+  }
+
+  .paymentMethodIcon {
+    margin-bottom: 0;
+    font-size: 1.5rem;
+  }
+
+  .paymentMethodName {
+    font-size: 1rem;
+  }
+
+  .paymentMethodDescription {
+    display: none;
+  }
+
+  /* Card Payment Form */
+  .cardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .cardFormRow {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cardFormField {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  /* OXXO Instructions */
+  .oxxoInstructions {
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 8px;
+  }
+
+  .oxxoInstructionsText {
+    font-size: 0.9rem;
+  }
+
+  /* Payment Details */
+  .paymentDetails {
+    margin: 16px 0;
+    padding: 12px;
+    background-color: var(--color-neutral-100);
+    border-radius: 8px;
+    border: 1px solid var(--color-neutral-300);
+  }
+
+  .paymentAmount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+  }
+
+  .paymentLabel {
+    font-weight: 600;
+  }
+
+  .paymentValue {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* Secure Payment Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.loadingContainer p {
+  margin: 16px 0 0 0;
+  color: var(--bs-gray-600);
+  font-size: 14px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--rojo);
+  border-radius: 50%;
+  animation: spin var(--animation-duration-base) linear infinite;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .formSection:hover {
+    transform: none;
+  }
+
+  .formButton:hover {
+    transform: none;
+  }
+
+  .stepActive .stepMarker {
+    transform: none;
+  }
+
+  .loadingSpinner {
+    animation: none;
+  }
+}
+
+/* OXXO Payment Section */
+.oxxoSection {
+  width: 100%;
+}
+
+/* Form Actions (Payment Buttons) */
+.formActions {
+  display: flex !important;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+  justify-content: space-between !important;
+  align-items: center;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.formActions button {
+  min-width: 140px;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .formActions {
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0;
+  }
+
+  .formActions button {
+    width: 100%;
+    min-width: unset;
+  }
+}
+}

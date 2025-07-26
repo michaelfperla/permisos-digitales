@@ -1,0 +1,511 @@
+/* User Details Page Styles */
+/* Container styling now handled by ResponsiveContainer component */
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0 0 0.5rem;
+}
+
+.pageSubtitle {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+/* Back Button */
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #343a40;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.backButton:hover {
+  background-color: #e9ecef;
+}
+
+.backIcon {
+  font-size: 0.875rem;
+}
+
+/* User Details Card */
+.userDetailsCard {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.userDetailsHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* User Actions */
+.userActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.userDetailsBody {
+  padding: 1.5rem;
+}
+
+/* Definition List */
+.definitionList {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem 2rem;
+  margin: 0;
+}
+
+.definitionTerm {
+  font-weight: 600;
+  color: #6c757d;
+  margin: 0;
+}
+
+.definitionDetail {
+  margin: 0;
+  color: #343a40;
+}
+
+/* Badge Styles */
+.adminBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0;
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.clientBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0;
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.booleanBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0;
+}
+
+.trueBadge {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.falseBadge {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgb(0 0 0 / 10%);
+  border-radius: 50%;
+  border-top-color: #a72b31;
+  animation: spin var(--animation-duration-base) ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  color: #a72b31;
+  margin-bottom: 1rem;
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  background-color: #a72b31;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease;
+}
+
+.retryButton:hover {
+  background-color: #852d2d;
+}
+
+/* Security Events Section */
+.securityEventsSection {
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+  margin: 0 0 1rem;
+}
+
+.securityEventsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.securityEventsTable th,
+.securityEventsTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.securityEventsTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.securityEventsTable tr:hover {
+  background-color: #f8f9fa;
+}
+
+.noEvents {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+/* Applications Section */
+.applicationsSection {
+  margin-top: 2rem;
+}
+
+.applicationsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+.applicationsTable th,
+.applicationsTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.applicationsTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #343a40;
+}
+
+.applicationsTable tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Status Badge Styles */
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0;
+}
+
+.statusActive {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.statusInactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.statusPending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.statusSubmitted {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.statusVerified {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.statusRejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.statusReady {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.statusCancelled {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.statusExpired {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* View Button */
+.viewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  color: #343a40;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.viewButton:hover {
+  background-color: #e9ecef;
+}
+
+.viewIcon {
+  font-size: 0.875rem;
+}
+
+/* Action buttons */
+.actionIcon {
+  margin-right: 0.5rem;
+}
+
+.enableButton,
+.disableButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.enableButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.enableButton:hover {
+  background-color: #218838;
+}
+
+.disableButton {
+  background-color: #a72b31;
+  color: white;
+}
+
+.disableButton:hover {
+  background-color: #852d2d;
+}
+
+.enableButton:disabled,
+.disableButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .userDetailsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .userActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .definitionList {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .definitionTerm {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .definitionDetail {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .definitionDetail:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    font-size: 0.8rem;
+  }
+
+  .securityEventsTable th,
+  .securityEventsTable td,
+  .applicationsTable th,
+  .applicationsTable td {
+    padding: 0.5rem;
+}
+
+@media (width <= 480px) {
+  .pageTitle {
+    font-size: 1.25rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
+
+  .userDetailsHeader,
+  .userDetailsBody {
+    padding: 1rem;
+  }
+
+  .backButton {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .userActions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .enableButton,
+  .disableButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    min-width: 500px;
+  }
+
+  .noEvents {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .viewButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+}
+
+@media (width <= 360px) {
+  .userDetailsCard {
+    margin-bottom: 1.5rem;
+  }
+
+  .userDetailsHeader,
+  .userDetailsBody {
+    padding: 0.75rem;
+  }
+
+  .adminBadge,
+  .clientBadge,
+  .booleanBadge,
+  .statusBadge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .securityEventsTable,
+  .applicationsTable {
+    min-width: 450px;
+  }
+
+  .loadingContainer,
+  .errorContainer {
+    padding: 2rem 1rem;
+  }
+
+  .retryButton {
+    width: 100%;
+    max-width: 200px;
+}
+}
+}
+}

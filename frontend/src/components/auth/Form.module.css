@@ -1,0 +1,711 @@
+.formContainer {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-neutral-800);
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.75rem;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.formGroup {
+  margin-bottom: 0.75rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  font-size: 0.9rem;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgb(74 144 226 / 20%);
+}
+
+.error {
+  color: var(--color-primary, #a72b31);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-primary, #a72b31);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: var(--color-primary-dark, #852d2d);
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.authButton {
+  width: 100%;
+  margin-top: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
+  transition: all 0.3s ease;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.authButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgb(255 255 255 / 10%), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.authButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%);
+  background-color: var(--color-primary-dark);
+  color: white;
+  text-decoration: none;
+}
+
+.authButton:hover::before {
+  transform: translateX(100%);
+}
+
+.authButton:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
+}
+
+.linkContainer {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.link {
+  color: var(--color-primary, #a72b31);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.termsText {
+  font-size: 0.8rem;
+  color: var(--color-neutral-600);
+  text-align: center;
+  margin-top: 15px;
+  line-height: 1.4;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.termsLink {
+  color: var(--color-primary, #a72b31);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.termsLink:hover {
+  text-decoration: underline;
+}
+
+/* Auth Links Container */
+.authFormLinks {
+  text-align: center;
+  margin-top: 2rem; /* Increased from 1.5rem for more space below button */
+  line-height: 1.6;
+}
+
+.authFormLinks p {
+  margin-bottom: 0.75rem;
+  padding-left: 0; /* Ensure consistent left alignment */
+  padding-right: 0; /* Ensure consistent right alignment */
+}
+
+/* Minor auth link style */
+.authLinkMinor {
+  color: var(--color-neutral-600);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s ease; /* Added smooth transition for hover effect */
+}
+
+.authLinkMinor:hover {
+  color: var(--color-neutral-900);
+  text-decoration: underline;
+}
+
+/* Secondary action auth link style */
+.authLinkSecondaryAction {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease; /* Added smooth transition for hover effect */
+}
+
+.authLinkSecondaryAction:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+/* Plain text style for non-clickable parts */
+.authPlainText {
+  color: var(--color-neutral-600);
+  font-size: 0.85rem;
+  display: inline;
+}
+
+/* Legacy styles - kept for backward compatibility */
+.formLinks {
+  text-align: center;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.formLink {
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin: 0 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.formLink:hover {
+  text-decoration: underline;
+  color: var(--color-neutral-900);
+}
+
+.authFormPrimaryLink {
+  color: var(--color-primary);
+  font-weight: 500;
+  text-decoration: none;
+  margin: 0 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.authFormPrimaryLink:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+.formLinkDivider {
+  color: var(--color-neutral-500);
+  margin: 0 0.5rem;
+}
+
+.successMessage {
+  color: #333;
+  text-align: center;
+  margin: 1.5rem 0;
+  line-height: 1.6;
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #4caf50;
+}
+
+.successMessage p {
+  margin-bottom: 1rem;
+}
+
+.successMessage p:last-child {
+  margin-bottom: 0;
+}
+
+.noteText {
+  font-style: italic;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.errorMessage {
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+
+.formAlert {
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.verificationAlert h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #856404;
+}
+
+.verificationAlert p {
+  margin-bottom: 0.75rem;
+}
+
+.resendButton {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+/* Verification Page Styles */
+.loadingContainer {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.spinner {
+  animation: spin var(--animation-duration-base) linear infinite;
+  font-size: 2rem;
+  color: var(--color-neutral-600);
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.successContainer,
+.errorContainer {
+  margin: 1.5rem 0;
+  width: 100%;
+}
+
+.buttonContainer {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.buttonContainer .authLinkSecondaryAction {
+  margin-top: 1rem;
+  display: block;
+  text-align: center;
+}
+
+@media (width <= 576px) {
+  .buttonContainer {
+    margin-top: 1rem;
+  }
+
+  .authButton {
+    font-size: 0.95rem;
+    padding: 0.7rem 1.25rem;
+}
+
+/* Pre-verification page styles */
+.verificationInstructions {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border-left: 4px solid var(--color-primary);
+}
+
+.verificationIcon {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.instructionsList {
+  margin: 1.5rem 0;
+}
+
+.instructionsList ol {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.instructionsList li {
+  margin-bottom: 0.5rem;
+}
+
+.timeInfo {
+  background-color: rgb(0 0 0 / 3%);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.timeInfo ul {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.timeInfo li {
+  margin-bottom: 0.5rem;
+}
+
+/* Verification page title styles */
+.verificationInstructions h3 {
+  font-size: 1.4rem;
+  margin: 1rem 0;
+  color: var(--color-neutral-800);
+  text-align: center;
+}
+
+/* Responsive styles for mobile */
+@media (width <= 768px) {
+  /* General form styles for mobile */
+  .formTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .formGroup {
+    margin-bottom: 1rem;
+  }
+
+  .label {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .inputWrapper {
+    width: 100%;
+  }
+
+  /* Password reset specific styles */
+  .compactForm {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .formInstructions {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .authButton {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 1rem;
+    min-height: 44px; /* Standard touch target size */
+  }
+
+  .authFormLinks {
+    margin-top: 1.5rem;
+  }
+
+  .authLinkMinor,
+  .authLinkSecondaryAction {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    display: inline-block; /* Better tap target */
+    min-height: 44px; /* Standard touch target size */
+    min-width: 44px; /* Standard touch target size */
+    line-height: 44px; /* Center text vertically */
+  }
+
+  /* Success message styles */
+  .formSuccess {
+    padding: 0.5rem;
+  }
+
+  .successText {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 0 0.5rem;
+  }
+
+  .linkButton {
+    padding: 0.25rem;
+    display: inline-block; /* Better tap target */
+    min-height: 44px; /* Standard touch target size */
+    min-width: 44px; /* Standard touch target size */
+  }
+
+  /* Password strength indicator */
+  .passwordStrength {
+    margin-top: 0.75rem;
+  }
+
+  .passwordStrengthBar {
+    height: 6px; /* Slightly larger for better visibility */
+  }
+
+  .passwordStrengthText {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Error text */
+  .errorText {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0;
+  }
+
+  /* Verification page styles */
+  .verificationInstructions {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .instructionsList {
+    margin: 1rem 0;
+  }
+
+  .timeInfo {
+    padding: 0.75rem;
+  }
+
+  .verificationIcon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .verificationInstructions h3 {
+    font-size: 1.2rem;
+    margin: 0.75rem 0;
+  }
+
+  .instructionsList ol,
+  .timeInfo ul {
+    padding-left: 1.25rem;
+  }
+
+  .instructionsList li,
+  .timeInfo li {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+/* Small mobile devices */
+@media (width <= 480px) {
+  .compactForm {
+    padding: 1rem;
+  }
+
+  .formTitle {
+    font-size: 1.3rem;
+  }
+
+  .authButton {
+    padding: 0.75rem 1rem;
+  }
+
+  .formGroup {
+    margin-bottom: 0.75rem;
+  }
+
+  .label {
+    font-size: 0.9rem;
+  }
+
+  .errorText {
+    font-size: 0.8rem;
+  }
+
+  .authFormLinks {
+    margin-top: 1.25rem;
+}
+
+/* Extra small devices - optimized for 360px width (common in Mexico) */
+@media (width <= 360px) {
+  .compactForm {
+    padding: 0.75rem;
+  }
+
+  .formTitle {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .authButton {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .authLinkMinor,
+  .authLinkSecondaryAction {
+    font-size: 0.85rem;
+    min-width: unset; /* Remove fixed min-width */
+    line-height: normal; /* Allow natural line height */
+    display: inline-flex; /* Use inline-flex for better alignment */
+    align-items: center; /* Center content vertically */
+    padding: 0.3rem; /* Reduce padding */
+    min-height: 32px; /* Reduce min-height but keep it accessible */
+  }
+
+  .formAlert {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* Fix for terms text in RegisterForm */
+  .authFormLinks p {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.alertContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.alertIcon {
+  font-size: 1.5rem;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.alertContent h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.alertContent p {
+  margin-bottom: 0.5rem;
+}
+
+.alertContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive styles for alerts on mobile */
+@media (width <= 576px) {
+  .alertContent {
+    gap: 0.75rem;
+  }
+
+  .alertIcon {
+    font-size: 1.25rem;
+  }
+
+  .alertContent h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .alertContent p {
+    font-size: 0.9rem;
+}
+
+.errorActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 0.5rem;
+}
+
+.linkDivider {
+  color: var(--color-neutral-500);
+  margin: 0 0.5rem;
+}
+
+.errorText {
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  display: block;
+  font-weight: 500;
+}
+
+.compactForm {
+  margin: 0 auto;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+@media (width <= 576px) {
+  .compactForm {
+    padding: 1rem;
+}
+
+.formSuccess {
+  text-align: center;
+}
+
+.successText {
+  font-size: 0.9rem;
+  color: var(--color-neutral-700);
+  margin-bottom: 1rem;
+}
+
+.formInstructions {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+}
+}
+}
+}
+}
+}

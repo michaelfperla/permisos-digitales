@@ -1,0 +1,253 @@
+/* PendingApplicationsCard.module.css */
+
+.card {
+  background: #fff;
+  border-radius: var(--border-radius-lg, 8px);
+  box-shadow: var(--box-shadow-sm, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06));
+  border: 1px solid var(--color-neutral-200, #e9ecef);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-neutral-900, #212529);
+  margin: 0;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary, #a72b31);
+}
+
+.badge {
+  background-color: var(--color-primary-lightest, #f8e9ea);
+  color: var(--color-primary-dark, #852023);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.applicationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.applicationItem {
+  border: 1px solid var(--color-neutral-200, #e9ecef);
+  border-radius: var(--border-radius, 6px);
+  padding: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.applicationItem:hover {
+  box-shadow: var(--box-shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06));
+}
+
+.applicationHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.applicationContent {
+  flex: 1;
+}
+
+.vehicleInfo {
+  font-weight: 500;
+  color: var(--color-neutral-900, #212529);
+  margin-bottom: 4px;
+}
+
+.applicantName {
+  font-size: 14px;
+  color: var(--color-neutral-600, #6c757d);
+  margin-bottom: 8px;
+}
+
+.statusContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusBadge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusPending {
+  background-color: var(--color-warning-lightest, #fffde7);
+  color: var(--color-warning-dark, #d97706);
+  border-color: var(--color-warning, #ffc107);
+}
+
+.statusOxxo {
+  background-color: var(--color-info-lightest, #e0f7fa);
+  color: var(--color-info-dark, #0bacce);
+  border-color: var(--color-info, #0dcaf0);
+}
+
+.statusProcessing {
+  background-color: var(--color-primary-lightest, #f8e9ea);
+  color: var(--color-primary-dark, #852023);
+  border-color: var(--color-primary, #a72b31);
+}
+
+.priceContainer {
+  text-align: right;
+  margin-left: 16px;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-neutral-900, #212529);
+  margin-bottom: 4px;
+}
+
+.expirationInfo {
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.expirationNormal {
+  color: var(--color-neutral-600, #6c757d);
+}
+
+.expirationWarning {
+  color: var(--color-danger, #dc3545);
+}
+
+.applicationFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-neutral-200, #e9ecef);
+}
+
+.createdDate {
+  font-size: 12px;
+  color: var(--color-neutral-500, #adb5bd);
+}
+
+.paymentButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: var(--color-primary, #a72b31);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--border-radius, 6px);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.paymentButton:hover {
+  background-color: var(--color-primary-dark, #852023);
+}
+
+.loadingState,
+.errorState,
+.emptyState {
+  text-align: center;
+  padding: 24px;
+}
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.loadingBar {
+  height: 16px;
+  background-color: var(--color-neutral-200, #e9ecef);
+  border-radius: 4px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.loadingBarLarge {
+  width: 75%;
+}
+
+.loadingBarSmall {
+  width: 50%;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.errorIcon {
+  color: var(--color-danger, #dc3545);
+}
+
+.successIcon {
+  color: var(--color-success, #198754);
+}
+
+.errorText {
+  color: var(--color-danger, #dc3545);
+  font-size: 14px;
+}
+
+.emptyText {
+  color: var(--color-neutral-600, #6c757d);
+  font-size: 14px;
+}
+
+.viewAllLink {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-neutral-200, #e9ecef);
+}
+
+.viewAllLinkText {
+  font-size: 14px;
+  color: var(--color-primary, #a72b31);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.viewAllLinkText:hover {
+  color: var(--color-primary-dark, #852023);
+}

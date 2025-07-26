@@ -1,0 +1,61 @@
+/* Auth Layout Styles */
+.authPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-neutral-100);
+  overflow-x: hidden;
+}
+
+/* Desktop Header (logo only, fixed at top) */
+.desktopHeader {
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-neutral-200);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-header-height, 56px); /* Match AppHeaderMobile */
+  z-index: var(--z-fixed);
+  box-sizing: border-box;
+}
+
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  width: 100%;
+  padding: var(--space-4);
+
+  /* Add padding-top to account for the fixed header */
+  padding-top: calc(var(--mobile-header-height, 56px) + var(--space-4));
+  box-sizing: border-box;
+}
+
+.authCardWrapper {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: var(--space-4);
+}
+
+/* REMOVE all .mobileMenu, .mobileMenuOpen, .mobileMenuOverlay, .mobileMenuContent, .mobileMenuLink styles
+   as these are now handled by AppHeaderMobile.module.css
+*/
+
+/* Responsive adjustments for header and content padding */
+@media (max-width: var(--breakpoint-xs)) {
+  /* 360px */
+  .authContainer {
+    padding-top: calc(var(--mobile-header-height-sm, 52px) + var(--space-3));
+  }
+
+  /* .desktopHeader is hidden by isMdDown in JSX */
+}

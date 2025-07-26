@@ -1,0 +1,252 @@
+{
+  "title": "PERMISOS DIGITALES - THE FREEDOM STORY",
+  "duration": "45 seconds",
+  "style": "Cinematic Drama with Mexican Cultural Elements",
+  "music": "Epic orchestral with Mexican guitar undertones",
+  
+  "scenes": [
+    {
+      "id": 1,
+      "title": "THE STRUGGLE",
+      "duration": "5s",
+      "type": "opening",
+      "setting": "DAWN - Mexico City",
+      "shots": [
+        {
+          "type": "wide-shot",
+          "description": "Sunrise over Mexico City skyline, golden hour lighting",
+          "camera": "slow push in",
+          "mood": "hopeful yet tense"
+        },
+        {
+          "type": "close-up",
+          "description": "Clock showing 5:00 AM",
+          "sound": "ticking clock, city awakening"
+        }
+      ],
+      "narration": "Cada día, miles de mexicanos despiertan antes del amanecer...",
+      "emotion": "empathy, shared struggle"
+    },
+    
+    {
+      "id": 2,
+      "title": "THE QUEUE",
+      "duration": "6s",
+      "type": "conflict",
+      "shots": [
+        {
+          "type": "montage",
+          "description": "Long lines outside government office",
+          "camera": "handheld, documentary style",
+          "elements": [
+            "Tired faces",
+            "People checking watches", 
+            "Children crying",
+            "Hot sun beating down"
+          ]
+        },
+        {
+          "type": "extreme-close-up",
+          "description": "Sweat drop on forehead",
+          "transition": "match cut to..."
+        }
+      ],
+      "narration": "...para hacer filas interminables bajo el sol",
+      "emotion": "frustration, exhaustion"
+    },
+    
+    {
+      "id": 3,
+      "title": "THE REVELATION",
+      "duration": "5s",
+      "type": "turning-point",
+      "shots": [
+        {
+          "type": "close-up",
+          "description": "Phone screen illuminating face in darkness",
+          "lighting": "dramatic chiaroscuro",
+          "text_overlay": "Hay otra manera..."
+        },
+        {
+          "type": "product-shot",
+          "description": "Permisos Digitales logo emerges",
+          "effect": "particles forming logo",
+          "sound": "whoosh, digital transformation"
+        }
+      ],
+      "emotion": "discovery, hope"
+    },
+    
+    {
+      "id": 4,
+      "title": "THE TRANSFORMATION",
+      "duration": "8s",
+      "type": "rising-action",
+      "shots": [
+        {
+          "type": "split-screen",
+          "description": "Left: Person in pajamas with coffee / Right: Long queue in sun",
+          "transition": "wipe transition favoring left"
+        },
+        {
+          "type": "montage-sequence",
+          "description": "Hands typing, clicking, smiling faces",
+          "speed": "accelerating rhythm",
+          "music": "building crescendo"
+        },
+        {
+          "type": "UI-showcase",
+          "elements": [
+            "Form filling with ease",
+            "Progress bar moving",
+            "Payment confirmation",
+            "Success animation"
+          ],
+          "style": "smooth, Apple-like presentation"
+        }
+      ],
+      "narration": "Desde la comodidad de tu hogar. En minutos, no horas.",
+      "emotion": "empowerment, efficiency"
+    },
+    
+    {
+      "id": 5,
+      "title": "THE NUMBERS",
+      "duration": "6s",
+      "type": "social-proof",
+      "shots": [
+        {
+          "type": "kinetic-typography",
+          "animations": [
+            {"text": "10,000+", "subtitle": "Permisos emitidos"},
+            {"text": "5 MIN", "subtitle": "Tiempo promedio"},
+            {"text": "24/7", "subtitle": "Siempre disponible"},
+            {"text": "$150", "subtitle": "Un solo pago"}
+          ],
+          "style": "bold, impactful, synchronized with beat"
+        }
+      ],
+      "sound": "percussion hits on each number",
+      "emotion": "trust, credibility"
+    },
+    
+    {
+      "id": 6,
+      "title": "THE FREEDOM",
+      "duration": "8s",
+      "type": "climax",
+      "shots": [
+        {
+          "type": "emotional-montage",
+          "description": "Happy families in cars, road trips, freedom",
+          "elements": [
+            "Family laughing in car",
+            "Sunset drive on highway",
+            "City lights through windshield",
+            "Hands holding printed permit"
+          ],
+          "camera": "steadicam, flowing movement",
+          "color": "warm, golden tones"
+        },
+        {
+          "type": "hero-shot",
+          "description": "Car driving into sunset on open road",
+          "text_overlay": "Tu libertad no debe esperar"
+        }
+      ],
+      "music": "emotional peak, full orchestra",
+      "emotion": "joy, freedom, accomplishment"
+    },
+    
+    {
+      "id": 7,
+      "title": "THE CALL",
+      "duration": "7s",
+      "type": "resolution/CTA",
+      "shots": [
+        {
+          "type": "center-frame",
+          "description": "Logo with tagline",
+          "animation": "elegant fade in"
+        },
+        {
+          "type": "call-to-action",
+          "elements": [
+            {
+              "primary": "COMIENZA HOY",
+              "style": "pulsing button"
+            },
+            {
+              "secondary": "permisosdigitales.com.mx",
+              "style": "clean, memorable"
+            }
+          ]
+        },
+        {
+          "type": "trust-badges",
+          "elements": ["100% Legal", "Proceso Seguro", "Soporte 24/7"],
+          "animation": "slide in from bottom"
+        }
+      ],
+      "narration": "Permisos Digitales. La evolución del trámite.",
+      "music": "resolution, hopeful ending",
+      "emotion": "confidence, decision"
+    }
+  ],
+  
+  "color_palette": {
+    "primary": "#B5384D",
+    "secondary": "#8B2D3D",
+    "accent": "#F7B32B",
+    "light": "#FFF5F5",
+    "dark": "#1A1A1A",
+    "success": "#10B981"
+  },
+  
+  "typography": {
+    "headlines": "Bebas Neue or Impact - BOLD, CINEMATIC",
+    "body": "Inter - Clean, Modern",
+    "accents": "Playfair Display - Elegant touches"
+  },
+  
+  "transitions": [
+    "Smooth cross-dissolves between scenes",
+    "Match cuts on movement",
+    "Speed ramping for emphasis",
+    "Parallax effects on text",
+    "Particle transitions for digital transformation"
+  ],
+  
+  "sound_design": {
+    "opening": "City ambience, morning sounds",
+    "struggle": "Clock ticking, crowd murmur, children crying",
+    "transformation": "Digital whooshes, keyboard clicks, notification sounds",
+    "freedom": "Car engine purring, wind, laughter",
+    "music_arc": "Somber → Hopeful → Triumphant → Inspiring"
+  },
+  
+  "emotional_journey": [
+    {"phase": "Empathy", "scenes": [1, 2]},
+    {"phase": "Hope", "scenes": [3]},
+    {"phase": "Empowerment", "scenes": [4, 5]},
+    {"phase": "Joy/Freedom", "scenes": [6]},
+    {"phase": "Action", "scenes": [7]}
+  ],
+  
+  "key_messages": [
+    "No more waiting in lines",
+    "Digital transformation at your fingertips", 
+    "Time is precious - save it",
+    "Join thousands who chose the better way",
+    "Your freedom matters"
+  ],
+  
+  "technical_notes": {
+    "aspect_ratio": "16:9",
+    "resolution": "1920x1080 minimum",
+    "frame_rate": "24fps for cinematic feel",
+    "motion_blur": "180-degree shutter angle",
+    "depth_of_field": "Shallow for emotional moments",
+    "color_grading": "Warm tones for positive scenes, cool/desaturated for struggle"
+  }
+}

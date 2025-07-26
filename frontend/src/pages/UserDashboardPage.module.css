@@ -1,0 +1,495 @@
+/* src/pages/UserDashboardPage.module.css */
+
+.dashboardPage {
+  /* This container is mostly for semantic grouping if UserLayout's <main> has a different bg */
+
+  /* Centering of content within this is handled by .dashboardContentWrapper */
+}
+
+.dashboardContentWrapper {
+  /* Full-width layout for better desktop space utilization */
+  width: 100%;
+  max-width: none; /* Remove width constraint for full-width layout */
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0 var(--space-2); /* Maintain side padding for content spacing */
+}
+
+/* Page Header */
+.pageHeader {
+  margin-bottom: var(--space-5); /* Increased space after header */
+
+  /* border-bottom: 1px solid var(--color-neutral-200); */
+
+ /* Optional: if you want a line under header */
+
+  /* padding-bottom: var(--space-3); */
+
+ /* Optional: if you want space before the line */
+}
+
+.pageHeader.centeredText .pageTitle,
+.pageHeader.centeredText .pageSubtitle {
+  text-align: center;
+}
+
+.pageTitle {
+  font-size: clamp(1.75rem, 4vw, 2.25rem); /* From global.css */
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0 0 0.5rem;
+}
+
+.pageSubtitle {
+  font-size: clamp(1rem, 3vw, 1.125rem); /* From global.css */
+  font-weight: var(--font-weight-normal);
+  color: var(--color-neutral-700);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Stats Overview */
+.statsOverview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Min card width */
+  gap: var(--space-4); /* Consistent gap */
+  margin-bottom: var(--space-6); /* More space after stats */
+}
+
+.statCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-lg); /* Softer radius */
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--box-shadow-sm);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.statCard:hover {
+  box-shadow: var(--box-shadow);
+  transform: translateY(-3px);
+}
+
+.statHeader {
+  margin-bottom: var(--space-3);
+}
+
+.statTitle {
+  font-size: var(--font-size-base); /* 1rem */
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
+.statContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  flex-grow: 1; /* Allow content to push footer down */
+}
+
+.statValue {
+  font-size: clamp(2rem, 6vw, 2.75rem); /* Larger, responsive value */
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary); /* Primary color for emphasis */
+  line-height: 1;
+}
+
+.statIcon {
+  font-size: 2.5rem; /* Consistent icon size */
+  color: var(--color-primary-light); /* Lighter shade for icon */
+  opacity: 0.7;
+}
+
+.statFooter {
+  margin-top: auto; /* Pushes link to the bottom */
+}
+
+.statLink {
+  display: inline-block;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.statLink:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+/* Status Section */
+.statusSection {
+  margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
+  font-size: 1.5rem; /* Slightly larger section titles */
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-4) 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-neutral-200);
+  text-align: left; /* Default, but can be centered if needed */
+}
+
+.dashboardContentWrapper > .statusSection > .sectionTitle,
+.dashboardContentWrapper > .quickLinks > .sectionTitle {
+  /* text-align: center; /* If you want these titles centered too */
+}
+
+.statusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Adjust min width */
+  gap: var(--space-3);
+}
+
+.statusCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-left-width: 4px; /* Accent border */
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: var(--box-shadow-sm);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.statusCard:hover {
+  box-shadow: var(--box-shadow);
+  transform: translateY(-2px);
+}
+
+.statusIconWrapper {
+  /* Wrapper for consistent icon sizing and alignment */
+  font-size: 1.5rem; /* Base size for icons in status cards */
+  flex-shrink: 0;
+  width: 32px; /* Ensure space for icon */
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Optional: circular background for icon */
+
+  /* background-color: rgba(0,0,0,0.03); /* Subtle background */
+}
+
+.iconPending {
+  color: var(--status-warning);
+}
+
+.statusCard.statusPending {
+  border-left-color: var(--status-warning);
+} /* Match border to icon */
+.iconSubmitted {
+  color: var(--status-info);
+}
+
+.statusCard.statusSubmitted {
+  border-left-color: var(--status-info);
+}
+
+.iconVerified {
+  color: var(--status-success);
+}
+
+.statusCard.statusVerified {
+  border-left-color: var(--status-success);
+}
+
+.iconRejected {
+  color: var(--status-critical);
+}
+
+.statusCard.statusRejected {
+  border-left-color: var(--status-critical);
+}
+
+.iconGenerated {
+  color: var(--status-success);
+} /* Using success color */
+.statusCard.statusGenerated {
+  border-left-color: var(--status-success);
+}
+
+.iconCompleted {
+  color: var(--status-success);
+}
+
+.statusCard.statusCompleted {
+  border-left-color: var(--status-success);
+}
+
+.iconCancelled {
+  color: var(--color-neutral-500);
+}
+
+.statusCard.statusCancelled {
+  border-left-color: var(--color-neutral-500);
+}
+
+.iconDefault {
+  color: var(--color-neutral-500);
+}
+
+.statusCard.statusDefault {
+  border-left-color: var(--color-neutral-500);
+}
+
+.statusContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center text */
+}
+
+.statusCount {
+  font-size: 1.75rem; /* Larger count */
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  line-height: 1.1;
+}
+
+.statusName {
+  font-size: 0.8rem; /* Smaller status name */
+  color: var(--color-neutral-600);
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.emptyStatusMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background-color: var(--color-neutral-50); /* Softer background for empty state */
+  border: 1px dashed var(--color-neutral-300); /* Dashed border */
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  color: var(--color-neutral-600);
+}
+
+.emptyStatusIcon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+  opacity: 0.7;
+}
+
+.emptyStatusMessage p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+/* Quick Links */
+.quickLinks {
+  margin-bottom: var(--space-6);
+}
+
+.linksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-4);
+}
+
+.linkCard {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-neutral-900);
+  transition: all 0.2s ease;
+  box-shadow: var(--box-shadow-sm);
+  gap: var(--space-3);
+}
+
+.linkCard:hover {
+  background-color: var(--color-primary-lightest);
+  border-color: var(--color-primary-light);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgb(167 43 49 / 10%); /* Primary color shadow */
+  color: var(--color-primary-dark);
+}
+
+.linkIconWrapper {
+  /* Wrapper for consistent icon sizing and alignment */
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-lightest); /* Icon background */
+  border-radius: 50%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.linkCard:hover .linkIconWrapper {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.linkText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  min-height: 300px; /* Ensure it takes some space */
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 5px solid var(--color-neutral-200); /* Lighter track */
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin var(--animation-duration-base) ease-in-out infinite;
+  margin-bottom: var(--space-4);
+}
+
+.errorIcon {
+  font-size: 3rem;
+  color: var(--color-danger);
+  margin-bottom: var(--space-3);
+}
+
+.errorContainer h2 {
+  font-size: 1.5rem;
+  color: var(--color-neutral-800);
+  margin-bottom: var(--space-2);
+}
+
+.errorContainer p {
+  color: var(--color-neutral-600);
+  margin-bottom: var(--space-4);
+}
+
+.retryButton {
+  /* Using Button component now, so this might not be needed */
+  margin-top: var(--space-3);
+
+  /* Styles will come from Button component if used */
+}
+
+/* Responsive Styles */
+
+/* Desktop optimizations for full-width layout */
+@media (width >= 1200px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-4); /* Increased padding on large screens for better content spacing */
+  }
+
+  .statsOverview {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Larger cards on wide screens */
+    gap: var(--space-5); /* More generous spacing */
+  }
+
+  .linksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Larger quick link cards */
+    gap: var(--space-5);
+  }
+}
+
+/* Medium desktop screens - balanced layout */
+@media (width >= 992px) and (width < 1200px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-3); /* Moderate padding for medium screens */
+  }
+
+  .statsOverview {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Medium-sized cards */
+    gap: var(--space-4);
+  }
+}
+
+@media (width <= 768px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-3); /* Adjust side padding for tablets */
+  }
+
+  .statsOverview {
+    grid-template-columns: 1fr; /* Stack stat cards */
+    gap: var(--space-3);
+  }
+
+  .statusGrid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--space-2);
+  }
+
+  .linksGrid {
+    grid-template-columns: 1fr; /* Stack quick links */
+    gap: var(--space-3);
+  }
+}
+
+@media (width <= 480px) {
+  .dashboardContentWrapper {
+    padding: 0 var(--space-2); /* Adjust side padding for mobile */
+  }
+
+  .pageTitle {
+    font-size: 1.6rem;
+  }
+
+  .pageSubtitle {
+    font-size: 0.95rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.3rem;
+  }
+
+  .statCard,
+  .statusCard,
+  .linkCard {
+    padding: var(--space-3);
+  }
+
+  .statValue {
+    font-size: 2.25rem;
+  }
+
+  .statIcon {
+    font-size: 2.25rem;
+  }
+
+  .statusCount {
+    font-size: 1.5rem;
+  }
+
+  .statusName {
+    font-size: 0.75rem;
+  }
+
+  .linkText {
+    font-size: 0.95rem;
+  }
+}

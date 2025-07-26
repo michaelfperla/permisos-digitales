@@ -1,0 +1,255 @@
+/* src/styles/global.css */
+
+/*
+ * CSS Import Order:
+ * 1. Variables - Must be first so other files can use the variables
+ * 2. Reset - To normalize browser defaults
+ * 3. Core Layout Systems - Fundamental layout utilities
+ * 4. Utility Classes - General utility classes
+ * 5. Base Component Styles - Base styles for common components
+ * 6. Specific Component Styles - More complex, shared components
+ * 7. Form Utilities - Form-specific utilities
+ * 8. Touch Target Enhancements - Touch target enhancements
+ */
+
+/* 1. Variables */
+@import url('./variables.css');
+
+/* 2. Reset */
+@import url('./reset.css');
+
+/* 3. Core Layout Systems */
+
+/* Note: breakpoint-system.css has been removed as all functionality has been migrated to component-specific modules */
+
+/* 4. Utility Classes */
+@import url('./visibility-utilities.css'); /* Responsive visibility utilities */
+@import url('./mobile-utilities.css'); /* Mobile utility classes */
+
+/* 5. Base Component Styles */
+@import url('./button-styles.css'); /* Standardized button styles */
+@import url('./link-styles.css'); /* Standardized link styles */
+
+/* 7. Form Utilities */
+@import url('./mobile-form-utilities.css'); /* Mobile form utility classes */
+
+/* 8. Touch Target Enhancements */
+
+/* Touch target enhancements have been moved to component CSS modules */
+
+/* Apply border-box sizing to all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family-sans); /* From variables.css */
+  color: var(--color-neutral-900); /* From variables.css */
+  background-color: var(--color-neutral-100); /* Light gray background */
+  line-height: 1.6;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 0; /* No padding needed with sidebar layout */ /* Prevent iOS font size adjustment */ /* Firefox-specific prefix */ /* IE/Edge-specific prefix */
+  text-size-adjust: 100%; /* Standard property for text size adjustment */
+  -webkit-font-smoothing: antialiased; /* Smoother text rendering */
+  -moz-osx-font-smoothing: grayscale; /* Smoother text rendering in Firefox */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Specific body classes for different layouts */
+body.home-body,
+body.sandbox-body {
+  /* Keep any specific styles needed for these pages */
+}
+
+#root {
+  /* Vite's default root element ID */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Add other global base styles if needed */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-headings);
+  margin-bottom: var(--space-3);
+  color: var(--color-neutral-900);
+}
+
+h1 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: var(--font-weight-bold);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: var(--font-weight-semibold);
+}
+
+h3 {
+  font-size: clamp(1.125rem, 3.5vw, 1.5rem);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Standardized Page Title and Subtitle Styling */
+.page-title-h1 {
+  font-family: var(--font-family-headings);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  line-height: 1.2;
+}
+
+.page-subtitle-h2 {
+  font-family: var(--font-family-sans);
+  font-size: clamp(1rem, 3vw, 1.125rem);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-neutral-700);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  line-height: 1.4;
+}
+
+/* Container for title and subtitle for consistent bottom margin/border */
+.page-header-main-content {
+  margin-bottom: var(--space-5);
+
+  /* Optional: padding-bottom: var(--space-3); */
+
+  /* Optional: border-bottom: 1px solid var(--color-neutral-200); */
+}
+
+/* Mobile spacing for content below mobile header */
+@media (max-width: var(--breakpoint-md)) { /* breakpoint-md */
+  .page-header-main-content {
+    margin-top: var(--space-3);
+  }
+}
+
+/* Legacy page subtitle styling - kept for backward compatibility */
+.page-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-4);
+  margin-top: var(--space-2);
+  line-height: 1.5;
+  max-width: 800px;
+}
+
+p {
+  margin-bottom: var(--space-3);
+}
+
+/* Container class has been removed.
+ * Use the ResponsiveContainer component instead:
+ * <ResponsiveContainer maxWidth="xxl">...</ResponsiveContainer>
+ */
+
+/* Responsive content section */
+.contentSection {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+@media (max-width: var(--breakpoint-sm)) { /* breakpoint-sm */
+  .contentSection {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    border-radius: var(--border-radius);
+  }
+}
+
+@media (max-width: var(--breakpoint-xs)) { /* breakpoint-xs */
+  .contentSection {
+    padding: var(--space-mobile-3);
+    margin-bottom: var(--space-mobile-3);
+  }
+}
+
+/* Button styles have been moved to button-styles.css */
+
+/* Touch-friendly link styles for text links only */
+@media (max-width: var(--breakpoint-sm)) { /* breakpoint-sm */
+  a.text-link {
+    padding: 6px 0;
+    display: inline-block;
+    min-height: 44px;
+    line-height: 32px;
+  }
+}
+
+/* Mobile styles for page subtitles */
+@media (max-width: var(--breakpoint-md)) { /* breakpoint-md */
+  .page-subtitle {
+    margin-top: var(--space-5);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    padding-bottom: var(--space-3);
+  }
+
+  /* For subtitles that appear after mobile headers */
+  .mobile-header + .page-subtitle,
+  .mobile-header + div .page-subtitle,
+  .mobile-header + section .page-subtitle {
+    margin-top: var(--space-6);
+    padding-bottom: var(--space-4);
+  }
+}
+
+/* Extra small devices (under 360px) */
+@media (max-width: var(--breakpoint-xs)) { /* breakpoint-xs */
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.875rem;
+    margin-top: var(--space-2);
+  }
+
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
+/* Sandbox specific styles */
+.sandbox-body {
+  padding-top: 0 !important; /* Remove the padding for the header in sandbox pages */
+}

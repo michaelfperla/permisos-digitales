@@ -1,0 +1,348 @@
+/* Mobile Permit Details - Following Established Design System */
+
+.mobileContainer {
+  min-height: 100vh;
+  background-color: var(--color-white);
+  padding-bottom: var(--space-6);
+}
+
+/* Mobile Header */
+.mobileHeader {
+  background: var(--color-white);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.backButtonLink {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-neutral-100);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-neutral-700);
+  text-decoration: none;
+}
+
+.backButtonLink:active {
+  transform: scale(0.95);
+  background: var(--color-neutral-200);
+}
+
+.headerTitle {
+  flex: 1;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+/* Permit Context Card */
+.permitContextCard {
+  background: var(--color-white);
+  margin: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.contextHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.permitId {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+}
+
+.statusBadge {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Status badge variants - using established patterns */
+.statusBadge.awaiting-oxxo-payment {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--color-warning);
+}
+
+.statusBadge.permit-ready,
+.statusBadge.completed {
+  background: rgba(25, 135, 84, 0.1);
+  color: var(--color-success);
+}
+
+.statusBadge.payment-failed {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--color-danger);
+}
+
+/* OXXO Reference Section */
+.oxxoReferenceSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-neutral-100);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-3);
+}
+
+.oxxoLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.oxxoReference {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  word-break: break-all;
+}
+
+.copyButton {
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-white);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}
+
+/* Primary Action Button */
+.primaryActionButton {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  box-shadow: 0 2px 4px rgba(167, 43, 49, 0.2);
+}
+
+.primaryActionButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.primaryActionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile Card - Following established patterns */
+.mobileCard {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-neutral-200);
+  margin: 0 var(--space-4) var(--space-4);
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: var(--space-4);
+  background: var(--color-neutral-50);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.cardTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.cardContent {
+  padding: var(--space-4);
+}
+
+/* Info Items - Following mobile table patterns */
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-neutral-100);
+  min-height: 44px;
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-600);
+  flex: 0 0 40%;
+}
+
+.infoValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-900);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
+}
+
+/* Document Button */
+.documentButton {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+}
+
+.documentButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.documentButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading and Error States */
+.loadingState,
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.errorState h2 {
+  font-size: var(--font-size-xl);
+  color: var(--color-danger);
+  margin: 0 0 var(--space-3);
+}
+
+.errorState p {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-700);
+  margin: 0 0 var(--space-4);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.backButton:active {
+  transform: scale(0.95);
+}
+
+/* Small screens (360px) */
+@media (max-width: 360px) {
+  .mobileContainer {
+    padding-bottom: var(--space-5);
+  }
+  
+  .mobileHeader {
+    padding: var(--space-3);
+  }
+  
+  .headerTitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .permitContextCard,
+  .mobileCard {
+    margin-left: var(--space-3);
+    margin-right: var(--space-3);
+  }
+  
+  .permitId {
+    font-size: var(--font-size-base);
+  }
+  
+  .statusBadge {
+    font-size: var(--font-size-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+  
+  .cardHeader {
+    padding: var(--space-3);
+  }
+  
+  .cardContent {
+    padding: var(--space-3);
+  }
+  
+  .infoItem {
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-start;
+  }
+  
+  .infoLabel {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  
+  .infoValue {
+    flex: 1 1 100%;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* Remove dark mode to maintain consistent white background */

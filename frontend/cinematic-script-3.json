@@ -1,0 +1,303 @@
+{
+  "title": "LA CARRERA CONTRA EL TIEMPO - An Action Comedy",
+  "duration": "50 seconds",
+  "style": "Fast-paced action comedy with Mexican humor",
+  "music": "Mission Impossible meets Mariachi",
+  
+  "premise": "What if getting a permit was like an action movie?",
+  
+  "characters": {
+    "protagonist": {
+      "name": "Carlos 'El Rápido'",
+      "trait": "Always running late but optimistic",
+      "catchphrase": "¡No hay problema!"
+    },
+    "antagonist": {
+      "name": "El Reloj (The Clock)",
+      "representation": "Time itself as the villain"
+    }
+  },
+  
+  "scenes": [
+    {
+      "id": 1,
+      "title": "THE MISSION BRIEFING",
+      "duration": "5s",
+      "style": "Mission Impossible parody",
+      "shots": [
+        {
+          "type": "extreme-close-up",
+          "description": "Eyes opening dramatically",
+          "sound": "Dramatic sting"
+        },
+        {
+          "type": "quick-cuts",
+          "description": "Morning routine in fast motion",
+          "elements": [
+            "Alarm showing 6:00 AM",
+            "Coffee spilling",
+            "Tie being tied wrong",
+            "Keys dropping"
+          ]
+        },
+        {
+          "type": "freeze-frame",
+          "description": "Carlos realizes he needs permit TODAY",
+          "text_overlay": "MISIÓN: CONSEGUIR PERMISO",
+          "voiceover": "Tu misión, si decides aceptarla..."
+        }
+      ]
+    },
+    
+    {
+      "id": 2,
+      "title": "THE IMPOSSIBLE OBSTACLES",
+      "duration": "8s",
+      "style": "Action montage with comic timing",
+      "shots": [
+        {
+          "type": "slow-motion-run",
+          "description": "Carlos running to catch bus",
+          "twist": "Bus leaves just as he arrives",
+          "reaction": "¡No manches!"
+        },
+        {
+          "type": "GPS-view",
+          "description": "Map showing route to office",
+          "obstacles": [
+            "Traffic jam (red everywhere)",
+            "Construction zone",
+            "Manifestación (protest)",
+            "Taco truck blocking path (temptation)"
+          ],
+          "timer": "Countdown clock ticking"
+        },
+        {
+          "type": "parkour-sequence",
+          "description": "Carlos doing 'Mexican parkour'",
+          "comedy_elements": [
+            "Jumping over street vendor",
+            "Sliding under piñata",
+            "Dodging abuela with shopping cart"
+          ]
+        }
+      ],
+      "music": "Intense drums with accordion"
+    },
+    
+    {
+      "id": 3,
+      "title": "THE VILLAIN APPEARS",
+      "duration": "6s",
+      "shots": [
+        {
+          "type": "dramatic-reveal",
+          "description": "Office building in sight",
+          "camera": "Low angle, imposing"
+        },
+        {
+          "type": "horror-zoom",
+          "description": "Sign on door: 'CERRADO - INVENTARIO'",
+          "sound": "Record scratch, silence"
+        },
+        {
+          "type": "clock-montage",
+          "description": "Clocks everywhere ticking",
+          "effect": "Surreal, nightmarish",
+          "Carlos_reaction": "Slow-motion 'NOOOOOO!'"
+        }
+      ]
+    },
+    
+    {
+      "id": 4,
+      "title": "THE PLOT TWIST",
+      "duration": "7s",
+      "shots": [
+        {
+          "type": "phone-vibration",
+          "description": "Phone buzzes dramatically",
+          "slow_motion": "Carlos reaching for phone"
+        },
+        {
+          "type": "screen-glow",
+          "description": "Message from primo",
+          "text": "Wey, usa Permisos Digitales! 🚀",
+          "Carlos_face": "From despair to hope"
+        },
+        {
+          "type": "matrix-moment",
+          "description": "Carlos sees the code",
+          "visual": "Website appearing, angels singing",
+          "realization": "He doesn't need the office!"
+        }
+      ],
+      "music": "Heavenly choir meets mariachi"
+    },
+    
+    {
+      "id": 5,
+      "title": "THE TRANSFORMATION",
+      "duration": "8s",
+      "style": "Superhero transformation sequence",
+      "shots": [
+        {
+          "type": "power-up-sequence",
+          "description": "Carlos typing on phone",
+          "effects": [
+            "Lightning from fingers",
+            "Wind blowing papers",
+            "Dramatic backlighting"
+          ]
+        },
+        {
+          "type": "split-screen-race",
+          "left": "Carlos filling form relaxed",
+          "right": "Others still running to office",
+          "timer": "His timer going UP (more time saved)"
+        },
+        {
+          "type": "payment-moment",
+          "description": "Credit card swipe",
+          "effect": "Explosion of confetti",
+          "sound": "Mariachi triumph"
+        }
+      ]
+    },
+    
+    {
+      "id": 6,
+      "title": "THE VICTORY LAP",
+      "duration": "8s",
+      "shots": [
+        {
+          "type": "permit-arrival",
+          "description": "Email notification with fanfare",
+          "visual": "Permit descending from heavens"
+        },
+        {
+          "type": "celebration-montage",
+          "description": "Carlos celebrating",
+          "elements": [
+            "Victory dance in street",
+            "High-fiving strangers",
+            "Buying tacos for everyone",
+            "Permit printed and kissed"
+          ]
+        },
+        {
+          "type": "time-check",
+          "description": "Clock shows 6:30 AM",
+          "text": "Still time for breakfast!",
+          "Carlos": "Winks at camera"
+        }
+      ]
+    },
+    
+    {
+      "id": 7,
+      "title": "THE LESSON",
+      "duration": "6s",
+      "shots": [
+        {
+          "type": "freeze-frame-group",
+          "description": "People still in line at office",
+          "time": "3 hours later..."
+        },
+        {
+          "type": "testimonial-style",
+          "description": "Carlos to camera",
+          "dialogue": "¿Por qué correr cuando puedes clickear?",
+          "backdrop": "Beach, relaxing"
+        }
+      ]
+    },
+    
+    {
+      "id": 8,
+      "title": "THE BLOCKBUSTER ENDING",
+      "duration": "8s",
+      "style": "Marvel-style credits",
+      "shots": [
+        {
+          "type": "hero-pose",
+          "description": "Carlos as 'Permiso-Man'",
+          "costume": "Cape made of permits"
+        },
+        {
+          "type": "action-text",
+          "sequence": [
+            "NO MÁS FILAS",
+            "NO MÁS CARRERAS", 
+            "NO MÁS DRAMA"
+          ],
+          "effect": "Explosive appearance"
+        },
+        {
+          "type": "final-card",
+          "text": "PERMISOS DIGITALES",
+          "subtitle": "La película de tu vida tiene final feliz",
+          "CTA": "ÚNETE A LA ACCIÓN"
+        },
+        {
+          "type": "post-credits",
+          "scene": "Carlos eating tacos peacefully",
+          "text": "Carlos nunca volvió a correr... para un permiso"
+        }
+      ]
+    }
+  ],
+  
+  "visual_effects": {
+    "color_grading": "High contrast, saturated colors like Marvel",
+    "transitions": "Quick cuts, whip pans, crash zooms",
+    "special_effects": [
+      "Speed lines when running",
+      "Explosion effects on success",
+      "Comic book style POW! BAM! effects",
+      "Time dilation for dramatic moments"
+    ]
+  },
+  
+  "sound_design": {
+    "effects": [
+      "Whoosh sounds for quick movements",
+      "Ticking clocks getting louder",
+      "Mariachi stings for victories",
+      "Record scratches for plot twists",
+      "Angelic choir for solution reveal"
+    ],
+    "music_progression": [
+      "Mission Impossible theme → ",
+      "Chase music with Mexican instruments →",
+      "Silence/horror at closed office →",
+      "Heavenly revelation →",
+      "Triumphant mariachi finale"
+    ]
+  },
+  
+  "comedy_elements": [
+    "Physical comedy with Mexican twist",
+    "Telenovela-style dramatic reactions",
+    "Breaking the fourth wall",
+    "Absurdist humor (permit cape)",
+    "Relatable Mexican situations"
+  ],
+  
+  "hidden_messages": [
+    "Time is precious - don't waste it",
+    "Modern problems require modern solutions",
+    "Technology is your friend",
+    "Life doesn't have to be so hard",
+    "Choose smart, not hard"
+  ],
+  
+  "target_emotions": [
+    {"moment": "Opening", "feeling": "Amused recognition"},
+    {"moment": "Chase", "feeling": "Excited, laughing"},
+    {"moment": "Office closed", "feeling": "Oh no! (but funny)"},
+    {"moment": "Solution", "feeling": "Relief and joy"},
+    {"moment": "Success", "feeling": "Triumphant laughter"},
+    {"moment": "Ending", "feeling": "Motivated to act"}
+  ]
+}

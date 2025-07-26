@@ -1,0 +1,202 @@
+.testCardContainer {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #fff8e1; /* Light yellow background for attention */
+  border: 2px solid #ffc107; /* Warning yellow border */
+  border-radius: var(--border-radius);
+}
+
+.testCardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.infoIcon {
+  color: var(--color-info);
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.warningIcon {
+  color: #ff9800; /* Warning orange */
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.testCardHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #d32f2f; /* Red for emphasis */
+}
+
+.testCardDescription {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #d32f2f; /* Red for emphasis */
+  font-weight: 500;
+}
+
+.testCardList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.testCard {
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  position: relative;
+}
+
+.testCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
+}
+
+.recommendedCard {
+  border: 2px solid #4caf50; /* Green border for recommended card */
+  box-shadow: 0 4px 8px rgb(76 175 80 / 20%);
+}
+
+.recommendedCard:hover {
+  box-shadow: 0 6px 12px rgb(76 175 80 / 30%);
+}
+
+.recommendedBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #4caf50;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+}
+
+.testCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.testCardType {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+}
+
+.cardIcon {
+  margin-right: 0.5rem;
+  color: var(--color-primary);
+}
+
+.testCardStatus {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  background-color: #e9ecef;
+  color: var(--color-neutral-700);
+}
+
+.recommendedStatus {
+  background-color: #4caf50;
+  color: white;
+}
+
+.testCardDetails {
+  margin-bottom: 1rem;
+}
+
+.testCardField {
+  display: flex;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.fieldLabel {
+  width: 30%;
+  font-weight: 500;
+  color: var(--color-neutral-600);
+}
+
+.fieldValueContainer {
+  display: flex;
+  align-items: center;
+  width: 70%;
+}
+
+.fieldValue {
+  flex: 1;
+  font-family: monospace;
+  color: var(--color-neutral-800);
+}
+
+.copyButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.copyButton:hover {
+  color: var(--color-primary-dark);
+}
+
+.useCardButton {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.useCardButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.recommendedButton {
+  background-color: #4caf50; /* Green for recommended */
+  font-weight: 600;
+  padding: 0.75rem 0.5rem;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 4px rgb(76 175 80 / 30%);
+}
+
+.recommendedButton:hover {
+  background-color: #388e3c; /* Darker green on hover */
+  box-shadow: 0 4px 8px rgb(76 175 80 / 40%);
+}
+
+@media (width <= 768px) {
+  .testCardList {
+    grid-template-columns: 1fr;
+  }
+}

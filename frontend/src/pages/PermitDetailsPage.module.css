@@ -1,0 +1,1380 @@
+/* Permit Details Hub Styles - Soft & Trustworthy Design */
+.pageWrapper {
+  /* max-width and padding now handled by ResponsiveContainer */
+  width: 100%;
+}
+
+/* Breadcrumbs styles */
+.breadcrumbs {
+  margin-bottom: 1rem;
+}
+
+/* Page Header with Title and Back Button */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-neutral-200);
+  width: 100%;
+}
+
+.title {
+  font-size: 1.75rem;
+  color: var(--color-primary-dark);
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  background-color: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.backButton:hover {
+  color: var(--color-primary-dark);
+  background-color: var(--color-neutral-100);
+  transform: translateY(-1px);
+}
+
+/* Two-Column Layout */
+.mainTwoColumnContainer {
+  display: flex;
+  gap: 32px;
+  margin-bottom: var(--space-5);
+  width: 100%;
+}
+
+/* Permit Context Header Card */
+.permitContextHeaderCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 24px;
+  border: 1px solid var(--color-neutral-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Left Side of Context Header */
+.contextHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Right Side of Context Header */
+.contextHeaderRight {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+/* Permit ID */
+.contextPermitId {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
+/* Status Pill */
+.contextStatusPill {
+  display: flex;
+}
+
+/* Primary Action Button */
+.contextPrimaryButton {
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  min-width: 200px;
+}
+
+.contextPrimaryButton:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgb(0 0 0 / 15%);
+}
+
+.contextPrimaryButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+.contextPrimaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* OXXO Reference Block */
+.contextOxxoBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contextOxxoLabel {
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+  font-weight: var(--font-weight-medium);
+}
+
+.contextOxxoRefValue {
+  font-family: var(--font-family-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  background-color: var(--color-neutral-50);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--color-neutral-200);
+}
+
+.contextCopyButton {
+  background-color: var(--color-neutral-200);
+  border: none;
+  color: var(--color-neutral-700);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.contextCopyButton:hover {
+  background-color: var(--color-neutral-300);
+}
+
+/* Key Date */
+.contextKeyDate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--color-neutral-600);
+}
+
+.contextKeyDateExpiring {
+  color: var(--color-warning-dark);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* These styles have been moved to the top of the file */
+
+/* Tabbed Interface Section */
+.tabbedInterfaceSection {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: var(--box-shadow);
+  overflow-wrap: break-word; /* Ensure content wraps correctly */
+
+  /* word-break: break-word; */
+
+  /* Additional wrapping for long content - replaced by overflow-wrap */
+  border: 1px solid var(--color-neutral-200);
+  margin-bottom: 24px;
+}
+
+/* Tab Headers */
+.tabsContainer {
+  margin-bottom: 24px;
+}
+
+.tabHeader {
+  display: flex;
+  border-bottom: 1px solid var(--color-neutral-200);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.tabItem {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tabItem:hover {
+  color: var(--color-primary);
+}
+
+.tabItemActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Tab Panels */
+.tabPanel {
+  display: none;
+}
+
+.tabPanelActive {
+  display: block;
+}
+
+/* Tab Panel Subheadings */
+.tabSubheading {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-dark);
+  margin: 24px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.tabSubheading:first-child {
+  margin-top: 0;
+}
+
+/* Info Rows for Tab Content */
+.infoRow {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--color-neutral-100);
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoTabLabel {
+  flex-basis: 35%;
+  color: var(--text-secondary, var(--color-neutral-600));
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.infoTabValue {
+  flex-basis: 65%;
+  color: var(--text-primary, var(--color-neutral-900));
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: break-word;
+}
+
+/* Status Tab Panel */
+.statusTabPanel {
+  padding: 0;
+}
+
+.statusTabInstructionHeader {
+  font-size: 1.4rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusInstructionsPanel {
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid var(--color-neutral-200);
+}
+
+.statusInstructionsText {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-neutral-700);
+  margin-bottom: 20px;
+}
+
+.oxxoInstructionsHeader {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-dark);
+  margin: 24px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.oxxoPaymentDetails {
+  background-color: white;
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-neutral-200);
+}
+
+.oxxoPaymentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--color-neutral-200);
+}
+
+.oxxoPaymentItem:last-child {
+  border-bottom: none;
+}
+
+.oxxoPaymentLabel {
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+}
+
+.oxxoPaymentValue {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  font-family: var(--font-family-mono);
+}
+
+.oxxoInstructionsSteps {
+  margin-top: 20px;
+}
+
+.oxxoInstructionsSteps p {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* Primary Action Button styles have been moved to the top of the file */
+
+/* Tab Panel Styles */
+.statusTabPanel,
+.permitInfoTabPanel,
+.vehicleInfoTabPanel,
+.applicantInfoTabPanel {
+  /* Remove padding as it's now handled by Tabs component */
+  padding: 0;
+}
+
+/* Status Tab Panel Specific Styles */
+.statusTimelineSection {
+  margin-bottom: var(--space-5);
+  padding: var(--space-3);
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+}
+
+/* .statusInstructionsPanel removed, consolidated with definition around line 313 */
+
+.statusInstructionsTitle {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-dark);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statusInstructionsContent {
+  color: var(--color-neutral-800);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.statusInstructionsIcon {
+  color: var(--color-primary);
+  font-size: 1.4rem;
+}
+
+.statusInstructionsIcon.statusInstructionsIconDanger {
+  color: var(--color-danger);
+}
+
+.statusInstructionsIcon.statusInstructionsIconSuccess {
+  color: var(--color-success);
+}
+
+.statusInstructionsIcon.statusInstructionsIconWarning {
+  color: var(--color-warning);
+}
+
+.oxxoVoucherNote {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.oxxoVoucherNote p {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+/* Payment Status Card */
+
+/* .oxxoInstructionsHeader (around line 509) removed, consolidated with definition around line 327 */
+.paymentStatusCard {
+  background-color: rgb(var(--color-info-rgb), 0.05);
+  border: 1px solid var(--color-info-light);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.paymentStatusMessage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.paymentStatusMessage p {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-800);
+  line-height: 1.5;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* Info Labels and Values */
+.infoSection {
+  margin-bottom: var(--space-4);
+}
+
+.infoCard {
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.infoItem {
+  display: flex;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--color-neutral-200);
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.infoLabel {
+  flex: 0 0 40%;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-600);
+}
+
+.infoValue {
+  flex: 0 0 60%;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+}
+
+/* OXXO Payment Instructions */
+.oxxoInstructions {
+  background-color: rgb(var(--color-warning-rgb), 0.05);
+  border: 1px solid var(--color-warning-light);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+}
+
+/* Duplicate .oxxoInstructionsHeader removed from here */
+
+.oxxoInstructionsIcon {
+  color: var(--color-warning);
+  font-size: 1.4rem;
+}
+
+.oxxoInstructionsTitle {
+  color: var(--color-warning-dark);
+  font-size: 1.2rem;
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.oxxoInstructions p {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-neutral-800);
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.oxxoInstructions p:last-child {
+  margin-bottom: 0;
+}
+
+.oxxoReferenceContainer {
+  background-color: white;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+
+.infoValueImportant {
+  font-weight: var(--font-weight-bold);
+  font-size: 1.15rem;
+  color: var(--color-neutral-900);
+  background-color: rgb(var(--color-warning-rgb), 0.1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  display: inline-block;
+  margin-right: var(--space-2);
+}
+
+.infoValueWarning {
+  font-style: italic;
+  color: var(--color-neutral-600);
+  font-size: 0.95rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  display: inline-block;
+}
+
+.oxxoPaymentValueWarning {
+  font-style: italic;
+  color: var(--color-neutral-600);
+  font-size: 0.95rem;
+  width: 100%;
+  word-break: break-all;
+}
+
+/* Copy Reference Button */
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-neutral-100);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius);
+  color: var(--color-neutral-700);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  background-color: var(--color-neutral-200);
+}
+
+.copyButtonIcon {
+  font-size: 0.9rem;
+}
+
+/* Rejection Reason */
+.rejectionReason {
+  background-color: rgb(var(--color-danger-rgb), 0.05);
+  border: 1px solid var(--color-danger-light);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.rejectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.rejectionIcon {
+  color: var(--color-danger);
+  font-size: 1.2rem;
+}
+
+.rejectionTitle {
+  color: var(--color-danger);
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.rejectionReason p {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-neutral-800);
+  line-height: 1.5;
+}
+
+.rejectionReason p:last-child {
+  margin-bottom: 0;
+}
+
+.detailItem {
+  display: flex;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--color-neutral-200);
+}
+
+.detailItem:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.detailLabel {
+  flex: 0 0 40%;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+}
+
+.detailValue {
+  flex: 0 0 60%;
+  color: var(--color-neutral-900);
+}
+
+.viewLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.viewLink:hover {
+  text-decoration: underline;
+}
+
+/* Support Footer */
+.supportFooter {
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  text-align: center;
+  border: 1px solid var(--color-neutral-200);
+  margin-top: var(--space-5);
+  width: 100%;
+}
+
+/* .supportFooter (around line 1066) removed, consolidated with definition around line 667 */
+
+/* .supportFooterText (around line 1075) removed, consolidated with definition around line 673 */
+.supportFooterText {
+  color: var(--color-neutral-700);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.loadingContainer p {
+  margin-top: var(--space-3);
+  color: var(--color-neutral-600);
+}
+
+.errorContainer h2 {
+  color: var(--color-danger);
+  margin-bottom: var(--space-2);
+}
+
+.errorContainer p {
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-4);
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Simulation Controls Styles */
+.simulationControls {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.simulationCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  box-shadow: var(--box-shadow);
+  border-left: 4px solid var(--bs-info);
+}
+
+.simulationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.simulationTitle {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--bs-info);
+}
+
+.simulationBadge {
+  background-color: var(--bs-info);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.simulationSection {
+  margin-bottom: var(--space-3);
+}
+
+.simulationSection h3 {
+  font-size: 1rem;
+  margin-bottom: var(--space-2);
+  color: var(--color-neutral-700);
+}
+
+.simulationStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.simulationButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.simulationButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-neutral-300);
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.simulationButton:hover {
+  background-color: var(--color-neutral-100);
+}
+
+.simulationButtonActive {
+  background-color: var(--bs-info);
+  color: white;
+  border-color: var(--bs-info);
+}
+
+.simulationButtonActive:hover {
+  background-color: var(--bs-info-dark);
+}
+
+.simulationFooter {
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-neutral-200);
+  font-size: 0.9rem;
+  color: var(--color-neutral-600);
+}
+
+/* Responsive styles */
+@media (width >= 769px) {
+  .contextPrimaryActions {
+    margin-top: var(--space-3);
+  }
+}
+
+@media (width <= 768px) {
+  /* Page wrapper responsive styles */
+  .pageWrapper {
+    padding: 16px;
+  }
+
+  /* Page header responsive styles */
+  .pageHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+
+  .title {
+    margin-bottom: 8px;
+  }
+
+  .backButton {
+    margin-right: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Permit Context Header Card on mobile */
+  .permitContextHeaderCard {
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .contextHeaderLeft {
+    align-items: center;
+    width: 100%;
+  }
+
+  .contextHeaderRight {
+    align-items: center;
+    width: 100%;
+  }
+
+  .contextPermitId {
+    text-align: center;
+  }
+
+  .contextStatusPill {
+    justify-content: center;
+  }
+
+  .contextPrimaryButton {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .contextOxxoBlock {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .contextOxxoRefValue {
+    width: 100%;
+    text-align: center;
+  }
+
+  .contextCopyButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .contextKeyDate {
+    justify-content: center;
+  }
+
+  /* Tabbed Interface Section on mobile */
+  .tabbedInterfaceSection {
+    padding: 16px;
+  }
+
+  /* Tab headers on mobile */
+  .tabHeader {
+    overflow-x: auto;
+    padding-bottom: 4px; /* Space for scrollbar */
+    scroll-behavior: smooth;
+  }
+
+  .tabItem {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Status tab panel on mobile */
+  .statusTabInstructionHeader {
+    font-size: 1.2rem;
+  }
+
+  .statusInstructionsPanel {
+    padding: 16px;
+  }
+
+  .oxxoPaymentItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .oxxoPaymentValue {
+    width: 100%;
+    word-break: break-all;
+  }
+
+  /* Tab content on mobile */
+  .tabSubheading {
+    font-size: 1rem;
+    margin: 20px 0 12px;
+  }
+
+  /* Info rows stack on mobile */
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+
+  .infoTabLabel {
+    width: 100%;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .infoTabValue {
+    width: 100%;
+    font-weight: 500;
+  }
+
+  /* Info items stack on mobile */
+  .infoItem {
+    flex-direction: column;
+  }
+
+  .infoLabel {
+    flex: 0 0 100%;
+    margin-bottom: 4px;
+  }
+
+  .infoValue {
+    flex: 0 0 100%;
+  }
+}
+
+/* Documents Section */
+.documentsSection {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: var(--box-shadow);
+  border: 1px solid var(--color-neutral-200);
+  margin-bottom: 24px;
+}
+
+.documentsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.documentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.documentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.documentInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.documentIcon {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+.documentName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-800);
+}
+
+.downloadButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(
+    --color-primary,
+    #a72b31
+  ); /* Updated from var(--rojo) to canonical var(--color-primary) */
+
+  color: white;
+  border: none;
+  border-radius: var(--border-radius, 4px);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.downloadButton:hover {
+  background-color: var(
+    --color-primary-dark,
+    #852d2d
+  ); /* Updated from var(--rojofuerte) to canonical var(--color-primary-dark) */
+
+  color: white; /* Explicitly set text color on hover to ensure visibility */
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%); /* Add box-shadow for visual consistency with standard buttons */
+}
+
+.downloadButton:hover .downloadIcon {
+  transform: translateX(3px); /* Add icon animation on hover */
+}
+
+.downloadButton:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%); /* Reduced shadow for active state */
+  color: white; /* Ensure text remains visible in active state */
+}
+
+.downloadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.downloadIcon {
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+
+/* Download All Button */
+.downloadAllButton {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 12px 20px;
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.downloadAllButton:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 6px 16px rgb(167 43 49 / 35%);
+}
+
+.downloadAllButton:active {
+  box-shadow: 0 4px 8px rgb(167 43 49 / 30%);
+}
+
+/* Individual Document Download Button */
+.documentDownloadButton {
+  padding: 8px 16px !important;
+  font-size: 0.9rem !important;
+  min-width: 120px;
+}
+
+.documentDownloadButton span {
+  display: inline-block;
+}
+
+/* Support Footer */
+
+/* Duplicate .supportFooter removed from here */
+
+/* Duplicate .supportFooterText removed from here */
+
+/* Media Queries for Document Section */
+@media (width <= 768px) {
+  .documentItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .downloadButton {
+    width: 100%;
+    justify-content: center;
+    background-color: var(
+      --color-primary,
+      #a72b31
+    ); /* Explicitly set for mobile to ensure it's applied */
+
+    color: white; /* Ensure text is visible */
+  }
+
+  .documentInfo {
+    width: 100%;
+  }
+
+  .documentName {
+    font-size: 0.95rem;
+  }
+}
+
+/* Responsive Styles for Mobile */
+@media (width <= 768px) {
+  .pageWrapper {
+    padding: 16px;
+  }
+
+  .mainTwoColumnContainer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+  }
+
+  .contextPrimaryButton {
+    min-width: auto;
+    width: 100%;
+    min-height: 44px; /* Touch-friendly size */
+  }
+
+  .permitContextHeaderCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .contextHeaderRight {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .infoTabLabel {
+    flex-basis: 40%;
+  }
+
+  .infoTabValue {
+    flex-basis: 60%;
+  }
+
+  .documentsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .backButton {
+    min-height: 44px; /* Touch-friendly size */
+  }
+
+  .tabItem {
+    min-height: 44px; /* Touch-friendly size */
+    padding: 12px;
+  }
+
+  .tabbedInterfaceSection {
+    padding: 16px;
+  }
+
+  .contextCopyButton {
+    min-height: 44px; /* Touch-friendly size */
+    min-width: 44px; /* Touch-friendly size */
+  }
+}
+
+/* Small mobile devices */
+@media (width <= 480px) {
+  .pageWrapper {
+    padding: 12px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .backButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .permitContextHeaderCard {
+    padding: 12px;
+  }
+
+  .contextPermitId {
+    font-size: 1.1rem;
+  }
+
+  .tabHeader {
+    gap: 8px;
+  }
+
+  .tabItem {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .infoTabLabel {
+    flex-basis: 100%;
+  }
+
+  .infoTabValue {
+    flex-basis: 100%;
+  }
+
+  .statusTabInstructionHeader {
+    font-size: 1.2rem;
+  }
+
+  .statusInstructionsPanel {
+    padding: 12px;
+  }
+
+  .oxxoPaymentItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+/* Extra small devices - optimized for 360px width (common in Mexico) */
+@media (width <= 360px) {
+  .pageWrapper {
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .contextPermitId {
+    font-size: 1rem;
+  }
+
+  .tabItem {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .tabbedInterfaceSection {
+    padding: 12px;
+  }
+
+  .statusInstructionsText {
+    font-size: 0.9rem;
+  }
+
+  .oxxoPaymentValue {
+    font-size: 1rem;
+  }
+}
+
+/* Spinning animation for loading icons */
+
+.spinning {
+  animation: spin var(--animation-duration-base) linear infinite;
+}
+
+/* Payment processing note styles */
+.paymentProcessingNote {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-info-bg);
+  border: 1px solid var(--color-info-border);
+  border-radius: var(--border-radius);
+  color: var(--color-info-text);
+  font-size: 0.9rem;
+}
+
+.paymentProcessingNote svg {
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+/* No Documents Message */
+.noDocumentsMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  border: 1px dashed var(--color-neutral-300);
+}
+
+.noDocumentsMessage p {
+  margin: 0;
+  color: var(--color-neutral-600);
+  font-size: 0.95rem;
+}
+
+.warningIcon {
+  font-size: 2rem;
+  color: var(--color-warning);
+  opacity: 0.6;
+}

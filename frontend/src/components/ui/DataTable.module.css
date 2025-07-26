@@ -1,0 +1,465 @@
+/* DataTable Component Styles */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: var(--space-4);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tableHeader {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  border-bottom: 2px solid var(--color-neutral-200);
+}
+
+.tableHeader th {
+  padding: var(--space-3);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.sortableColumn {
+  cursor: pointer;
+}
+
+.nonSortableColumn {
+  cursor: default;
+}
+
+.tableHeader th:hover {
+  background-color: var(--color-neutral-200);
+}
+
+.sortIcon {
+  margin-left: var(--space-1);
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+.sortAsc {
+  border-bottom: 5px solid var(--color-neutral-600);
+}
+
+.sortDesc {
+  border-top: 5px solid var(--color-neutral-600);
+}
+
+.tableBody tr {
+  border-bottom: 1px solid var(--color-neutral-200);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.nonClickableRow {
+  cursor: default;
+}
+
+.tableBody tr:last-child {
+  border-bottom: none;
+}
+
+.tableBody tr:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.tableBody td {
+  padding: var(--space-3);
+  color: var(--color-neutral-800);
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--color-neutral-600);
+  font-style: italic;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  min-width: 100px;
+}
+
+.statusDraft {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-800);
+}
+
+.statusSubmitted {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.statusUnderReview {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.statusApproved {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.statusRejected {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.statusExpired {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-700);
+}
+
+.statusRevoked {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+.statusPendingPayment {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+}
+
+.statusPaymentVerification {
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+}
+
+.actionButton {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.actionButtonSecondary {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-800);
+}
+
+.actionButtonSecondary:hover {
+  background-color: var(--color-neutral-300);
+}
+
+.actionButtonWarning {
+  background-color: var(--color-warning);
+  color: var(--color-white);
+}
+
+.actionButtonWarning:hover {
+  background-color: var(--color-warning-dark);
+}
+
+.actionButtonDanger {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+}
+
+.actionButtonDanger:hover {
+  background-color: var(--color-danger-dark);
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-neutral-50);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.paginationButton {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-300);
+  color: var(--color-neutral-800);
+  padding: 0.25rem 0.5rem;
+  margin: 0 0.25rem;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-400);
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationActive {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.paginationActive:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+}
+
+.paginationInfo {
+  margin: 0 var(--space-2);
+  color: var(--color-neutral-600);
+  font-size: 0.9rem;
+}
+
+/* Tablet: Enhanced horizontal scrolling */
+@media (width <= 992px) and (width >= 577px) {
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+
+  /* Make the table header sticky */
+  .tableHeader th {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-neutral-100);
+    z-index: 1;
+  }
+
+  /* Adjust action buttons to be more tappable */
+  .actionButton {
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-1);
+    min-width: 80px;
+    text-align: center;
+  }
+}
+
+/* Mobile: Enhanced Card-based layout */
+@media (width <= 576px) {
+  .tableContainer {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .table {
+    border: none;
+    background: transparent;
+  }
+
+  .tableHeader {
+    display: none; /* Hide the table header on mobile */
+  }
+
+  .tableBody {
+    display: block;
+  }
+
+  /* Card-style rows with improved visual hierarchy */
+  .tableBody tr {
+    display: block;
+    margin-bottom: 16px;
+    background-color: var(--color-white);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    border: 1px solid var(--color-neutral-200);
+    overflow: hidden; /* Ensure border radius is applied to children */
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  /* Add hover effect for clickable rows */
+  .tableBody tr.clickableRow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  }
+
+  /* Highlight the first cell as a header for each card */
+  .tableBody tr td:first-child {
+    background-color: var(--color-neutral-100);
+    border-bottom: 2px solid var(--color-neutral-200);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-neutral-900);
+  }
+
+  /* Improved cell styling */
+  .tableBody td {
+    display: flex;
+    padding: 14px 16px; /* Increased padding for better touch targets */
+    text-align: right;
+    border-bottom: 1px solid var(--color-neutral-100);
+    min-height: 44px; /* Minimum height for touch targets */
+    align-items: center; /* Center content vertically */
+    word-break: break-word; /* Prevent text overflow */
+  }
+
+  /* Ensure action buttons have adequate touch targets */
+  .tableBody td button,
+  .tableBody td a {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    margin: 4px;
+    border-radius: 6px;
+  }
+
+  .tableBody td:last-child {
+    border-bottom: none;
+    background-color: var(--color-neutral-50); /* Subtle background for action area */
+    padding: 12px;
+  }
+
+  /* Improved labels for each cell */
+  .tableBody td::before {
+    content: attr(data-label);
+    font-weight: var(--font-weight-semibold);
+    margin-right: auto;
+    text-align: left;
+    color: var(--color-neutral-600);
+    padding-right: 12px; /* Space between label and value */
+    flex-shrink: 0; /* Prevent label from shrinking */
+    width: 40%; /* Fixed width for labels */
+  }
+
+  /* Adjust action buttons layout */
+  .tableBody td:last-child {
+    flex-flow: row wrap; /* Change to row for better usability */ /* Allow wrapping for multiple buttons */
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px; /* Space between buttons */
+  }
+
+  /* Style for action buttons in mobile view */
+  .tableBody td:last-child button,
+  .tableBody td:last-child a {
+    margin: 4px;
+    flex: 0 0 auto; /* Don't stretch buttons */
+    white-space: nowrap;
+  }
+
+  /* Status badges in mobile view */
+  .status {
+    min-width: auto;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Adjust pagination for mobile */
+  .pagination {
+    justify-content: space-between; /* Better spacing */
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: var(--color-white);
+    margin-top: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  }
+
+  .paginationButton {
+    padding: 8px 12px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .paginationInfo {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+    color: var(--color-neutral-700);
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra small mobile devices (360px and below) - Optimized for Mexican market */
+@media (width <= 360px) {
+  .tableContainer {
+    margin: 0 -8px; /* Negative margin to allow full width in padded containers */
+    width: calc(100% + 16px);
+  }
+
+  .tableBody td {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tableBody td::before {
+    width: 100%;
+    margin-bottom: 6px;
+    padding-right: 0;
+  }
+
+  .tableBody td:not(:first-child) {
+    text-align: left;
+  }
+
+  /* Adjust action buttons for very small screens */
+  .tableBody td:last-child {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tableBody td:last-child button,
+  .tableBody td:last-child a {
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  /* Simplify pagination on very small screens */
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .paginationButton {
+    margin: 2px 0;
+  }
+}

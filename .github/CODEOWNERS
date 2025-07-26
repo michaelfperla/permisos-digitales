@@ -1,0 +1,34 @@
+# Global code owners
+* @michaelfperla
+
+# Backend code
+/src/ @michaelfperla
+/routes/ @michaelfperla
+/middleware/ @michaelfperla
+/config/ @michaelfperla
+
+# Frontend code
+/frontend/ @michaelfperla
+/public/ @michaelfperla
+
+# Database and migrations
+/migrations/ @michaelfperla
+/seeds/ @michaelfperla
+
+# Configuration files
+package.json @michaelfperla
+package-lock.json @michaelfperla
+.env.example @michaelfperla
+docker-compose.yml @michaelfperla
+
+# CI/CD and GitHub configuration
+/.github/ @michaelfperla
+.gitignore @michaelfperla
+
+# Documentation
+*.md @michaelfperla
+/docs/ @michaelfperla
+
+# Security and deployment
+/scripts/ @michaelfperla
+/deployment/ @michaelfperla

@@ -1,0 +1,70 @@
+/* Generic Navigation Styles */
+
+/* Base navigation link styles */
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  min-height: 40px; /* Consistent with button heights */
+  color: var(--color-neutral-700);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.navLink:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-lightest);
+}
+
+.navLink.active {
+  color: var(--color-primary);
+  font-weight: 600;
+  background-color: var(--color-primary-lightest);
+}
+
+/* Navigation list styles */
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.navItem {
+  margin: 0;
+}
+
+/* Vertical navigation */
+.navVertical .navList {
+  flex-direction: column;
+}
+
+.navVertical .navLink {
+  width: 100%;
+}
+
+/* Responsive styles */
+@media (width <= 768px) {
+  .navLink {
+    padding: 10px 14px;
+    min-height: 44px; /* Touch-friendly on mobile */
+  }
+}
+
+@media (width <= 480px) {
+  .navLink {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (width <= 360px) {
+  .navLink {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+}

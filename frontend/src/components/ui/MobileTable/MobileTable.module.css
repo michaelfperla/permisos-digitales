@@ -1,0 +1,285 @@
+/* MobileTable Component Styles */
+
+/* Table Container */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: var(--space-4);
+}
+
+/* Standard Table Styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tableHeader {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  border-bottom: 2px solid var(--color-neutral-200);
+}
+
+.tableHeader th {
+  padding: var(--space-3);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.sortableColumn {
+  cursor: pointer;
+}
+
+.nonSortableColumn {
+  cursor: default;
+}
+
+.tableHeader th:hover {
+  background-color: var(--color-neutral-200);
+}
+
+/* Align action column header with its content */
+.actionsColumnHeader {
+  text-align: center !important;
+}
+
+.sortIcon {
+  margin-left: var(--space-1);
+  display: inline-block;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.sortAsc {
+  color: var(--color-primary);
+}
+
+.sortDesc {
+  color: var(--color-primary);
+}
+
+.tableBody tr {
+  border-bottom: 1px solid var(--color-neutral-200);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.nonClickableRow {
+  cursor: default;
+}
+
+.tableBody tr:last-child {
+  border-bottom: none;
+}
+
+.tableBody tr:hover {
+  background-color: var(--color-neutral-50);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.tableBody td {
+  padding: var(--space-3);
+  color: var(--color-neutral-800);
+}
+
+/* Empty Message */
+.emptyMessage {
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--color-neutral-600);
+  font-style: italic;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-neutral-50);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.paginationButton {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-neutral-300);
+  color: var(--color-neutral-800);
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.25rem;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-400);
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.paginationInfo {
+  margin: 0 var(--space-2);
+  color: var(--color-neutral-600);
+  font-size: 0.9rem;
+}
+
+/* Mobile Card View */
+.mobileCards {
+  display: none;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  .tableContainer {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 650px;
+  }
+
+  /* Make the table header sticky */
+  .tableHeader th {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-neutral-100);
+    z-index: 1;
+  }
+}
+
+/* Mobile: Card-based layout */
+@media (width <= 576px) {
+  .table {
+    display: none;
+  }
+
+  .mobileCards {
+    display: block;
+  }
+
+  .mobileCard {
+    background-color: var(--color-white);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    border: 1px solid var(--color-neutral-200);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .clickableCard {
+    cursor: pointer;
+  }
+
+  .clickableCard:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  }
+
+  .mobileCardItem {
+    display: flex;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-neutral-100);
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .mobileCardItem:first-child {
+    background-color: var(--color-neutral-100);
+    border-bottom: 2px solid var(--color-neutral-200);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .mobileCardItem:last-child {
+    border-bottom: none;
+  }
+
+  .mobileCardLabel {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-neutral-600);
+    width: 40%;
+    padding-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .mobileCardValue {
+    flex: 1;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  /* Adjust pagination for mobile */
+  .pagination {
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: var(--color-white);
+    margin-top: 8px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  }
+
+  .paginationButton {
+    padding: 8px 12px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .paginationInfo {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra small devices (360px and below) */
+@media (width <= 360px) {
+  .mobileCardItem {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mobileCardLabel {
+    width: 100%;
+    margin-bottom: 6px;
+    padding-right: 0;
+  }
+
+  .mobileCardValue {
+    width: 100%;
+    text-align: left;
+  }
+
+  /* Simplify pagination on very small screens */
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .paginationButton {
+    margin: 2px 0;
+  }
+}

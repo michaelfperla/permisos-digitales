@@ -1,0 +1,382 @@
+/* Mobile Navigation Styles */
+
+/* ===== Bottom Navigation Bar ===== */
+.bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-white);
+  box-shadow: 0 -2px 10px rgb(0 0 0 / 10%);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: var(--z-modal, 1000);
+  height: 60px;
+}
+
+.bottomNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-width: 60px;
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 8px;
+  margin: 0 2px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.bottomNavItem:active {
+  transform: scale(0.95);
+  background-color: var(--color-neutral-100);
+}
+
+.bottomNavItem.active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-lightest);
+}
+
+.bottomNavItem:hover {
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-800);
+}
+
+/* Reset button styles to match nav items */
+.bottomNavItem[type="button"] {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.navIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.bottomNavLabel {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ===== Drawer Navigation ===== */
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--color-neutral-700);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: var(--z-overlay, 1001);
+}
+
+.menuButton:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+}
+
+.menuButton:active {
+  transform: scale(0.95);
+  background-color: var(--color-neutral-200);
+}
+
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 50%);
+  z-index: var(--z-overlay, 1002);
+  animation: fadeIn 0.3s ease;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: var(--color-neutral-900);
+  color: var(--color-white);
+  box-shadow: -2px 0 12px rgb(0 0 0 / 10%);
+  z-index: var(--z-tooltip, 1003);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-3);
+  height: 56px;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--color-neutral-300);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: rgb(255 255 255 / 10%);
+  color: var(--color-white);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  background-color: rgb(255 255 255 / 10%);
+}
+
+/* User Info Section */
+.drawerUser {
+  padding: var(--space-3);
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  color: var(--color-white);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 70%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawerNav {
+  list-style: none;
+  padding: var(--space-2) 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.drawerNavItem {
+  margin: 2px 0;
+}
+
+.drawerNavLink {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-3);
+  margin: 0 var(--space-2) var(--space-1);
+  color: rgb(255 255 255 / 80%);
+  text-decoration: none;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.15s ease;
+  min-height: 44px;
+  gap: var(--space-3);
+}
+
+.drawerNavLink:hover {
+  background-color: rgb(255 255 255 / 10%);
+  color: var(--color-white);
+}
+
+.drawerNavLink:active {
+  background-color: rgb(255 255 255 / 15%);
+}
+
+.drawerNavLink.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Reset button styles for drawer nav to match links */
+.drawerNavLink[type="button"] {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  width: 100%;
+  text-align: left;
+}
+
+/* Drawer Legal Links */
+.drawerLegalLinks {
+  margin-top: auto;
+  padding: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgb(255 255 255 / 15%);
+}
+
+.drawerLegalLink {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-1) 0;
+  color: rgb(255 255 255 / 60%);
+  text-decoration: none;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.15s ease;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.drawerLegalLink:hover {
+  background-color: rgb(255 255 255 / 5%);
+  color: rgb(255 255 255 / 80%);
+}
+
+.drawerLegalIcon {
+  font-size: var(--font-size-base);
+  opacity: 0.7;
+}
+
+/* Drawer Footer */
+.drawerFooter {
+  padding: var(--space-4) var(--space-3);
+  padding-bottom: calc(var(--space-4) + var(--safe-area-inset-bottom));
+  border-top: 2px solid rgb(255 255 255 / 15%);
+  margin-top: var(--space-2);
+  background-color: transparent;
+}
+
+.footerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Remove the active indicator bar */
+
+.drawerNavIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 1.1rem;
+}
+
+.drawerNavLabel {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (width >= 769px) {
+  /* Hide mobile navigation on larger screens */
+  .bottomNav,
+  .menuButton,
+  .drawer,
+  .drawerOverlay {
+    display: none;
+  }
+}
+
+/* Extra small devices (360px and below) */
+@media (width <= 360px) {
+  .bottomNav {
+    height: 56px;
+    padding: 4px 0;
+  }
+
+  .bottomNavItem {
+    padding: 6px 8px;
+    min-width: 48px;
+  }
+
+  .navIcon {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .bottomNavLabel {
+    font-size: 10px;
+  }
+
+  .drawer {
+    width: 260px;
+  }
+
+  .drawerHeader,
+  .drawerUser,
+  .drawerFooter {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .drawerNavLink {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .drawerNavLabel {
+    font-size: 0.85rem;
+  }
+
+  .drawerNavIcon {
+    font-size: 1rem;
+  }
+
+  .userName {
+    font-size: 0.85rem;
+  }
+
+  .userEmail {
+    font-size: 0.75rem;
+  }
+}

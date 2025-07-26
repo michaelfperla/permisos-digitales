@@ -1,0 +1,460 @@
+/* Mobile-First Permits List Design */
+
+.mobileContainer {
+  min-height: 100vh;
+  background: var(--color-neutral-100);
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--space-6) + 80px); /* Space for FAB */
+}
+
+/* Pull to refresh */
+.refreshIndicator {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: var(--color-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  animation: slideDown 0.3s ease;
+}
+
+.refreshIcon {
+  animation: spin var(--animation-duration-base) linear infinite;
+  color: var(--color-primary);
+}
+
+/* Header */
+.mobileHeader {
+  background: var(--color-white);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.mobileTitle {
+  font-size: var(--font-size-fluid-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.filterButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-neutral-100);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  color: var(--color-neutral-700);
+}
+
+.filterButton:active {
+  transform: scale(0.95);
+  background: var(--color-neutral-200);
+}
+
+.filterBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+}
+
+/* Search */
+.searchContainer {
+  background: var(--color-white);
+  padding: 0 var(--space-5) var(--space-4);
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
+  background: var(--color-neutral-100);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-base);
+  transition: all 0.2s ease;
+  
+  /* Prevent zoom on iOS */
+  font-size: 16px;
+}
+
+.searchInput:focus {
+  outline: none;
+  background: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.searchIcon {
+  position: absolute;
+  left: calc(var(--space-5) + var(--space-3));
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neutral-500);
+  pointer-events: none;
+}
+
+/* Filter Pills */
+.filterPills {
+  background: var(--color-white);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: 1px solid var(--color-neutral-200);
+  animation: slideDown 0.2s ease;
+}
+
+.filterPill {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-white);
+  border: 2px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+}
+
+.filterPill:active {
+  transform: scale(0.98);
+}
+
+.filterPill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.filterCount {
+  background: var(--color-neutral-100);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-sm);
+  min-width: 24px;
+  text-align: center;
+}
+
+.filterPill.active .filterCount {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Permits List */
+.permitsList {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Permit Card */
+.permitCard {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-neutral-100);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 120px; /* Increased to accommodate action buttons */
+  
+  /* Touch optimization */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.permitCard:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.cardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0; /* Allow text truncation */
+}
+
+.vehicleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.vehicleIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-primary-lightest);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.vehicleInfo {
+  flex: 1;
+}
+
+.vehicleName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-1);
+  line-height: 1.2;
+}
+
+.vehicleYear {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+.permitDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+.detailRow svg {
+  color: var(--color-neutral-500);
+  flex-shrink: 0;
+}
+
+.statusSection {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.statusBadge {
+  font-size: var(--font-size-sm) !important;
+}
+
+/* Action section for payment buttons */
+.actionSection {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-3);
+  gap: var(--space-2);
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-white);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-pill);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.actionButton:active {
+  transform: scale(0.95);
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.paymentButton {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.paymentButton:active {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.chevron {
+  color: var(--color-neutral-400);
+  font-size: 1.25rem;
+  margin-left: var(--space-3);
+}
+
+/* States */
+.loadingState,
+.errorState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-5);
+  min-height: 60vh;
+}
+
+.loadingIcon {
+  font-size: 2rem;
+  color: var(--color-primary);
+  animation: spin var(--animation-duration-base) linear infinite;
+  margin-bottom: var(--space-4);
+}
+
+.errorState svg,
+.emptyState svg {
+  color: var(--color-neutral-400);
+  margin-bottom: var(--space-4);
+}
+
+.errorState h2,
+.emptyState h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-2);
+}
+
+.errorState p,
+.emptyState p {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  margin: 0 0 var(--space-4);
+  max-width: 300px;
+}
+
+.retryButton,
+.newPermitCta {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 auto;
+}
+
+.retryButton:active,
+.newPermitCta:active {
+  transform: scale(0.95);
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-5);
+  width: 64px;
+  height: 64px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 30;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(167, 43, 49, 0.4);
+}
+
+.fab:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobileContainer {
+    background: var(--color-neutral-900);
+  }
+  
+  .mobileHeader,
+  .searchContainer,
+  .filterPills {
+    background: var(--color-neutral-800);
+  }
+  
+  .permitCard {
+    background: var(--color-neutral-800);
+  }
+  
+  .mobileTitle,
+  .vehicleName {
+    color: var(--color-white);
+  }
+  
+  .searchInput {
+    background: var(--color-neutral-700);
+    color: var(--color-white);
+  }
+  
+  .filterButton {
+    background: var(--color-neutral-700);
+    color: var(--color-neutral-300);
+}
+}
+}

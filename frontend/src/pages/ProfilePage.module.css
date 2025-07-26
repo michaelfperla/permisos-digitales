@@ -1,0 +1,292 @@
+/* Profile Page Styles */
+.profileContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* Breadcrumbs styles */
+.breadcrumbs {
+  margin-bottom: 1rem;
+}
+
+.profileHeader {
+  margin-bottom: var(--space-4);
+  text-align: center;
+}
+
+.profileTitle {
+  font-size: 2rem;
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-2);
+}
+
+.profileSubtitle {
+  font-size: 1.1rem;
+  color: var(--color-neutral-600);
+  margin-bottom: var(--space-4);
+}
+
+.profileCard {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.profileSection {
+  margin-bottom: var(--space-4);
+}
+
+/* Profile Section Styles */
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-neutral-200);
+  padding-bottom: var(--space-2);
+}
+
+.profileSectionTitle {
+  font-size: 1.25rem;
+  color: var(--color-neutral-800);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+
+.profileInfo {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.profileLabel {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+}
+
+.profileValue {
+  color: var(--color-neutral-900);
+}
+
+/* Form Styles */
+.editForm {
+  margin-top: var(--space-3);
+}
+
+.formGroup {
+  margin-bottom: var(--space-3);
+}
+
+.formLabel {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--space-1);
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgb(var(--color-primary-rgb), 0.2);
+}
+
+.formInput:disabled {
+  background-color: var(--color-neutral-100);
+  cursor: not-allowed;
+}
+
+.formHelperText {
+  font-size: 0.875rem;
+  color: var(--color-neutral-600);
+  margin-top: var(--space-1);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* Button Styles */
+.actionButton {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-3);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.actionButton:disabled {
+  background-color: var(--color-neutral-400);
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-800);
+}
+
+.secondaryButton:hover {
+  background-color: var(--color-neutral-300);
+}
+
+.secondaryButton:disabled {
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-500);
+  cursor: not-allowed;
+}
+
+.editButton {
+  margin-top: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Responsive Styles */
+@media (width <= 768px) {
+  /* Overall Layout */
+  .profileContainer {
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .profileHeader {
+    margin-bottom: var(--space-3);
+  }
+
+  .profileTitle {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .profileSubtitle {
+    font-size: 1rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .profileCard {
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .profileSection {
+    margin-bottom: var(--space-3);
+  }
+
+  /* Profile Information Display */
+  .profileInfo {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .profileLabel {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: var(--color-neutral-600);
+  }
+
+  .profileValue {
+    margin-bottom: var(--space-3);
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  /* Section Headers */
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+
+  .profileSectionTitle {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .editButton {
+    margin-top: var(--space-1);
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Edit Form */
+  .editForm {
+    margin-top: var(--space-2);
+  }
+
+  .formGroup {
+    margin-bottom: var(--space-3);
+  }
+
+  .formLabel {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .formInput {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    min-height: 44px; /* Better touch target */
+  }
+
+  /* Form Actions */
+  .formActions {
+    flex-direction: column-reverse; /* Primary button on top */
+    gap: 0.75rem;
+    margin-top: var(--space-3);
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    text-align: center;
+    padding: 0.875rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px; /* Better touch target */
+  }
+
+  /* Action Buttons */
+  .actionButton {
+    width: 100%;
+    text-align: center;
+    padding: 0.875rem;
+    min-height: 48px; /* Better touch target */
+  }
+
+  /* Change Password Button */
+  .securitySection .actionButton {
+    width: 100%;
+    margin-top: var(--space-2);
+  }
+}

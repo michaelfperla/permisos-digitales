@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URGENTE: Su solicitud expira en menos de 2 horas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fef2f2;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            border: 2px solid #dc2626;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #dc2626;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .urgent-banner {
+            background-color: #fee2e2;
+            border-bottom: 2px solid #fca5a5;
+            padding: 16px 24px;
+            text-align: center;
+        }
+        .urgent-banner .urgent-text {
+            color: #991b1b;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 0;
+        }
+        .content {
+            padding: 32px 24px;
+        }
+        .critical-box {
+            background-color: #fee2e2;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .critical-box .critical-icon {
+            color: #dc2626;
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .application-details {
+            background-color: #f9fafb;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .application-details h3 {
+            margin: 0 0 12px 0;
+            color: #1f2937;
+            font-size: 18px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+        .detail-value {
+            color: #1f2937;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #dc2626;
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #dc2626;
+            transition: all 0.2s;
+        }
+        .cta-button:hover {
+            background-color: #b91c1c;
+            border-color: #b91c1c;
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px 24px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #dc2626;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .countdown {
+            font-size: 36px;
+            font-weight: 900;
+            color: #dc2626;
+            text-align: center;
+            margin: 16px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .steps {
+            background-color: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .steps h4 {
+            color: #0c4a6e;
+            margin: 0 0 12px 0;
+        }
+        .steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps li {
+            margin: 4px 0;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .content {
+                padding: 20px 16px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .countdown {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 ALERTA CRÍTICA</h1>
+        </div>
+        
+        <div class="urgent-banner">
+            <p class="urgent-text">¡SU SOLICITUD EXPIRA EN MENOS DE 2 HORAS!</p>
+        </div>
+        
+        <div class="content">
+            <div class="critical-box">
+                <div class="critical-icon">⏰</div>
+                <h2 style="color: #dc2626; margin: 0 0 8px 0;">TIEMPO RESTANTE</h2>
+                <div class="countdown">{{timeRemaining}}</div>
+                <p style="margin: 8px 0 0 0; font-weight: 600; color: #dc2626;">
+                    Expira: {{expirationDate}}
+                </p>
+            </div>
+
+            <p>Estimado/a <strong>{{userName}}</strong>,</p>
+            
+            <p><strong style="color: #dc2626;">¡ACCIÓN REQUERIDA INMEDIATAMENTE!</strong></p>
+            
+            <p>Su solicitud de permiso de circulación <strong>expirará automáticamente en menos de 2 horas</strong>. Después de este tiempo:</p>
+            
+            <ul style="color: #dc2626; font-weight: 500;">
+                <li>Su solicitud será <strong>CANCELADA PERMANENTEMENTE</strong></li>
+                <li>Perderá toda la información ingresada</li>
+                <li>Deberá comenzar el proceso completo nuevamente</li>
+            </ul>
+
+            <div class="application-details">
+                <h3>🚗 Solicitud a punto de expirar</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Vehículo:</span>
+                    <span class="detail-value">{{vehicleDetails}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Solicitante:</span>
+                    <span class="detail-value">{{applicantName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Monto a pagar:</span>
+                    <span class="detail-value" style="font-weight: 700; color: #dc2626;">${{amount}} MXN</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estado actual:</span>
+                    <span class="detail-value">{{statusText}}</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <a href="{{resumePaymentUrl}}" class="cta-button">
+                    🚀 COMPLETAR PAGO AHORA
+                </a>
+            </div>
+
+            <div class="steps">
+                <h4>⚡ Pasos rápidos para completar:</h4>
+                <ol>
+                    <li>Haga clic en el botón "COMPLETAR PAGO AHORA"</li>
+                    <li>Seleccione su método de pago preferido</li>
+                    <li>Complete la información requerida</li>
+                    <li>Confirme su pago</li>
+                </ol>
+                <p style="margin: 12px 0 0 0; font-weight: 500; color: #0c4a6e;">
+                    ⏱️ El proceso toma menos de 3 minutos
+                </p>
+            </div>
+
+            <div style="background-color: #fffbeb; border: 1px solid #f59e0b; border-radius: 6px; padding: 16px; margin: 20px 0;">
+                <h4 style="color: #92400e; margin: 0 0 8px 0;">💳 Opciones de pago rápido:</h4>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>Tarjeta:</strong> Pago instantáneo (RECOMENDADO para casos urgentes)</li>
+                    <li><strong>OXXO:</strong> Tendrá 48 horas adicionales para pagar en tienda</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center; font-weight: 600; color: #dc2626; font-size: 16px;">
+                ⚠️ Esta es su ÚLTIMA OPORTUNIDAD para completar esta solicitud ⚠️
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong>Este es un mensaje automático urgente del Sistema de Permisos de Circulación.</strong></p>
+            <p>
+                <a href="{{dashboardUrl}}">Ver mi dashboard</a> | 
+                <a href="mailto:soporte@permisos.gob.mx">Soporte urgente</a> | 
+                <a href="tel:+52-800-123-4567">800-123-4567</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

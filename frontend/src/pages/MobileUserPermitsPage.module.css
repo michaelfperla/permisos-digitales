@@ -1,0 +1,512 @@
+/* Mobile-First User Permits Design - Optimized for 360px+ */
+
+.mobileContainer {
+  min-height: 100vh;
+  background-color: var(--color-white);
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--space-6) + 80px); /* Space for FAB */
+}
+
+/* Pull to refresh */
+.refreshIndicator {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: var(--color-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  animation: slideDown 0.3s ease;
+}
+
+.refreshIcon {
+  animation: spin var(--animation-duration-base) linear infinite;
+  color: var(--color-primary);
+}
+
+/* Header */
+.mobileHeader {
+  background: var(--color-primary);
+  padding: var(--space-4) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.mobileTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.filterButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  color: var(--color-white);
+}
+
+.filterButton:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.filterBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: var(--color-white);
+  border-radius: 50%;
+}
+
+/* Search */
+.searchContainer {
+  background: var(--color-primary);
+  padding: 0 16px 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 48px; /* Increased left padding for better icon spacing */
+  background: var(--color-white);
+  border: 2px solid var(--color-white);
+  border-radius: var(--border-radius-pill);
+  font-size: 16px; /* Prevent zoom on iOS */
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  color: var(--color-neutral-900);
+  height: 48px; /* Explicit height for consistent alignment */
+}
+
+.searchInput::placeholder {
+  color: var(--color-neutral-500);
+  opacity: 1;
+}
+
+.searchInput:focus {
+  outline: none;
+  background: var(--color-white);
+  border-color: var(--color-white);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 30px; /* Moved 3px to the right */
+  top: calc(50% - 7px); /* Moved up 2px */
+  transform: translateY(-50%);
+  color: var(--color-primary);
+  pointer-events: none;
+  font-size: 1rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+}
+
+/* Filter Pills */
+.filterPills {
+  background: var(--color-white);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.2s ease;
+}
+
+.filterPill {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-white);
+  border: 2px solid var(--color-neutral-200);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 48px; /* Touch target */
+}
+
+.filterPill:active {
+  transform: scale(0.98);
+}
+
+.filterPill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.filterCount {
+  background: var(--color-neutral-100);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-xs);
+  min-width: 24px;
+  text-align: center;
+}
+
+.filterPill.active .filterCount {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Permits List */
+.permitsList {
+  padding: var(--space-4) var(--space-4) var(--space-6); /* Increased top padding and bottom for FAB */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4); /* Increased gap between cards */
+}
+
+/* Optimize padding for very small screens */
+@media (max-width: 375px) {
+  .permitsList {
+    padding: var(--space-3) var(--space-3) var(--space-5); /* Better spacing */
+    gap: var(--space-3); /* Maintain reasonable gap */
+  }
+}
+
+@media (max-width: 360px) {
+  .permitsList {
+    padding: var(--space-2) var(--space-2) var(--space-4); /* Better bottom spacing */
+    gap: var(--space-2); /* Use consistent spacing variable */
+  }
+}
+
+/* Permit Card */
+.permitCard {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-neutral-100);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 120px; /* Increased to accommodate action buttons */
+}
+
+.permitCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-neutral-200);
+}
+
+.permitCard:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.cardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0; /* Allow text truncation */
+}
+
+.vehicleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.vehicleIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  flex-shrink: 0;
+}
+
+.vehicleInfo {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.vehicleName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-1);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vehicleYear {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+.permitDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+.detailRow svg {
+  color: var(--color-neutral-500);
+  flex-shrink: 0;
+}
+
+.statusSection {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.statusBadge {
+  font-size: var(--font-size-sm) !important;
+}
+
+/* Action section for payment buttons */
+.actionSection {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-3);
+  gap: var(--space-2);
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-white);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-pill);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.actionButton:active {
+  transform: scale(0.95);
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.paymentButton {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+}
+
+.paymentButton:active {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.chevron {
+  color: var(--color-primary);
+  font-size: 1rem;
+  margin-left: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* States */
+.loadingState,
+.errorState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  min-height: 60vh;
+}
+
+.loadingIcon {
+  font-size: 2rem;
+  color: var(--color-primary);
+  animation: spin var(--animation-duration-base) linear infinite;
+  margin-bottom: var(--space-4);
+}
+
+.errorState svg,
+.emptyState svg {
+  color: var(--color-neutral-400);
+  margin-bottom: var(--space-4);
+}
+
+.errorState h2,
+.emptyState h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-2);
+}
+
+.errorState p,
+.emptyState p {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  margin: 0 0 var(--space-4);
+  max-width: 280px;
+}
+
+.retryButton,
+.newPermitCta {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-pill);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 auto;
+  min-height: 48px;
+}
+
+.retryButton:active,
+.newPermitCta:active {
+  transform: scale(0.95);
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-4);
+  width: 56px;
+  height: 56px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(167, 43, 49, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 30;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(167, 43, 49, 0.4);
+}
+
+.fab:active {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Extra small screens (360px) */
+@media (max-width: 360px) {
+  .mobileHeader {
+    padding: var(--space-3);
+  }
+  
+  .mobileTitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .filterButton {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .searchContainer,
+  .filterPills,
+  .permitsList {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  
+  .permitCard {
+    padding: var(--space-3);
+  }
+  
+  .vehicleIcon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .vehicleName {
+    font-size: var(--font-size-sm);
+  }
+  
+  .fab {
+    width: 52px;
+    height: 52px;
+    right: var(--space-3);
+    bottom: var(--space-5);
+  }
+}
+}

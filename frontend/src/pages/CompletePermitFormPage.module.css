@@ -1,0 +1,112 @@
+.pageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3);
+}
+
+/* Page styles now use shared styles from UserDashboardPage.module.css */
+
+/* Mobile Optimizations */
+@media (width <= 480px) {
+  .pageContainer {
+    padding: var(--space-2);
+  }
+}
+
+/* Override for removing divider in page header */
+.pageContainer :global(.pageHeader) {
+  border-bottom: none;
+  padding-bottom: 0; /* Remove bottom padding if border is gone */
+  margin-bottom: 1.25rem; /* Standardize spacing after header */
+}
+
+/* Common styles for permit forms */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.errorContainer h2 {
+  color: var(--error);
+  margin-bottom: 1rem;
+}
+
+/* Payment Resume Styles */
+.paymentResumeInfo {
+  margin-bottom: 2rem;
+}
+
+.paymentResumeInfo h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.paymentResumeInfo ul {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+
+.paymentResumeInfo li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+.formContainer {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.stepContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.stepTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.stepDescription {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}

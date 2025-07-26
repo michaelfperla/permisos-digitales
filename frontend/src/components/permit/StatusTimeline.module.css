@@ -1,0 +1,379 @@
+/**
+ * StatusTimeline Component Styles - Redesigned
+ * 
+ * Modern, cohesive timeline component for government permit system
+ * Features smooth transitions, visual hierarchy, and professional appearance
+ */
+
+/* CSS Variables for consistent theming */
+:root {
+  --timeline-primary: #22c55e;
+  --timeline-primary-dark: #16a34a;
+  --timeline-current: #3b82f6;
+  --timeline-current-dark: #2563eb;
+  --timeline-danger: #ef4444;
+  --timeline-warning: #f59e0b;
+  --timeline-pending: #9ca3af;
+  --timeline-line: #e5e7eb;
+  --timeline-bg: #fafbfc;
+  --timeline-card-bg: #ffffff;
+  --timeline-text-primary: #111827;
+  --timeline-text-secondary: #6b7280;
+  --timeline-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --timeline-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --timeline-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --timeline-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Timeline Container */
+.timelineContainer {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: var(--timeline-card-bg);
+  border-radius: 16px;
+  box-shadow: var(--timeline-shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background pattern */
+.timelineContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 1rem 0;
+  z-index: 1;
+}
+
+/* Step Item */
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  padding: 1.5rem 0;
+  transition: var(--timeline-transition);
+}
+
+/* Vertical connecting line */
+.stepItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 3.5rem;
+  left: 1.5rem;
+  width: 2px;
+  height: calc(100% - 2rem);
+  background: var(--timeline-line);
+  transform: translateX(-50%);
+  transition: var(--timeline-transition);
+}
+
+/* Completed step connecting line with gradient */
+.stepCompleted:not(:last-child)::after {
+  background: linear-gradient(180deg, var(--timeline-primary) 0%, var(--timeline-primary-dark) 100%);
+  width: 3px;
+}
+
+/* Step Indicator Container */
+.stepIndicator {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--timeline-card-bg);
+  border: 3px solid var(--timeline-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  box-shadow: var(--timeline-shadow-sm);
+  transition: var(--timeline-transition);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--timeline-pending);
+}
+
+/* Pulse animation for current step */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Step Content */
+.stepContent {
+  flex: 1;
+  padding-top: 0.25rem;
+}
+
+.stepTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--timeline-text-primary);
+  margin: 0 0 0.5rem;
+  transition: var(--timeline-transition);
+  letter-spacing: -0.01em;
+}
+
+.stepDescription {
+  font-size: 0.875rem;
+  color: var(--timeline-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  transition: var(--timeline-transition);
+}
+
+/* Completed Step */
+.stepCompleted .stepIndicator {
+  background: linear-gradient(135deg, var(--timeline-primary) 0%, var(--timeline-primary-dark) 100%);
+  border-color: var(--timeline-primary);
+  color: white;
+  transform: scale(1);
+  box-shadow: var(--timeline-shadow-md), 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.stepCompleted .stepIndicator::after {
+  content: '✓';
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.stepCompleted .stepTitle {
+  color: var(--timeline-primary-dark);
+}
+
+.stepCompleted .stepDescription {
+  color: var(--timeline-text-secondary);
+}
+
+/* Current Step */
+.stepCurrent .stepIndicator {
+  background: linear-gradient(135deg, var(--timeline-current) 0%, var(--timeline-current-dark) 100%);
+  border-color: var(--timeline-current);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: var(--timeline-shadow-lg), 0 0 0 4px rgba(59, 130, 246, 0.15);
+  animation: pulse 2s infinite;
+}
+
+.stepCurrent .stepIndicator::after {
+  content: '•';
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.stepCurrent .stepTitle {
+  color: var(--timeline-current-dark);
+  font-weight: 700;
+}
+
+.stepCurrent .stepDescription {
+  color: var(--timeline-text-primary);
+  font-weight: 500;
+}
+
+/* Pending Step */
+.stepPending .stepIndicator {
+  background: var(--timeline-bg);
+  border-color: var(--timeline-line);
+  color: var(--timeline-pending);
+  border-style: dashed;
+}
+
+.stepPending .stepTitle {
+  color: var(--timeline-text-secondary);
+}
+
+.stepPending .stepDescription {
+  color: var(--timeline-pending);
+}
+
+/* Rejected Step */
+.stepRejected .stepIndicator {
+  background: linear-gradient(135deg, var(--timeline-danger) 0%, #dc2626 100%);
+  border-color: var(--timeline-danger);
+  color: white;
+  box-shadow: var(--timeline-shadow-md), 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.stepRejected .stepIndicator::after {
+  content: '✕';
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.stepRejected .stepTitle {
+  color: var(--timeline-danger);
+}
+
+/* Expired Step */
+.stepExpired .stepIndicator {
+  background: linear-gradient(135deg, var(--timeline-warning) 0%, #d97706 100%);
+  border-color: var(--timeline-warning);
+  color: white;
+  box-shadow: var(--timeline-shadow-md), 0 0 0 4px rgba(245, 158, 11, 0.1);
+}
+
+.stepExpired .stepIndicator::after {
+  content: '!';
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.stepExpired .stepTitle {
+  color: var(--timeline-warning);
+}
+
+/* Hover effects */
+.stepItem:hover .stepIndicator {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--timeline-shadow-lg);
+}
+
+.stepCurrent:hover .stepIndicator {
+  transform: translateY(-2px) scale(1.15);
+}
+
+/* Responsive styles for desktop */
+@media (min-width: 768px) {
+  .timelineContainer {
+    padding: 2.5rem;
+  }
+
+  .timeline {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 2rem 0;
+    gap: 2rem;
+  }
+
+  .stepItem {
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    text-align: center;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .stepIndicator {
+    margin-right: 0;
+    margin-bottom: 1.5rem;
+    width: 56px;
+    height: 56px;
+  }
+
+  .stepContent {
+    width: 100%;
+    padding-top: 0;
+  }
+
+  /* Horizontal connector line */
+  .stepItem:not(:last-child)::after {
+    width: 100%;
+    height: 2px;
+    top: 28px;
+    left: calc(50% + 28px);
+    right: auto;
+    transform: none;
+    background: var(--timeline-line);
+  }
+
+  /* Completed horizontal line */
+  .stepCompleted:not(:last-child)::after {
+    background: linear-gradient(90deg, var(--timeline-primary) 0%, var(--timeline-primary-dark) 100%);
+    height: 3px;
+  }
+
+  .stepTitle {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .stepDescription {
+    font-size: 0.875rem;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1024px) {
+  .stepIndicator {
+    width: 64px;
+    height: 64px;
+  }
+
+  .stepItem:not(:last-child)::after {
+    top: 32px;
+    left: calc(50% + 32px);
+  }
+
+  .stepTitle {
+    font-size: 1.125rem;
+  }
+
+  .stepDescription {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Animation for timeline appearance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepItem {
+  animation: fadeInUp 0.5s ease-out forwards;
+  animation-delay: calc(var(--step-index, 0) * 0.1s);
+}
+
+/* Accessibility improvements */
+.stepIndicator:focus-visible {
+  outline: 3px solid var(--timeline-current);
+  outline-offset: 4px;
+}
+
+/* Print styles */
+@media print {
+  .timelineContainer {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+  .stepIndicator {
+    box-shadow: none !important;
+    animation: none !important;
+  }
+}

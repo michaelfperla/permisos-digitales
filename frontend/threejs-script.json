@@ -1,0 +1,207 @@
+{
+  "title": "DIGITAL EVOLUTION - A 3D Journey",
+  "duration": "15 seconds",
+  "fps": 60,
+  "style": "Cinematic 3D with dynamic camera movements",
+  
+  "scenes": [
+    {
+      "id": 1,
+      "title": "THE OLD WAY",
+      "duration": "0-3s",
+      "description": "Dark, cramped office space with endless queue",
+      "camera": {
+        "start": {"x": 0, "y": 5, "z": 10},
+        "end": {"x": -5, "y": 2, "z": 5},
+        "movement": "dolly in with slight pan"
+      },
+      "objects": [
+        {
+          "type": "queue_people",
+          "description": "3D stick figures in grayscale",
+          "animation": "swaying, tired movement",
+          "count": 10
+        },
+        {
+          "type": "clock",
+          "description": "Giant ticking clock on wall",
+          "animation": "hands spinning fast showing time waste"
+        },
+        {
+          "type": "environment",
+          "lighting": "harsh fluorescent",
+          "fog": "heavy, oppressive",
+          "color_scheme": "desaturated grays"
+        }
+      ],
+      "text_overlay": {
+        "content": "Horas perdidas...",
+        "animation": "fade in with glitch effect",
+        "position": "bottom third"
+      }
+    },
+    
+    {
+      "id": 2,
+      "title": "THE TRANSFORMATION",
+      "duration": "3-7s",
+      "description": "Office walls explode into particles, revealing digital world",
+      "camera": {
+        "movement": "360° orbit around center",
+        "speed": "accelerating"
+      },
+      "objects": [
+        {
+          "type": "wall_explosion",
+          "description": "Office walls shatter into thousands of cubes",
+          "animation": "physics-based explosion outward",
+          "particles": 5000
+        },
+        {
+          "type": "phone_emergence",
+          "description": "Giant smartphone rises from ground",
+          "material": "glass with internal glow",
+          "animation": "rise with rotation"
+        },
+        {
+          "type": "digital_rain",
+          "description": "Matrix-style falling code",
+          "content": "1s and 0s forming 'PERMISOS DIGITALES'"
+        }
+      ],
+      "lighting_transition": {
+        "from": "harsh white",
+        "to": "warm golden with rim lighting"
+      },
+      "sound_cue": "WHOOSH - transformation sound"
+    },
+    
+    {
+      "id": 3,
+      "title": "THE NEW WORLD",
+      "duration": "7-11s",
+      "description": "Beautiful digital landscape with floating UI elements",
+      "camera": {
+        "movement": "fly-through between floating cards",
+        "path": "bezier curve through scene"
+      },
+      "objects": [
+        {
+          "type": "permit_card_3d",
+          "description": "Metallic permit card with holographic finish",
+          "animation": "floating with gentle rotation",
+          "material": {
+            "base": "brushed metal",
+            "overlay": "holographic shader",
+            "glow": "edge emission"
+          }
+        },
+        {
+          "type": "ui_elements",
+          "description": "Floating glass panels showing app interface",
+          "content": ["Login form", "Payment screen", "Success message"],
+          "animation": "orbit around permit card"
+        },
+        {
+          "type": "particle_flow",
+          "description": "Golden particles flowing between elements",
+          "behavior": "attracted to permit card",
+          "count": 2000
+        },
+        {
+          "type": "environment",
+          "description": "Infinite grid floor with neon accents",
+          "animation": "grid pulses with energy"
+        }
+      ],
+      "effects": {
+        "bloom": "strong on emissive materials",
+        "depth_of_field": "focus pulls to permit card",
+        "motion_blur": "on fast movements"
+      }
+    },
+    
+    {
+      "id": 4,
+      "title": "THE REVEAL",
+      "duration": "11-15s",
+      "description": "Logo formation and call to action",
+      "camera": {
+        "movement": "pull back to reveal full logo",
+        "final_position": {"x": 0, "y": 0, "z": 8}
+      },
+      "objects": [
+        {
+          "type": "logo_assembly",
+          "description": "Particles converge to form 3D logo",
+          "animation": "magnetic attraction with physics",
+          "material": "emissive red gradient"
+        },
+        {
+          "type": "cta_button",
+          "description": "Glass button with internal glow",
+          "text": "OBTÉN TU PERMISO AHORA",
+          "animation": "pulse with hover state",
+          "interaction": "responds to mouse proximity"
+        },
+        {
+          "type": "success_counter",
+          "description": "3D counter showing permits issued",
+          "animation": "numbers flipping up rapidly",
+          "final_number": "10,000+"
+        }
+      ],
+      "final_effects": {
+        "confetti": "3D paper pieces falling",
+        "light_rays": "volumetric god rays from above",
+        "lens_flare": "subtle on logo highlight"
+      }
+    }
+  ],
+  
+  "technical_details": {
+    "renderer": {
+      "shadows": true,
+      "antialiasing": true,
+      "tone_mapping": "ACESFilmic"
+    },
+    "post_processing": [
+      "Bloom pass for glow effects",
+      "FXAA for smooth edges",
+      "Vignette for cinematic feel",
+      "Film grain for texture"
+    ],
+    "optimizations": [
+      "LOD system for complex meshes",
+      "Instanced rendering for particles",
+      "Texture atlasing for UI elements",
+      "Frustum culling"
+    ]
+  },
+  
+  "color_palette": {
+    "primary": "#B5384D",
+    "secondary": "#FFD700",
+    "accent": "#00D4FF",
+    "dark": "#0A0A0A",
+    "light": "#FFFFFF"
+  },
+  
+  "animations": {
+    "easing": "cubic-bezier(0.23, 1, 0.32, 1)",
+    "physics": {
+      "gravity": -9.8,
+      "damping": 0.1,
+      "restitution": 0.7
+    }
+  },
+  
+  "audio_cues": [
+    {"time": "0s", "sound": "office ambience"},
+    {"time": "3s", "sound": "wall shatter"},
+    {"time": "4s", "sound": "digital transformation"},
+    {"time": "7s", "sound": "uplifting music"},
+    {"time": "11s", "sound": "success chime"},
+    {"time": "13s", "sound": "logo sting"}
+  ]
+}

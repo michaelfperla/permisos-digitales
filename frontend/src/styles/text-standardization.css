@@ -1,0 +1,133 @@
+/* Text Standardization for UI Components
+ * Ensures consistent typography across buttons, badges, and other UI elements
+ * Follows UI best practices for readability and visual hierarchy
+ */
+
+/* Button Text Standardization */
+.btn,
+[role='button'] {
+  /* Standardized font properties */
+  font-family: var(--font-family-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-weight: 500; /* Medium weight for better readability */
+  letter-spacing: 0.02em; /* Slight letter spacing for clarity */
+  text-transform: none; /* Avoid uppercase for better readability */
+  
+  /* Ensure proper text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Primary buttons should have slightly bolder text */
+.btn-primary {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Secondary buttons use standard weight */
+.btn-secondary,
+.btn-ghost {
+  font-weight: 500;
+}
+
+/* Badge Text Standardization */
+.statusBadge,
+[class*='badge'] {
+  /* Consistent typography */
+  font-family: var(--font-family-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  
+  /* Ensure readability at small sizes */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1;
+}
+
+/* Responsive Font Sizes */
+@media (max-width: var(--breakpoint-sm)) {
+  .btn,
+  [role='button'] {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
+  }
+  
+  .statusBadge,
+  [class*='badge'] {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: var(--breakpoint-xs)) {
+  .btn,
+  [role='button'] {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.5;
+  }
+  
+  .statusBadge,
+  [class*='badge'] {
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1.3;
+    letter-spacing: 0.02em; /* Slightly less letter spacing at small sizes */
+  }
+}
+
+/* Ensure proper text contrast */
+.btn-primary,
+.btn-danger,
+.btn-success {
+  color: var(--color-white, #ffffff);
+}
+
+.btn-secondary,
+.btn-ghost {
+  color: var(--color-neutral-900, #212529);
+}
+
+/* Badge color standardization */
+.statusBadge {
+  /* Use semantic colors with proper contrast ratios */
+  background-color: var(--badge-bg);
+  color: var(--badge-color);
+  border-color: var(--badge-border);
+}
+
+/* Icon + Text Alignment */
+.btn svg + span,
+.statusBadge svg + span {
+  margin-left: 0.25rem;
+}
+
+/* Prevent text orphans and widows */
+.btn,
+.statusBadge {
+  word-break: keep-all;
+  hyphens: none;
+}
+
+/* Focus state text enhancement */
+.btn:focus-visible,
+.statusBadge:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn,
+  .statusBadge {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .statusBadge {
+    transition: none;
+  }
+}

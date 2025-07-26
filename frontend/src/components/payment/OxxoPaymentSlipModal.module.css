@@ -1,0 +1,536 @@
+/* OXXO Payment Slip Modal Styles */
+.oxxoSlipContainer {
+  padding: var(--space-3);
+}
+
+.modalContent {
+  padding: var(--space-3);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.oxxoIcon {
+  font-size: 3rem;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: 1.5rem;
+  color: var(--color-neutral-800);
+  margin: 0;
+}
+
+.instructions {
+  text-align: center;
+  margin-bottom: var(--space-4);
+  color: var(--color-neutral-600);
+}
+
+.paymentDetails {
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px dashed var(--color-neutral-200);
+}
+
+.detailItem:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.label {
+  font-weight: 600;
+  color: var(--color-neutral-700);
+  font-size: 0.95rem;
+}
+
+.referenceNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.1em;
+}
+
+.amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.value {
+  font-weight: 600;
+  color: var(--color-neutral-800);
+}
+
+.voucherSection {
+  margin-bottom: var(--space-4);
+}
+
+.voucherLabel {
+  text-align: center;
+  margin-bottom: var(--space-3);
+  color: var(--color-neutral-600);
+  font-weight: 500;
+}
+
+.voucherContainer {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.voucherFrame {
+  width: 100%;
+  height: 400px;
+  border: none;
+  border-radius: var(--border-radius);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.printButton,
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.printButton {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+}
+
+.printButton:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.closeButton {
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.closeButton:hover {
+  background-color: var(--color-neutral-200);
+  transform: translateY(-1px);
+}
+
+.warning {
+  background-color: rgb(var(--color-warning-rgb), 0.1);
+  border: 1px solid var(--color-warning-light);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-neutral-700);
+}
+
+/* Permit Folio Display */
+.permitFolio {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+/* OXXO Detail Blocks */
+.oxxoDetailBlock {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+
+.oxxoDetailHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.oxxoDetailIcon {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  margin-right: var(--space-2);
+}
+
+.oxxoDetailLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+/* Reference Value Styling */
+.oxxoReferenceWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: var(--space-2);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.oxxoReferenceValue {
+  font-family: monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+}
+
+/* Copy Button */
+.copyButtonSmall {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 44px; /* WCAG touch target size */
+  min-width: 44px; /* WCAG touch target size */
+}
+
+.copyButtonSmall:hover {
+  background-color: var(--color-neutral-200);
+}
+
+/* Amount Value Styling */
+.oxxoAmountValue {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-neutral-900);
+  background-color: white;
+  padding: var(--space-2);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+/* Date Value Styling */
+.oxxoDateValue {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  background-color: white;
+  padding: var(--space-2);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+/* Instructions Block */
+.oxxoInstructions {
+  background-color: rgb(var(--color-warning-rgb), 0.1);
+  border: 1px solid rgb(var(--color-warning-rgb), 0.3);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Barcode Block */
+.oxxoBarcodeBlock {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background-color: var(--color-neutral-50);
+  border-radius: var(--border-radius);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+}
+
+.oxxoBarcodeWrapper {
+  display: flex;
+  justify-content: center;
+  background-color: white;
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.oxxoBarcodeImage {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
+  display: block;
+  margin: 0 auto;
+}
+
+.oxxoInstructionsHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.oxxoInstructionsIcon {
+  color: var(--color-warning);
+  font-size: 1.2rem;
+  margin-right: var(--space-2);
+}
+
+.oxxoInstructionsHeader h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.instructionsList {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.instructionsList li {
+  font-size: 0.95rem;
+  color: var(--color-neutral-800);
+  margin-bottom: var(--space-2);
+  line-height: 1.4;
+}
+
+/* Modal Actions */
+.modalActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2); /* Add bottom margin for extra spacing */
+  gap: var(--space-3);
+}
+
+/* Print Button */
+.printButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-height: 44px; /* WCAG touch target size */
+}
+
+.printButton:hover {
+  background-color: var(--color-neutral-200);
+}
+
+/* Close Button */
+.closeButtonModal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
+  min-height: 44px; /* WCAG touch target size */
+}
+
+.closeButtonModal:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgb(167 43 49 / 30%);
+}
+
+.closeButtonModal:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgb(167 43 49 / 25%);
+}
+
+/* Print-specific styles */
+@media print {
+  .modalActions {
+    display: none;
+  }
+
+  .copyButtonSmall {
+    display: none;
+  }
+
+  .oxxoSlipContainer {
+    padding: 0;
+  }
+
+  .oxxoDetailBlock,
+  .oxxoInstructions,
+  .oxxoBarcodeBlock {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .oxxoBarcodeImage {
+    max-height: 150px;
+  }
+}
+
+/* Responsive styles */
+@media (width <= 768px) {
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .oxxoReferenceValue {
+    font-size: 1.3rem;
+  }
+
+  .oxxoBarcodeImage {
+    max-height: 100px;
+  }
+}
+
+/* Small mobile styles */
+@media (width <= 480px) {
+  .oxxoSlipContainer {
+    padding: var(--space-2);
+    padding-bottom: var(--space-4); /* Extra padding at bottom for navigation bar */
+  }
+
+  .oxxoDetailBlock,
+  .oxxoBarcodeBlock,
+  .oxxoInstructions {
+    padding: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .oxxoReferenceWrapper {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .oxxoReferenceValue {
+    font-size: 1.1rem;
+    word-break: break-all;
+  }
+
+  .copyButtonSmall {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .oxxoAmountValue {
+    font-size: 1.1rem;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .oxxoDateValue {
+    font-size: 0.95rem;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .oxxoBarcodeWrapper {
+    padding: var(--space-2);
+  }
+
+  .instructionsList li {
+    font-size: 0.9rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .modalActions {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-3); /* More bottom margin on mobile */
+  }
+}
+
+/* Very small mobile styles */
+@media (width <= 360px) {
+  .oxxoSlipContainer {
+    padding: var(--space-1);
+    padding-bottom: var(
+      --space-5
+    ); /* Extra padding at bottom for navigation bar on very small screens */
+  }
+
+  .oxxoReferenceWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .copyButtonSmall {
+    justify-self: flex-end;
+    margin-top: var(--space-1);
+  }
+
+  .oxxoReferenceValue {
+    font-size: 1rem;
+  }
+
+  .oxxoDetailLabel,
+  .oxxoInstructionsHeader h4 {
+    font-size: 0.85rem;
+  }
+
+  .instructionsList li {
+    font-size: 0.85rem;
+  }
+
+  .printButton,
+  .closeButtonModal {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .modalActions {
+    margin-top: var(--space-2);
+    margin-bottom: var(--space-4); /* Even more bottom margin on very small screens */
+    gap: var(--space-2);
+  }
+
+  /* Reduce bottom margins of the last elements to avoid unnecessary scrolling */
+  .oxxoBarcodeBlock:last-of-type,
+  .oxxoDetailBlock:last-of-type,
+  .oxxoInstructions:last-of-type {
+    margin-bottom: var(--space-2);
+  }
+}

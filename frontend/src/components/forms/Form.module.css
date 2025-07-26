@@ -1,0 +1,209 @@
+/* Form Component Styles */
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formInstructions {
+  margin-bottom: 1.5rem;
+  color: var(--color-neutral-600);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.formSuccess {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.formSuccess h1 {
+  color: var(--color-success);
+  margin-bottom: 1.5rem;
+}
+
+.formSuccess p {
+  margin-bottom: 1.5rem;
+  color: var(--color-neutral-700);
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: inherit;
+  padding: 0;
+  margin: 0 0.25rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.linkButton:hover {
+  color: var(--color-primary-dark);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-neutral-900);
+  background-color: var(--color-white);
+  background-clip: padding-box;
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  transition:
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+  box-shadow: var(--box-shadow-sm);
+}
+
+.input:focus {
+  color: var(--color-neutral-900);
+  background-color: var(--color-white);
+  border-color: var(--color-accent);
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgb(172 137 82 / 25%);
+}
+
+.input.invalid {
+  border-color: var(--color-danger);
+}
+
+.label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-700);
+}
+
+.errorMessage {
+  background-color: rgb(220 53 69 / 10%);
+  color: var(--color-danger);
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.successMessage {
+  background-color: rgb(25 135 84 / 10%) !important;
+  color: var(--color-success) !important;
+}
+
+.errorText {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.helperText {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+.submitButton {
+  display: inline-block;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--color-white);
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: var(--border-radius);
+  transition: all 0.15s ease-in-out;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.submitButton:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.submitButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.formLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-top: 1.5rem;
+}
+
+.formLinks a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.formLinks a:hover,
+.formLinks a:focus {
+  text-decoration: underline;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgb(255 255 255 / 30%);
+  border-radius: 50%;
+  border-top-color: var(--color-white);
+  animation: spin var(--animation-duration-fast) linear infinite;
+  margin-left: 0.5rem;
+}
+
+/* Password strength indicator */
+.passwordStrength {
+  margin-top: 0.5rem;
+}
+
+.passwordStrengthBar {
+  height: 5px;
+  border-radius: 2px;
+  margin-bottom: 0.25rem;
+  transition: width 0.3s ease;
+}
+
+.strength-weak {
+  width: 33%;
+  background-color: var(--color-danger);
+}
+
+.strength-medium {
+  width: 66%;
+  background-color: var(--color-warning);
+}
+
+.strength-strong {
+  width: 100%;
+  background-color: var(--color-success);
+}
+
+.passwordStrengthText {
+  font-size: 0.75rem;
+  color: var(--color-neutral-600);
+}
+
+
+}

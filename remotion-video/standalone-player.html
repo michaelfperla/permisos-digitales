@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permisos Digitales - Video Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 2px solid #B5384D;
+        }
+        
+        .video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #111;
+        }
+        
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .scene.active {
+            display: flex;
+        }
+        
+        /* Scene 1: Problem */
+        .scene1 {
+            background: linear-gradient(to bottom, #e5e5e5 0%, #d0d0d0 100%);
+            color: #333;
+        }
+        
+        .clock {
+            font-size: 120px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Scene 2: Discovery */
+        .scene2 {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+        
+        .phone {
+            width: 300px;
+            height: 600px;
+            background: #222;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            color: #333;
+        }
+        
+        .search-highlight {
+            background: #FFE5B4;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+            animation: highlight 1s ease-in-out;
+        }
+        
+        @keyframes highlight {
+            0% { background: white; }
+            50% { background: #FFD700; }
+            100% { background: #FFE5B4; }
+        }
+        
+        /* Scene 3: Demo */
+        .scene3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .form-demo {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        
+        .progress-step {
+            width: 50px;
+            height: 50px;
+            background: #e0e0e0;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background: #B5384D;
+            transform: scale(1.2);
+        }
+        
+        /* Scene 4: Success */
+        .scene4 {
+            background: linear-gradient(to bottom, #065F46 0%, #10B981 100%);
+        }
+        
+        .success-icon {
+            width: 200px;
+            height: 200px;
+            background: white;
+            color: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            margin-bottom: 40px;
+            animation: successBounce 0.6s ease-out;
+        }
+        
+        @keyframes successBounce {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Scene 5: CTA */
+        .scene5 {
+            background: linear-gradient(135deg, #B5384D 0%, #8B2D3D 100%);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 25px 60px;
+            background: white;
+            color: #B5384D;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            animation: ctaPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes ctaPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .controls {
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #B5384D;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #8B2D3D;
+            transform: scale(1.05);
+        }
+        
+        .timeline {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin: 0 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .timeline-progress {
+            height: 100%;
+            background: #FFD700;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-display {
+            color: white;
+            font-size: 14px;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Permisos Digitales - Promo Video Preview</h1>
+        <p>60 segundos | 5 escenas | Click en Play para comenzar</p>
+    </div>
+    
+    <div class="video-container">
+        <!-- Scene 1: The Problem (0-8s) -->
+        <div class="scene scene1 active">
+            <div>
+                <div class="clock" id="clock">11:47</div>
+                <h2 style="font-size: 48px; color: #B5384D;">4 horas perdidas...</h2>
+                <p style="font-size: 24px; margin-top: 20px;">En la oficina de permisos</p>
+            </div>
+        </div>
+        
+        <!-- Scene 2: Discovery (8-13s) -->
+        <div class="scene scene2">
+            <div>
+                <h2 style="font-size: 48px; margin-bottom: 40px;">¿Y si hubiera una mejor manera?</h2>
+                <div class="phone">
+                    <div class="phone-screen">
+                        <p style="margin-bottom: 20px;">🔍 permiso circulación en línea</p>
+                        <div class="search-highlight">
+                            <strong>Permisos Digitales</strong><br>
+                            5 minutos • Sin filas • $150 MXN
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 3: Demo (13-33s) -->
+        <div class="scene scene3">
+            <div>
+                <h2 style="font-size: 48px; margin-bottom: 40px;">3 simples pasos</h2>
+                <div class="form-demo">
+                    <div class="progress-bar">
+                        <div class="progress-step active" id="step1">1</div>
+                        <div class="progress-step" id="step2">2</div>
+                        <div class="progress-step" id="step3">3</div>
+                    </div>
+                    <div id="form-content">
+                        <h3>Paso 1: Registro</h3>
+                        <p>Crea tu cuenta en segundos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 4: Success (33-43s) -->
+        <div class="scene scene4">
+            <div>
+                <div class="success-icon">✓</div>
+                <h2 style="font-size: 48px;">¡Listo!</h2>
+                <p style="font-size: 24px; margin-top: 20px;">Tu permiso está disponible para descargar</p>
+                <p style="font-size: 18px; margin-top: 10px; opacity: 0.8;">100% legal y válido</p>
+            </div>
+        </div>
+        
+        <!-- Scene 5: CTA (43-60s) -->
+        <div class="scene scene5">
+            <div>
+                <h1 style="font-size: 72px; margin-bottom: 20px;">Permisos Digitales</h1>
+                <p style="font-size: 32px; margin-bottom: 40px;">Tu tiempo vale</p>
+                <a href="#" class="cta-button">Obtén tu permiso AHORA</a>
+                <p style="font-size: 24px; margin-top: 40px; opacity: 0.8;">permisosdigitales.com.mx</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="playPause()" id="playBtn">▶ Play</button>
+        <button onclick="restart()">↺ Reiniciar</button>
+        <div class="timeline" onclick="seek(event)">
+            <div class="timeline-progress" id="progress"></div>
+        </div>
+        <div class="time-display">
+            <span id="currentTime">0:00</span> / <span id="totalTime">1:00</span>
+        </div>
+    </div>
+    
+    <script>
+        // Video state
+        let isPlaying = false;
+        let currentTime = 0;
+        let animationId = null;
+        let startTimestamp = null;
+        let pausedAt = 0;
+        
+        const TOTAL_DURATION = 60000; // 60 seconds in milliseconds
+        const scenes = document.querySelectorAll('.scene');
+        const playBtn = document.getElementById('playBtn');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const clock = document.getElementById('clock');
+        
+        // Scene timings
+        const sceneTimings = [
+            { start: 0, end: 8000, scene: 0 },     // Scene 1: 0-8s
+            { start: 8000, end: 13000, scene: 1 }, // Scene 2: 8-13s
+            { start: 13000, end: 33000, scene: 2 },// Scene 3: 13-33s
+            { start: 33000, end: 43000, scene: 3 },// Scene 4: 33-43s
+            { start: 43000, end: 60000, scene: 4 } // Scene 5: 43-60s
+        ];
+        
+        function showScene(index) {
+            scenes.forEach(scene => scene.classList.remove('active'));
+            if (scenes[index]) {
+                scenes[index].classList.add('active');
+                animateScene(index);
+            }
+        }
+        
+        function animateScene(index) {
+            // Reset animations
+            const activeScene = scenes[index];
+            
+            // Re-trigger animations by removing and re-adding classes
+            if (index === 3) { // Success scene
+                const icon = activeScene.querySelector('.success-icon');
+                icon.style.animation = 'none';
+                setTimeout(() => {
+                    icon.style.animation = 'successBounce 0.6s ease-out';
+                }, 10);
+            }
+            
+            if (index === 2) { // Demo scene
+                animateDemoSteps();
+            }
+        }
+        
+        function animateDemoSteps() {
+            const steps = [
+                { id: 'step1', content: '<h3>Paso 1: Registro</h3><p>Crea tu cuenta en segundos</p>' },
+                { id: 'step2', content: '<h3>Paso 2: Vehículo</h3><p>Ingresa los datos de tu auto</p>' },
+                { id: 'step3', content: '<h3>Paso 3: Pago</h3><p>$150 MXN - Pago seguro</p>' }
+            ];
+            
+            const relativeTime = currentTime - 13000;
+            const stepDuration = 20000 / 3; // 20 seconds divided by 3 steps
+            const currentStep = Math.floor(relativeTime / stepDuration);
+            
+            steps.forEach((step, i) => {
+                const stepEl = document.getElementById(step.id);
+                stepEl.classList.toggle('active', i <= currentStep);
+            });
+            
+            if (currentStep >= 0 && currentStep < steps.length) {
+                document.getElementById('form-content').innerHTML = steps[currentStep].content;
+            }
+        }
+        
+        function updateClock() {
+            if (currentTime < 8000) {
+                const minutes = Math.floor((currentTime / 1000) * 2);
+                const hours = 11 + Math.floor(minutes / 60);
+                const mins = 47 + (minutes % 60);
+                clock.textContent = `${hours}:${mins.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        function animate(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const elapsed = timestamp - startTimestamp + pausedAt;
+            
+            currentTime = elapsed;
+            
+            // Update UI
+            updateProgress();
+            updateClock();
+            
+            // Check which scene should be active
+            const currentSceneTiming = sceneTimings.find(
+                timing => elapsed >= timing.start && elapsed < timing.end
+            );
+            
+            if (currentSceneTiming) {
+                showScene(currentSceneTiming.scene);
+            }
+            
+            // Continue or loop
+            if (elapsed < TOTAL_DURATION && isPlaying) {
+                animationId = requestAnimationFrame(animate);
+            } else if (elapsed >= TOTAL_DURATION) {
+                restart();
+                if (isPlaying) {
+                    play();
+                }
+            }
+        }
+        
+        function updateProgress() {
+            const percentage = (currentTime / TOTAL_DURATION) * 100;
+            progress.style.width = percentage + '%';
+            
+            const seconds = Math.floor(currentTime / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            currentTimeEl.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function play() {
+            isPlaying = true;
+            startTimestamp = null;
+            animationId = requestAnimationFrame(animate);
+            playBtn.textContent = '⏸ Pausar';
+        }
+        
+        function pause() {
+            isPlaying = false;
+            pausedAt = currentTime;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            playBtn.textContent = '▶ Play';
+        }
+        
+        function playPause() {
+            if (isPlaying) {
+                pause();
+            } else {
+                play();
+            }
+        }
+        
+        function restart() {
+            pause();
+            currentTime = 0;
+            pausedAt = 0;
+            startTimestamp = null;
+            showScene(0);
+            updateProgress();
+            updateClock();
+        }
+        
+        function seek(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percentage = x / rect.width;
+            const newTime = percentage * TOTAL_DURATION;
+            
+            pausedAt = newTime;
+            currentTime = newTime;
+            startTimestamp = null;
+            
+            updateProgress();
+            
+            // Find and show appropriate scene
+            const currentSceneTiming = sceneTimings.find(
+                timing => newTime >= timing.start && newTime < timing.end
+            );
+            if (currentSceneTiming) {
+                showScene(currentSceneTiming.scene);
+            }
+            
+            if (isPlaying) {
+                if (animationId) cancelAnimationFrame(animationId);
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                playPause();
+            } else if (e.code === 'KeyR') {
+                restart();
+            }
+        });
+        
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+.legalPageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+/* Add padding-top for fixed header on desktop only */
+@media (min-width: 768px) {
+  .legalPageContainer {
+    padding-top: var(--mobile-header-height, 56px);
+  }
+}
+
+/* Mobile uses AppHeaderMobile which handles its own padding */
+@media (max-width: 767px) {
+  .legalPageContainer {
+    padding-top: var(--mobile-header-height, 56px);
+  }
+}
+
+/* Old desktop header styles removed - now using StandardDesktopHeader component */
+
+.legalContent {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.legalContentNoHeader {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  /* Remove top padding when in authenticated context */
+  padding-top: 0;
+}
+
+.legalTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.legalDate {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.legalSection {
+  margin-bottom: 2rem;
+}
+
+.legalSection h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  margin-bottom: 1rem;
+}
+
+.legalSection p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.legalIndent {
+  padding-left: 1.5rem;
+}
+
+/* Link styles removed - now using global text-link class */
+
+.legalList {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.legalList li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.legalFootnote {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+/* Contact page specific styles */
+.contactGrid {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.contactCard {
+  padding: var(--space-5);
+  overflow: visible !important; /* Fix for email cutoff */
+}
+
+.contactCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+}
+
+.contactCardDescription {
+  margin-bottom: var(--space-2);
+  color: var(--color-neutral-700);
+  line-height: var(--line-height-base);
+}
+
+.contactEmail {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.contactEmail a {
+  display: inline-block !important;
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Custom email link styles removed - now using global text-link class */
+
+.contactOpeningHours {
+  margin-bottom: var(--space-4);
+  color: var(--color-neutral-700);
+  line-height: var(--line-height-base);
+}
+
+.contactHoursGrid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.contactNote {
+  margin-top: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+.contactAddress {
+  line-height: var(--line-height-lg);
+  color: var(--color-neutral-700);
+}
+
+/* Custom header link styles removed - now using global text-link class */
+
+/* Responsive styles */
+@media (width <= 768px) {
+  .legalTitle {
+    font-size: 1.5rem;
+  }
+
+  .legalSection h2 {
+    font-size: 1.125rem;
+  }
+
+  .legalContent {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .legalIndent {
+    padding-left: 1rem;
+  }
+  
+  .contactGrid {
+    gap: var(--space-5);
+  }
+  
+  .contactCard {
+    padding: var(--space-4);
+  }
+}

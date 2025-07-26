@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recordatorio: Complete su solicitud de permiso</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #1f2937;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 32px 24px;
+        }
+        .warning-box {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .warning-box .warning-icon {
+            color: #d97706;
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        .application-details {
+            background-color: #f9fafb;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .application-details h3 {
+            margin: 0 0 12px 0;
+            color: #1f2937;
+            font-size: 18px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+        .detail-value {
+            color: #1f2937;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .cta-button:hover {
+            background-color: #1d4ed8;
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px 24px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .countdown {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d97706;
+            text-align: center;
+            margin: 16px 0;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .content {
+                padding: 20px 16px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Recordatorio Importante</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Su solicitud de permiso expira pronto</h2>
+            
+            <p>Estimado/a <strong>{{userName}}</strong>,</p>
+            
+            <p>Le recordamos que su solicitud de permiso de circulación necesita ser completada pronto para evitar la expiración.</p>
+            
+            <div class="warning-box">
+                <strong>⚠️ Su solicitud expira en:</strong>
+                <div class="countdown">{{timeRemaining}}</div>
+                <p style="margin: 8px 0 0 0; font-size: 14px;">
+                    Fecha límite: {{expirationDate}}
+                </p>
+            </div>
+
+            <div class="application-details">
+                <h3>Detalles de su solicitud</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Vehículo:</span>
+                    <span class="detail-value">{{vehicleDetails}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Solicitante:</span>
+                    <span class="detail-value">{{applicantName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Monto:</span>
+                    <span class="detail-value">${{amount}} MXN</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Estado:</span>
+                    <span class="detail-value">{{statusText}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Creada:</span>
+                    <span class="detail-value">{{createdDate}}</span>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="{{resumePaymentUrl}}" class="cta-button">
+                    Completar Pago Ahora
+                </a>
+            </div>
+
+            <h3>¿Qué sucede si no completo el pago?</h3>
+            <ul>
+                <li>Su solicitud será <strong>automáticamente cancelada</strong></li>
+                <li>Perderá toda la información ingresada</li>
+                <li>Deberá crear una nueva solicitud desde cero</li>
+            </ul>
+
+            <h3>Métodos de pago disponibles:</h3>
+            <ul>
+                <li><strong>Tarjeta de crédito/débito:</strong> Pago inmediato y procesamiento rápido</li>
+                <li><strong>OXXO:</strong> Pague en efectivo en cualquier tienda OXXO (48 horas para pagar)</li>
+            </ul>
+
+            <p><strong>¿Necesita ayuda?</strong> Contáctenos si tiene alguna pregunta sobre su solicitud o el proceso de pago.</p>
+        </div>
+
+        <div class="footer">
+            <p>Este es un mensaje automático del Sistema de Permisos de Circulación.</p>
+            <p>Si no realizó esta solicitud, puede ignorar este correo.</p>
+            <p>
+                <a href="{{dashboardUrl}}">Ver todas mis solicitudes</a> | 
+                <a href="mailto:soporte@permisos.gob.mx">Contactar Soporte</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

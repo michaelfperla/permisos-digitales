@@ -1,0 +1,217 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build output - Frontend specific
+frontend/dist/
+frontend/dist-admin/
+frontend/build/
+dist/
+build/
+
+# Environment variables (CRITICAL: Never commit secrets!)
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# AWS Secrets Manager - Never commit these!
+.env.production
+.env.staging
+**/secrets-backup/
+**/credentials.json
+aws/secrets-manager/scripts/*.env
+aws/secrets-manager/scripts/.env.*
+
+# TypeScript
+*.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# PM2
+ecosystem.config.js
+pm2.json
+.pm2/
+
+# Security - Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+docs/*.pem
+docs/*.key
+docs/permisos-digitales-fresh.pem
+docs/rds-ca-2019-root.pem
+
+# AWS Infrastructure files
+docs/AWS_INFRASTRUCTURE_REPORT.md
+*-cert-validation.json
+*-subdomain-record.json
+cert-validation-records.json
+current-cloudfront-config.json
+updated-cloudfront-config.json
+delete-old-validation-records.json
+route53-a-records.json
+single-cert-validation.json
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+log/
+*.log.*
+
+# Testing
+coverage/
+frontend/coverage/
+.nyc_output/
+test-storage/
+jest-results/
+*.test.tmp
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.cache/
+.parcel-cache/
+
+# Storage directories (uploads, PDFs, etc)
+storage/
+uploads/
+generated-pdfs/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+database/backups/
+*.sql
+*.dump
+*.backup
+dump.rdb
+
+# Documentation that might contain sensitive info
+PRODUCTION_*.md
+TROUBLESHOOTING_*.md
+*_TROUBLESHOOTING.md
+*_REGISTRATION_FIX.md
+SECURITY_ACTION_PLAN.md
+PRE_DEPLOYMENT_SECURITY_AUDIT_FINAL.md
+
+# Payment related
+PAYMENT_TESTING_GUIDE.md
+payment-logs/
+stripe-webhooks.log
+
+# Migration and data export files
+database_export.json
+*_test_user.js
+check_*.js
+export_data.js
+import_data.js
+cleanup_*.ps1
+
+# Archives
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Redis
+dump.rdb
+*.rdb
+
+# Puppeteer downloads
+.cache/puppeteer/
+
+# Frontend specific ignores
+frontend/public/maintenance.html
+frontend/src/components/MOBILE_IMPLEMENTATION_GUIDE.md
+frontend/src/components/ui/Button/BUTTON_GUIDELINES.md
+frontend/src/shared/components/ui/Icon/MIGRATION*.md
+
+# Backend specific
+src/config/env-validator.js
+!src/config/env-validator.example.js
+
+# Scripts directory (deployment scripts)
+scripts/
+deployment/
+
+# Monitoring and metrics
+metrics/
+monitoring/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Session files
+sessions/
+cookies.txt
+*.cookies
+# MCP Server Environment Files
+mcp-servers/**/.env
+mcp-servers/**/.env.*
+
+# Test results
+test-results/
+frontend/test-results/
+
+# Test files in root
+test-*.js
+
+# Certificates directory (use environment variables instead)
+certs/
+
+# MCP server documentation with sensitive info
+mcp-servers/*.md
+mcp-servers/**/*.md
+
+# Temporary/uncommitted files
+uncommitted-files.txt
+
+# E2E test screenshots and videos
+frontend/e2e/screenshots/
+frontend/e2e/videos/
+
+# Playwright test results
+playwright-report/
+playwright/.cache/
+
+# Production readiness documentation
+production-readiness-tasks/
+
+# Deployment documentation with sensitive info
+DEPLOYMENT_SETUP.md
+PIPELINE_INFRASTRUCTURE_COMPLETE.md
+
+# Docker compose override files
+docker-compose.override.yml

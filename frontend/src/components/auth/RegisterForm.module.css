@@ -1,0 +1,228 @@
+/* Styles for multi-step RegisterForm */
+
+/* Step indicator (Existing - keeping for completeness, though not visible in target image for step 1) */
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--bs-gray-200); /* Consider var(--color-neutral-200) */
+  color: var(--bs-gray-600); /* Consider var(--color-neutral-600) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.activeStep {
+  background-color: var(--rojo); /* var(--color-primary) */
+  color: white;
+}
+
+.stepConnector {
+  height: 2px;
+  width: 60px;
+  background-color: var(--bs-gray-200); /* Consider var(--color-neutral-200) */
+  margin: 0 10px;
+}
+
+.stepTitle {
+  font-size: 1.1rem;
+  color: var(--bs-gray-700); /* Consider var(--color-neutral-700) */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Form step container */
+.formStep {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form group custom spacing if needed, MobileFormGroup already has margin */
+.formGroup {
+  margin-bottom: 1rem; /* Consistent with MobileFormGroup or slight adjustment */
+}
+
+/* Label styling (applied via className in RegisterForm.tsx) */
+.label {
+  display: block;
+  margin-bottom: 0.5rem; /* Increased spacing */
+  font-weight: 600; /* Bolder labels */
+  color: var(--color-neutral-800, #333); /* Using theme variables */
+  font-size: 0.9rem; /* Slightly smaller than input text */
+}
+
+/* Input styling (applied via className in RegisterForm.tsx) */
+.input {
+  width: 100%;
+  min-height: 44px; /* Good touch target */
+  padding: 10px 14px; /* Comfortable padding */
+  border: 1px solid var(--color-neutral-300, #ddd);
+  border-radius: 8px; /* Softer, more modern rounded corners */
+  font-size: 1rem; /* Standard input font size, 16px to prevent iOS zoom */
+  background-color: var(--color-white, #fff);
+  color: var(--color-neutral-900, #222);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  appearance: none;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary, #a72b31);
+  box-shadow: 0 0 0 3px rgb(167 43 49 / 15%); /* Accent shadow on focus */
+}
+
+/* Error text (associated with MobileFormInput's error prop) */
+.errorText {
+  /* This class is from the original, MobileFormInput handles its own error display */
+  color: var(--rojo, #a72b31);
+  font-size: 0.8rem;
+  margin-top: 4px; /* Consistent small spacing */
+  display: block;
+  font-weight: 500;
+}
+
+/* Form title (handled by MobileForm title prop and its styles) */
+.formTitle {
+  /* This is from the original, likely for a non-MobileForm setup */
+  margin-bottom: 1.5rem; /* Adjusted from 0.75rem */
+  font-size: 1.6rem; /* Slightly larger and bolder for "Crear cuenta" */
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-neutral-900, #222);
+}
+
+/* Server error message styling */
+.errorMessage {
+  /* Class for the <Alert> message */
+  margin-bottom: 1rem;
+
+  /* Alert component likely has its own styling, this could be for additional text */
+}
+
+/* Button Group & Individual Buttons */
+.buttonGroup {
+  /* Used for Back/Next group in step 2 */
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem; /* More space before buttons */
+}
+
+/* Specific styling for the "Siguiente" button in Step 1 if needed */
+
+/* It uses MobileFormActions, which handles flex layout.
+   Button variant="primary" should handle most styling.
+   To make it full-width within MobileFormActions (which is flex-column on mobile): */
+.stepOneNextButton button {
+  /* Target the button element if Button component allows className pass-through */
+  width: 100%;
+}
+
+/* .nextButton, .backButton, .registerButton - These can be applied as classNames to the Button component if it supports it */
+
+/* For example, if Button component passes className to its root element: */
+.nextButton {
+  /* Primary button styles usually suffice */
+
+  /* If Button is inline-block/inline-flex by default, make it full width for Step 1 */
+  width: 100%; /* Ensure it takes full width in MobileFormActions */
+}
+
+.backButton {
+  /* Secondary button styles usually suffice */
+}
+
+.registerButton {
+  flex: 1; /* If in a row with back button */
+}
+
+.buttonIcon {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem; /* For icons inside buttons */
+  font-size: 0.8rem;
+}
+
+/* Footer Links Section Styles */
+.formFooterLinks {
+  text-align: center;
+  margin-top: 1.5rem; /* Increased space */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Space between "terms" and "login" sections */
+}
+
+.formFooterSection {
+  /* Each section (terms, login prompt) */
+}
+
+.mutedText {
+  font-size: 0.8rem; /* Smaller text for prompts */
+  color: var(--color-neutral-600, #666);
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.termsLinksContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+  gap: 0.25rem 0.5rem; /* row and column gap */
+}
+
+.minorLink {
+  font-size: 0.8rem;
+  color: var(--color-primary, #a72b31); /* Use primary color for links */
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.minorLink:hover {
+  text-decoration: none;
+}
+
+.termsSeparator {
+  font-size: 0.8rem;
+  color: var(--color-neutral-600, #666);
+  margin: 0 0.1rem;
+}
+
+.actionLink {
+  font-size: 0.9rem; /* Slightly larger for primary alternative action */
+  color: var(--color-primary-dark, #862328); /* Darker shade of primary or distinct color */
+  text-decoration: underline;
+  font-weight: 600; /* Bolder */
+}
+
+.actionLink:hover {
+  text-decoration: none;
+}
+
+/* Spinner - if current one needs adjustment */
+.spinner {
+  /* Assuming Button component's loading state has a spinner */
+}

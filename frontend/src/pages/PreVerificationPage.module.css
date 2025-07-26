@@ -1,0 +1,342 @@
+/* PreVerification Page Styles - Redesigned */
+.verificationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: var(--font-family-sans);
+}
+
+.verificationHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.successIcon {
+  font-size: 2.5rem;
+  color: var(--color-success);
+  margin-bottom: 1rem;
+  animation: fadeInScale 0.5s ease-out;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.verificationCard {
+  width: 100%;
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 10%);
+  background-color: white;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.emailIconWrapper {
+  width: 80px;
+  height: 80px;
+  background-color: rgb(167 43 49 / 10%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem auto 1.5rem;
+  box-shadow: 0 4px 8px rgb(0 0 0 / 5%);
+  border: 1px solid rgb(167 43 49 / 20%);
+}
+
+.emailIcon {
+  font-size: 2.5rem;
+  color: var(--rojo);
+}
+
+.verificationTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  text-align: center;
+  margin: 0 0 1.25rem;
+}
+
+.verificationAlert {
+  margin-bottom: 1.5rem;
+}
+
+.alertText {
+  text-align: center;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.emailSentText {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  color: var(--color-neutral-800);
+}
+
+.instructionsSection {
+  background-color: rgb(0 0 0 / 2%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  border-left: 4px solid var(--rojo);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 3%);
+  position: relative;
+  overflow: hidden;
+}
+
+.instructionsSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgb(167 43 49 / 3%) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.instructionsTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.infoIcon {
+  margin-right: 8px;
+  color: var(--rojo);
+}
+
+.listItemIcon {
+  margin-right: 6px;
+  font-size: 0.9em;
+  color: var(--rojo);
+}
+
+.instructionsList {
+  margin: 0;
+  padding-left: 1.75rem;
+  counter-reset: step-counter;
+}
+
+.instructionsList li {
+  margin-bottom: 0.9rem;
+  color: var(--color-neutral-700);
+  line-height: 1.5;
+  position: relative;
+  padding-left: 0.25rem;
+}
+
+.instructionsList li::marker {
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+.instructionsList li:last-child {
+  margin-bottom: 0;
+}
+
+.infoBox {
+  background-color: rgb(0 0 0 / 3%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid rgb(0 0 0 / 5%);
+}
+
+.infoTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-neutral-800);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.infoList {
+  margin: 0;
+  padding-left: 1.75rem;
+}
+
+.infoList li {
+  margin-bottom: 0.75rem;
+  color: var(--color-neutral-700);
+  line-height: 1.5;
+}
+
+.infoList li:last-child {
+  margin-bottom: 0;
+}
+
+.actionsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.loginLink {
+  width: 100%;
+  text-decoration: none;
+}
+
+.loginButton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+}
+
+.loginButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(167 43 49 / 20%);
+}
+
+.buttonIcon {
+  font-size: 1rem;
+  margin-left: 0.25rem;
+  transition: transform 0.2s ease;
+}
+
+.loginButton:hover .buttonIcon {
+  transform: translateX(3px);
+}
+
+.resendLink {
+  color: var(--rojo);
+  font-size: 0.95rem;
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 1.25rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.resendLink:hover {
+  color: var(--rojofuerte);
+  text-decoration: underline;
+  background-color: rgb(167 43 49 / 5%);
+}
+
+/* Responsive styles for mobile */
+@media (width <= 576px) {
+  .verificationContainer {
+    padding: 0;
+  }
+
+  .verificationHeader {
+    margin-bottom: 1rem;
+  }
+
+  .successIcon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .cardContent {
+    padding: 1.25rem;
+  }
+
+  .emailIconWrapper {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 1.25rem;
+  }
+
+  .emailIcon {
+    font-size: 2rem;
+  }
+
+  .verificationTitle {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .instructionsSection,
+  .infoBox {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .instructionsTitle,
+  .infoTitle {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .instructionsList,
+  .infoList {
+    padding-left: 1.5rem;
+  }
+
+  .instructionsList li,
+  .infoList li {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .loginButton {
+    padding: 0.8rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .resendLink {
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "permisos-digitales-promo",
+  "version": "1.0.0",
+  "description": "Promotional video for Permisos Digitales",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render PromoVideo out/video.mp4",
+    "preview": "remotion preview",
+    "upgrade": "remotion upgrade",
+    "render": "remotion render PromoVideo out/promo.mp4 --codec=h264",
+    "render-gif": "remotion render PromoVideo out/promo.gif --codec=gif",
+    "render-still": "remotion still PromoVideo out/thumbnail.png --frame=900"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/player": "^4.0.325",
+    "express": "^5.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/web": "^0.0.99",
+    "typescript": "^5.0.2"
+  }
+}

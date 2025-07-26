@@ -1,0 +1,124 @@
+name: Payment System Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/services/payment-*.js'
+      - 'src/controllers/*payment*.js'
+      - 'src/services/stripe-*.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/services/payment-*.js'
+      - 'src/controllers/*payment*.js'
+      - 'src/services/stripe-*.js'
+
+jobs:
+  test-payments:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_permits
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      redis:
+        image: redis:6
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Stripe CLI
+      run: |
+        curl -s https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | gpg --dearmor | sudo tee /usr/share/keyrings/stripe.gpg
+        echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" | sudo tee -a /etc/apt/sources.list.d/stripe.list
+        sudo apt update
+        sudo apt install stripe
+    
+    - name: Setup test environment
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_permits
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+        STRIPE_TEST_PUBLIC_KEY: ${{ secrets.STRIPE_TEST_PUBLIC_KEY }}
+        STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_TEST_WEBHOOK_SECRET }}
+      run: |
+        cp .env.example .env.test
+        npm run migrate:up
+    
+    - name: Run unit tests
+      run: npm test -- src/services/__tests__/payment-recovery.service.test.js
+      
+    - name: Run contract tests
+      env:
+        STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      run: npm test -- src/tests/contracts/stripe-api.contract.test.js
+    
+    - name: Run integration tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_permits
+        REDIS_HOST: localhost
+        STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+        STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_TEST_WEBHOOK_SECRET }}
+      run: npm test -- src/tests/integration/payment-recovery.integration.test.js
+    
+    - name: Run payment simulations
+      env:
+        STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+        API_URL: http://localhost:3001
+      run: |
+        npm start &
+        sleep 10
+        node scripts/simulate-payments.js all 999
+        node scripts/simulate-payments.js chaos 999 5
+    
+    - name: Test webhook delivery
+      env:
+        STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+      run: |
+        stripe listen --api-key $STRIPE_TEST_SECRET_KEY --forward-to localhost:3001/payments/stripe/webhook &
+        sleep 5
+        stripe trigger payment_intent.succeeded --api-key $STRIPE_TEST_SECRET_KEY
+        stripe trigger payment_intent.payment_failed --api-key $STRIPE_TEST_SECRET_KEY
+        stripe trigger charge.succeeded --api-key $STRIPE_TEST_SECRET_KEY
+        sleep 10
+    
+    - name: Generate test report
+      if: always()
+      run: |
+        npm run test:coverage
+        
+    - name: Upload coverage
+      if: always()
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: payments
+        name: payment-tests

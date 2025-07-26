@@ -1,0 +1,541 @@
+/* Mobile-First Auth Form Design System */
+
+/* Container fills viewport for mobile immersion */
+.authFormContainer {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brand Section - Creates visual hierarchy */
+.brandSection {
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.brandLogo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--space-4);
+  background: var(--color-primary-lightest);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--color-primary);
+  box-shadow: var(--box-shadow-lg);
+  transition: transform var(--transition-smooth);
+}
+
+.brandTitle {
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0 0 var(--space-2);
+  letter-spacing: -0.02em;
+}
+
+.brandSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  margin: 0;
+}
+
+/* Form Content Area - Optimized for thumb reach */
+.formContent {
+  flex: 1;
+  padding: 0 var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+/* Input Groups with floating labels */
+.inputGroup {
+  margin-bottom: var(--space-5);
+  position: relative;
+}
+
+.inputWrapper {
+  position: relative;
+  background: var(--color-neutral-100);
+  border-radius: var(--border-radius-lg);
+  transition: var(--transition-base);
+  border: 2px solid transparent;
+}
+
+.inputWrapper:focus-within {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-alpha-10);
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-5) var(--space-4) var(--space-3);
+  font-size: var(--font-size-lg);
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-900);
+  outline: none;
+  border-radius: var(--border-radius-lg);
+  transition: padding var(--transition-base);
+  
+  /* Better touch experience */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  /* Prevent zoom on iOS */
+  font-size: 16px;
+}
+
+.input::placeholder {
+  color: transparent;
+}
+
+.input:focus::placeholder {
+  color: var(--color-neutral-500);
+}
+
+/* Floating label */
+.label {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  pointer-events: none;
+  transition: var(--transition-base);
+  background: transparent;
+  padding: 0 var(--space-1);
+  font-weight: var(--font-weight-medium);
+}
+
+.input:focus ~ .label,
+.input:not(:placeholder-shown) ~ .label,
+.inputWrapper:focus-within .label {
+  top: var(--space-3);
+  font-size: var(--font-size-sm);
+  transform: translateY(0);
+  color: var(--color-primary);
+  background: var(--color-white);
+}
+
+/* Password visibility toggle */
+.passwordToggle {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-neutral-600);
+  cursor: pointer;
+  padding: var(--space-2);
+  font-size: var(--font-size-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: var(--border-radius);
+  transition: var(--transition-base);
+}
+
+.passwordToggle:hover {
+  color: var(--color-neutral-900);
+  background: var(--color-neutral-100);
+}
+
+.passwordToggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Error states */
+.inputError {
+  border-color: var(--color-danger);
+}
+
+.inputError:focus-within {
+  box-shadow: 0 0 0 4px var(--color-danger-alpha-10);
+}
+
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-danger-alpha-10);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius);
+  animation: slideInUp var(--animation-duration-slow) ease;
+}
+
+/* Success feedback */
+.inputSuccess {
+  border-color: var(--color-success);
+}
+
+.successIcon {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-success);
+  font-size: 1.25rem;
+  animation: scaleIn var(--animation-duration-slow) ease;
+}
+
+/* Primary action button - in thumb zone */
+.submitButton {
+  width: 100%;
+  padding: var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  
+  /* Better touch feedback */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.submitButton:not(:disabled):hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--box-shadow-lg);
+}
+
+.submitButton:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: var(--box-shadow-md);
+}
+
+.submitButton:disabled {
+  background: var(--color-neutral-400);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Loading state */
+.submitButton.loading {
+  color: transparent;
+}
+
+.submitButton.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  border: 2px solid var(--color-white);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin var(--animation-duration-base) linear infinite;
+}
+
+/* Secondary actions */
+.secondaryActions {
+  margin-top: var(--space-6);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.dividerText {
+  position: relative;
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-sm);
+  margin: var(--space-4) 0;
+}
+
+.dividerText::before,
+.dividerText::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 30px);
+  height: 1px;
+  background: var(--color-neutral-300);
+}
+
+.dividerText::before {
+  left: 0;
+}
+
+.dividerText::after {
+  right: 0;
+}
+
+/* Social login buttons */
+.socialButtons {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.socialButton {
+  flex: 1;
+  padding: var(--space-3);
+  border: 2px solid var(--color-neutral-300);
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-700);
+  transition: var(--transition-base);
+  min-height: 48px;
+  font-weight: var(--font-weight-medium);
+}
+
+.socialButton:hover {
+  border-color: var(--color-neutral-400);
+  background: var(--color-neutral-50);
+  transform: translateY(-1px);
+}
+
+.socialButton:active {
+  transform: translateY(0);
+}
+
+/* Links */
+.textLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  padding: var(--space-2);
+  display: inline-block;
+  transition: var(--transition-base);
+  border-radius: var(--border-radius);
+}
+
+.textLink:hover {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-lightest);
+}
+
+.textLink:active {
+  transform: scale(0.98);
+}
+
+/* Footer section */
+.footerSection {
+  padding: var(--space-5);
+  text-align: center;
+  border-top: 1px solid var(--color-neutral-200);
+  margin-top: auto;
+}
+
+.footerText {
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Biometric login */
+.biometricButton {
+  width: 64px;
+  height: 64px;
+  margin: var(--space-6) auto var(--space-4);
+  background: var(--color-primary-lightest);
+  border: 2px solid var(--color-primary-lighter);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+}
+
+.biometricButton:hover {
+  transform: scale(1.05);
+  box-shadow: var(--box-shadow-xl);
+}
+
+.biometricButton:active {
+  transform: scale(0.95);
+}
+
+.biometricIcon {
+  font-size: var(--font-size-2xl);
+  color: var(--color-primary);
+}
+
+/* Remember me checkbox */
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-neutral-400);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition-base);
+  position: relative;
+  background: var(--color-white);
+}
+
+.checkbox:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+}
+
+.checkboxLabel {
+  color: var(--color-neutral-700);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Progress indicator for multi-step forms */
+.progressBar {
+  height: 4px;
+  background: var(--color-neutral-200);
+  border-radius: 2px;
+  margin-bottom: var(--space-6);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width var(--animation-duration-slow) ease;
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(-50%);
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) {
+  .authFormContainer {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: auto;
+    margin-top: var(--space-8);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--box-shadow-2xl);
+  }
+  
+  .brandSection {
+    padding: var(--space-8) var(--space-6) var(--space-6);
+  }
+  
+  .formContent {
+    padding: 0 var(--space-6) var(--space-8);
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .authFormContainer {
+    background: var(--color-neutral-900);
+  }
+  
+  .brandTitle {
+    color: var(--color-white);
+  }
+  
+  .brandSubtitle {
+    color: var(--color-neutral-400);
+  }
+  
+  .inputWrapper {
+    background: var(--color-neutral-800);
+  }
+  
+  .input {
+    color: var(--color-white);
+  }
+  
+  .label {
+    color: var(--color-neutral-400);
+  }
+  
+  .socialButton {
+    background: var(--color-neutral-800);
+    border-color: var(--color-neutral-700);
+    color: var(--color-neutral-300);
+}
+}
+}
+}
+}
+}
