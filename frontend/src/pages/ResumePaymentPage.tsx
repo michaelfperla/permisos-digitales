@@ -148,7 +148,7 @@ const ResumePaymentPage: React.FC = () => {
             
             <div className="text-right">
               <p className="text-2xl font-bold text-gray-900 mb-1">
-                ${application.importe || 150}.00 MXN
+                ${application.importe || 99}.00 MXN
               </p>
               {countdown && (
                 <div className={`flex items-center justify-end space-x-1 text-sm font-medium ${

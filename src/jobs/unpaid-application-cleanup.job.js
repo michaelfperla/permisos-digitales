@@ -30,7 +30,7 @@ async function cleanupUnpaidApplications() {
         pa.status,
         pa.created_at,
         pa.payment_processor_order_id,
-        u.email as user_email,
+        u.account_email as user_email,
         EXTRACT(DAYS FROM NOW() - pa.created_at) as days_old
       FROM permit_applications pa
       JOIN users u ON pa.user_id = u.id

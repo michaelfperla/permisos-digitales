@@ -1,4 +1,5 @@
 import { resolve } from 'path'
+import { existsSync, renameSync } from 'fs'
 
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -49,7 +50,7 @@ export default defineConfig(({ command, mode }) => {
   }
   
   return {
-    base: '/admin/', // Set base path for admin assets
+    base: '/admin/',
     appType: 'spa', // Ensure SPA routing works
     css: {
       modules: {
@@ -58,7 +59,26 @@ export default defineConfig(({ command, mode }) => {
         generateScopedName: '[local]_[hash:base64:5]',
       },
     },
-    plugins: [react()],
+    plugins: [
+      react(),
+      // Custom plugin to rename admin.html to index.html for clean URLs
+      {
+        name: 'rename-admin-html',
+        writeBundle(options, bundle) {
+          // This runs after files are written - rename the actual file
+          const outDir = options.dir || 'dist-admin';
+          const adminHtmlPath = resolve(outDir, 'admin.html');
+          const indexHtmlPath = resolve(outDir, 'index.html');
+          
+          if (existsSync(adminHtmlPath)) {
+            renameSync(adminHtmlPath, indexHtmlPath);
+            console.log('✅ Renamed admin.html to index.html');
+          } else {
+            console.log('⚠️ admin.html not found at:', adminHtmlPath);
+          }
+        }
+      }
+    ],
     server: {
       port: 3003, // Use different port for admin development
       // Only enable proxy in development mode
@@ -72,20 +92,18 @@ export default defineConfig(({ command, mode }) => {
       minify: 'terser',
       terserOptions: {
         compress: {
-          // Remove console.* statements in production
-          drop_console: true,
-          drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
+          // Keep console.* statements for debugging
+          drop_console: false,
+          drop_debugger: false,
+          pure_funcs: []
         },
         mangle: {
-          // Mangle property names for better compression
-          properties: {
-            regex: /^_/
-          }
+          // Don't mangle properties to preserve displayName
+          properties: false
         },
         format: {
-          // Remove comments in production
-          comments: false
+          // Keep comments for debugging
+          comments: true
         }
       },
       rollupOptions: {
@@ -93,6 +111,8 @@ export default defineConfig(({ command, mode }) => {
           main: resolve(__dirname, 'admin.html')
         },
         output: {
+          entryFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash][extname]',
           manualChunks: {
             'vendor': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
             'admin': ['./src/admin/main.tsx']

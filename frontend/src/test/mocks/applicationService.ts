@@ -26,7 +26,7 @@ export const mockApplications: Application[] = [
 
     // Permit Data
     folio: 'PD-2025-001',
-    importe: 150.0,
+    importe: 99.0,
     fecha_expedicion: '2025-01-15',
     fecha_vencimiento: '2026-01-15',
 

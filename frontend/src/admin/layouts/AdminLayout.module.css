@@ -3,6 +3,7 @@
   display: flex;
   min-height: 100vh;
   position: relative;
+  background-color: var(--color-neutral-50, #f8f9fa);
 }
 
 /* Overlay for mobile sidebar */
@@ -25,7 +26,7 @@
 /* Sidebar Styles */
 .sidebar {
   width: 250px;
-  background-color: var(--color-neutral-900, #343a40);
+  background: linear-gradient(180deg, var(--color-neutral-900) 0%, var(--color-neutral-800) 100%);
   color: var(--color-white, #fff);
   display: flex;
   flex-direction: column;
@@ -36,6 +37,7 @@
   height: 100vh;
   z-index: 1000;
   transform: translateX(0);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Mobile sidebar styles */

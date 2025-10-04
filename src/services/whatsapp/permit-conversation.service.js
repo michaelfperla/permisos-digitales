@@ -7,7 +7,7 @@ const WhatsAppClientService = require('./whatsapp-client.service');
 const ConversationManagerService = require('./conversation-manager.service');
 const AIProcessorService = require('./ai-processor.service');
 const applicationService = require('../application.service');
-const stripePaymentService = require('../stripe-payment.service');
+const stripeLinkService = require('./stripe-payment-link.service');
 const { logger } = require('../../utils/logger');
 
 class PermitConversationService {
@@ -177,7 +177,7 @@ Te ayudaré a tramitar tu permiso de circulación de manera rápida y sencilla.
 • Tus datos personales
 • Información de tu vehículo
 
-💰 Costo: $150.00 MXN
+💰 Costo: $99.00 MXN
 ⏱️ Tiempo: 5-10 minutos después del pago
 
 ¿Comenzamos? Por favor, dime tu nombre completo.`;
@@ -251,7 +251,7 @@ Te ayudaré a tramitar tu permiso de circulación de manera rápida y sencilla.
 • No. Serie: ${vehicle.numero_serie}
 • No. Motor: ${vehicle.numero_motor}
 
-💰 **Costo: $150.00 MXN**
+💰 **Costo: $99.00 MXN**
 
 ¿Todos los datos son correctos?`;
     
@@ -314,43 +314,43 @@ Te ayudaré a tramitar tu permiso de circulación de manera rápida y sencilla.
       // Get application data
       const applicationData = await this.conversationManager.getApplicationData(phoneNumber);
       
-      // Find or create user
-      const userService = require('../user.service');
-      let user = await userService.findByPhone(phoneNumber);
-      
+      // Find or create user using WhatsApp user account service
+      const userAccountService = require('./user-account.service');
+      let user = await userAccountService.findByWhatsAppPhone(phoneNumber);
+
       if (!user) {
-        // Create user with phone number
-        user = await userService.create({
-          phone: phoneNumber,
-          first_name: applicationData.nombre_completo.split(' ')[0],
-          last_name: applicationData.nombre_completo.split(' ').slice(1).join(' ') || 'Usuario',
-          email: `${phoneNumber}@whatsapp.permisos.mx`, // Placeholder email
-          password: require('crypto').randomBytes(32).toString('hex') // Random password
-        });
+        // Create user with WhatsApp phone as primary identifier
+        user = await userAccountService.createOrFindUser(
+          phoneNumber,
+          null, // No email provided in this flow
+          applicationData.nombre_completo
+        );
       }
       
       // Create application
       const application = await applicationService.createApplication({
         ...applicationData,
         user_id: user.id,
-        importe: 150.00
+        importe: 99.00
       });
       
       // Store application ID in conversation
       await this.conversationManager.storeApplicationId(phoneNumber, application.id);
       
-      // Create Stripe payment link
-      const paymentLink = await stripePaymentService.createPaymentLink({
-        amount: 150.00,
+      // Create Stripe payment link using service that handles NULL emails
+      const checkoutSession = await stripeLinkService.createCheckoutSession({
+        applicationId: application.id,
+        amount: 99.00,
         currency: 'MXN',
+        customerEmail: null, // WhatsApp users can have NULL emails
         metadata: {
           application_id: application.id,
           phone_number: phoneNumber,
           source: 'whatsapp'
-        },
-        success_url: `${process.env.FRONTEND_URL}/payment-success?id=${application.id}`,
-        cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`
+        }
       });
+      
+      const paymentLink = { url: checkoutSession.url };
       
       // Store payment info
       await this.conversationManager.storePaymentInfo(phoneNumber, {
@@ -497,7 +497,7 @@ Tu permiso digital está siendo generado. Lo recibirás en este chat en unos min
 **Preguntas frecuentes:**
 
 ❓ **¿Cuánto cuesta?**
-El permiso tiene un costo de $150 MXN
+El permiso tiene un costo de $99 MXN
 
 ❓ **¿Cuánto tarda?**
 El permiso se genera en 5-10 minutos después del pago

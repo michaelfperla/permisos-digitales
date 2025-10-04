@@ -3,8 +3,16 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Falta tu correo electrónico')
-    .email('Escribe un correo electrónico válido'),
+    .min(1, 'Falta tu correo electrónico o teléfono')
+    .refine((value) => {
+      // Check if it's an email
+      if (value.includes('@')) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }
+      // Check if it's a phone number (10 digits, optionally with country code)
+      const phoneDigits = value.replace(/\D/g, '');
+      return phoneDigits.length >= 10 && phoneDigits.length <= 13;
+    }, 'Ingresa un correo electrónico válido o número de teléfono (10 dígitos)'),
   password: z.string().min(1, 'Falta tu contraseña'),
 });
 

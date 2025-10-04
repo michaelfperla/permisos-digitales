@@ -10,6 +10,7 @@ const { logger } = require('../utils/logger');
 const { PermisosStartupMonitor } = require('../monitoring/startup-monitor');
 const PermisosHealthMonitor = require('../monitoring/health-monitor');
 const PermisosServiceContainer = require('./service-container');
+const { getServiceContainer, initializeContainer } = require('./service-container-singleton');
 const { PermisosExpressAppFactory } = require('./express-app-factory');
 const unifiedConfig = require('../config/unified-config');
 const { registerPermisosServices } = require('./service-registry');
@@ -47,7 +48,8 @@ class PermisosStartupOrchestrator {
       this.startupMonitor.recordPhaseStart('service_registration');
       logger.info('[Startup] Phase 2: Creating service container and registering services...');
       
-      this.serviceContainer = new PermisosServiceContainer();
+      // Use the singleton container for consistency across the app
+      this.serviceContainer = getServiceContainer();
       
       // Register all fixed services from Agent 2
       registerPermisosServices(this.serviceContainer, fullConfig);
@@ -61,7 +63,8 @@ class PermisosStartupOrchestrator {
       this.startupMonitor.recordPhaseStart('service_initialization');
       logger.info('[Startup] Phase 3: Initializing services in dependency order...');
       
-      await this.serviceContainer.initialize(fullConfig);
+      // Initialize using the singleton method to set the isInitialized flag
+      await initializeContainer(fullConfig);
       
       this.startupMonitor.recordPhaseComplete('service_initialization', {
         servicesInitialized: this.serviceContainer.services.size,

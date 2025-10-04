@@ -610,38 +610,108 @@ class PermisosServiceContainer {
    */
   async shutdown() {
     logger.info('Container: Starting graceful shutdown...');
-    
+
     // Get services in reverse initialization order
     const shutdownOrder = this.dependencyResolver.resolveInitializationOrder(this.factories).reverse();
-    
+
     for (const serviceName of shutdownOrder) {
       const service = this.services.get(serviceName);
       if (service && service.status === SERVICE_STATUS.READY) {
         try {
           logger.info(`Container: Shutting down ${serviceName}...`);
-          
+
           // Call shutdown handler if available
           const shutdownHandler = this.shutdownHandlers.get(serviceName);
           if (shutdownHandler) {
             await shutdownHandler(service.instance);
           }
-          
+
           // Call service's own shutdown method if available
           if (service.instance && typeof service.instance.shutdown === 'function') {
             await service.instance.shutdown();
           }
-          
+
           service.status = SERVICE_STATUS.STOPPED;
           logger.info(`Container: ✓ ${serviceName} shut down successfully`);
-          
+
         } catch (error) {
           logger.error(`Container: Error shutting down ${serviceName}:`, error);
         }
       }
     }
-    
+
     this.initialized = false;
     logger.info('Container: Graceful shutdown completed');
+  }
+
+  /**
+   * Emergency shutdown - faster, less graceful shutdown for critical errors
+   * @returns {Promise<void>}
+   */
+  async emergencyShutdown() {
+    logger.warn('Container: Starting emergency shutdown...');
+
+    try {
+      // Set a timeout for emergency shutdown
+      const shutdownPromise = this.performEmergencyShutdown();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Emergency shutdown timeout')), 5000);
+      });
+
+      await Promise.race([shutdownPromise, timeoutPromise]);
+
+    } catch (error) {
+      logger.error('Container: Emergency shutdown failed:', error);
+      // Force exit if emergency shutdown fails
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Perform the actual emergency shutdown
+   * @private
+   */
+  async performEmergencyShutdown() {
+    const services = Array.from(this.services.entries());
+
+    // Shutdown all services in parallel for speed
+    const shutdownPromises = services.map(async ([serviceName, service]) => {
+      if (service && service.status === SERVICE_STATUS.READY) {
+        try {
+          logger.info(`Container: Emergency shutdown of ${serviceName}...`);
+
+          // Try shutdown handler first (faster)
+          const shutdownHandler = this.shutdownHandlers.get(serviceName);
+          if (shutdownHandler) {
+            await Promise.race([
+              shutdownHandler(service.instance),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Handler timeout')), 1000))
+            ]);
+          }
+
+          // Try service's own shutdown method
+          if (service.instance && typeof service.instance.shutdown === 'function') {
+            await Promise.race([
+              service.instance.shutdown(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Service timeout')), 1000))
+            ]);
+          }
+
+          service.status = SERVICE_STATUS.STOPPED;
+          logger.info(`Container: ✓ ${serviceName} emergency shutdown completed`);
+
+        } catch (error) {
+          logger.warn(`Container: Emergency shutdown of ${serviceName} failed:`, error.message);
+          // Continue with other services
+        }
+      }
+    });
+
+    // Wait for all shutdowns to complete or timeout
+    await Promise.allSettled(shutdownPromises);
+
+    this.initialized = false;
+    logger.warn('Container: Emergency shutdown completed');
   }
 
   /**

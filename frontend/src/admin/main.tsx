@@ -34,7 +34,7 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="/admin">
+      <BrowserRouter>
         <ErrorBoundary>
           <AuthProvider type="admin" authService={authService}>
             <ToastProvider>

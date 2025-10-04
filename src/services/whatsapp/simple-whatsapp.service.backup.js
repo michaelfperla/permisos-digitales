@@ -1,1856 +1,1396 @@
 /**
  * Simple WhatsApp Service for Permisos Digitales
- * No AI, just pattern matching and linear flow
+ * Uses numbered options instead of slash commands for better UX
  */
 
 const { logger } = require('../../utils/logger');
-const redisClient = require('../../utils/redis-client');
 const db = require('../../db');
-const securityUtils = require('./security-utils');
-const StateManager = require('./state-manager');
-const ErrorRecovery = require('./error-recovery');
-const MessageFormatter = require('./message-formatter');
-const HealthMonitor = require('./health-monitor');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const privacyAuditService = require('../privacy-audit.service');
+const navigationManager = require('./navigation-manager');
+const emailService = require('../email.service');
+const { getGreeting, getTimezoneName } = require('../../utils/mexican-timezones');
+const { PaymentFees } = require('../../constants/payment.constants');
+const redisClient = require('../../utils/redis-client');
+const axios = require('axios');
 
 class SimpleWhatsAppService {
   constructor() {
-    // Configuration management
-    this._config = null;
-    this._configInitialized = false;
-    this._configInitializing = false;
+    // Core configuration
+    this.config = {
+      phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
+      accessToken: process.env.WHATSAPP_ACCESS_TOKEN,
+      apiUrl: null // Set in initialize()
+    };
     
-    // State management
+    // Simple rate limiting
+    this.rateLimiter = new Map();
+    this.RATE_LIMIT = 20; // messages per minute
+    this.RATE_WINDOW = 60000; // 1 minute
+    
+    // Session management using Redis (via existing StateManager)
+    const StateManager = require('./state-manager');
     this.stateManager = new StateManager();
     
-    // Error recovery system
-    this.errorRecovery = new ErrorRecovery(this.stateManager, this);
+    // Enhanced state management with migration adapter
+    const StateMigrationAdapter = require('./state-migration-adapter');
+    this.migrationAdapter = new StateMigrationAdapter(this.stateManager);
     
-    // Message formatter for consistent styling
-    this.formatter = new MessageFormatter();
+    // Privacy settings
+    this.PRIVACY_VERSION = process.env.PRIVACY_POLICY_VERSION || '1.0';
     
-    // Health monitoring system (initialized after other components)
-    this.healthMonitor = null;
-    
-    // Rate limiter to prevent spam
-    this.rateLimiter = new Map();
-    this.rateLimitNotified = new Map(); // Track who we've notified
-    this.RATE_LIMIT_MAX = 20; // Max messages per minute (increased for form completion)
-    this.RATE_LIMIT_WINDOW = 60000; // 1 minute
-    
-    // Periodic cleanup to prevent memory leaks
-    this.rateLimiterCleanupInterval = setInterval(() => {
-      this.cleanRateLimiter();
-    }, 5 * 60000); // Clean every 5 minutes
-    
-    // In-memory state fallback for Redis failures (deprecated - use stateManager)
-    this.memoryStateCache = new Map();
-    
-    // Input limits
-    this.MAX_INPUT_LENGTH = 500;
-    this.MAX_FIELD_LENGTHS = {
-      nombre_completo: 255,
-      curp_rfc: 50,
-      domicilio: 500,
-      email: 255,
-      marca: 100,
-      linea: 100,
-      color: 50,
-      numero_serie: 50,
-      numero_motor: 50,
-      ano_modelo: 4
-    };
-    
-    // Enhanced commands - now with numbered options and natural language
-    this.commands = {
-      // Slash commands (keep for backwards compatibility)
-      '/permiso': 'startOrResumeApplication',
-      '/estado': 'checkStatus',
-      '/pagar': 'getPaymentLinks',
-      '/mis-permisos': 'listUserPermits',
-      '/renovar': 'renewPermit',
-      '/ayuda': 'sendContextualHelp',
-      '/cancelar': 'cancelCurrent',
-      // Natural language and greetings
-      'hola': 'handleGreeting',
-      'inicio': 'handleGreeting',
-      'menu': 'handleGreeting',
-      'menú': 'handleGreeting',
-      'ayuda': 'sendContextualHelp',
-      'help': 'sendContextualHelp',
-      'necesito ayuda': 'sendContextualHelp',
-      'no entiendo': 'sendContextualHelp',
-      // Numbered options
-      '1': 'handleNumberedOption',
-      '2': 'handleNumberedOption',
-      '3': 'handleNumberedOption',
-      '4': 'handleNumberedOption',
-      '5': 'handleNumberedOption',
-      '6': 'handleNumberedOption',
-      // Action phrases
-      'nuevo permiso': 'startOrResumeApplication',
-      'solicitar permiso': 'startOrResumeApplication',
-      'quiero un permiso': 'startOrResumeApplication',
-      'necesito permiso': 'startOrResumeApplication',
-      'ver estado': 'checkStatus',
-      'como voy': 'checkStatus',
-      'mi solicitud': 'checkStatus',
-      'pagar': 'getPaymentLinks',
-      'hacer pago': 'getPaymentLinks',
-      'link de pago': 'getPaymentLinks',
-      'mis permisos': 'listUserPermits',
-      'ver permisos': 'listUserPermits',
-      'renovar': 'renewPermit',
-      'renovar permiso': 'renewPermit',
-      'cancelar': 'cancelCurrent',
-      'reiniciar': 'cancelCurrent',
-      // Opt-out
-      'stop': 'handleOptOut',
-      'baja': 'handleOptOut',
-      'detener': 'handleOptOut',
-      'cancelar suscripcion': 'handleOptOut',
-      'no mas mensajes': 'handleOptOut'
-    };
-    
-    // Define the fields we need in order
-    this.fields = [
-      { 
-        key: 'nombre_completo', 
-        label: 'Nombre completo',
-        prompt: '👤 ¿Cómo te llamas? (nombre y apellidos)', 
-        type: 'text',
-        help: 'Escribe tu nombre completo tal como aparece en tu identificación oficial. Ejemplo: Juan Pérez González'
+    // Assistant personalities
+    this.assistants = {
+      sophia: {
+        name: 'Sophia',
+        emoji: '👩‍💼',
+        style: 'warm_professional' // Cálida y eficiente
       },
-      { 
-        key: 'curp_rfc', 
-        label: 'CURP o RFC',
-        prompt: '📄 ¿Cuál es tu CURP o RFC?\n\nEjemplo CURP: GOMJ880326HDFRRL09\nEjemplo RFC: GOMJ880326A01', 
-        type: 'curp_rfc',
-        help: 'Puedes usar CURP (18 caracteres) o RFC (13 caracteres). Lo encuentras en tu INE, acta de nacimiento o constancia del SAT.'
-      },
-      { 
-        key: 'domicilio', 
-        label: 'Domicilio',
-        prompt: '🏠 ¿Cuál es tu domicilio completo?\n\nIncluye calle, número, colonia, ciudad y código postal', 
-        type: 'text',
-        help: 'Ejemplo: Av. Reforma 123, Col. Centro, Monterrey, NL, 64000. Este será el domicilio que aparecerá en tu permiso.'
-      },
-      { 
-        key: 'email', 
-        label: 'Correo electrónico',
-        prompt: '📧 ¿Cuál es tu correo electrónico?\n\nAquí te enviaremos tu permiso', 
-        type: 'email',
-        help: 'Asegúrate de escribirlo correctamente. Aquí recibirás tu permiso y el comprobante de pago. Ejemplo: juan.perez@gmail.com'
-      },
-      { 
-        key: 'marca', 
-        label: 'Marca del vehículo',
-        prompt: '🚗 Ahora vamos con tu vehículo!\n\n¿Qué marca es? (Ej: Toyota, Nissan, Ford)', 
-        type: 'text',
-        help: 'La marca es el fabricante del vehículo. Ejemplos: Toyota, Nissan, Chevrolet, Ford, Volkswagen, Honda, Mazda.'
-      },
-      { 
-        key: 'linea', 
-        label: 'Modelo/Línea',
-        prompt: '📋 ¿Qué modelo es?\n\nEj: Corolla, Sentra, F-150', 
-        type: 'text',
-        help: 'El modelo o línea es el nombre específico del vehículo. Lo encuentras en la parte trasera del auto o en tu tarjeta de circulación.'
-      },
-      { 
-        key: 'color', 
-        label: 'Color',
-        prompt: '🎨 ¿De qué color es tu vehículo?\n\n💡 Si tiene varios colores, sepáralos con "y"\nEj: Rojo y Negro', 
-        type: 'color',
-        help: 'Si tu vehículo tiene dos colores, escríbelos separados con "y". Ejemplo: Blanco y Azul, Gris y Negro.'
-      },
-      { 
-        key: 'numero_serie', 
-        label: 'Número de serie (VIN)',
-        prompt: '🔢 ¿Cuál es el número de serie (VIN)?\n\nSon 17 caracteres, generalmente empieza con letras\nEj: 3VWFE21C04M123456', 
-        type: 'vin',
-        help: 'El VIN tiene 17 caracteres (letras y números). Lo encuentras en el parabrisas del lado del conductor, en la puerta del conductor o en tu tarjeta de circulación.'
-      },
-      { 
-        key: 'numero_motor', 
-        label: 'Número de motor',
-        prompt: '⚙️ ¿Cuál es el número de motor?\n\nLo encuentras en el motor o en tu tarjeta de circulación', 
-        type: 'numero_motor',
-        help: 'Está grabado en el motor o en tu tarjeta de circulación. Es diferente al VIN. Ejemplo: 4G63S4M123456'
-      },
-      { 
-        key: 'ano_modelo', 
-        label: 'Año del vehículo',
-        prompt: '📅 Por último, ¿de qué año es tu vehículo?', 
-        type: 'year',
-        help: 'Solo escribe el año en 4 dígitos. Ejemplo: 2015, 2020, 2023. Lo encuentras en tu tarjeta de circulación o factura.'
+      diego: {
+        name: 'Diego', 
+        emoji: '👨‍💼',
+        style: 'friendly_expert' // Amigable y conocedor
       }
-    ];
+    };
     
-    // Common colors in Spanish
-    this.colors = ['blanco', 'negro', 'gris', 'plata', 'rojo', 'azul', 'verde', 
-                   'amarillo', 'naranja', 'cafe', 'marron', 'dorado', 'beige'];
+    // Track which assistant each user gets
+    this.userAssistants = new Map();
     
-    // Common car brands
-    this.brands = ['toyota', 'nissan', 'chevrolet', 'ford', 'volkswagen', 'honda', 
-                   'mazda', 'hyundai', 'kia', 'bmw', 'mercedes', 'audi'];
+    // Campos del formulario agrupados para mejor UX
+    this.fieldGroups = {
+      personal: {
+        title: 'DATOS PERSONALES',
+        emoji: '📝',
+        fields: [
+          { key: 'nombre_completo', label: 'Nombre completo', prompt: 'Ingrese su nombre completo (nombre y apellidos):\nEjemplo: Juan Carlos Pérez González 👤' },
+          { key: 'curp_rfc', label: 'CURP o RFC', prompt: 'Ingrese su CURP o RFC:\nEjemplo CURP: PERJ850124HDFRZN01 🆔\nEjemplo RFC: PERJ850124X91 📄' },
+          { key: 'email', label: 'Correo electrónico', prompt: 'Ingrese su correo electrónico:\nEjemplo: juan.perez@gmail.com 📧' }
+        ]
+      },
+      vehicle: {
+        title: 'INFORMACIÓN DEL VEHÍCULO',
+        emoji: '🚗',
+        fields: [
+          { key: 'marca', label: 'Marca', prompt: 'Marca del vehículo:\nEjemplo: Toyota, Nissan, Ford 🚙' },
+          { key: 'linea', label: 'Modelo', prompt: 'Modelo o línea del vehículo:\nEjemplo: Corolla, Sentra, F-150 🚗' },
+          { key: 'color', label: 'Color', prompt: 'Color del vehículo:\nEjemplo: Blanco, Azul y Rojo 🎨' },
+          { key: 'ano_modelo', label: 'Año', prompt: 'Año del vehículo:\nEjemplo: 2020, 2018, 2015 📅' }
+        ]
+      },
+      details: {
+        title: 'DATOS TÉCNICOS Y DOMICILIO',
+        emoji: '📋',
+        fields: [
+          { key: 'numero_serie', label: 'Número de serie (VIN)', prompt: 'Número de serie (VIN) - consulte su factura:\nEjemplo: 1HGBH41JXMN109186 🔧' },
+          { key: 'numero_motor', label: 'Número de motor', prompt: 'Número de motor - consulte su factura:\nEjemplo: 4G15-MN123456 ⚙️' },
+          { key: 'domicilio', label: 'Domicilio', prompt: 'Domicilio completo:\nEjemplo: Calle Juárez 123, Centro, Guadalajara, Jalisco 📍' }
+        ]
+      }
+    };
+    
+    // Flatten fields for backward compatibility
+    this.fields = Object.values(this.fieldGroups).flatMap(group => group.fields);
+    
+    // Menu options for easier understanding
+    this.menuOptions = {
+      main: {
+        '1': 'nuevo_permiso',
+        '2': 'ver_estado',
+        '3': 'privacidad',
+        '4': 'ayuda'
+      },
+      mainWithRenewal: {
+        '1': 'nuevo_permiso',
+        '2': 'renovar_permiso',
+        '3': 'ver_estado',
+        '4': 'privacidad',
+        '5': 'ayuda'
+      },
+      privacy: {
+        '1': 'exportar_datos',
+        '2': 'eliminar_datos',
+        '3': 'no_mensajes',
+        '4': 'menu_principal'
+      },
+      yesNo: {
+        '1': 'si',
+        '2': 'no',
+        'si': 'si',
+        'sí': 'si',
+        'no': 'no'
+      }
+    };
   }
 
   /**
-   * Validate configuration at startup
+   * Initialize service
    */
-  static validateConfig() {
-    const required = ['WHATSAPP_PHONE_NUMBER_ID', 'WHATSAPP_ACCESS_TOKEN'];
-    const missing = required.filter(key => !process.env[key]);
-    
-    if (missing.length > 0) {
-      throw new Error(`Missing required WhatsApp configuration: ${missing.join(', ')}`);
+  async initialize() {
+    if (!this.config.phoneNumberId || !this.config.accessToken) {
+      throw new Error('WhatsApp configuration missing');
     }
     
-    logger.info('WhatsApp configuration validated successfully');
+    this.config.apiUrl = `https://graph.facebook.com/v23.0/${this.config.phoneNumberId}/messages`;
+    
+    // Set up TTL cleanup for userAssistants to prevent memory leak
+    this.cleanupInterval = setInterval(() => {
+      const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+      let cleaned = 0;
+      
+      for (const [phone, data] of this.userAssistants.entries()) {
+        // Handle both old format (direct assistant object) and new format (with timestamp)
+        const timestamp = data.timestamp || 0; // Old format has no timestamp, treat as expired
+        if (timestamp < thirtyMinutesAgo) {
+          this.userAssistants.delete(phone);
+          cleaned++;
+        }
+      }
+      
+      if (cleaned > 0) {
+        logger.info(`Cleaned ${cleaned} expired user assistant assignments`);
+      }
+    }, 5 * 60 * 1000); // Run every 5 minutes
+    
+    logger.info('Servicio WhatsApp inicializado');
+  }
+
+  /**
+   * Get or assign assistant for user
+   */
+  getAssistantForUser(from) {
+    // Check if user already has an assistant
+    if (this.userAssistants.has(from)) {
+      const data = this.userAssistants.get(from);
+      // Return the assistant object if stored in old format
+      if (data.name) {
+        return data;
+      }
+      // Return the assistant from new format
+      return data.assistant;
+    }
+    
+    // Assign alternating assistants based on phone number hash
+    const hash = crypto.createHash('md5').update(from).digest('hex');
+    const usesSophia = parseInt(hash.charAt(0), 16) % 2 === 0;
+    
+    const assistant = usesSophia ? this.assistants.sophia : this.assistants.diego;
+    
+    // Store with timestamp for TTL cleanup
+    this.userAssistants.set(from, {
+      assistant,
+      timestamp: Date.now()
+    });
+    
+    return assistant;
   }
   
   /**
-   * Validate configuration with comprehensive runtime checks
+   * Get time-based greeting
    */
-  async validateConfig(config) {
-    const validationResults = {
-      passed: [],
-      warnings: [],
-      errors: []
-    };
-
-    // Basic field validation
-    if (!config.phoneNumberId || !config.accessToken || !config.apiUrl) {
-      validationResults.errors.push('Missing required fields: phoneNumberId, accessToken, or apiUrl');
-    } else {
-      validationResults.passed.push('Required fields present');
+  getTimeBasedGreeting(phoneNumber = null) {
+    // If phone number provided, use timezone-aware greeting
+    if (phoneNumber) {
+      return getGreeting(phoneNumber);
     }
     
-    // Validate phone number ID format
-    if (config.phoneNumberId) {
-      if (!/^\d+$/.test(config.phoneNumberId)) {
-        validationResults.errors.push('Invalid phone number ID format - must be numeric');
-      } else if (config.phoneNumberId.length < 10) {
-        validationResults.warnings.push('Phone number ID seems too short - may be invalid');
-      } else {
-        validationResults.passed.push('Phone number ID format valid');
-      }
-    }
-    
-    // Validate access token format
-    if (config.accessToken) {
-      if (config.accessToken.length < 50) {
-        validationResults.errors.push('Access token too short - likely invalid');
-      } else if (config.accessToken.length > 500) {
-        validationResults.warnings.push('Access token unusually long');
-      } else if (!/^[A-Za-z0-9_-]+$/.test(config.accessToken)) {
-        validationResults.warnings.push('Access token contains unexpected characters');
-      } else {
-        validationResults.passed.push('Access token format valid');
-      }
-    }
-    
-    // Validate API URL format
-    if (config.apiUrl) {
-      if (!config.apiUrl.startsWith('https://graph.facebook.com/')) {
-        validationResults.errors.push('Invalid API URL - must use Facebook Graph API');
-      } else if (!config.apiUrl.includes('/messages')) {
-        validationResults.errors.push('Invalid API URL - must be a messages endpoint');
-      } else {
-        validationResults.passed.push('API URL format valid');
-      }
-    }
-
-    // Environment-specific validations
-    const nodeEnv = process.env.NODE_ENV || 'development';
-    if (nodeEnv === 'production') {
-      // Production-specific validations
-      if (config.accessToken && config.accessToken.includes('test')) {
-        validationResults.warnings.push('Using test token in production environment');
-      }
-      
-      if (config.apiUrl && config.apiUrl.includes('test')) {
-        validationResults.warnings.push('Using test API URL in production environment');
-      }
-      
-      validationResults.passed.push('Production environment checks completed');
-    } else {
-      validationResults.passed.push('Development environment detected');
-    }
-
-    // Check for common configuration issues
-    if (config.phoneNumberId && config.apiUrl && !config.apiUrl.includes(config.phoneNumberId)) {
-      validationResults.warnings.push('Phone number ID mismatch in API URL');
-    }
-
-    // Runtime connectivity validation (optional)
-    try {
-      await this.validateConnectivity(config);
-      validationResults.passed.push('Connectivity validation passed');
-    } catch (error) {
-      validationResults.warnings.push(`Connectivity check failed: ${error.message}`);
-    }
-
-    // Log validation results
-    if (validationResults.errors.length > 0) {
-      logger.error('Configuration validation failed', {
-        errors: validationResults.errors,
-        warnings: validationResults.warnings,
-        passed: validationResults.passed.length
-      });
-      throw new Error(`Configuration validation failed: ${validationResults.errors.join(', ')}`);
-    }
-
-    if (validationResults.warnings.length > 0) {
-      logger.warn('Configuration validation completed with warnings', {
-        warnings: validationResults.warnings,
-        passed: validationResults.passed.length
-      });
-    } else {
-      logger.info('Configuration validation passed', {
-        phoneNumberId: config.phoneNumberId,
-        apiUrl: config.apiUrl,
-        tokenLength: config.accessToken.length,
-        checksCompleted: validationResults.passed.length
-      });
-    }
-
-    return validationResults;
+    // Fallback to server time (Central Mexico)
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Buenos días';
+    if (hour < 19) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 
   /**
-   * Validate connectivity to WhatsApp API
-   */
-  async validateConnectivity(config) {
-    // Basic connectivity test - just check if we can reach the API
-    try {
-      const response = await fetch(`https://graph.facebook.com/v17.0/${config.phoneNumberId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${config.accessToken}`
-        },
-        timeout: 5000
-      });
-
-      if (!response.ok) {
-        throw new Error(`API responded with status ${response.status}`);
-      }
-
-      return true;
-    } catch (error) {
-      // Don't fail validation for connectivity issues, just warn
-      throw new Error(`Connectivity test failed: ${error.message}`);
-    }
-  }
-  
-  /**
-   * Initialize configuration once during startup
-   */
-  async initializeConfig() {
-    if (this._configInitialized) {
-      return this._config;
-    }
-    
-    if (this._configInitializing) {
-      // Wait for ongoing initialization to complete
-      return new Promise((resolve, reject) => {
-        const checkInterval = setInterval(() => {
-          if (this._configInitialized) {
-            clearInterval(checkInterval);
-            resolve(this._config);
-          } else if (!this._configInitializing) {
-            clearInterval(checkInterval);
-            reject(new Error('Configuration initialization failed'));
-          }
-        }, 50);
-      });
-    }
-    
-    this._configInitializing = true;
-    
-    try {
-      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-      const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
-      
-      if (!phoneNumberId || !accessToken) {
-        throw new Error('WhatsApp configuration missing: WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ACCESS_TOKEN are required');
-      }
-      
-      this._config = {
-        phoneNumberId,
-        accessToken,
-        apiUrl: `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`
-      };
-      
-      // Validate configuration
-      await this.validateConfig(this._config);
-      
-      this._configInitialized = true;
-      this._configInitializing = false;
-      
-      logger.info('WhatsApp configuration initialized', {
-        phoneNumberId: this._config.phoneNumberId,
-        hasAccessToken: !!this._config.accessToken,
-        apiUrl: this._config.apiUrl,
-        tokenPreview: accessToken.substring(0, 20) + '...'
-      });
-      
-      return this._config;
-      
-    } catch (error) {
-      this._configInitializing = false;
-      logger.error('Failed to initialize WhatsApp configuration', {
-        error: error.message
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Get configuration (initialized once)
-   */
-  getConfig() {
-    if (!this._configInitialized) {
-      throw new Error('Configuration not initialized. Call initializeConfig() first.');
-    }
-    
-    return this._config;
-  }
-
-  /**
-   * Reload configuration (for token updates)
-   */
-  async reloadConfig() {
-    logger.info('Reloading WhatsApp configuration');
-    this._configInitialized = false;
-    this._config = null;
-    return await this.initializeConfig();
-  }
-
-  /**
-   * Initialize health monitoring
-   */
-  initializeHealthMonitoring() {
-    if (!this.healthMonitor) {
-      this.healthMonitor = new HealthMonitor(this);
-      logger.info('Health monitoring initialized');
-    }
-    return this.healthMonitor;
-  }
-
-  /**
-   * Get health status
-   */
-  getHealthStatus() {
-    if (!this.healthMonitor) {
-      return { status: 'not_initialized', message: 'Health monitoring not initialized' };
-    }
-    return this.healthMonitor.getCurrentHealth();
-  }
-
-  /**
-   * Get detailed health report
-   */
-  getDetailedHealthReport() {
-    if (!this.healthMonitor) {
-      return { error: 'Health monitoring not initialized' };
-    }
-    return this.healthMonitor.getDetailedHealthReport();
-  }
-
-  /**
-   * Validate current configuration (for runtime checks)
-   */
-  async validateCurrentConfig() {
-    if (!this._configInitialized) {
-      throw new Error('Configuration not initialized');
-    }
-    
-    return await this.validateConfig(this._config);
-  }
-
-  /**
-   * Get configuration validation status
-   */
-  async getConfigValidationStatus() {
-    try {
-      const validationResults = await this.validateCurrentConfig();
-      return {
-        status: 'valid',
-        errors: validationResults.errors.length,
-        warnings: validationResults.warnings.length,
-        passed: validationResults.passed.length,
-        details: validationResults
-      };
-    } catch (error) {
-      return {
-        status: 'invalid',
-        error: error.message,
-        timestamp: Date.now()
-      };
-    }
-  }
-
-  /**
-   * Process incoming message with comprehensive error handling
+   * Process incoming message
    */
   async processMessage(from, message) {
-    const startTime = Date.now();
-    
     try {
-      // Initial validation and sanitization
-      const sanitizedMessage = await this.validateAndSanitizeInput(from, message);
-      if (!sanitizedMessage) return;
-      
-      // Store last message for numbered option handling
-      this.lastMessageReceived = sanitizedMessage;
-      
-      // Handle global commands first
-      if (await this.handleGlobalCommands(from, sanitizedMessage)) {
-        return;
-      }
-      
-      // Get user context and current state
-      const context = await this.getUserContext(from);
-      const state = await this.stateManager.getState(from);
-      
-      // Route to appropriate handler
-      await this.routeMessage(from, sanitizedMessage, context, state);
-      
-      // Record processing time
-      const processingTime = Date.now() - startTime;
-      if (this.healthMonitor) {
-        this.healthMonitor.recordMessageProcessingTime(processingTime);
-      }
-      
-    } catch (error) {
-      // Record error
-      if (this.healthMonitor) {
-        this.healthMonitor.recordError('message_processing', from);
-      }
-      
-      await this.errorRecovery.handleError(from, error, {
-        message: sanitizedMessage,
-        method: 'processMessage'
+      // Enhanced logging for Meta review
+      logger.info('⚙️ [PROCESSING] Starting message processing', {
+        from,
+        originalMessage: message,
+        timestamp: new Date().toISOString()
       });
-    }
-  }
-
-  /**
-   * Validate and sanitize incoming message
-   */
-  async validateAndSanitizeInput(from, message) {
-    // Check if user has opted out
-    if (await this.isOptedOut(from)) {
-      logger.info(`Opted out user attempted to message: ${from}`);
-      await this.sendMessage(from, 
-        '🚫 Tu número está dado de baja del servicio WhatsApp.\n\n' +
-        'Para reactivar el servicio, por favor visita:\n' +
-        'https://permisosdigitales.com.mx/perfil'
-      );
-      return null;
-    }
-    
-    // Rate limiting check
-    if (!await this.checkRateLimit(from)) {
-      return null;
-    }
-    
-    // Check for duplicate messages
-    if (securityUtils.isDuplicateMessage(from, message)) {
-      logger.info('Duplicate message ignored', { from });
-      return null;
-    }
-    
-    // Sanitize input
-    const sanitizedMessage = this.sanitizeInput(message);
-    if (!sanitizedMessage) {
-      await this.sendMessage(from, '❌ Mensaje inválido. Por favor intenta de nuevo.');
-      return null;
-    }
-    
-    return sanitizedMessage;
-  }
-
-  /**
-   * Handle global commands that work regardless of state
-   */
-  async handleGlobalCommands(from, sanitizedMessage) {
-    const msgLower = sanitizedMessage.toLowerCase().trim();
-    const stateKey = `wa:${from}`;
-    
-    // Check for global commands first (before checking state)
-    if (msgLower === "/ayuda" || msgLower === "/permiso" || msgLower === "/reset" || msgLower === "/cancelar") {
-      // Clear any existing state for reset command
-      if (msgLower === "/reset" || msgLower === "/cancelar") {
+      
+      // Check rate limit
+      if (!this.checkRateLimit(from)) {
+        logger.info('⚠️ [RATE LIMIT] Message ignored due to rate limit', { from });
+        return; // Silently ignore if rate limited
+      }
+      
+      // Sanitize input
+      const sanitized = this.sanitizeInput(message);
+      logger.info('🔒 [SANITIZED] Message sanitized', {
+        from,
+        sanitized,
+        originalLength: message.length,
+        sanitizedLength: sanitized.length
+      });
+      
+      // Get or create session state first
+      const state = await this.stateManager.getState(from) || {};
+      
+      // Log state for debugging permit_downloaded issue
+      logger.info('State retrieved for processing', {
+        from,
+        message: sanitized.substring(0, 20),
+        stateStatus: state?.status || 'none',
+        hasState: !!state
+      });
+      
+      // Parse navigation commands
+      const navCommand = navigationManager.parseNavigationCommand(sanitized);
+      
+      // Skip navigation command handling if we're collecting data and it's "atras"
+      if (navCommand && navCommand.type === 'navigation') {
+        // If we're collecting data, let the collection handler process "back" commands
+        if (state.status === 'collecting' && navCommand.command === 'back') {
+          // Let it fall through to handleDataCollection
+        } else {
+          return await this.handleNavigationCommand(from, navCommand.command);
+        }
+      }
+      
+      // Only check for links if we're not collecting data
+      if (state.status !== 'collecting' && state.status !== 'editing_field') {
+        // Extract and handle links
+        const links = navigationManager.extractLinks(sanitized);
+        if (links.length > 0) {
+          return await this.handleLinks(from, links);
+        }
+      }
+      
+      // Check for priority commands before state processing
+      const normalized = sanitized.toLowerCase().trim();
+      
+      // Handle renewal commands with priority (work regardless of state)
+      if (normalized === 'renovar' || normalized === 'renovación' || normalized === 'renewal') {
+        return await this.handleRenewalFlow(from);
+      }
+      
+      // Check for renewal with specific permit ID (e.g., "renovar 123")
+      const renewalMatch = sanitized.match(/^renovar\s+(\d+)$/i);
+      if (renewalMatch) {
+        const permitId = parseInt(renewalMatch[1]);
+        return await this.handleRenewalFlow(from, permitId);
+      }
+      
+      // Check for numbered field editing (e.g., "1 Toyota", "3 Azul")
+      const fieldEditMatch = sanitized.match(/^(\d+)\s+(.+)$/);
+      if (fieldEditMatch) {
+        const fieldNumber = parseInt(fieldEditMatch[1]);
+        const newValue = fieldEditMatch[2].trim();
+        return await this.handleQuickFieldEdit(from, fieldNumber, newValue);
+      }
+      
+      // EMERGENCY FIX: Temporarily disabled single number field selection (breaking menu navigation)
+      // This was intercepting ALL number inputs, including menu selections!
+      // TODO: Re-implement with proper context checking
+      // const singleNumberMatch = sanitized.match(/^(\d+)$/);
+      // if (singleNumberMatch) {
+      //   const fieldNumber = parseInt(singleNumberMatch[1]);
+      //   // Only handle numbers 1-9 for renewal field editing
+      //   if (fieldNumber >= 1 && fieldNumber <= 9) {
+      //     return await this.handleRenewalFieldSelectionFromReminder(from, fieldNumber);
+      //   }
+      // }
+      
+      // Handle menu command with priority
+      if (normalized === 'menu' || normalized === 'menú' || normalized === 'inicio') {
+        // Clear state and show main menu
         await this.stateManager.clearState(from);
+        return await this.showMainMenu(from);
       }
       
-      // Handle commands
-      if (msgLower === "/ayuda") {
-        await this.sendHelp(from, await this.getUserContext(from));
-        return true;
-      } else if (msgLower === "/permiso") {
-        await this.startPermitApplication(from);
-        return true;
-      } else if (msgLower === "/reset" || msgLower === "/cancelar") {
-        await this.sendMessage(from, "✅ Conversación reiniciada. ¿En qué puedo ayudarte?");
-        await this.sendWelcomeMessage(from);
-        return true;
-      }
-    }
-    
-    return false;
-  }
-
-  /**
-   * Route message to appropriate handler based on context and state
-   */
-  async routeMessage(from, sanitizedMessage, context, state) {
-    // If we have an active state, process it directly
-    if (state) {
-      await this.handleStateBasedMessage(from, sanitizedMessage, state);
-      return;
-    }
-    
-    // No active state - handle based on context
-    await this.handleContextBasedMessage(from, sanitizedMessage, context);
-  }
-
-  /**
-   * Handle messages when user has an active state
-   */
-  async handleStateBasedMessage(from, sanitizedMessage, state) {
-    // Process confirmation
-    if (state.status === 'confirming') {
-      await this.handleConfirmation(from, sanitizedMessage, state);
-      return;
-    }
-    
-    // Handle field editing
-    if (state.status === 'editing_field') {
-      await this.handleFieldEditing(from, sanitizedMessage, state);
-      return;
-    }
-    
-    // Handle field collection
-    if (state.status === 'collecting') {
-      await this.handleFieldCollection(from, sanitizedMessage, state);
-      return;
-    }
-    
-    // Handle resume confirmation
-    if (state.status === 'awaiting_resume_confirmation') {
-      await this.handleResumeConfirmation(from, sanitizedMessage, state);
-      return;
-    }
-  }
-
-  /**
-   * Handle field editing process
-   */
-  async handleFieldEditing(from, sanitizedMessage, state) {
-    const fieldInfo = this.fields.find(f => f.key === state.editingField);
-    const sanitizedValue = this.sanitizeFieldValue(sanitizedMessage, state.editingField);
-    const value = this.extractField(sanitizedValue, fieldInfo.type);
-    
-    if (!value) {
-      const example = this.getFieldExample(fieldInfo.type);
-      const helpText = example ? `\n\n${example}` : '';
-      await this.sendMessage(from, 
-        `❌ Formato inválido.${helpText}\n\n${fieldInfo.prompt}`
-      );
-      return;
-    }
-    
-    const validation = this.validateField(state.editingField, value);
-    if (!validation.isValid) {
-      const example = this.getFieldExample(fieldInfo.type);
-      const helpText = example ? `\n\n${example}` : '';
-      await this.sendMessage(from, 
-        `❌ ${validation.error}${helpText}\n\n${fieldInfo.prompt}`
-      );
-      return;
-    }
-    
-    // Update the field and go back to confirmation
-    state.data[state.editingField] = validation.sanitized || value;
-    state.status = 'confirming';
-    delete state.editingField;
-    
-    await this.stateManager.setState(from, state);
-    await this.showConfirmation(from, state);
-  }
-
-  /**
-   * Handle processing errors
-   */
-  async handleProcessingError(from, error) {
-    logger.error('Error processing WhatsApp message', { 
-      error: error.message, 
-      stack: error.stack, 
-      from 
-    });
-    
-    try {
-      await this.sendMessage(from, 
-        '❌ Error temporal. Tu progreso está guardado.\n\n' +
-        'Por favor intenta en unos minutos o contacta soporte.'  
-      );
-    } catch (sendError) {
-      logger.error('Failed to send error message', { error: sendError.message });
-    }
-  }
-
-  /**
-   * Handle messages when no active state exists
-   */
-  async handleContextBasedMessage(from, sanitizedMessage, context) {
-    const msgLower = sanitizedMessage.toLowerCase().trim();
-    
-    // Check for commands first
-    const command = this.commands[msgLower];
-    if (command) {
-      // For numbered options, we need to pass the message
-      if (command === 'handleNumberedOption') {
-        await this.handleNumberedOption(from, context, msgLower);
-      } else {
-        await this[command](from, context);
-      }
-      return;
-    }
-    
-    // Handle based on user context
-    if (context.status === 'PENDING_PAYMENT') {
-      await this.handlePendingPaymentContext(from, sanitizedMessage, context);
-      return;
-    }
-    
-    if (context.status === 'INCOMPLETE_APPLICATION') {
-      await this.handleIncompleteContext(from, sanitizedMessage, context);
-      return;
-    }
-    
-    if (context.status === 'INCOMPLETE_SESSION') {
-      await this.handleIncompleteSessionContext(from, sanitizedMessage, context);
-      return;
-    }
-    
-    // Default: show welcome message
-    await this.sendWelcomeMessage(from, context);
-  }
-
-  /**
-   * Handle field collection process
-   */
-  async handleFieldCollection(from, sanitizedMessage, state) {
-    const msgLower = sanitizedMessage.toLowerCase().trim();
-    
-    // Check if user typed a menu number (1-6) - offer to switch context
-    if (/^[1-6]$/.test(msgLower)) {
-      const menuOptions = {
-        '1': 'Solicitar nuevo permiso',
-        '2': 'Ver estado de mi solicitud',
-        '3': 'Realizar un pago pendiente', 
-        '4': 'Ver mis permisos anteriores',
-        '5': 'Renovar un permiso',
-        '6': 'Necesito ayuda'
-      };
-      
-      const selectedOption = menuOptions[msgLower];
-      const completedFields = Object.keys(state.data || {}).length;
-      
-      // If they selected option 1 and are already filling a form, continue
-      if (msgLower === '1' && state.status === 'collecting') {
-        await this.sendMessage(from,
-          `📝 Ya estás llenando una solicitud nueva.\n\n` +
-          `✅ Completaste ${completedFields} de ${this.fields.length} campos\n\n` +
-          `Continúa con: ${this.fields[state.currentFieldIndex].prompt}\n\n` +
-          `💡 Tip: Escribe /ayuda para ver comandos disponibles`
-        );
-        return;
+      // Handle help command with priority
+      if (normalized === 'ayuda' || normalized === 'help' || normalized === 'soporte') {
+        return await this.sendHelp(from);
       }
       
-      // If they selected option 6 (help) while in a form
-      if (msgLower === '6') {
-        const currentField = this.fields[state.currentFieldIndex];
-        const example = this.getFieldExample(currentField.type);
-        await this.sendMessage(from,
-          `📚 *AYUDA - ${currentField.label}*\n\n` +
-          `${currentField.help || 'Ingresa el dato solicitado.'}\n` +
-          `${example ? `\n${example}` : ''}\n\n` +
-          `📋 Tu progreso: ${completedFields}/${this.fields.length} campos\n\n` +
-          `💡 Comandos útiles:\n` +
-          `• /atras - Regresar al campo anterior\n` +
-          `• /estado - Ver tu progreso\n` +
-          `• /pausa - Guardar y continuar después\n` +
-          `• /cancelar - Cancelar solicitud\n\n` +
-          `Para continuar, responde: ${currentField.prompt}`
-        );
-        return;
+      // Handle status command with priority
+      if (normalized === 'estado' || normalized === 'status' || normalized === 'mis-permisos') {
+        return await this.checkStatus(from);
       }
       
-      // For other options, confirm if they want to pause current form
-      await this.sendMessage(from,
-        `🤔 Veo que quieres: *${selectedOption}*\n\n` +
-        `Pero tienes una solicitud en progreso (${completedFields}/${this.fields.length} campos).\n\n` +
-        `*¿Qué prefieres hacer?*\n\n` +
-        `✅ Escribe "continuar" para seguir con tu solicitud\n` +
-        `⏸️ Escribe "pausa" para guardar y hacer otra cosa\n` +
-        `❌ Escribe "cancelar" para cancelar tu solicitud`
-      );
-      
-      state.pendingMenuOption = msgLower;
-      await this.stateManager.setState(from, state);
-      return;
-    }
-    
-    // Handle response to menu option confirmation
-    if (state.pendingMenuOption) {
-      if (msgLower === 'continuar' || msgLower === 'seguir') {
-        delete state.pendingMenuOption;
-        await this.stateManager.setState(from, state);
-        await this.sendMessage(from, 
-          `✅ Perfecto, continuemos.\n\n${this.fields[state.currentFieldIndex].prompt}`
-        );
-        return;
-      } else if (msgLower === 'pausa' || msgLower === 'guardar') {
-        state.status = 'paused';
-        state.pausedAt = Date.now();
-        await this.stateManager.setState(from, state);
-        await this.sendMessage(from,
-          `⏸️ *Solicitud pausada*\n\n` +
-          `✅ Tu progreso ha sido guardado (${Object.keys(state.data || {}).length}/${this.fields.length} campos)\n\n` +
-          `Cuando regreses, podrás continuar donde quedaste.\n\n` +
-          `Ahora, ¿qué necesitas?`
-        );
-        // Handle the menu option they selected
-        await this.handleNumberedOption(from, await this.getUserContext(from), state.pendingMenuOption);
-        return;
-      } else if (msgLower === 'cancelar') {
-        await this.cancelCurrent(from, await this.getUserContext(from));
-        return;
+      // Handle edit renewal command with priority
+      if (normalized === 'editar' || normalized === 'edit' || normalized === 'cambiar') {
+        return await this.handleEditRenewal(from);
       }
-    }
-    
-    // Allow back/previous command
-    if (msgLower === '/atras' || msgLower === 'atras' || msgLower === 'anterior') {
-      if (state.currentFieldIndex > 0) {
-        state.currentFieldIndex--;
-        const previousField = this.fields[state.currentFieldIndex];
-        const currentValue = state.data[previousField.key];
-        await this.stateManager.setState(from, state);
-        await this.sendMessage(from,
-          `↩️ Regresando al campo anterior...\n\n` +
-          `${previousField.prompt}\n\n` +
-          `Valor actual: *${currentValue}*\n` +
-          `(Escribe un nuevo valor para cambiarlo)`
-        );
-        return;
-      } else {
-        await this.sendMessage(from,
-          `❌ Ya estás en el primer campo.\n\n` +
-          `Continúa con: ${this.fields[state.currentFieldIndex].prompt}`
-        );
-        return;
-      }
-    }
-    
-    // Allow pause command
-    if (msgLower === '/pausa' || msgLower === 'pausa') {
-      state.status = 'paused';
-      state.pausedAt = Date.now();
-      const completedFields = Object.keys(state.data || {}).length;
-      await this.stateManager.setState(from, state);
-      await this.sendMessage(from,
-        `⏸️ *Solicitud pausada*\n\n` +
-        `✅ Tu progreso ha sido guardado (${completedFields}/${this.fields.length} campos)\n\n` +
-        `Cuando regreses, solo escribe "hola" y podrás continuar donde quedaste.`
-      );
-      return;
-    }
-    
-    // Allow specific commands during collection
-    if (msgLower === '/cancelar') {
-      await this.cancelCurrent(from, await this.getUserContext(from));
-      return;
-    } else if (msgLower === '/estado') {
-      const completedFields = Object.keys(state.data || {}).length;
-      const lastField = Object.keys(state.data || {}).pop();
-      await this.sendMessage(from, 
-        `📋 Estás completando una solicitud:\n\n` +
-        `✅ Completados: ${completedFields} de ${this.fields.length} campos\n` +
-        `📝 Último guardado: ${lastField || 'ninguno'}\n\n` +
-        `Continúa con: ${this.fields[state.currentFieldIndex].prompt}`
-      );
-      return;
-    } else if (msgLower === '/ayuda' || msgLower === 'ayuda' || msgLower === '?') {
-      const currentField = this.fields[state.currentFieldIndex];
-      const example = this.getFieldExample(currentField.type);
-      await this.sendMessage(from, 
-        `📚 *AYUDA - ${currentField.label}*\n\n` +
-        `${currentField.help || 'Ingresa el dato solicitado.'}\n` +
-        `${example ? `\n${example}` : ''}\n\n` +
-        `📋 Tu progreso: ${Object.keys(state.data || {}).length}/${this.fields.length} campos\n\n` +
-        `💡 Comandos disponibles:\n` +
-        `• /atras - Regresar al campo anterior\n` +
-        `• /estado - Ver tu progreso\n` +
-        `• /pausa - Guardar y continuar después\n` +
-        `• /cancelar - Cancelar solicitud\n` +
-        `• /reset - Reiniciar todo\n\n` +
-        `Para continuar, responde: ${currentField.prompt}`
-      );
-      return;
-    }
-    
-    // Continue with field collection
-    await this.processFieldInput(from, sanitizedMessage, state);
-  }
 
-  /**
-   * Process field input during collection
-   */
-  async processFieldInput(from, sanitizedMessage, state) {
-    // Extract and validate field with sanitization
-    const currentField = this.fields[state.currentFieldIndex];
-    const sanitizedValue = this.sanitizeFieldValue(sanitizedMessage, currentField.key);
-    const value = this.extractField(sanitizedValue, currentField.type);
-    
-    if (!value) {
-      const example = this.getFieldExample(currentField.type);
-      const helpTip = this.getFieldHelpTip(currentField.type);
-      await this.sendMessage(from, 
-        `❌ *Formato inválido*\n\n` +
-        `${example ? `${example}\n\n` : ''}` +
-        `${helpTip ? `💡 Tip: ${helpTip}\n\n` : ''}` +
-        `${currentField.prompt}\n\n` +
-        `_Escribe "ayuda" para más información o "atras" para regresar_`
-      );
-      return;
-    }
-    
-    const validation = this.validateField(currentField.key, value);
-    if (!validation.isValid) {
-      const example = this.getFieldExample(currentField.type);
-      const helpTip = this.getFieldHelpTip(currentField.type);
-      await this.sendMessage(from, 
-        `❌ *${validation.error}*\n\n` +
-        `${example ? `${example}\n\n` : ''}` +
-        `${helpTip ? `💡 Tip: ${helpTip}\n\n` : ''}` +
-        `${currentField.prompt}\n\n` +
-        `_Escribe "ayuda" para más información o "atras" para regresar_`
-      );
-      return;
-    }
-    
-    // Store validated value
-    state.data[currentField.key] = validation.sanitized || value;
-    state.lastActivity = Date.now();
-    state.timeoutWarned = false; // Reset warning when user is active
-    
-    // Send success confirmation with the saved value
-    await this.sendMessage(from, `✅ Guardado: *${validation.sanitized || value}*`);
-    
-    // Small delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Move to next field
-    state.currentFieldIndex++;
-    
-    // Check if we've collected all fields
-    if (state.currentFieldIndex >= this.fields.length) {
-      state.status = 'confirming';
-      await this.stateManager.setState(from, state);
-      await this.showConfirmation(from, state);
-      return;
-    }
-    
-    // Save updated state and continue
-    await this.stateManager.setState(from, state);
-    
-    // Send next field prompt with enhanced progress indicator
-    const nextField = this.fields[state.currentFieldIndex];
-    const progressBar = this.createProgressBar(state.currentFieldIndex + 1, this.fields.length);
-    const stepIndicator = `📍 *Paso ${state.currentFieldIndex + 1} de ${this.fields.length}*`;
-    
-    await this.sendMessage(from, 
-      `${progressBar}\n` +
-      `${stepIndicator}\n\n` +
-      `${nextField.prompt}`
-    );
-  }
+      // EMERGENCY FIX: Temporarily disabled enhanced state management (breaking production flows)
+      // TODO: Fix enhanced system offline and re-enable after thorough testing
+      // const enhancedResult = await this.migrationAdapter.processInputWithContext(from, sanitized, state);
+      // if (enhancedResult.useEnhancedSystem) {
+      //   return await this.handleEnhancedInput(from, enhancedResult);
+      // }
 
-  /**
-   * Handle resume confirmation
-   */
-  async handleResumeConfirmation(from, sanitizedMessage, state) {
-    const msgLower = sanitizedMessage.toLowerCase().trim();
-    
-    if (msgLower === '1' || msgLower === 'si' || msgLower === 'sí' || msgLower === 'continuar') {
-      // Resume the draft
-      await this.resumeDraft(from, state.draftId);
-    } else if (msgLower === '2' || msgLower === 'no' || msgLower === 'nuevo' || msgLower === 'nueva') {
-      // Start new application
-      await this.stateManager.clearState(from);
-      await this.startNewApplication(from);
-    } else {
-      await this.sendMessage(from, 
-        '❓ No entendí tu respuesta.\n\n' +
-        'Escribe "1" para continuar donde quedaste o "2" para empezar una nueva solicitud.'
-      );
-    }
-  }
-
-  /**
-   * Get user context for smart responses
-   */
-  async getUserContext(phoneNumber) {
-    try {
-      // First check if there's an active Redis session
-      const stateKey = `wa:${phoneNumber}`;
-      let redisState;
-      try {
-        const stateData = await redisClient.get(stateKey);
-        if (stateData) {
-          try {
-            redisState = JSON.parse(stateData);
-          } catch (parseError) {
-            logger.error('Error parsing Redis state data', { error: parseError.message, phoneNumber });
-            // Clear corrupted state
-            await redisClient.del(stateKey);
-            redisState = null;
+      // Handle based on current state
+      switch (state.status) {
+        case 'showing_menu':
+          return await this.handleMenuSelection(from, sanitized, state);
+        case 'showing_conversational_menu':
+          return await this.handleConversationalMenu(from, sanitized, state);
+        case 'showing_privacy_menu':
+          return await this.handlePrivacyMenuSelection(from, sanitized, state);
+        case 'awaiting_privacy_consent':
+          return await this.handlePrivacyConsent(from, sanitized, state);
+        case 'awaiting_privacy_consent_after_viewing':
+          return await this.handlePrivacyConsentAfterViewing(from, sanitized, state);
+        case 'collecting':
+          return await this.handleDataCollection(from, sanitized, state);
+        case 'confirming':
+          return await this.handleConfirmation(from, sanitized, state);
+        case 'editing_field':
+          return await this.handleFieldEdit(from, sanitized, state);
+        case 'resume_prompt':
+          return await this.handleResumePrompt(from, sanitized, state);
+        case 'save_progress_prompt':
+          return await this.handleSaveProgressPrompt(from, sanitized, state);
+        // Removed payment_method_selection - now goes directly to application creation
+        case 'quick_actions_menu':
+          // Check if it's a greeting first
+          if (this.isGreeting(sanitized)) {
+            state.status = 'idle';
+            await this.stateManager.setState(from, state);
+            return await this.handleGreeting(from);
           }
-          // If we have an active session that's collecting or confirming
-          if (redisState.status === 'collecting' || redisState.status === 'confirming') {
-            // Calculate how many fields are complete
-            const completedFields = Object.keys(redisState.data || {}).length;
-            const totalFields = this.fields.length;
-            
-            return {
-              status: 'INCOMPLETE_SESSION',
-              phoneNumber,
-              redisState,
-              completedFields,
-              totalFields,
-              data: redisState.data
-            };
-          }
-        }
-      } catch (redisError) {
-        logger.error('Redis error in getUserContext', { error: redisError.message });
-      }
-      
-      // Find user by WhatsApp phone
-      const userAccountService = require('./user-account.service');
-      const user = await userAccountService.findByWhatsAppPhone(phoneNumber);
-      
-      if (!user) {
-        return { status: 'NEW_USER', phoneNumber };
-      }
-      
-      // Check for pending payments
-      const applicationRepository = require('../../repositories/application.repository');
-      const pendingPayments = await applicationRepository.findPendingPaymentByUserId(user.id);
-      
-      if (pendingPayments && pendingPayments.length > 0) {
-        const mostRecent = pendingPayments[0];
-        return {
-          status: 'PENDING_PAYMENT',
-          user,
-          application: mostRecent,
-          paymentLink: mostRecent.payment_link,
-          amount: mostRecent.importe
-        };
-      }
-      
-      // Check for incomplete applications (drafts)
-      const drafts = await this.findDraftApplications(user.id);
-      if (drafts.length > 0) {
-        return {
-          status: 'INCOMPLETE_APPLICATION',
-          user,
-          draft: drafts[0],
-          missingFields: this.getMissingFields(drafts[0])
-        };
-      }
-      
-      // Check for active permits
-      const activePermits = await applicationRepository.findByUserId(user.id);
-      const hasActivePermit = activePermits.some(app => 
-        app.status === 'PERMIT_READY' && 
-        new Date(app.fecha_vencimiento) > new Date()
-      );
-      
-      if (hasActivePermit) {
-        return {
-          status: 'ACTIVE_PERMIT',
-          user,
-          permits: activePermits.filter(app => app.status === 'PERMIT_READY')
-        };
-      }
-      
-      return { status: 'RETURNING_USER', user };
-    } catch (error) {
-      logger.error('Error getting user context', { error: error.message });
-      return { status: 'NEW_USER', phoneNumber };
-    }
-  }
-  
-  /**
-   * Send contextual welcome message based on user status
-   */
-  async sendWelcomeMessage(from, context) {
-    let message;
-    
-    switch (context?.status) {
-      case 'INCOMPLETE_SESSION':
-        message = `👋 ¡Hola de nuevo!
-
-📝 Veo que estabas llenando una solicitud.
-✅ Completaste ${context.completedFields} de ${context.totalFields} campos
-
-*¿Qué deseas hacer?*
-
-1️⃣ Continuar donde quedaste
-2️⃣ Empezar solicitud nueva
-3️⃣ Ver menú principal
-
-*Escribe el número* de tu elección o "continuar" para seguir donde quedaste.`;
-        break;
-        
-      case 'PENDING_PAYMENT':
-        message = `👋 ¡Hola de nuevo!
-
-💳 Tienes un pago pendiente de $${context.amount} MXN
-📱 Folio: ${context.application.id}
-
-🔗 *Link de pago:*
-${context.paymentLink}
-
-*¿Qué deseas hacer?*
-
-1️⃣ Ver mi link de pago
-2️⃣ Necesito ayuda con el pago
-3️⃣ Ver menú principal
-
-*Escribe el número* o "pagar" para continuar.`;
-        break;
-        
-      case 'INCOMPLETE_APPLICATION':
-        message = `👋 ¡Hola de nuevo!
-
-Veo que tienes una solicitud sin terminar.
-📋 Te faltan: ${context.missingFields.join(', ')}
-
-*¿Qué deseas hacer?*
-
-1️⃣ Continuar mi solicitud anterior
-2️⃣ Empezar una nueva solicitud
-3️⃣ Ver menú principal
-
-*Escribe el número* o "continuar" para seguir.`;
-        break;
-        
-      case 'ACTIVE_PERMIT':
-        const permit = context.permits[0];
-        message = `👋 ¡Bienvenido de vuelta!
-
-✅ Tienes ${context.permits.length} permiso(s) activo(s)
-
-*¿Qué deseas hacer?*
-
-1️⃣ Ver mis permisos actuales
-2️⃣ Solicitar nuevo permiso
-3️⃣ Renovar un permiso
-4️⃣ Ver menú completo
-
-*Escribe el número* de tu elección o el comando que necesites.`;
-        break;
-        
-      default:
-        message = `🚗 *¡Bienvenido a Permisos Digitales!*
-
-¡Hola! Soy tu asistente para obtener tu permiso de importación vehicular. 🤖
-
-*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Ver estado de mi solicitud
-3️⃣ Realizar un pago pendiente
-4️⃣ Ver mis permisos anteriores
-5️⃣ Renovar un permiso
-6️⃣ Necesito ayuda
-
-*Solo escribe el número* de la opción que necesitas.
-
-💡 También puedes escribir directamente lo que necesitas, como "nuevo permiso" o "pagar".
-
-💰 Costo: $150 MXN | ⏱️ Listo en 5-10 min`;
-    }
-    
-    await this.sendMessage(from, message);
-  }
-
-  /**
-   * Handle greeting and route appropriately
-   */
-  async handleGreeting(from, context) {
-    await this.sendWelcomeMessage(from, context);
-  }
-  
-  /**
-   * Handle numbered menu options
-   */
-  async handleNumberedOption(from, context, message) {
-    try {
-      const number = message.trim();
-      
-      switch(number) {
-        case '1':
-          await this.startOrResumeApplication(from, context);
-          break;
-        case '2':
-          await this.checkStatus(from, context);
-          break;
-        case '3':
-          await this.getPaymentLinks(from, context);
-          break;
-        case '4':
-          await this.listUserPermits(from, context);
-          break;
-        case '5':
-          await this.renewPermit(from, context);
-          break;
-        case '6':
-          await this.sendContextualHelp(from, context);
-          break;
+          return await this.handleQuickActions(from, sanitized, state);
+        case 'payment_help_menu':
+          return await this.handlePaymentHelp(from, sanitized, state);
+        case 'awaiting_create_from_status':
+          return await this.handleCreateFromStatus(from, sanitized, state);
+        case 'awaiting_folio_selection':
+          return await this.handleFolioSelection(from, sanitized, state);
+        case 'draft_status_menu':
+          return await this.handleDraftStatusMenu(from, sanitized, state);
+        case 'awaiting_active_app_decision':
+          return await this.handleActiveAppDecision(from, sanitized, state);
+        case 'draft_continuation_menu':
+          return await this.handleDraftContinuationMenu(from, sanitized, state);
+        case 'no_draft_menu':
+          return await this.handleNoDraftMenu(from, sanitized, state);
+        case 'rate_limit_options':
+          return await this.handleRateLimitOptions(from, sanitized, state);
+        case 'managing_applications':
+          return await this.handleManagingApplications(from, sanitized, state);
+        case 'permit_delivered':
+          return await this.handlePermitDeliveredResponse(from, sanitized, state);
+        case 'permit_downloaded':
+          return await this.handlePermitDownloadedResponse(from, sanitized, state);
+        case 'renewal_selection':
+          return await this.handleRenewalSelection(from, sanitized, state);
+        case 'renewal_confirmation':
+          return await this.handleRenewalConfirmation(from, sanitized, state);
+        case 'renewal_field_selection':
+          return await this.handleRenewalFieldSelection(from, sanitized, state);
+        case 'renewal_edit_selection':
+          return await this.handleRenewalEditSelection(from, sanitized, state);
+        case 'renewal_field_editing':
+          return await this.handleRenewalFieldEditing(from, sanitized, state);
+        case 'renewal_field_input':
+          return await this.handleRenewalFieldInput(from, sanitized, state);
+        case 'renewal_payment':
+          // Renewal payment uses same logic as regular payment
+          return await this.handleMenuSelection(from, sanitized, state);
         default:
-          await this.sendMessage(from, '❓ No entendí esa opción. Por favor escribe un número del 1 al 6.');
-          await this.sendWelcomeMessage(from, context);
+          // Check for greetings only when not in an active state
+          if (this.isGreeting(sanitized)) {
+            return await this.handleGreeting(from);
+          }
+          return await this.showMainMenu(from);
       }
+      
     } catch (error) {
-      logger.error('Error handling numbered option', { error: error.message, from });
-      await this.sendMessage(from, '❌ Hubo un error. Por favor intenta de nuevo.');
+      logger.error('Error al procesar mensaje', { error: error.message, from });
+      await this.sendMessage(from, '❌ Hubo un error. Por favor intenta de nuevo o visita:\n\n🌐 permisosdigitales.com.mx');
     }
   }
-  
+
   /**
-   * Start or resume application based on context
+   * Check if message is a greeting
    */
-  async startOrResumeApplication(from, context) {
-    if (context.status === 'INCOMPLETE_APPLICATION') {
-      await this.sendMessage(from, 
-        `📋 *Solicitud sin terminar*
+  isGreeting(message) {
+    const greetings = [
+      'hola', 'hi', 'hello', 'buenas', 'buenos días', 'buenos dias',
+      'buenas tardes', 'buenas noches', 'buen día', 'buen dia',
+      'que tal', 'qué tal', 'saludos', 'hey', 'ola', 'alo', 'aló'
+    ];
+    
+    const normalized = message.toLowerCase().trim();
+    return greetings.some(greeting => normalized.includes(greeting));
+  }
 
-Te faltan: ${context.missingFields.join(', ')}
-
-*¿Qué deseas hacer?*
-
-1️⃣ Continuar donde quedé
-2️⃣ Empezar una nueva solicitud
-
-*Escribe el número* o "continuar" para seguir donde quedaste.`
-      );
+  /**
+   * Handle greeting messages
+   */
+  async handleGreeting(from) {
+    // Get assistant and time-based greeting
+    const assistant = this.getAssistantForUser(from);
+    const timeGreeting = this.getTimeBasedGreeting(from);
+    const state = await this.stateManager.getState(from) || {};
+    
+    if (state.pendingPayment) {
+      // User has pending payment - single consolidated message
+      const message = assistant.name === 'Sophia' ? 
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 💜\n\n` +
+        `Tu permiso está casi listo, solo falta el pago 😊\n\n` +
+        `💳 *LINK DE PAGO:*\n${state.pendingPayment.link}\n\n` +
+        `📱 *Folio:* ${state.pendingPayment.applicationId}\n\n` +
+        `¿Necesitas ayuda? Escribe "ayuda" 💬` :
+        
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 🚗\n\n` +
+        `Tu permiso está a un paso de estar listo 💪\n\n` +
+        `💳 *LINK DE PAGO:*\n${state.pendingPayment.link}\n\n` +
+        `📱 *Folio:* ${state.pendingPayment.applicationId}\n\n` +
+        `¿Necesitas apoyo? Escribe "ayuda" 🤝`;
       
-      // Set state to wait for resume confirmation
-      await redisClient.setex(`wa:${from}`, 3600, JSON.stringify({
-        status: 'awaiting_resume_confirmation',
-        draftId: context.draft.id
-      }));
-      return;
+      await this.sendMessage(from, message);
+    } else if (state.draftData) {
+      // User has saved draft - single message
+      const progress = Math.round((state.draftField / this.fields.length) * 100);
+      const message = assistant.name === 'Sophia' ? 
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 💜\n\n` +
+        `¡Qué bien que regresas! Tienes un permiso ${progress}% completado 📊\n\n` +
+        `¿Seguimos donde nos quedamos?\n\n` +
+        `✨ Escribe "sí" para continuar\n` +
+        `🆕 Escribe "nuevo" para empezar de cero` :
+        
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 🚗\n\n` +
+        `¡Genial que volviste! Ya llevamos ${progress}% de tu permiso 💪\n\n` +
+        `¿Le seguimos o empezamos de nuevo?\n\n` +
+        `✨ Escribe "sí" para continuar\n` +
+        `🆕 Escribe "nuevo" para empezar de cero`;
+      
+      await this.sendMessage(from, message);
+      
+      state.status = 'resume_prompt';
+      await this.stateManager.setState(from, state);
+    } else {
+      // Just show the main menu
+      return await this.showMainMenu(from);
     }
-    
-    await this.startNewApplication(from);
   }
-  
+
   /**
-   * Check user's current status
+   * Check for renewable permits
    */
-  async checkStatus(from, context) {
-    if (context.status === 'NEW_USER' || context.status === 'INCOMPLETE_SESSION') {
-      await this.sendMessage(from, 
-        `🔍 *No encontré información*
-
-No tienes solicitudes registradas con este número.
-
-*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Ver menú principal
-
-*Escribe el número* o "permiso" para comenzar.`
-      );
-      return;
-    }
+  async checkRenewablePermits(userId) {
+    const query = `
+      SELECT 
+        id, folio, marca, linea, color, ano_modelo,
+        fecha_expedicion, fecha_vencimiento, status,
+        EXTRACT(DAY FROM fecha_vencimiento - NOW()) as days_until_expiration
+      FROM permit_applications
+      WHERE user_id = $1 
+        AND status IN ('PERMIT_READY', 'COMPLETED')
+        AND fecha_vencimiento IS NOT NULL
+        AND fecha_vencimiento BETWEEN (NOW() - INTERVAL '30 days') AND (NOW() + INTERVAL '7 days')
+      ORDER BY fecha_vencimiento ASC
+    `;
     
-    if (!context.user || !context.user.id) {
-      await this.sendMessage(from, 
-        `❌ *Error temporal*
+    const result = await db.query(query, [userId]);
+    return result.rows;
+  }
 
-No pude obtener tu información en este momento.
-
-*Intenta de nuevo* en unos minutos o contacta soporte escribiendo "ayuda".`
-      );
-      return;
-    }
+  /**
+   * Check if a permit is eligible for renewal
+   */
+  async isEligibleForRenewal(permitId, userId) {
+    const permit = await this.getPermitById(permitId, userId);
+    if (!permit || !['PERMIT_READY', 'COMPLETED'].includes(permit.status)) return false;
     
-    const applicationRepository = require('../../repositories/application.repository');
-    const applications = await applicationRepository.findByUserId(context.user.id);
+    const expirationDate = new Date(permit.fecha_vencimiento);
+    const today = new Date();
+    const daysUntilExpiration = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
     
-    if (applications.length === 0) {
-      await this.sendMessage(from, 
-        `📋 *Sin solicitudes*
+    // Eligible if expires in 7 days or expired within last 30 days
+    return daysUntilExpiration <= 7 && daysUntilExpiration > -30;
+  }
 
-No tienes solicitudes registradas aún.
+  /**
+   * Get permit by ID for renewal
+   */
+  async getPermitById(permitId, userId) {
+    const query = `
+      SELECT * FROM permit_applications 
+      WHERE id = $1 AND user_id = $2
+    `;
+    const result = await db.query(query, [permitId, userId]);
+    return result.rows[0] || null;
+  }
 
-*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Ver menú principal
-
-*Escribe el número* o "permiso" para comenzar.`
-      );
-      return;
-    }
+  /**
+   * Show main menu
+   */
+  async showMainMenu(from) {
+    // Get assistant and time-based greeting
+    const assistant = this.getAssistantForUser(from);
+    const timeGreeting = this.getTimeBasedGreeting(from);
+    const currentState = await this.stateManager.getState(from) || {};
     
-    let message = `📊 *Tu estado actual:*\n\n`;
+    // Check for renewable permits
+    const user = await this.findOrCreateUser(from);
+    const renewablePermits = await this.checkRenewablePermits(user.id);
+    const hasRenewablePermits = renewablePermits.length > 0;
     
-    // Group by status
-    const pending = applications.filter(a => ['AWAITING_PAYMENT', 'AWAITING_OXXO_PAYMENT'].includes(a.status));
-    const processing = applications.filter(a => ['PAYMENT_PROCESSING', 'GENERATING_PERMIT'].includes(a.status));
-    const ready = applications.filter(a => a.status === 'PERMIT_READY' && new Date(a.fecha_vencimiento) > new Date());
-    const expired = applications.filter(a => a.status === 'PERMIT_READY' && new Date(a.fecha_vencimiento) <= new Date());
+    let messages;
     
-    if (pending.length > 0) {
-      message += `⏳ *Pagos pendientes:*\n`;
-      pending.forEach(app => {
-        message += `• ${app.marca} ${app.linea} - $${app.importe}\n`;
-        if (app.payment_link) {
-          message += `  💳 Pagar: ${app.payment_link}\n`;
+    let menuMessage;
+    
+    // Check for expiring soon
+    const expiringSoon = renewablePermits.filter(p => 
+      p.days_until_expiration >= 0 && p.days_until_expiration <= 3
+    );
+    
+    if (currentState.draftData && currentState.draftField !== undefined) {
+      // User has saved draft
+      const progress = Math.round((currentState.draftField / this.fields.length) * 100);
+      
+      menuMessage = assistant.name === 'Sophia' ?
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 👩‍💼\n\n` +
+        `Veo que tienes una solicitud ${progress}% completada 📝\n\n` +
+        `🏛️ *PERMISOS DIGITALES*\n` +
+        `⏱️ Proceso: 5 minutos • 💵 Costo: $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)}\n` +
+        `📅 *Duración del permiso: 30 días*\n\n` +
+        `📋 *¿QUÉ DESEAS HACER?*\n\n` +
+        `1️⃣ Continuar solicitud guardada\n` +
+        `2️⃣ Ver mis solicitudes\n` +
+        `3️⃣ Opciones de privacidad\n` +
+        `4️⃣ Ayuda y soporte\n` +
+        `5️⃣ Nueva solicitud (eliminar guardada)\n\n` +
+        `💜 Responde con el número de tu elección` :
+        
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 👨‍💼\n\n` +
+        `Tienes un permiso ${progress}% listo 🚗\n\n` +
+        `🏛️ *PERMISOS DIGITALES*\n` +
+        `⏱️ Solo 5 minutos • 💵 $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n` +
+        `📅 *Duración del permiso: 30 días*\n\n` +
+        `🚗 *¿QUÉ NECESITAS HOY?*\n\n` +
+        `1️⃣ Continuar solicitud pausada\n` +
+        `2️⃣ Consultar mis solicitudes\n` +
+        `3️⃣ Opciones de privacidad\n` +
+        `4️⃣ Ayuda técnica\n` +
+        `5️⃣ Empezar de nuevo\n\n` +
+        `🔧 Escribe el número de la opción`;
+    } else {
+      // Regular menu with personality and dynamic renewal options
+      let alertSection = '';
+      if (expiringSoon.length > 0) {
+        alertSection = `⚠️ *ATENCIÓN: Tienes ${expiringSoon.length} permiso(s) por vencer*\n\n`;
+      }
+      
+      let menuOptions = '';
+      let optionNumber = 1;
+      const menuMapping = {};
+      
+      menuOptions += `${optionNumber}️⃣ Nuevo permiso de circulación\n`;
+      menuMapping[optionNumber++] = 'nuevo_permiso';
+      
+      if (hasRenewablePermits) {
+        menuOptions += `${optionNumber}️⃣ Renovar permiso existente ♻️\n`;
+        if (expiringSoon.length > 0) {
+          menuOptions += `   ⚠️ ${expiringSoon.length} por vencer\n`;
         }
-      });
-      message += `\n`;
-    }
-    
-    if (processing.length > 0) {
-      message += `⚙️ *En proceso:*\n`;
-      processing.forEach(app => {
-        message += `• ${app.marca} ${app.linea} - Generando permiso...\n`;
-      });
-      message += `\n`;
-    }
-    
-    if (ready.length > 0) {
-      message += `✅ *Permisos activos:*\n`;
-      ready.forEach(app => {
-        const vencimiento = new Date(app.fecha_vencimiento).toLocaleDateString('es-MX');
-        message += `• ${app.marca} ${app.linea} - Vence: ${vencimiento}\n`;
-      });
-      message += `\n`;
-    }
-    
-    if (expired.length > 0) {
-      message += `❌ *Permisos vencidos:*\n`;
-      expired.forEach(app => {
-        message += `• ${app.marca} ${app.linea} - Envía /renovar\n`;
-      });
-      message += `\n`;
-    }
-    
-    // Add action options
-    message += `*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Realizar un pago pendiente
-3️⃣ Renovar un permiso
-4️⃣ Ver menú principal
-
-*Escribe el número* de tu elección.`;
-    
-    await this.sendMessage(from, message);
-  }
-  
-  /**
-   * Get payment links for pending payments
-   */
-  async getPaymentLinks(from, context) {
-    if (context.status === 'NEW_USER' || !context.user) {
-      await this.sendMessage(from, 
-        `💳 *Sin pagos pendientes*
-
-No tienes pagos registrados aún.
-
-*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Ver menú principal
-
-*Escribe el número* o "permiso" para comenzar.`
-      );
-      return;
-    }
-    
-    const applicationRepository = require('../../repositories/application.repository');
-    const pendingPayments = await applicationRepository.findPendingPaymentByUserId(context.user.id);
-    
-    if (!pendingPayments || pendingPayments.length === 0) {
-      await this.sendMessage(from, 
-        `🎉 *¡Excelente!*
-
-No tienes pagos pendientes.
-
-*¿Qué deseas hacer?*
-
-1️⃣ Solicitar nuevo permiso
-2️⃣ Ver estado de mis solicitudes
-3️⃣ Ver menú principal
-
-*Escribe el número* de tu elección.`
-      );
-      return;
-    }
-    
-    let message = `💳 *Tus pagos pendientes:*\n\n`;
-    
-    pendingPayments.forEach((app, index) => {
-      message += `${index + 1}. ${app.marca} ${app.linea}\n`;
-      message += `   💵 Monto: $${app.importe} MXN\n`;
-      message += `   🔗 ${app.payment_link}\n\n`;
-    });
-    
-    // Add action options
-    message += `*¿Necesitas ayuda?*
-
-1️⃣ ¿Cómo pagar con tarjeta?
-2️⃣ ¿Cómo pagar en OXXO?
-3️⃣ Problemas con el pago
-4️⃣ Ver menú principal
-
-*Escribe el número* de tu elección.`;
-    
-    await this.sendMessage(from, message);
-  }
-  
-  /**
-   * Find draft applications
-   */
-  async findDraftApplications(userId) {
-    const applicationRepository = require('../../repositories/application.repository');
-    const allApplications = await applicationRepository.findByUserId(userId);
-    
-    // Filter for draft status or incomplete data
-    return allApplications.filter(app => 
-      app.status === 'DRAFT' || 
-      (!app.numero_serie || !app.numero_motor || !app.domicilio)
-    );
-  }
-  
-  /**
-   * Get missing fields from draft
-   */
-  getMissingFields(draft) {
-    const required = ['nombre_completo', 'curp_rfc', 'domicilio', 'marca', 
-                     'linea', 'color', 'numero_serie', 'numero_motor', 'ano_modelo'];
-    
-    return required.filter(field => !draft[field]).map(field => {
-      const fieldMap = {
-        'nombre_completo': 'Nombre',
-        'curp_rfc': 'CURP/RFC',
-        'domicilio': 'Domicilio',
-        'marca': 'Marca',
-        'linea': 'Modelo',
-        'color': 'Color',
-        'numero_serie': 'VIN',
-        'numero_motor': 'Motor',
-        'ano_modelo': 'Año'
-      };
-      return fieldMap[field] || field;
-    });
-  }
-  
-  /**
-   * Handle pending payment context
-   */
-  async handlePendingPaymentContext(from, message, context) {
-    const msgLower = message.toLowerCase();
-    
-    if (msgLower === 'pagar' || msgLower === 'link' || msgLower === 'pago') {
-      await this.getPaymentLinks(from, context);
-    } else if (msgLower === 'nuevo' || msgLower === 'otra') {
-      await this.startNewApplication(from);
-    } else {
-      await this.sendMessage(from, 
-        `Tienes un pago pendiente. Opciones:\n\n` +
-        `💳 Escribe "pagar" para ver el link\n` +
-        `🆕 Escribe "nuevo" para otra solicitud\n` +
-        `❓ Escribe /ayuda para más opciones`
-      );
-    }
-  }
-  
-  /**
-   * Handle incomplete application context
-   */
-  async handleIncompleteContext(from, message, context) {
-    const msgLower = message.toLowerCase();
-    
-    if (msgLower === 'si' || msgLower === 'sí' || msgLower === '1') {
-      await this.resumeApplication(from, context.draft);
-    } else if (msgLower === 'no' || msgLower === '2') {
-      await this.startNewApplication(from);
-    } else {
-      await this.sendMessage(from, 
-        `Por favor responde:\n` +
-        `1️⃣ o SI - Para continuar\n` +
-        `2️⃣ o NO - Para empezar de nuevo`
-      );
-    }
-  }
-  
-  /**
-   * Handle incomplete session context (Redis session)
-   */
-  async handleIncompleteSessionContext(from, message, context) {
-    const msgLower = message.toLowerCase();
-    const stateKey = `wa:${from}`;
-    
-    if (msgLower === 'si' || msgLower === 'sí' || msgLower === '1') {
-      // Continue with the existing session
-      // Don't modify the state, just let it continue
-      await this.sendMessage(from, 
-        `🔄 Continuando tu solicitud...\n\n${this.fields[context.redisState.currentFieldIndex].prompt}`
-      );
-      
-      // Remove the incomplete session flag from Redis to avoid re-triggering
-      try {
-        await redisClient.del(stateKey);
-        await redisClient.setex(stateKey, 3600, JSON.stringify(context.redisState));
-      } catch (error) {
-        logger.error('Error restoring session state', { error: error.message });
-      }
-    } else if (msgLower === 'no' || msgLower === '2') {
-      // Clear the old session
-      try {
-        await redisClient.del(stateKey);
-      } catch (error) {
-        logger.error('Error clearing Redis session', { error: error.message });
+        menuMapping[optionNumber++] = 'renovar_permiso';
       }
       
-      // Set a flag to indicate we're waiting to start new
-      await redisClient.setex(stateKey, 3600, JSON.stringify({
-        status: 'awaiting_new_start',
-        clearedAt: new Date().toISOString()
-      }));
+      menuOptions += `${optionNumber}️⃣ Consultar mis solicitudes\n`;
+      menuMapping[optionNumber++] = 'ver_estado';
       
-      await this.sendMessage(from, '🗑️ Solicitud anterior eliminada.\n\n🆕 Envía /permiso para comenzar una nueva solicitud.');
-    } else {
-      // Set state to awaiting incomplete session response
-      await redisClient.setex(stateKey, 3600, JSON.stringify({
-        status: 'awaiting_incomplete_response',
-        redisState: context.redisState
-      }));
+      menuOptions += `${optionNumber}️⃣ Opciones de privacidad\n`;
+      menuMapping[optionNumber++] = 'privacidad';
       
-      await this.sendMessage(from, 
-        `Por favor responde:\n` +
-        `1️⃣ o SI - Para continuar\n` +
-        `2️⃣ o NO - Para empezar de nuevo`
-      );
-    }
-  }
-  
-  /**
-   * Resume an incomplete application
-   */
-  async resumeApplication(from, draft) {
-    const missingFields = this.getMissingFields(draft);
-    const firstMissingField = this.fields.find(f => !draft[f.key]);
-    
-    if (!firstMissingField) {
-      // All fields complete, go to confirmation
-      const state = {
-        status: 'confirming',
-        data: draft,
-        applicationId: draft.id
-      };
-      await redisClient.setex(`wa:${from}`, 3600, JSON.stringify(state));
-      await this.sendConfirmation(from, draft);
-      return;
+      menuOptions += `${optionNumber}️⃣ Ayuda técnica\n`;
+      menuMapping[optionNumber++] = 'ayuda';
+      
+      menuMessage = assistant.name === 'Sophia' ?
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 👩‍💼\n\n` +
+        alertSection +
+        `Estoy aquí para ayudarte a obtener tu *permiso para circular sin placas por 30 días* para auto 🚗, pick up 🚛 o motocicleta 🏍 particulares.\n\n` +
+        `🏛️ *PERMISOS DIGITALES*\n` +
+        `⏱️ Proceso: 5 minutos • 💵 Costo: $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)}\n` +
+        `📅 *Duración del permiso: 30 días*\n\n` +
+        `📋 *¿EN QUÉ PUEDO AYUDARTE?*\n\n` +
+        menuOptions + `\n` +
+        `💜 Responde con el número de tu elección` :
+        
+        `${assistant.emoji} ¡${timeGreeting}! Soy ${assistant.name} 👨‍💼\n\n` +
+        alertSection +
+        `Te ayudo a obtener tu *permiso para circular sin placas por 30 días* para auto 🚗, pick up 🚛 o motocicleta 🏍 particulares.\n\n` +
+        `🏛️ *PERMISOS DIGITALES*\n` +
+        `⏱️ Solo 5 minutos • 💵 $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n` +
+        `📅 *Duración del permiso: 30 días*\n\n` +
+        `🚗 *¿QUÉ NECESITAS HOY?*\n\n` +
+        menuOptions + `\n` +
+        `🔧 Escribe el número de la opción`;
+        
+      // Store dynamic menu mapping
+      currentState.menuMapping = menuMapping;
     }
     
-    // Resume from first missing field
-    const fieldIndex = this.fields.findIndex(f => f.key === firstMissingField.key);
+    await this.sendMessage(from, menuMessage);
+    
     const state = {
-      status: 'collecting',
-      currentFieldIndex: fieldIndex,
-      data: draft,
-      applicationId: draft.id,
-      resumed: true,
+      status: 'showing_menu',
       timestamp: Date.now(),
-      lastActivity: Date.now()
+      // Preserve draft data
+      draftData: currentState.draftData,
+      draftField: currentState.draftField,
+      // Add renewal information
+      menuMapping: currentState.menuMapping,
+      renewablePermits: renewablePermits,
+      hasRenewablePermits: hasRenewablePermits
     };
+    await this.stateManager.setState(from, state);
     
-    await redisClient.setex(`wa:${from}`, 3600, JSON.stringify(state));
+    // Push to navigation history
+    navigationManager.pushNavigation(from, {
+      state: 'MAIN_MENU',
+      title: 'Menú Principal',
+      data: state
+    });
+  }
+
+  /**
+   * Handle conversational menu
+   */
+  async handleConversationalMenu(from, input, state) {
+    const normalized = input.toLowerCase().trim();
+    
+    // Handle numbered options using dynamic menu mapping
+    const optionNumber = parseInt(normalized);
+    if (!isNaN(optionNumber) && state.menuMapping && state.menuMapping[optionNumber]) {
+      const action = state.menuMapping[optionNumber];
+      
+      switch (action) {
+        case 'nuevo_permiso':
+          return await this.startApplication(from);
+        case 'renovar_permiso':
+          return await this.handleRenewalFlow(from);
+        case 'ver_estado':
+          return await this.checkStatus(from);
+        case 'privacidad':
+          return await this.showPrivacyMenu(from);
+        case 'ayuda':
+          return await this.showHelp(from);
+        default:
+          break;
+      }
+    }
+    
+    // Fallback to legacy hardcoded options for backward compatibility
+    switch (normalized) {
+      case '1':
+        return await this.startApplication(from);
+      case '2':
+        return await this.checkStatus(from);
+      case '3':
+        return await this.handleDraftContinuation(from);
+      case '4':
+        return await this.showHelp(from);
+      default:
+        break;
+    }
+    
+    // Also handle text variations for backward compatibility
+    if (normalized === 'sí' || normalized === 'si' || normalized === 'yes' || 
+        normalized === '✅' || normalized === 'dale' || normalized === 'ok') {
+      return await this.startApplication(from);
+    }
+    
+    // Handle status check
+    if (normalized === 'estado' || normalized === 'status' || normalized === '📋') {
+      return await this.checkStatus(from);
+    }
+    
+    // Handle help
+    if (normalized === 'ayuda' || normalized === 'help' || normalized === '❓') {
+      return await this.showHelp(from);
+    }
+    
+    // Handle privacy
+    if (normalized.includes('privacidad') || normalized.includes('privacy')) {
+      return await this.showPrivacyMenu(from);
+    }
+    
+    // Handle renewal commands
+    if (normalized === 'renovar' || normalized === 'renovación' || normalized === 'renewal') {
+      return await this.handleRenewalFlow(from);
+    }
+    
+    // Check for renewal with specific permit ID (e.g., "renovar 123")
+    const renewalMatch = input.match(/^renovar\s+(\d+)$/i);
+    if (renewalMatch) {
+      const permitId = parseInt(renewalMatch[1]);
+      return await this.handleRenewalFlow(from, permitId);
+    }
+    
+    // Handle opt-out commands
+    if (normalized === 'stop' || normalized === 'baja' || normalized === 'unsubscribe' || 
+        normalized === 'no más' || normalized === 'no mas' || normalized === 'cancelar notificaciones') {
+      return await this.handleOptOut(from);
+    }
+    
+    // Handle re-subscription commands
+    if (normalized === 'start' || normalized === 'suscribir' || normalized === 'subscribe' || 
+        normalized === 'recordatorios' || normalized === 'notificaciones') {
+      return await this.handleOptIn(from);
+    }
+    
+    // Didn't understand - warm professional response with personality
+    const assistant = this.getAssistantForUser(from);
+    const errorMessage = assistant.name === 'Sophia' ? 
+      `💜 No entendí tu respuesta. Por favor elige una opción:\n\n` +
+      `1️⃣ Solicitar nuevo permiso\n` +
+      `2️⃣ Ver mis solicitudes\n` +
+      `3️⃣ Continuar solicitud guardada\n` +
+      `4️⃣ Ayuda y soporte\n\n` +
+      `🌟 Escribe solo el número de la opción` :
+      
+      `🔧 Opción no válida. Escoge una de estas:\n\n` +
+      `1️⃣ Nuevo permiso de circulación\n` +
+      `2️⃣ Consultar mis solicitudes\n` +
+      `3️⃣ Continuar solicitud pausada\n` +
+      `4️⃣ Ayuda técnica\n\n` +
+      `⚡ Solo necesito el número, ¡así de fácil!`;
+      
+    await this.sendMessage(from, errorMessage);
+  }
+
+  /**
+   * Handle main menu selection
+   */
+  async handleMenuSelection(from, selection, state) {
+    // Check for greetings first
+    if (this.isGreeting(selection)) {
+      return await this.handleGreeting(from);
+    }
+    
+    const hasDraft = state.draftData && state.draftField !== undefined;
+    const selectedNum = selection.trim();
+    
+    // Handle special case for option 5 when draft exists
+    if (hasDraft && selectedNum === '5') {
+      // Delete draft and start new
+      delete state.draftData;
+      delete state.draftField;
+      await this.stateManager.clearState(from);
+      return await this.startApplication(from);
+    }
+    
+    // Handle draft scenario for option 1
+    if (hasDraft && selectedNum === '1') {
+      // Continue with draft
+      state.status = 'resume_prompt';
+      await this.stateManager.setState(from, state);
+      return await this.handleResumePrompt(from, '1', state);
+    }
+    
+    const option = this.menuOptions.main[selectedNum];
+    
+    if (!option) {
+      const maxOption = hasDraft ? '5' : '4';
+      await this.sendMessage(from, 
+        `❌ Por favor responde solo con un número del 1 al ${maxOption}.`
+      );
+      return;
+    }
+    
+    switch (option) {
+      case 'nuevo_permiso':
+        // EMERGENCY FIX: Always clear state and start fresh for new permit
+        await this.stateManager.clearState(from);
+        return await this.startApplication(from);
+      case 'ver_estado':
+        return await this.checkStatus(from);
+      case 'privacidad':
+        return await this.showPrivacyMenu(from);
+      case 'ayuda':
+        return await this.showHelp(from);
+    }
+  }
+
+  /**
+   * Show privacy menu
+   */
+  async showPrivacyMenu(from) {
+    const state = {
+      status: 'showing_privacy_menu',
+      timestamp: Date.now()
+    };
+    await this.stateManager.setState(from, state);
+    
+    // Push to navigation history
+    navigationManager.pushNavigation(from, {
+      state: 'PRIVACY_MENU',
+      title: 'Opciones de Privacidad',
+      data: state
+    });
+    
     await this.sendMessage(from, 
-      `🔄 Continuando tu solicitud...\n\n${firstMissingField.prompt}`
+      `🔐 *OPCIONES DE PRIVACIDAD*\n\n` +
+      `1️⃣ Exportar mis datos\n` +
+      `2️⃣ Eliminar mis datos\n` +
+      `3️⃣ No recibir más mensajes\n` +
+      `4️⃣ Volver al menú principal\n\n` +
+      `📄 Política de privacidad:\n` +
+      `https://permisosdigitales.com.mx/politica-de-privacidad\n\n` +
+      `Responde con el número de tu elección (1-4)`
     );
   }
-  
+
+  /**
+   * Handle privacy menu selection
+   */
+  async handlePrivacyMenuSelection(from, selection, state) {
+    const option = this.menuOptions.privacy[selection.trim()];
+    
+    if (!option) {
+      await this.sendMessage(from, 
+        `❌ Por favor responde solo con un número del 1 al 4.`
+      );
+      return;
+    }
+    
+    switch (option) {
+      case 'exportar_datos':
+        return await this.handleDataExport(from);
+      case 'eliminar_datos':
+        return await this.handleDataDeletion(from);
+      case 'no_mensajes':
+        return await this.handleOptOut(from);
+      case 'menu_principal':
+        return await this.showMainMenu(from);
+    }
+  }
+
   /**
    * Start new application
    */
-  async startNewApplication(from) {
-    const stateKey = `wa:${from}`;
+  async startApplication(from) {
+    // Check for existing application
+    const user = await this.findOrCreateUser(from);
     
-    try {
-      // Check for duplicate vehicles first
-      const context = await this.getUserContext(from);
-      if (context.user) {
-        // User exists, let's be smarter about starting
-        await this.sendMessage(from, 
-          `👋 ¡Hola ${context.user.first_name}! Iniciemos tu nueva solicitud.\n\n` +
-          `Si ya tienes los datos del vehículo, continuaremos rápidamente.`
-        );
-      }
+    // Check rate limits first
+    const recentApps = await this.countRecentApplications(user.id);
+    
+    // Daily limit check - friendly message
+    if (recentApps.today >= 3) {
+      const assistant = this.getAssistantForUser(from);
+      const message = assistant.name === 'Sophia' ? 
+        `🛡️ *PROTECCIÓN INTELIGENTE*\n\n` +
+        `💜 He notado que ya tienes solicitudes activas hoy.\n\n` +
+        `Para mantener un servicio eficiente, procesamos máximo 3 permisos diarios por persona.\n\n` +
+        `🌟 *MI RECOMENDACIÓN:*\n` +
+        `Completemos el pago de alguna solicitud anterior para evitar duplicados innecesarios.\n\n` +
+        `📋 Escribe "estado" para ver tus solicitudes pendientes` :
+        
+        `🛡️ *LÍMITE DIARIO ALCANZADO*\n\n` +
+        `🔧 Ya tienes varias solicitudes activas hoy.\n\n` +
+        `Para que todos puedan usar el servicio eficientemente, manejamos hasta 3 permisos diarios.\n\n` +
+        `⚡ *TUS OPCIONES:*\n\n` +
+        `1️⃣ Ver y gestionar mis solicitudes\n` +
+        `2️⃣ Completar pago pendiente\n` +
+        `3️⃣ Volver al menú principal`;
+        
+      await this.sendMessage(from, message);
       
-      // First send requirements message
-      const requirementsMessage = `¡Hola! 👋 Te ayudaré a tramitar tu permiso.
-
-📋 *Necesitarás estos datos:*
-
-De ti:
-• Tu nombre completo
-• CURP o RFC
-• Dirección
-• Correo electrónico
-
-De tu vehículo:
-• Marca y modelo
-• Color
-• VIN (está en el parabrisas)
-• Número de motor
-• Año
-
-💡 Si no tienes algún dato a la mano, puedes buscarlo mientras avanzamos.
-
-¡Empecemos! 🚀`;
-      
-      await this.sendMessage(from, requirementsMessage);
-      
-      // Wait a bit before starting questions
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const state = {
-        status: 'collecting',
-        currentFieldIndex: 0,
-        data: {},
-        startedAt: new Date().toISOString(),
-        timestamp: Date.now(),
-        lastActivity: Date.now()
-      };
-      
-      // Try to save to Redis with fallback to memory
-      try {
-        await redisClient.setex(stateKey, 3600, JSON.stringify(state));
-      } catch (redisError) {
-        logger.error('Redis error, using memory fallback', { error: redisError.message });
-        await this.saveStateToMemory(stateKey, state);
-      }
-      
-      const startMessage = `¡Perfecto! Comenzaremos con tus datos personales.
-
-${this.fields[0].prompt}`;
-      
-      await this.sendMessage(from, startMessage);
-      
-    } catch (error) {
-      logger.error('Error starting new application', { error: error.message, from });
-      
-      // Send user-friendly error message
+      const newState = { status: 'rate_limit_options' };
+      await this.stateManager.setState(from, newState);
+      return;
+    }
+    
+    // Weekly limit check
+    if (recentApps.week >= 10) {
       await this.sendMessage(from, 
-        '❌ Hubo un problema al iniciar tu solicitud.\n\n' +
-        '🔄 Por favor intenta de nuevo en unos momentos.\n\n' +
-        'Si el problema persiste:\n' +
-        '• Envía /reset para reiniciar\n' +
-        '• Contacta soporte@permisosdigitales.com.mx'
+        `⚠️ *LÍMITE SEMANAL ALCANZADO*\n\n` +
+        `Has creado 10 solicitudes esta semana.\n\n` +
+        `Este límite existe para prevenir el uso indebido del sistema.\n\n` +
+        `Escribe *2* para ver tus solicitudes.`
       );
+      await this.stateManager.clearState(from);
+      return;
     }
+    
+    // Anti-abuse check - limit unpaid applications instead of time-based cooldown
+    const unpaidCount = await this.checkUnpaidApplicationCount(user.id);
+    if (unpaidCount >= 3) {
+      await this.sendMessage(from, 
+        `⚠️ *LÍMITE DE SOLICITUDES*\n\n` +
+        `Tienes ${unpaidCount} solicitudes pendientes de pago.\n\n` +
+        `Para crear una nueva solicitud, primero:\n` +
+        `• Completa el pago de una solicitud existente, o\n` +
+        `• Cancela una solicitud anterior\n\n` +
+        `Escribe "2" para ver tus solicitudes pendientes.`
+      );
+      await this.stateManager.clearState(from);
+      return;
+    }
+    
+    // Quick succession check - prevent rapid-fire applications (5 minutes)
+    const minutesSinceLastApp = await this.checkLastApplicationTime(user.id);
+    if (minutesSinceLastApp < 5) {
+      const waitTime = Math.ceil(5 - minutesSinceLastApp);
+      await this.sendMessage(from, 
+        `⏱️ *ESPERA UN MOMENTO*\n\n` +
+        `Por favor espera ${waitTime} minuto${waitTime > 1 ? 's' : ''} antes de crear otra solicitud.\n\n` +
+        `Esto evita solicitudes duplicadas accidentales.`
+      );
+      await this.stateManager.clearState(from);
+      return;
+    }
+    
+    const hasActiveApp = await this.checkActiveApplication(user.id);
+    
+    if (hasActiveApp) {
+      // Show active application info
+      let message = `⚠️ Ya tienes una solicitud en proceso.\n\n`;
+      
+      message += `📱 Folio: ${hasActiveApp.id}\n`;
+      message += `💰 Monto pendiente: $${hasActiveApp.importe || PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n`;
+      message += `📅 Creada: ${new Date(hasActiveApp.created_at).toLocaleDateString('es-MX')}\n\n`;
+      
+      message += `¿Qué deseas hacer?\n\n`;
+      message += `1️⃣ Ver estado de mis solicitudes\n`;
+      message += `2️⃣ Cancelar esta solicitud y crear una nueva\n`;
+      message += `3️⃣ Volver al menú principal`;
+      
+      await this.sendMessage(from, message);
+      
+      // Set state to handle the response
+      const state = {
+        status: 'awaiting_active_app_decision',
+        activeApplication: hasActiveApp,
+        timestamp: Date.now()
+      };
+      await this.stateManager.setState(from, state);
+      return;
+    }
+    
+    // Check for saved draft data
+    const currentState = await this.stateManager.getState(from) || {};
+    if (currentState.draftData && currentState.draftField !== undefined) {
+      // User has saved progress, ask if they want to continue
+      const fieldsCompleted = currentState.draftField;
+      const totalFields = this.fields.length;
+      
+      await this.sendMessage(from, 
+        `📋 *SOLICITUD GUARDADA ENCONTRADA*\n\n` +
+        `Tienes una solicitud guardada con ${fieldsCompleted} de ${totalFields} campos completados.\n\n` +
+        `¿Quieres continuar donde te quedaste?\n\n` +
+        `1️⃣ Sí, continuar\n` +
+        `2️⃣ No, empezar de nuevo`
+      );
+      
+      currentState.status = 'resume_prompt';
+      await this.stateManager.setState(from, currentState);
+      return;
+    }
+    
+    // Push to navigation history
+    navigationManager.pushNavigation(from, {
+      state: 'NEW_APPLICATION',
+      title: 'Nueva Solicitud',
+      data: { userId: user.id }
+    });
+    
+    // Get assistant for personalized messages
+    const assistant = this.getAssistantForUser(from);
+    
+    // Professional privacy consent - single message
+    const privacyConsent = `🔒 *AVISO DE PRIVACIDAD*\n\n` +
+                          `Para procesar su solicitud, requerimos:\n\n` +
+                          `📝 *Datos personales:*\n` +
+                          `• Nombre completo y CURP\n` +
+                          `• Correo electrónico\n\n` +
+                          `🚗 *Datos del vehículo:*\n` +
+                          `• Marca, modelo y año\n` +
+                          `• Número de serie y motor\n` +
+                          `• *Tipo de vehículo (auto, pick up, motocicleta)*\n\n` +
+                          `📍 *Domicilio completo*\n\n` +
+                          `*Sus datos están protegidos y solo los usamos para generar tu permiso oficial.*\n\n` +
+                          `¿Acepta continuar?\n\n` +
+                          `1️⃣ Sí, acepto\n` +
+                          `2️⃣ Ver política completa\n` +
+                          `3️⃣ No acepto`;
+    
+    await this.sendMessage(from, privacyConsent);
+    
+    await this.stateManager.setState(from, {
+      status: 'awaiting_privacy_consent',
+      userId: user.id,
+      userEmail: user.email && !user.email.includes('@permisos.mx') && !user.email.includes('@whatsapp.permisos.mx') ? user.email : null,
+      hasTempEmail: user.email && (user.email.includes('@permisos.mx') || user.email.includes('@whatsapp.permisos.mx')),
+      startedAt: new Date()
+    });
   }
 
   /**
-   * Extract field value based on type
+   * Handle privacy consent
    */
-  extractField(message, type) {
-    const cleaned = message.trim();
+  async handlePrivacyConsent(from, response, state) {
+    const normalized = response.toLowerCase().trim();
+    const assistant = this.getAssistantForUser(from);
     
-    switch (type) {
-      case 'text':
-        return cleaned.length > 1 ? cleaned : null;
+    // Handle numeric options first
+    if (normalized === '1') {
+      // Accept consent - proceed with form collection directly
+      // Log consent
+      await privacyAuditService.logConsent(
+        state.userId,
+        'data_processing',
+        true,
+        { 
+          version: this.PRIVACY_VERSION,
+          source: 'whatsapp',
+          phoneNumber: from
+        }
+      );
       
-      case 'email':
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(cleaned) ? cleaned.toLowerCase() : null;
+      // Start data collection with groups
+      state.status = 'collecting';
+      state.currentField = 0;
+      state.currentGroup = 'personal';
+      state.currentGroupIndex = 0;
+      state.data = {};
       
-      case 'curp_rfc':
-        const curpRfc = cleaned.toUpperCase().replace(/[\s\-\.]/g, '');
-        // Website allows 10-50 characters, letters and numbers only
-        return curpRfc.match(/^[A-Z0-9]{10,50}$/) ? curpRfc : null;
+      // Pre-fill email if user already has one
+      if (state.userEmail) {
+        state.data.email = state.userEmail;
+      }
       
-      case 'vin':
-        const vin = cleaned.toUpperCase().replace(/[\s\-\.]/g, '');
-        // Website allows 5-50 characters for numero_serie
-        return vin.length >= 5 && vin.length <= 50 && vin.match(/^[A-Z0-9]+$/) ? vin : null;
+      await this.stateManager.setState(from, state);
       
-      case 'numero_motor':
-        const motor = cleaned.toUpperCase().replace(/[\s\-\.]/g, '');
-        // Website allows 2-50 characters for numero_motor
-        return motor.length >= 2 && motor.length <= 50 && motor.match(/^[A-Z0-9]+$/) ? motor : null;
+      // Preserve form data in navigation
+      navigationManager.preserveState(from, 'form_data', state.data);
+      navigationManager.pushNavigation(from, {
+        state: 'FORM_FILLING',
+        title: 'Llenando Formulario',
+        data: { step: 1, total: this.fields.length }
+      });
       
-      case 'year':
-        const year = cleaned.replace(/\D/g, '');
-        const yearNum = parseInt(year);
-        return yearNum >= 1900 && yearNum <= new Date().getFullYear() + 2 ? year : null;
+      // Start with first group introduction and first field
+      const firstGroup = this.fieldGroups.personal;
+      const firstField = firstGroup.fields[0];
       
-      case 'color':
-        const colorLower = cleaned.toLowerCase();
+      // Calculate total fields user will see
+      const emailSkipped = state.userEmail && state.data.email;
+      const totalFieldsForUser = emailSkipped ? this.fields.length - 1 : this.fields.length;
+      
+      const assistant = this.getAssistantForUser(from);
+      const welcomeMessage = assistant.name === 'Sophia' ? 
+        `✅ *CONSENTIMIENTO ACEPTADO*\n\n` +
+        `💜 ¡Perfecto! Ahora recopilemos tus datos paso a paso.\n\n` +
+        `📝 *PASO 1: DATOS PERSONALES*\n\n` +
+        `${firstField.prompt}\n\n` +
+        `(Campo 1 de ${totalFieldsForUser})` :
         
-        // Handle multi-color vehicles
-        if (colorLower.includes('/') || colorLower.includes('\\')) {
-          // Replace slashes with 'y' (and)
-          const normalized = colorLower.replace(/[\/\\]/g, ' y ');
-          // Capitalize first letter of each word, but keep 'y' lowercase
-          return normalized.split(' ').map(word => {
-            if (word === 'y') return 'y';
-            return word.charAt(0).toUpperCase() + word.slice(1);
-          }).join(' ');
+        `✅ *CONSENTIMIENTO ACEPTADO*\n\n` +
+        `🔧 ¡Excelente! Vamos por tus datos, será rápido.\n\n` +
+        `📝 *PASO 1: INFORMACIÓN PERSONAL*\n\n` +
+        `${firstField.prompt}\n\n` +
+        `(Campo 1 de ${totalFieldsForUser})`;
+      
+      await this.sendMessage(from, welcomeMessage);
+      return;
+    }
+    
+    if (normalized === '2') {
+      // Show privacy policy info
+      await this.sendMessage(from, 
+        `📋 *POLÍTICA DE PRIVACIDAD*\n\n` +
+        `✅ Tus datos están protegidos por ley\n` +
+        `🔒 Solo los usamos para generar tu permiso\n` +
+        `🗑️ Puedes eliminarlos cuando quieras\n` +
+        `📧 No enviamos spam ni vendemos información\n\n` +
+        `Más detalles: permisosdigitales.com.mx/politica-de-privacidad\n\n` +
+        `¿Continuamos?\n\n` +
+        `1️⃣ Sí, acepto\n` +
+        `3️⃣ No acepto`
+      );
+      
+      // Change state to indicate user has viewed policy
+      state.status = 'awaiting_privacy_consent_after_viewing';
+      await this.stateManager.setState(from, state);
+      return;
+    }
+    
+    if (normalized === '3') {
+      // User rejected - clear state
+      await this.stateManager.clearState(from);
+      await this.sendMessage(from, 
+        `❌ *Proceso cancelado*\n\n` +
+        `Entendemos su decisión. Si cambia de opinión, puede escribir "permiso" para comenzar nuevamente.\n\n` +
+        `Gracias por contactarnos.`
+      );
+      return;
+    }
+    
+    // Invalid option - show menu again
+    await this.sendMessage(from, 
+      `Opción no válida. Por favor seleccione:\n\n` +
+      `1️⃣ Sí, acepto\n` +
+      `2️⃣ Ver política completa\n` +
+      `3️⃣ No acepto`
+    );
+    return;
+    
+    // Legacy fallback code (unreachable now, but kept for reference)
+    /*
+    const rejectionWords = ['no', 'cancelar', 'cancel', 'salir', 'exit', 'detener', 'stop', 'nunca', 'jamás'];
+    const isRejection = rejectionWords.some(word => normalized.includes(word));
+    
+    // Check for info request (legacy support)
+    const infoWords = ['info', 'información', 'detalles', 'más', 'política', 'privacidad', '📄'];
+    const wantsInfo = infoWords.some(word => normalized.includes(word));
+    */
+  }
+
+  /**
+   * Handle privacy consent after user has viewed the policy
+   */
+  async handlePrivacyConsentAfterViewing(from, response, state) {
+    const normalized = response.toLowerCase().trim();
+    const assistant = this.getAssistantForUser(from);
+    
+    if (normalized === '1') {
+      // Accept consent - proceed with form collection directly
+      // Log consent
+      await privacyAuditService.logConsent(
+        state.userId,
+        'data_processing',
+        true,
+        { 
+          version: this.PRIVACY_VERSION,
+          source: 'whatsapp',
+          phoneNumber: from
+        }
+      );
+      
+      // Start data collection with groups
+      state.status = 'collecting';
+      state.currentField = 0;
+      state.currentGroup = 'personal';
+      state.currentGroupIndex = 0;
+      state.data = {};
+      
+      // Pre-fill email if user already has one
+      if (state.userEmail) {
+        state.data.email = state.userEmail;
+      }
+      
+      await this.stateManager.setState(from, state);
+      
+      // Preserve form data in navigation
+      navigationManager.preserveState(from, 'form_data', state.data);
+      navigationManager.pushNavigation(from, {
+        state: 'FORM_FILLING',
+        title: 'Llenando Formulario',
+        data: { step: 1, total: this.fields.length }
+      });
+      
+      // Start with first group introduction and first field
+      const firstGroup = this.fieldGroups.personal;
+      const firstField = firstGroup.fields[0];
+      
+      // Calculate total fields user will see
+      const emailSkipped = state.userEmail && state.data.email;
+      const totalFieldsForUser = emailSkipped ? this.fields.length - 1 : this.fields.length;
+      
+      const welcomeMessage = assistant.name === 'Sophia' ? 
+        `✅ *CONSENTIMIENTO ACEPTADO*\n\n` +
+        `💜 ¡Perfecto! Ahora recopilemos tus datos paso a paso.\n\n` +
+        `📝 *PASO 1: DATOS PERSONALES*\n\n` +
+        `${firstField.prompt}\n\n` +
+        `(Campo 1 de ${totalFieldsForUser})` :
+        
+        `✅ *CONSENTIMIENTO ACEPTADO*\n\n` +
+        `🔧 ¡Excelente! Vamos por tus datos, será rápido.\n\n` +
+        `📝 *PASO 1: INFORMACIÓN PERSONAL*\n\n` +
+        `${firstField.prompt}\n\n` +
+        `(Campo 1 de ${totalFieldsForUser})`;
+      
+      await this.sendMessage(from, welcomeMessage);
+      return;
+    }
+    
+    if (normalized === '3') {
+      // User rejected - clear state
+      await this.stateManager.clearState(from);
+      const rejectMessage = assistant.name === 'Sophia' ? 
+        `❌ *Proceso cancelado*\n\n` +
+        `💜 *Sophia:* "Entiendo tu decisión. Si cambias de opinión, estaré aquí"\n\n` +
+        `Escribe cualquier mensaje para volver al menú principal.` :
+        
+        `❌ *Proceso cancelado*\n\n` +
+        `🔧 *Diego:* "Sin problema. Si luego quieres tu permiso, me avisas"\n\n` +
+        `Escribe cualquier mensaje para regresar al menú.`;
+        
+      await this.sendMessage(from, rejectMessage);
+      return;
+    }
+    
+    // Invalid option
+    const errorMessage = assistant.name === 'Sophia' ? 
+      `💜 Por favor selecciona una opción válida:\n\n` +
+      `1️⃣ Sí, acepto\n` +
+      `3️⃣ No acepto` :
+      
+      `🔧 Opción no válida. Elige:\n\n` +
+      `1️⃣ Sí, acepto\n` +
+      `3️⃣ No acepto`;
+      
+    await this.sendMessage(from, errorMessage);
+  }
+
+  /**
+   * Handle data collection
+   */
+  async handleDataCollection(from, value, state) {
+    const fieldIndex = state.currentField || 0;
+    const field = this.fields[fieldIndex];
+    
+    // Store current form data for navigation
+    navigationManager.preserveState(from, 'form_data', state.data);
+    
+    // Check for help command
+    if (value.toLowerCase() === 'ayuda' || value.toLowerCase() === 'help') {
+      await this.showHelp(from);
+      // After showing help, remind them of the current field
+      setTimeout(async () => {
+        await this.sendFieldPrompt(from, field, fieldIndex);
+      }, 1000);
+      return;
+    }
+    
+    // Check if user wants to go back
+    if (value.toLowerCase() === 'atras' || value.toLowerCase() === 'atrás' || value.toLowerCase() === 'back') {
+      if (fieldIndex > 0) {
+        // Go back to previous field
+        state.currentField = fieldIndex - 1;
+        
+        // Skip email field if going backwards and it's pre-filled
+        const prevField = this.fields[state.currentField];
+        if (prevField.key === 'email' && state.data.email && state.userEmail) {
+          state.currentField = Math.max(0, state.currentField - 1);
         }
         
-        // Check if it contains any known color
-        const foundColor = this.colors.find(color => colorLower.includes(color));
-        return foundColor ? foundColor.charAt(0).toUpperCase() + foundColor.slice(1) : cleaned;
+        await this.stateManager.setState(from, state);
+        const fieldToShow = this.fields[state.currentField];
+        await this.sendMessage(from, `↩️ Regresando al campo anterior...`);
+        await this.sendFieldPrompt(from, fieldToShow, state.currentField, state);
+        return;
+      } else {
+        await this.sendMessage(from, `↩️ Ya estás en el primer campo. Escribe "0" para cancelar.`);
+        return;
+      }
+    }
+    
+    // Check if user wants to cancel
+    if (value.toLowerCase() === 'cancelar' || value === '0') {
+      // Ask if they want to save progress
+      state.status = 'save_progress_prompt';
+      await this.stateManager.setState(from, state);
       
-      default:
-        return cleaned;
+      await this.sendMessage(from, 
+        `⏸️ ¿Quieres guardar tu progreso para continuar después?\n\n` +
+        `1️⃣ Sí, guardar\n` +
+        `2️⃣ No, borrar todo`
+      );
+      return;
+    }
+    
+    // Validate input
+    const validation = this.validateField(field.key, value);
+    if (!validation.valid) {
+      const assistant = this.getAssistantForUser(from);
+      
+      // Send error message
+      await this.sendMessage(from, validation.error);
+      return;
+    }
+    
+    // Store value
+    state.data[field.key] = validation.value;
+    
+    // Get assistant for personalized responses
+    const assistant = this.getAssistantForUser(from);
+    
+    // Special feedback for color normalization
+    let savedMessage = '';
+    if (field.key === 'color' && value.includes('/')) {
+      savedMessage = `✅ Color guardado como: *${validation.value}*`;
+    } else {
+      // Personalized success messages
+      savedMessage = `✅ Información guardada`;
+    }
+    
+    // Move to next field
+    if (fieldIndex < this.fields.length - 1) {
+      state.currentField = fieldIndex + 1;
+      
+      // Skip email field ONLY if we have a real email from the user (not asking them to provide one)
+      const nextField = this.fields[state.currentField];
+      if (nextField.key === 'email' && state.data.email && state.userEmail) {
+        state.currentField++;
+      }
+      
+      await this.stateManager.setState(from, state);
+      
+      const fieldToShow = this.fields[state.currentField];
+      await this.sendFieldPrompt(from, fieldToShow, state.currentField, state);
+    } else {
+      // All fields collected - show confirmation
+      state.status = 'confirming';
+      await this.stateManager.setState(from, state);
+      await this.showConfirmation(from, state);
     }
   }
 
   /**
-   * Get field example text
+   * Show confirmation with numbered fields for easy editing
    */
-  getFieldExample(fieldType) {
-    const examples = {
-      curp_rfc: '📋 *Ejemplos válidos:*\nCURP: ABCD123456HDFGHI01\nRFC: ABCD880326A01',
-      email: '📧 *Ejemplo:* juan.perez@gmail.com',
-      numero_serie: '🔢 *Ejemplo VIN:* 1HGCM82633A123456\n_(17 caracteres alfanuméricos)_',
-      numero_motor: '⚙️ *Ejemplo:* 52WVC10338',
-      year: '📅 *Ejemplos:* 2020, 2023, 2025',
-      color: '🎨 *Ejemplos:* Rojo, Negro, Blanco y Azul',
-      text: '',
-      vin: '🔢 *Ejemplo VIN:* 1HGCM82633A123456\n_(17 caracteres alfanuméricos)_'
-    };
-    return examples[fieldType] || '';
-  }
-
-  /**
-   * Get helpful tips for field types
-   */
-  getFieldHelpTip(fieldType) {
-    const tips = {
-      curp_rfc: 'Sin espacios, guiones o puntos',
-      email: 'Revisa que esté bien escrito',
-      numero_serie: 'Lo encuentras en el parabrisas o puerta del conductor',
-      numero_motor: 'Está en tu tarjeta de circulación',
-      year: 'Solo 4 dígitos',
-      color: 'Si tiene 2 colores, usa "y" entre ellos',
-      vin: 'Revisa que sean exactamente 17 caracteres'
-    };
-    return tips[fieldType] || '';
-  }
-
-  /**
-   * Create visual progress bar
-   */
-  createProgressBar(current, total) {
-    const percentage = Math.round((current / total) * 100);
-    const filled = Math.floor((current / total) * 10);
-    const empty = 10 - filled;
-    const bar = '▓'.repeat(filled) + '░'.repeat(empty);
-    return `${bar} ${percentage}%`;
-  }
-
-  /**
-   * Validate field value with security checks
-   */
-  validateField(field, value) {
-    // Use secure validation from security utils
-    const validation = securityUtils.validateFieldSecure(field, value);
+  async showConfirmation(from, state) {
+    // Push to navigation history
+    navigationManager.pushNavigation(from, {
+      state: 'CONFIRMATION',
+      title: 'Confirmación de Datos',
+      data: { formData: state.data }
+    });
     
-    // If security utils handled it, return the result
-    if (validation.error || validation.sanitized) {
-      return validation;
+    let message = `📋 *CONFIRMACIÓN DE DATOS*\n\n`;
+    
+    // Build fields array, excluding email if it was pre-filled
+    const fieldsToShow = [];
+    for (let i = 0; i < this.fields.length; i++) {
+      const field = this.fields[i];
+      // Skip showing email in confirmation if it was pre-filled
+      if (field.key === 'email' && state.userEmail && state.data.email === state.userEmail) {
+        continue;
+      }
+      fieldsToShow.push({
+        field: field,
+        originalIndex: i,
+        value: state.data[field.key]
+      });
     }
     
-    // Additional field-specific validation not covered by security utils
-    switch (field) {
-      case 'domicilio':
-        if (value.length < 5) {
-          return { isValid: false, error: 'El domicilio debe tener al menos 5 caracteres' };
-        }
-        break;
-      
-      case 'email':
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          return { isValid: false, error: 'Por favor ingresa un correo válido' };
-        }
-        break;
-      
-      case 'numero_serie':
-        if (value.length < 5 || value.length > 50) {
-          return { isValid: false, error: 'El número de serie debe tener entre 5 y 50 caracteres' };
-        }
-        break;
-      
-      case 'numero_motor':
-        if (value.length < 2 || value.length > 50) {
-          return { isValid: false, error: 'El número de motor debe tener entre 2 y 50 caracteres' };
-        }
-        break;
-        
-      case 'ano_modelo':
-        const year = parseInt(value);
-        if (year < 1900 || year > new Date().getFullYear() + 2) {
-          return { isValid: false, error: 'Año inválido' };
-        }
-        break;
+    // Show numbered list
+    for (let i = 0; i < fieldsToShow.length; i++) {
+      const item = fieldsToShow[i];
+      const number = i + 1;
+      message += `${number}. *${item.field.label}:* ${item.value}\n`;
     }
     
-    return { isValid: true };
-  }
-
-  /**
-   * Send confirmation message
-   */
-  async sendConfirmation(from, data) {
-    const message = `🎉 ¡Listo! Aquí está tu información:
-
-👤 **TUS DATOS**
-Nombre: ${data.nombre_completo}
-CURP/RFC: ${data.curp_rfc}
-Domicilio: ${data.domicilio}
-Email: ${data.email}
-
-🚗 **TU VEHÍCULO**
-${data.marca} ${data.linea} - ${data.ano_modelo}
-Color: ${data.color}
-Serie (VIN): ${data.numero_serie}
-Motor: ${data.numero_motor}
-
-💳 **COSTO: $150.00 MXN**
-
-¿Todo está correcto?
-
-✅ *SI* - Proceder al pago
-✏️ *Escribe qué cambiar* - nombre, curp, domicilio, email, marca, modelo, color, serie, motor, año
-❌ *NO* - Cancelar y empezar de nuevo`;
+    message += `\n¿Los datos son correctos?\n\n`;
+    message += `✅ Escribe *SI* para continuar\n`;
+    message += `📝 Escribe el número del campo a corregir (1-${fieldsToShow.length})\n`;
+    message += `❌ Escribe *NO* o *0* para cancelar`;
+    
+    // Store fields mapping for editing
+    state.confirmationFields = fieldsToShow;
+    await this.stateManager.setState(from, state);
     
     await this.sendMessage(from, message);
   }
@@ -1858,915 +1398,4591 @@ Motor: ${data.numero_motor}
   /**
    * Handle confirmation response
    */
-  async handleConfirmation(from, message, state) {
-    const response = message.toLowerCase().trim();
-    const stateKey = `wa:${from}`;
+  async handleConfirmation(from, response, state) {
+    const normalized = response.toLowerCase().trim();
     
-    if (response === 'si' || response === 'sí') {
-      // Create application and payment
-      await this.createApplicationAndPayment(from, state.data);
-      await redisClient.del(stateKey);
-    } else if (response === 'no') {
-      // Start over
-      await this.startNewApplication(from);
-    } else {
-      // Check if user wants to edit a specific field
-      const fieldMap = {
-        'nombre': 'nombre_completo',
-        'curp': 'curp_rfc',
-        'rfc': 'curp_rfc',
-        'domicilio': 'domicilio',
-        'direccion': 'domicilio',
-        'email': 'email',
-        'correo': 'email',
-        'marca': 'marca',
-        'modelo': 'linea',
-        'linea': 'linea',
-        'color': 'color',
-        'serie': 'numero_serie',
-        'vin': 'numero_serie',
-        'motor': 'numero_motor',
-        'año': 'ano_modelo',
-        'ano': 'ano_modelo'
-      };
+    // Check if user confirms
+    if (normalized === 'si' || normalized === 'sí') {
+      // Go directly to creating the application
+      await this.createApplication(from, state);
+      return;
+    }
+    
+    // Check if user wants to cancel
+    if (normalized === 'no' || normalized === '0') {
+      await this.stateManager.clearState(from);
+      await this.sendMessage(from, 
+        `❌ Proceso cancelado.\n\n` +
+        `Escribe cualquier mensaje para volver al menú principal.`
+      );
+      return;
+    }
+    
+    // Check if user wants to edit a field by number
+    const fieldNumber = parseInt(response);
+    const fieldsToShow = state.confirmationFields || [];
+    
+    if (fieldNumber >= 1 && fieldNumber <= fieldsToShow.length) {
+      const fieldInfo = fieldsToShow[fieldNumber - 1];
+      const field = fieldInfo.field;
+      const originalIndex = fieldInfo.originalIndex;
       
-      const fieldToEdit = fieldMap[response];
-      if (fieldToEdit) {
-        // Set state to edit specific field
-        state.status = 'editing_field';
-        state.editingField = fieldToEdit;
-        const fieldInfo = this.fields.find(f => f.key === fieldToEdit);
-        
-        try {
-          await redisClient.setex(stateKey, 3600, JSON.stringify(state));
-          await this.sendMessage(from, 
-            `✏️ Editando: ${fieldToEdit}\n\n` +
-            `Valor actual: ${state.data[fieldToEdit]}\n\n` +
-            `${fieldInfo.prompt}`
-          );
-        } catch (error) {
-          logger.error('Error saving edit state', { error: error.message });
-          await this.sendMessage(from, '❌ Error al editar. Por favor intenta de nuevo.');
-        }
-      } else {
-        await this.sendMessage(from, 
-          '🤔 No entendí...\n\n' +
-          'Puedes escribir:\n' +
-          '• *SI* para continuar al pago\n' +
-          '• *NO* para cancelar todo\n' +
-          '• O el campo que quieres cambiar:\n' +
-          '  nombre, curp, domicilio, email,\n' +
-          '  marca, modelo, color, serie, motor, año'
-        );
-      }
+      state.status = 'editing_field';
+      state.editingField = originalIndex;
+      await this.stateManager.setState(from, state);
+      
+      await this.sendMessage(from, 
+        `📝 *Editando ${field.label}*\n\n` +
+        `Valor actual: ${state.data[field.key]}\n\n` +
+        field.prompt
+      );
+      return;
+    }
+    
+    // Invalid response
+    await this.sendMessage(from, 
+      `❌ Respuesta no válida.\n\n` +
+      `✅ Escribe *SI* para continuar\n` +
+      `📝 Escribe el número del campo a corregir (1-${fieldsToShow.length})\n` +
+      `❌ Escribe *NO* o *0* para cancelar`
+    );
+  }
+
+  /**
+   * Handle field editing
+   */
+  async handleFieldEdit(from, value, state) {
+    const field = this.fields[state.editingField];
+    
+    // Validate input
+    const validation = this.validateField(field.key, value);
+    if (!validation.valid) {
+      await this.sendMessage(from, `❌ ${validation.error}\n\nIntenta de nuevo.`);
+      return;
+    }
+    
+    // Update value
+    state.data[field.key] = validation.value;
+    state.status = 'confirming';
+    delete state.editingField;
+    await this.stateManager.setState(from, state);
+    
+    // Show confirmation again
+    await this.showConfirmation(from, state);
+  }
+
+  /**
+   * Handle save progress prompt
+   */
+  async handleSaveProgressPrompt(from, response, state) {
+    const selection = response.trim();
+    
+    if (selection === '1') {
+      // Save as draft
+      state.draftData = state.data || {};
+      state.draftField = state.currentField || 0;
+      state.draftUserEmail = state.userEmail; // Preserve userEmail for counting
+      state.status = 'draft_saved';
+      await this.stateManager.setState(from, state);
+      
+      await this.sendMessage(from, 
+        `✅ Tu progreso ha sido guardado.\n\n` +
+        `Puedes continuar en cualquier momento escribiendo "hola".\n\n` +
+        `⏰ Tu sesión guardada expirará en 24 horas.`
+      );
+    } else if (selection === '2') {
+      // Clear everything
+      await this.stateManager.clearState(from);
+      await this.sendMessage(from, 
+        `🗑️ Tu progreso ha sido eliminado.\n\n` +
+        `Escribe cualquier mensaje para volver al menú principal.`
+      );
+    } else {
+      await this.sendMessage(from, 
+        `Por favor responde:\n\n` +
+        `1️⃣ Sí, guardar\n` +
+        `2️⃣ No, borrar todo`
+      );
     }
   }
 
   /**
-   * Create application and payment link
+   * Handle resume prompt
    */
-  async createApplicationAndPayment(from, data) {
+  async handleResumePrompt(from, response, state) {
+    const selection = response.trim();
+    
+    if (selection === '1') {
+      // Resume from draft
+      state.status = 'collecting';
+      state.data = state.draftData || {};
+      state.currentField = state.draftField || 0;
+      state.userEmail = state.draftUserEmail; // Restore userEmail for field counting
+      delete state.draftData;
+      delete state.draftField;
+      delete state.draftUserEmail;
+      await this.stateManager.setState(from, state);
+      
+      // Show next field to collect
+      if (state.currentField < this.fields.length) {
+        const field = this.fields[state.currentField];
+        
+        // Calculate total fields user will see (same logic as sendFieldPrompt)
+        const emailSkipped = state.userEmail && state.data.email;
+        const totalFieldsForUser = emailSkipped ? this.fields.length - 1 : this.fields.length;
+        
+        // Calculate user-facing field number
+        let userFieldNumber = state.currentField + 1;
+        if (emailSkipped && state.currentField > 2) { // Email is field index 2
+          userFieldNumber = state.currentField; // Adjust because we skip email
+        }
+        
+        await this.sendMessage(from, `✅ Continuando donde te quedaste...`);
+        await this.sendFieldPrompt(from, field, state.currentField, state);
+      } else {
+        // All fields already collected, show confirmation
+        state.status = 'confirming';
+        await this.stateManager.setState(from, state);
+        await this.showConfirmation(from, state);
+      }
+    } else if (selection === '2') {
+      // Start fresh
+      await this.stateManager.clearState(from);
+      await this.showMainMenu(from);
+    } else {
+      await this.sendMessage(from, 
+        `Por favor responde:\n\n` +
+        `1️⃣ Sí, continuar\n` +
+        `2️⃣ No, empezar de nuevo`
+      );
+    }
+  }
+
+  /**
+   * Handle draft continuation option
+   */
+  async handleDraftContinuation(from) {
+    const state = await this.stateManager.getState(from) || {};
+    const assistant = this.getAssistantForUser(from);
+    
+    if (state.draftData) {
+      // User has a draft - show continuation options
+      const progress = Math.round((state.draftField / this.fields.length) * 100);
+      const message = assistant.name === 'Sophia' ? 
+        `💜 ¡Perfecto! Tienes un permiso ${progress}% completado.\n\n` +
+        `🌟 *OPCIONES PARA TU SOLICITUD GUARDADA:*\n\n` +
+        `1️⃣ Continuar donde me quedé\n` +
+        `2️⃣ Ver qué datos ya completé\n` +
+        `3️⃣ Empezar una nueva solicitud\n` +
+        `4️⃣ Eliminar solicitud guardada\n\n` +
+        `💜 Sophia: "¿Qué prefieres hacer?"` :
+        
+        `🔧 ¡Excelente! Ya tienes ${progress}% de tu permiso listo.\n\n` +
+        `⚡ *¿QUÉ QUIERES HACER?*\n\n` +
+        `1️⃣ Seguir llenando datos\n` +
+        `2️⃣ Revisar lo que ya puse\n` +
+        `3️⃣ Mejor empezar de cero\n` +
+        `4️⃣ Borrar solicitud guardada\n\n` +
+        `🚗 Diego: "Te recomiendo continuar para terminar rápido"`;
+        
+      await this.sendMessage(from, message);
+      state.status = 'draft_continuation_menu';
+      await this.stateManager.setState(from, state);
+    } else {
+      // No draft found
+      const message = assistant.name === 'Sophia' ? 
+        `💜 No tienes ninguna solicitud guardada actualmente.\n\n` +
+        `🌟 *¿QUÉ TE GUSTARÍA HACER?*\n\n` +
+        `1️⃣ Solicitar nuevo permiso\n` +
+        `2️⃣ Ver mis solicitudes existentes\n` +
+        `3️⃣ Volver al menú principal\n\n` +
+        `💜 Sophia: "¡Empecemos tu trámite!"` :
+        
+        `🔧 No hay solicitudes guardadas en este momento.\n\n` +
+        `⚡ *OPCIONES DISPONIBLES:*\n\n` +
+        `1️⃣ Crear nuevo permiso\n` +
+        `2️⃣ Consultar mis solicitudes\n` +
+        `3️⃣ Regresar al menú\n\n` +
+        `🚗 Diego: "¡Hagamos tu permiso ahora mismo!"`;
+        
+      await this.sendMessage(from, message);
+      state.status = 'no_draft_menu';
+      await this.stateManager.setState(from, state);
+    }
+  }
+
+  /**
+   * Handle draft continuation menu responses
+   */
+  async handleDraftContinuationMenu(from, response, state) {
+    const assistant = this.getAssistantForUser(from);
+    
+    switch (response.trim()) {
+      case '1':
+        // Continue from draft
+        return await this.handleResumePrompt(from, '1', state);
+      case '2':
+        // Show draft preview
+        return await this.showDraftPreview(from, state);
+      case '3':
+        // Start new application
+        await this.stateManager.clearState(from);
+        return await this.startApplication(from);
+      case '4':
+        // Delete draft
+        return await this.confirmDraftDeletion(from, state);
+      default:
+        const errorMsg = assistant.name === 'Sophia' ? 
+          `💜 Por favor elige una opción válida (1-4):\n\n` +
+          `1️⃣ Continuar donde me quedé\n` +
+          `2️⃣ Ver qué datos ya completé\n` +
+          `3️⃣ Empezar una nueva solicitud\n` +
+          `4️⃣ Eliminar solicitud guardada` :
+          
+          `🔧 Opción no válida. Elige 1, 2, 3 o 4:\n\n` +
+          `1️⃣ Seguir llenando datos\n` +
+          `2️⃣ Revisar lo que ya puse\n` +
+          `3️⃣ Mejor empezar de cero\n` +
+          `4️⃣ Borrar solicitud guardada`;
+          
+        await this.sendMessage(from, errorMsg);
+    }
+  }
+
+  /**
+   * Handle rate limit options menu
+   */
+  async handleRateLimitOptions(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Show status with management options
+        state.status = 'managing_applications';
+        await this.stateManager.setState(from, state);
+        return await this.showStatusWithManagement(from);
+        
+      case '2':
+        // Find pending payment and show it
+        const apps = await this.getUserApplications(from);
+        const pendingApp = apps.find(app => app.payment_status === 'pending');
+        
+        if (pendingApp) {
+          // Get payment link from Stripe if we have the order ID
+          if (pendingApp.payment_processor_order_id) {
+            await this.sendMessage(from, 
+              `💳 *PAGO PENDIENTE*\n\n` +
+              `📱 Folio: ${pendingApp.id}\n` +
+              `🚗 Vehículo: ${pendingApp.vehicle_brand} ${pendingApp.vehicle_model}\n` +
+              `💰 Costo: $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n\n` +
+              `🔗 Link de pago:\nhttps://permisosdigitales.com.mx/pago/${pendingApp.payment_processor_order_id}`
+            );
+          } else {
+            // No payment link available
+            await this.sendMessage(from,
+              `⚠️ Hay una solicitud pendiente pero no se encontró el link de pago.\n\n` +
+              `Por favor contacta a soporte o crea una nueva solicitud.`
+            );
+          }
+        } else {
+          return await this.checkStatus(from);
+        }
+        break;
+        
+      case '3':
+        state.status = 'idle';
+        await this.stateManager.setState(from, state);
+        return await this.showMainMenu(from);
+        
+      default:
+        await this.sendMessage(from, 
+          `Por favor selecciona una opción:\n\n` +
+          `1️⃣ Ver y gestionar mis solicitudes\n` +
+          `2️⃣ Completar pago pendiente\n` +
+          `3️⃣ Volver al menú principal`
+        );
+    }
+  }
+
+  /**
+   * Show status with management options
+   */
+  async showStatusWithManagement(from) {
+    const apps = await this.getUserApplications(from);
+    if (!apps || apps.length === 0) {
+      await this.sendMessage(from, 
+        `📋 No tienes solicitudes registradas.\n\n` +
+        `Escribe "1" para crear una nueva.`
+      );
+      return;
+    }
+    
+    // Show recent applications with delete option for unpaid ones
+    let message = `📋 *TUS SOLICITUDES*\n\n`;
+    const recentApps = apps.slice(0, 5);
+    let hasUnpaid = false;
+    
+    recentApps.forEach((app, index) => {
+      const statusEmoji = app.payment_status === 'pending' ? '⏳' : 
+                         app.payment_status === 'paid' ? '✅' : '🚫';
+      
+      message += `${index + 1}. Folio: ${app.id}\n`;
+      message += `   📅 ${new Date(app.created_at).toLocaleDateString('es-MX')}\n`;
+      message += `   🚗 ${app.vehicle_brand} ${app.vehicle_model}\n`;
+      message += `   ${statusEmoji} ${app.payment_status === 'pending' ? 'Esperando pago' : 
+                      app.payment_status === 'paid' ? 'Pagado' : 'Cancelado'}\n\n`;
+      
+      if (app.payment_status === 'pending') {
+        hasUnpaid = true;
+      }
+    });
+    
+    if (hasUnpaid) {
+      message += `⚡ *OPCIONES:*\n\n`;
+      message += `Para CANCELAR una solicitud sin pagar, escribe:\n`;
+      message += `"cancelar [número de folio]"\n\n`;
+      message += `Ejemplo: cancelar 59\n\n`;
+      message += `Escribe "menu" para volver al menú principal.`;
+    } else {
+      message += `Escribe cualquier mensaje para volver al menú.`;
+    }
+    
+    await this.sendMessage(from, message);
+  }
+
+  /**
+   * Handle managing applications state
+   */
+  async handleManagingApplications(from, response, state) {
+    const normalized = response.toLowerCase().trim();
+    
+    // Check for cancel command
+    if (normalized.startsWith('cancelar ')) {
+      const folioStr = normalized.replace('cancelar ', '').trim();
+      const folio = parseInt(folioStr);
+      
+      if (!isNaN(folio)) {
+        try {
+          // Get user first
+          const user = await this.findOrCreateUser(from);
+          
+          // Cancel the application
+          const result = await db.query(
+            `UPDATE permit_applications 
+             SET status = 'CANCELLED', 
+                 updated_at = NOW() 
+             WHERE id = $1 
+               AND user_id = $2 
+               AND status = 'AWAITING_PAYMENT'
+             RETURNING id`,
+            [folio, user.id]
+          );
+          
+          if (result.rows.length > 0) {
+            await this.sendMessage(from, 
+              `✅ *SOLICITUD CANCELADA*\n\n` +
+              `Folio ${folio} ha sido cancelado exitosamente.\n\n` +
+              `Ahora puedes crear una nueva solicitud si lo deseas.\n\n` +
+              `Escribe "menu" para volver al menú principal.`
+            );
+            
+            // Clear pending payment from state if it matches
+            if (state.pendingPayment && state.pendingPayment.applicationId === folio) {
+              delete state.pendingPayment;
+              await this.stateManager.setState(from, state);
+            }
+          } else {
+            await this.sendMessage(from, 
+              `❌ No se pudo cancelar el folio ${folio}.\n\n` +
+              `Verifica que:\n` +
+              `- El número de folio sea correcto\n` +
+              `- La solicitud esté pendiente de pago\n` +
+              `- La solicitud sea tuya\n\n` +
+              `Intenta de nuevo o escribe "menu" para salir.`
+            );
+          }
+        } catch (error) {
+          logger.error('Error cancelling application', { error: error.message, folio, from });
+          await this.sendMessage(from, 
+            `❌ Hubo un error al cancelar. Por favor intenta más tarde.`
+          );
+        }
+      } else {
+        await this.sendMessage(from, 
+          `❌ Formato incorrecto.\n\n` +
+          `Escribe: cancelar [folio]\n` +
+          `Ejemplo: cancelar 59`
+        );
+      }
+    } else if (normalized === 'menu' || normalized === 'menú') {
+      state.status = 'idle';
+      await this.stateManager.setState(from, state);
+      return await this.showMainMenu(from);
+    } else {
+      // Show status again
+      return await this.showStatusWithManagement(from);
+    }
+  }
+
+  /**
+   * Handle no draft menu responses
+   */
+  async handleNoDraftMenu(from, response, state) {
+    const assistant = this.getAssistantForUser(from);
+    
+    switch (response.trim()) {
+      case '1':
+        // Create new permit
+        return await this.startApplication(from);
+      case '2':
+        // Check status
+        return await this.checkStatus(from);
+      case '3':
+        // Back to main menu
+        return await this.showMainMenu(from);
+      default:
+        const errorMsg = assistant.name === 'Sophia' ? 
+          `💜 Por favor selecciona 1, 2 o 3:\n\n` +
+          `1️⃣ Solicitar nuevo permiso\n` +
+          `2️⃣ Ver mis solicitudes existentes\n` +
+          `3️⃣ Volver al menú principal` :
+          
+          `🔧 Elige una opción válida (1-3):\n\n` +
+          `1️⃣ Crear nuevo permiso\n` +
+          `2️⃣ Consultar mis solicitudes\n` +
+          `3️⃣ Regresar al menú`;
+          
+        await this.sendMessage(from, errorMsg);
+    }
+  }
+
+  /**
+   * Show help
+   */
+  async showHelp(from) {
+    // Get current state to provide contextual help
+    const state = await this.stateManager.getState(from) || {};
+    
+    // Check if user has a pending payment
+    if (state.pendingPayment) {
+      await this.sendMessage(from, 
+        `💳 *AYUDA - PAGO PENDIENTE*\n\n` +
+        `Tienes un pago pendiente:\n` +
+        `📱 Folio: ${state.pendingPayment.applicationId}\n` +
+        `💰 Monto: $99.00 MXN\n\n` +
+        `*Opciones de pago:*\n` +
+        `• Tarjeta de crédito/débito\n` +
+        `• OXXO (validación en 4-24 horas)\n\n` +
+        `*¿Problemas con el pago?*\n` +
+        `1️⃣ Reenviar link por email\n` +
+        `2️⃣ Generar nuevo link\n` +
+        `3️⃣ Contactar soporte\n\n` +
+        `📧 soporte@permisosdigitales.com.mx`
+      );
+      
+      state.status = 'payment_help_menu';
+      await this.stateManager.setState(from, state);
+      return;
+    }
+    
+    // Check if user is in the middle of filling a form
+    if (state.status === 'collecting' && state.currentField !== undefined) {
+      const field = this.fields[state.currentField];
+      await this.sendMessage(from, 
+        `📝 *AYUDA - LLENADO DE FORMULARIO*\n\n` +
+        `Estás en el paso ${state.currentField + 1} de ${this.fields.length}\n` +
+        `Campo actual: *${field.label}*\n\n` +
+        `*Consejos:*\n` +
+        this.getFieldHelp(field.key) + `\n\n` +
+        `*Opciones:*\n` +
+        `• Escribe tu respuesta para continuar\n` +
+        `• Escribe *0* para cancelar y guardar progreso\n\n` +
+        `¿Necesitas más ayuda?\n` +
+        `📧 soporte@permisosdigitales.com.mx`
+      );
+      return;
+    }
+    
+    // Default help message
+    await this.sendMessage(from, 
+      `📚 *AYUDA*\n\n` +
+      `*¿Cómo funciona?*\n` +
+      `1. Elige "Nuevo permiso" del menú\n` +
+      `2. Acepta el aviso de privacidad\n` +
+      `3. Proporciona los datos solicitados\n` +
+      `4. Confirma la información\n` +
+      `5. Realiza el pago\n` +
+      `6. Recibe tu permiso por email\n\n` +
+      `*Tiempo de proceso:* 5-10 minutos\n` +
+      `*Costo:* $99.00 MXN\n` +
+      `*Validez:* 30 días\n\n` +
+      `¿Necesitas más ayuda?\n` +
+      `📧 soporte@permisosdigitales.com.mx\n\n` +
+      `Escribe cualquier mensaje para volver al menú.`
+    );
+    
+    await this.stateManager.clearState(from);
+  }
+
+  /**
+   * Handle payment method selection
+   * @deprecated - Now we always offer both payment methods in Stripe Checkout
+   */
+  // async handlePaymentMethodSelection(from, response, state) {
+  //   const selection = response.trim();
+  //   
+  //   if (selection === '1' || selection === '2') {
+  //     // Store payment preference
+  //     state.paymentMethod = selection === '1' ? 'card' : 'oxxo';
+  //     await this.stateManager.setState(from, state);
+  //     
+  //     // Create application with selected payment method
+  //     return await this.createApplication(from, state);
+  //   } else {
+  //     await this.sendMessage(from, 
+  //       `Por favor responde:\n\n` +
+  //       `1️⃣ Tarjeta (inmediato)\n` +
+  //       `2️⃣ OXXO (paga en tienda)`
+  //     );
+  //   }
+  // }
+
+  /**
+   * Get contextual help for a specific field
+   */
+  getFieldHelp(fieldKey) {
+    const helpTexts = {
+      'nombre_completo': '• Escribe tu nombre completo tal como aparece en tu identificación\n• Ejemplo: Juan Pérez García',
+      'curp_rfc': '• CURP: 18 caracteres\n• RFC: 12-13 caracteres\n• Ejemplo CURP: ABCD123456HEFGHI01\n• Ejemplo RFC: ABCD123456XYZ',
+      'domicilio': '• Incluye calle, número, colonia, ciudad y código postal\n• Ejemplo: Av. Reforma 123, Col. Centro, CDMX, 06000',
+      'email': '• Correo válido donde recibirás tu permiso\n• Ejemplo: usuario@ejemplo.com',
+      'marca': '• Marca del vehículo\n• Ejemplos: Toyota, Nissan, Chevrolet, etc.',
+      'linea': '• Modelo o línea del vehículo\n• Ejemplos: Corolla, Sentra, Aveo, etc.',
+      'color': '• Color principal del vehículo\n• Si tiene varios colores, sepáralos con "y"\n• Ejemplo: Blanco y Negro',
+      'numero_serie': '• VIN o número de serie del vehículo\n• Generalmente 17 caracteres\n• Lo encuentras en la tarjeta de circulación',
+      'numero_motor': '• Número de motor del vehículo\n• Lo encuentras en la tarjeta de circulación',
+      'ano_modelo': '• Año del modelo del vehículo\n• Ejemplo: 2020, 2021, 2022'
+    };
+    
+    return helpTexts[fieldKey] || '• Ingresa la información solicitada';
+  }
+
+  /**
+   * Handle direct creation from status check
+   */
+  async handleCreateFromStatus(from, response, state) {
+    if (response.trim() === '1') {
+      // User wants to create a new application
+      // Don't clear state - let startApplication handle draft checking
+      return await this.startApplication(from);
+    } else {
+      // Any other response goes back to menu
+      // Only clear the special status, preserve drafts
+      state.status = 'idle';
+      await this.stateManager.setState(from, state);
+      return await this.showMainMenu(from);
+    }
+  }
+
+  /**
+   * Handle folio selection from status view
+   */
+  async handleFolioSelection(from, response, state) {
+    const input = response.trim().toLowerCase();
+    
+    // Check if user wants to go back to menu
+    if (input === 'menu' || input === 'inicio' || input === 'menú') {
+      await this.stateManager.clearState(from);
+      return await this.showMainMenu(from);
+    }
+    
+    // Check if input is a number (folio)
+    const folioNumber = parseInt(input);
+    if (!isNaN(folioNumber) && state.availablePermits) {
+      const permit = state.availablePermits.find(p => p.id === folioNumber);
+      
+      if (permit) {
+        // Handle based on permit status
+        if (permit.status === 'PERMIT_READY') {
+          // Generate download link
+          await this.sendPermitDownloadLink(from, folioNumber);
+          // Don't clear state here - sendPermitDownloadLink sets permit_downloaded state
+          return;
+        } else if (permit.status === 'AWAITING_PAYMENT' && permit.payment_processor_order_id) {
+          // Show payment link
+          await this.sendMessage(from,
+            `💳 *PAGO PENDIENTE - Folio ${folioNumber}*\n\n` +
+            `💰 Costo: $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n\n` +
+            `🔗 Link de pago:\nhttps://permisosdigitales.com.mx/pago/${permit.payment_processor_order_id}\n\n` +
+            `📱 O paga directamente aquí:\nhttps://checkout.stripe.com/c/pay/${permit.payment_processor_order_id}\n\n` +
+            `Escribe "menu" para volver al menú principal`
+          );
+          // Clear state for non-PERMIT_READY statuses
+          await this.stateManager.clearState(from);
+        } else {
+          await this.sendMessage(from,
+            `ℹ️ Folio ${folioNumber}: ${this.getStatusMessage(permit.status)}\n\n` +
+            `Escribe "menu" para volver al menú principal`
+          );
+          // Clear state for non-PERMIT_READY statuses
+          await this.stateManager.clearState(from);
+        }
+      } else {
+        await this.sendMessage(from,
+          `❌ No se encontró el folio ${folioNumber} en tu lista.\n\n` +
+          `Por favor verifica el número o escribe "menu" para volver.`
+        );
+      }
+    } else {
+      // Invalid input
+      await this.sendMessage(from,
+        `❌ Por favor escribe un número de folio válido o "menu" para volver.`
+      );
+    }
+  }
+
+  /**
+   * Get friendly status message
+   */
+  getStatusMessage(status) {
+    switch (status) {
+      case 'AWAITING_PAYMENT': return '⏳ Esperando pago';
+      case 'PENDING':
+      case 'PROCESSING': return '⚙️ Procesando';
+      case 'PERMIT_READY': return '✅ Permiso listo para descargar';
+      case 'COMPLETED': return '✅ Completado';
+      case 'FAILED': return '❌ Fallido';
+      case 'CANCELLED': return '🚫 Cancelado';
+      case 'EXPIRED': return '⏰ Expirado';
+      default: return status;
+    }
+  }
+
+  /**
+   * Send permit download link
+   */
+  async sendPermitDownloadLink(from, folioNumber) {
+    try {
+      // Get the application data
+      const user = await this.findOrCreateUser(from);
+      const appResult = await db.query(
+        `SELECT * FROM permit_applications WHERE id = $1 AND user_id = $2`,
+        [folioNumber, user.id]
+      );
+      
+      if (appResult.rows.length === 0) {
+        await this.sendMessage(from,
+          `❌ No se encontró el permiso con folio ${folioNumber}.`
+        );
+        return;
+      }
+      
+      const app = appResult.rows[0];
+      
+      // Generate a clean download URL for all PDFs
+      const axios = require('axios');
+      
+      try {
+        // Call our internal API to generate a clean download link
+        const apiUrl = process.env.API_URL || 'https://api.permisosdigitales.com.mx';
+        const response = await axios.post(`${apiUrl}/permits/generate-link`, {
+          applicationId: app.id,
+          folioNumber: app.folio || folioNumber
+        });
+        
+        if (!response.data.success) {
+          throw new Error('Failed to generate download link');
+        }
+        
+        const downloadUrl = response.data.url;
+        
+        // Send a professional, clean message with the single download link
+        await this.sendMessage(from,
+          `✅ *PERMISO LISTO - Folio ${folioNumber}*\n\n` +
+          `📦 *TODOS TUS DOCUMENTOS EN UN ÚNICO ENLACE*\n\n` +
+          `🔗 *Descarga aquí:*\n${downloadUrl}\n\n` +
+          `📄 *Incluye:*\n` +
+          `• Permiso Digital\n` +
+          `• Certificado\n` +
+          `• Placas en Proceso\n` +
+          `• Recomendaciones\n\n` +
+          `⏰ *Válido por:* 30 días\n` +
+          `🔒 *Enlace seguro:* Expira en 48 horas\n\n` +
+          `💡 *Tip:* Al tocar el enlace se descargará un archivo ZIP con todos tus documentos.\n\n` +
+          `🔗 *OPCIONES RÁPIDAS:*\n` +
+          `1️⃣ Reenviar por email\n` +
+          `2️⃣ Nuevo permiso\n` +
+          `3️⃣ Menú principal`
+        );
+        
+        // Log the clean URL generation
+        logger.info('Clean permit download URL generated', {
+          folioNumber,
+          applicationId: app.id,
+          folio: app.folio,
+          url: downloadUrl
+        });
+        
+        // Set simple state for quick actions
+        const newState = {
+          status: 'permit_downloaded',
+          lastAction: 'download',
+          permitData: {
+            folioNumber,
+            downloadUrl,
+            email: app.email || user.email
+          },
+          timestamp: Date.now()
+        };
+        
+        // Log state being set
+        logger.info('Setting permit_downloaded state', {
+          from,
+          status: 'permit_downloaded',
+          folioNumber
+        });
+        
+        await this.stateManager.setState(from, newState);
+        
+        // Verify state was set
+        const verifyState = await this.stateManager.getState(from);
+        logger.info('State verification after setting', {
+          from,
+          stateStatus: verifyState?.status,
+          stateSet: verifyState?.status === 'permit_downloaded'
+        });
+        
+      } catch (urlError) {
+        logger.error('Error generating download URLs', { 
+          error: urlError.message, 
+          folioNumber,
+          applicationId: app.id,
+          folio: app.folio,
+          stack: urlError.stack 
+        });
+        
+        // Fallback to web link
+        await this.sendMessage(from,
+          `✅ *PERMISO LISTO - Folio ${folioNumber}*\n\n` +
+          `🌐 *Descarga desde la web:*\nhttps://permisosdigitales.com.mx/permits\n\n` +
+          `Ingresa con tu email y contraseña para descargar tu permiso.\n\n` +
+          `Si olvidaste tu contraseña, puedes recuperarla en la página.\n\n` +
+          `Escribe "menu" para volver al menú principal`
+        );
+      }
+      
+    } catch (error) {
+      logger.error('Error sending permit download link', { error: error.message, folioNumber });
+      await this.sendMessage(from,
+        `❌ Hubo un error al obtener el enlace de descarga.\n\n` +
+        `Por favor intenta más tarde o visita:\nhttps://permisosdigitales.com.mx/permits`
+      );
+    }
+  }
+
+  /**
+   * Handle decision when user has active application
+   */
+  async handleActiveAppDecision(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Show all applications
+        await this.stateManager.clearState(from);
+        return await this.checkStatus(from);
+        
+      case '2':
+        // Cancel current and create new
+        if (state.activeApplication && state.activeApplication.id) {
+          try {
+            // Update the application status to CANCELLED
+            const cancelQuery = `
+              UPDATE permit_applications 
+              SET status = 'CANCELLED', 
+                  updated_at = NOW()
+              WHERE id = $1 AND user_id = $2
+            `;
+            const user = await this.findOrCreateUser(from);
+            await db.query(cancelQuery, [state.activeApplication.id, user.id]);
+            
+            // Cancel ALL old unpaid applications for this user
+            const cancelledCount = await this.cancelOldUnpaidApplications(user.id);
+            
+            await this.sendMessage(from, 
+              `✅ ${cancelledCount > 1 ? `${cancelledCount} solicitudes anteriores canceladas` : 'Solicitud anterior cancelada'}.\n\n` +
+              `Creando nueva solicitud...`
+            );
+            
+            // Clear state and start new application
+            await this.stateManager.clearState(from);
+            return await this.startApplication(from);
+            
+          } catch (error) {
+            logger.error('Error al cancelar solicitud', { error: error.message });
+            await this.sendMessage(from, 
+              `❌ Error al cancelar la solicitud anterior.\n\n` +
+              `Por favor intenta más tarde.`
+            );
+            return await this.showMainMenu(from);
+          }
+        }
+        break;
+        
+      case '3':
+        // Back to main menu
+        await this.stateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      default:
+        await this.sendMessage(from, 
+          `Por favor elige una opción:\n\n` +
+          `1️⃣ Ver todas mis solicitudes\n` +
+          `2️⃣ Cancelar y crear nueva\n` +
+          `3️⃣ Volver al menú principal`
+        );
+    }
+  }
+
+  /**
+   * Handle draft status menu
+   */
+  async handleDraftStatusMenu(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Continue filling the draft
+        state.status = 'resume_prompt';
+        await this.stateManager.setState(from, state);
+        return await this.handleResumePrompt(from, '1', state);
+        
+      case '2':
+        // Show completed permits
+        // Remove draft from state temporarily to show only completed
+        const draftData = state.draftData;
+        const draftField = state.draftField;
+        delete state.draftData;
+        delete state.draftField;
+        await this.stateManager.setState(from, state);
+        
+        // Call checkStatus again without draft
+        await this.checkStatus(from);
+        
+        // Restore draft data
+        state.draftData = draftData;
+        state.draftField = draftField;
+        await this.stateManager.setState(from, state);
+        break;
+        
+      case '3':
+        // Delete draft and start new
+        delete state.draftData;
+        delete state.draftField;
+        state.status = 'idle';
+        await this.stateManager.setState(from, state);
+        
+        await this.sendMessage(from, 
+          `🗑️ Tu borrador ha sido eliminado.\n\n` +
+          `¿Quieres crear una nueva solicitud?\n\n` +
+          `1️⃣ Sí, empezar de nuevo\n` +
+          `2️⃣ No, volver al menú`
+        );
+        
+        state.status = 'awaiting_create_from_status';
+        await this.stateManager.setState(from, state);
+        break;
+        
+      case '4':
+        // Back to main menu
+        return await this.showMainMenu(from);
+        
+      default:
+        await this.sendMessage(from, 
+          `Por favor responde con un número del 1 al 4:\n\n` +
+          `1️⃣ Continuar llenando\n` +
+          `2️⃣ Ver permisos completados\n` +
+          `3️⃣ Eliminar borrador\n` +
+          `4️⃣ Volver al menú`
+        );
+    }
+  }
+
+  /**
+   * Create application and payment
+   */
+  async createApplication(from, state) {
     try {
       await this.sendMessage(from, '⏳ Creando tu solicitud...');
       
-      // Check for duplicate vehicle first
-      const context = await this.getUserContext(from);
-      if (context.user) {
-        const duplicate = await this.checkDuplicateApplication(context.user.id, data.numero_serie);
-        if (duplicate.isDuplicate) {
-          await this.handleDuplicateApplication(from, duplicate);
-          return;
-        }
+      // Create application (using existing service)
+      const permitApplicationService = require('./permit-application.service');
+      const result = await permitApplicationService.createFromWhatsApp(from, state.data);
+      
+      // Get the user that was created/found during application creation
+      const userAccountService = require('./user-account.service');
+      const user = await userAccountService.findByWhatsAppPhone(this.normalizePhoneNumber(from));
+      
+      // Log data access with correct user ID
+      if (user && user.id) {
+        await privacyAuditService.logDataAccess(
+          user.id,
+          'whatsapp-bot',
+          'application_creation',
+          ['personal_data', 'vehicle_data']
+        );
+        
+        // Update state with correct user ID for future reference
+        state.userId = user.id;
       }
       
-      // Create real application
-      const permitApplicationService = require('./permit-application.service');
-      const result = await permitApplicationService.createFromWhatsApp(from, data);
+      // Create short URL for payment link
+      const urlShortener = require('./url-shortener.service');
+      const shortUrl = await urlShortener.createShortUrl(result.paymentLink, result.applicationId);
       
-      const message = `✅ ¡Solicitud creada!
+      // Store payment info in state for quick actions
+      state.pendingPayment = {
+        applicationId: result.applicationId,
+        link: shortUrl,
+        originalLink: result.paymentLink,
+        createdAt: Date.now()
+      };
+      state.status = 'payment_sent';
+      await this.stateManager.setState(from, state);
+      
+      await this.sendMessage(from, 
+        `✅ ¡Solicitud creada!\n\n` +
+        `📱 Folio: ${result.applicationId}\n\n` +
+        `💳 Para completar tu trámite, realiza el pago:\n${result.paymentLink}\n\n` +
+        `💰 Costo: $${PaymentFees.DEFAULT_PERMIT_FEE.toFixed(2)} MXN\n\n` +
+        `📍 Opciones de pago:\n` +
+        `• 💳 Tarjeta (validación en 5-10 minutos)\n` +
+        `• 🏪 OXXO (validación en 4-24 horas)\n\n` +
+        `🔗 *OPCIONES RÁPIDAS:*\n` +
+        `1️⃣ Reenviar link por email\n` +
+        `2️⃣ Ver estado del pago\n` +
+        `3️⃣ Nuevo permiso\n` +
+        `4️⃣ Menú principal`
+      );
+      
+      state.status = 'quick_actions_menu';
+      await this.stateManager.setState(from, state);
+      
+    } catch (error) {
+      logger.error('Error al crear solicitud', { error: error.message });
+      
+      // Check if it's an email-related error
+      if (error.message && error.message.includes('correo')) {
+        // Email already exists or invalid
+        await this.sendMessage(from, 
+          `❌ ${error.message}\n\n` +
+          `Por favor intenta con:\n` +
+          `1️⃣ Un correo diferente\n` +
+          `2️⃣ Acceder con tu cuenta existente en permisosdigitales.com.mx\n` +
+          `3️⃣ Contactar soporte: soporte@permisosdigitales.com.mx\n\n` +
+          `Escribe *cancelar* para volver a empezar.`
+        );
+        
+        // Clear the state so user can try again
+        await this.stateManager.clearState(from);
+      } else {
+        // Generic error
+        await this.sendMessage(from, 
+          `❌ Hubo un error al crear tu solicitud.\n\n` +
+          `Por favor intenta en:\n` +
+          `🌐 permisosdigitales.com.mx\n\n` +
+          `O contacta a soporte:\n` +
+          `📧 soporte@permisosdigitales.com.mx`
+        );
+      }
+    }
+  }
 
-📱 Folio: ${result.applicationId}
+  /**
+   * Handle quick actions after payment link sent
+   */
+  async handleQuickActions(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Reenviar link por email
+        if (state.data && state.data.email && state.pendingPayment) {
+          try {
+            // Create email content
+            const emailHtml = `
+              <h2>Tu link de pago - Permiso de Circulación</h2>
+              <p>Hola ${state.data.nombre_completo || 'Usuario'},</p>
+              <p>Aquí está tu link de pago para completar tu solicitud de permiso:</p>
+              <p><strong>Folio:</strong> ${state.pendingPayment.applicationId}</p>
+              <p><strong>Costo:</strong> $99.00 MXN</p>
+              <p><a href="${state.pendingPayment.originalLink || state.pendingPayment.link}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Pagar ahora</a></p>
+              <p>El link te llevará a una página segura donde podrás pagar con tarjeta de crédito/débito o generar un código para pagar en OXXO.</p>
+              <p><strong>Tiempos de procesamiento:</strong></p>
+              <ul>
+                <li>Pago con tarjeta: Validación en 5-10 minutos</li>
+                <li>Pago en OXXO: Validación en 4-24 horas</li>
+              </ul>
+              <p>Recibirás tu permiso por correo electrónico y WhatsApp cuando esté listo.</p>
+              <p>Si tienes alguna pregunta, responde a este correo o contáctanos por WhatsApp.</p>
+              <p>Saludos,<br>Equipo de Permisos Digitales</p>
+            `;
+            
+            const emailText = `
+              Tu link de pago - Permiso de Circulación
+              
+              Hola ${state.data.nombre_completo || 'Usuario'},
+              
+              Aquí está tu link de pago para completar tu solicitud de permiso:
+              
+              Folio: ${state.pendingPayment.applicationId}
+              Costo: $99.00 MXN
+              
+              Link de pago: ${state.pendingPayment.originalLink || state.pendingPayment.link}
+              
+              El link te llevará a una página segura donde podrás pagar con tarjeta de crédito/débito o generar un código para pagar en OXXO.
+              
+              Tiempos de procesamiento:
+              - Pago con tarjeta: Validación en 5-10 minutos
+              - Pago en OXXO: Validación en 4-24 horas
+              
+              Recibirás tu permiso por correo electrónico y WhatsApp cuando esté listo.
+              
+              Saludos,
+              Equipo de Permisos Digitales
+            `;
+            
+            // Send the email
+            await emailService.sendEmail(
+              state.data.email,
+              'Link de pago - Permiso de Circulación',
+              emailHtml,
+              emailText
+            );
+            
+            await this.sendMessage(from, 
+              `📧 Enviando link de pago a: ${state.data.email}...\n\n` +
+              `✅ ¡Listo! Revisa tu correo.\n\n` +
+              `Si no lo ves, revisa tu carpeta de spam.`
+            );
+          } catch (error) {
+            logger.error('Error sending payment link email', { error: error.message, email: state.data.email });
+            await this.sendMessage(from, 
+              `❌ Hubo un problema al enviar el email. Por favor intenta más tarde o contacta a soporte.`
+            );
+          }
+        } else {
+          await this.sendMessage(from, 
+            `❌ No se pudo enviar el email. Por favor contacta a soporte.`
+          );
+        }
+        break;
+        
+      case '2':
+        // Ver estado del pago
+        return await this.checkPaymentStatus(from, state.pendingPayment.applicationId);
+        
+      case '3':
+        // Nuevo permiso
+        await this.stateManager.clearState(from);
+        return await this.startApplication(from);
+        
+      case '4':
+        // Menú principal
+        await this.stateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      default:
+        await this.sendMessage(from, 
+          `Por favor elige una opción:\n\n` +
+          `1️⃣ Reenviar link por email\n` +
+          `2️⃣ Ver estado del pago\n` +
+          `3️⃣ Nuevo permiso\n` +
+          `4️⃣ Menú principal`
+        );
+    }
+  }
 
-💳 Paga aquí:
-${result.paymentLink}
+  /**
+   * Handle payment help menu
+   */
+  async handlePaymentHelp(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Reenviar link por email
+        if (state.pendingPayment && state.data && state.data.email) {
+          await this.sendMessage(from, 
+            `📧 Enviando link a: ${state.data.email}...\n\n` +
+            `✅ ¡Enviado! Revisa tu correo.`
+          );
+        }
+        break;
+        
+      case '2':
+        // Generar nuevo link
+        await this.sendMessage(from, 
+          `🔄 Generando nuevo link de pago...\n\n` +
+          `✅ Nuevo link: ${state.pendingPayment.link}\n\n` +
+          `Este link reemplaza al anterior.`
+        );
+        break;
+        
+      case '3':
+        // Contactar soporte
+        await this.sendMessage(from, 
+          `📞 *CONTACTO DE SOPORTE*\n\n` +
+          `📧 Email: soporte@permisosdigitales.com.mx\n` +
+          `💬 WhatsApp: Este mismo número\n\n` +
+          `Horario: Lunes a Viernes 9:00 - 18:00\n\n` +
+          `Por favor incluye tu folio: ${state.pendingPayment.applicationId}`
+        );
+        break;
+        
+      default:
+        return await this.showHelp(from);
+    }
+  }
 
-Una vez pagado, recibirás tu permiso en 5-10 minutos por este medio.`;
+  /**
+   * Check payment status
+   */
+  async checkPaymentStatus(from, applicationId) {
+    try {
+      // This would check the actual payment status
+      await this.sendMessage(from, 
+        `🔍 Verificando estado del pago...\n\n` +
+        `📱 Folio: ${applicationId}\n` +
+        `⏳ Estado: Esperando pago\n\n` +
+        `El pago aún no ha sido procesado.\n\n` +
+        `Escribe cualquier mensaje para volver al menú.`
+      );
+      
+      // Clear state so next message goes back to main menu
+      await this.stateManager.clearState(from);
+      
+    } catch (error) {
+      logger.error('Error al verificar estado del pago', { error: error.message });
+      await this.sendMessage(from, 
+        `❌ Error al verificar el estado. Intenta más tarde.`
+      );
+    }
+  }
+
+  /**
+   * Check application status
+   */
+  async checkStatus(from) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      const state = await this.stateManager.getState(from) || {};
+      
+      logger.info('Verificando estado para usuario', { 
+        phoneNumber: from, 
+        userId: user.id,
+        stateUserId: state.userId,
+        hasDraft: !!state.draftData 
+      });
+      
+      // Push to navigation history
+      navigationManager.pushNavigation(from, {
+        state: 'STATUS_CHECK',
+        title: 'Estado de Solicitud',
+        data: { userId: user.id }
+      });
+      
+      // First check for saved drafts
+      if (state.draftData && state.draftField !== undefined) {
+        const progress = Math.round((state.draftField / this.fields.length) * 100);
+        const progressBar = this.getProgressBar(state.draftField, this.fields.length);
+        
+        await this.sendMessage(from,
+          `📊 *ESTADO DE TUS SOLICITUDES*\n\n` +
+          `📝 *Solicitud en Borrador*\n` +
+          `   ├ Progreso: ${progressBar} ${progress}%\n` +
+          `   ├ Campos completados: ${state.draftField}/${this.fields.length}\n` +
+          `   └ Guardado automáticamente\n\n` +
+          `¿Qué deseas hacer?\n\n` +
+          `1️⃣ Continuar llenando solicitud\n` +
+          `2️⃣ Ver permisos completados\n` +
+          `3️⃣ Eliminar borrador y empezar de nuevo\n` +
+          `4️⃣ Volver al menú\n\n` +
+          `Responde con el número (1-4)`
+        );
+        
+        state.status = 'draft_status_menu';
+        await this.stateManager.setState(from, state);
+        return;
+      }
+      
+      // Check for recent applications (last 30 days)
+      const recentQuery = `
+        SELECT 
+          a.id, 
+          a.status, 
+          a.created_at, 
+          a.payment_processor_order_id,
+          a.fecha_expedicion,
+          a.fecha_vencimiento,
+          a.marca,
+          a.linea,
+          a.color,
+          a.ano_modelo,
+          a.importe,
+          a.folio,
+          a.nombre_completo,
+          a.curp_rfc,
+          a.domicilio,
+          a.numero_serie,
+          a.numero_motor
+        FROM permit_applications a
+        WHERE a.user_id = $1
+        ORDER BY a.created_at DESC
+        LIMIT 5
+      `;
+      const result = await db.query(recentQuery, [user.id]);
+      
+      if (result.rows.length === 0) {
+        // Check if user has any historical permits by user ID
+        const historyQuery = `
+          SELECT COUNT(*) as count
+          FROM permit_applications
+          WHERE user_id = $1
+        `;
+        const historyResult = await db.query(historyQuery, [user.id]);
+        
+        if (historyResult.rows[0].count > 0) {
+          await this.sendMessage(from, 
+            `📋 Encontramos ${historyResult.rows[0].count} permiso(s) asociados a tu cuenta.\n\n` +
+            `Sin embargo, estos permisos son anteriores a los últimos 30 días.\n\n` +
+            `Escribe *1* para crear una nueva solicitud o cualquier otra cosa para volver al menú.`
+          );
+        } else {
+          await this.sendMessage(from, 
+            `❓ No tienes solicitudes registradas.\n\n` +
+            `Escribe *1* para crear tu primera solicitud o cualquier otra cosa para volver al menú.`
+          );
+        }
+        
+        // Set special state to handle "1" directly, but preserve draft data
+        state.status = 'awaiting_create_from_status';
+        // Preserve draft data if it exists
+        if (state.draftData) {
+          state.draftData = state.draftData;
+          state.draftField = state.draftField;
+        }
+        await this.stateManager.setState(from, state);
+        return;
+      }
+      
+      // Show status of recent applications
+      let message = `📋 *HISTORIAL DE SOLICITUDES*\n\n`;
+      
+      for (let i = 0; i < Math.min(3, result.rows.length); i++) {
+        const app = result.rows[i];
+        const createdDate = new Date(app.created_at).toLocaleDateString('es-MX');
+        
+        message += `${i + 1}. *Folio:* ${app.id}\n`;
+        message += `   📅 Fecha: ${createdDate}\n`;
+        message += `   🚗 Vehículo: ${app.marca} ${app.linea} ${app.ano_modelo}\n`;
+        message += `   🎨 Color: ${app.color}\n`;
+        message += `   📊 Estado: `;
+        
+        switch (app.status) {
+          case 'AWAITING_PAYMENT':
+            message += `⏳ Esperando pago`;
+            break;
+          case 'PENDING':
+          case 'PROCESSING':
+            message += `⚙️ Procesando`;
+            break;
+          case 'PERMIT_READY':
+            message += `✅ *PERMISO LISTO*`;
+            // Add download action hint
+            message += `\n   📥 *Acción:* Escribe ${app.id} para descargar`;
+            
+            // Check if eligible for renewal
+            if (app.fecha_vencimiento) {
+              const now = new Date();
+              const vencimiento = new Date(app.fecha_vencimiento);
+              const diasRestantes = Math.ceil((vencimiento - now) / (1000 * 60 * 60 * 24));
+              
+              if (diasRestantes <= 7 && diasRestantes > -30) {
+                if (diasRestantes > 0) {
+                  message += `\n   ⚠️ Vence en ${diasRestantes} días`;
+                } else {
+                  message += `\n   ⚠️ Venció hace ${Math.abs(diasRestantes)} días`;
+                }
+                message += `\n   ♻️ *Renovar:* Escribe "renovar ${app.id}"`;
+              }
+            }
+            break;
+          case 'COMPLETED':
+            const now = new Date();
+            const vencimiento = new Date(app.fecha_vencimiento);
+            const diasRestantes = Math.ceil((vencimiento - now) / (1000 * 60 * 60 * 24));
+            
+            if (vencimiento > now) {
+              message += `✅ Vigente (${diasRestantes} días restantes)`;
+              
+              // Add renewal option if expiring soon
+              if (diasRestantes <= 7) {
+                message += `\n   ♻️ *Acción:* Escribe "renovar ${app.id}" para renovar`;
+              }
+            } else {
+              const diasVencido = Math.abs(diasRestantes);
+              message += `❌ Vencido hace ${diasVencido} días`;
+              
+              // Add renewal option if expired within 30 days
+              if (diasVencido <= 30) {
+                message += `\n   ♻️ *Acción:* Escribe "renovar ${app.id}" para renovar`;
+              }
+            }
+            break;
+          case 'FAILED':
+            message += `❌ Fallido`;
+            break;
+          case 'CANCELLED':
+            message += `🚫 Cancelado`;
+            break;
+          case 'EXPIRED':
+            message += `⏰ Expirado`;
+            break;
+          default:
+            message += app.status;
+        }
+        message += `\n\n`;
+      }
+      
+      if (result.rows.length > 3) {
+        message += `📌 Mostrando las 3 solicitudes más recientes de ${result.rows.length} total.\n\n`;
+      }
+      
+      // Add login instructions
+      message += `🌐 *ACCESO A TU CUENTA EN LÍNEA*\n`;
+      message += `Ingresa a permisosdigitales.com.mx con:\n`;
+      message += `• Tu número de teléfono o correo electrónico\n`;
+      message += `• Si olvidaste tu contraseña, puedes restablecerla en la página de inicio de sesión\n\n`;
+      
+      // Check for pending payment
+      const pendingApp = result.rows.find(app => app.status === 'AWAITING_PAYMENT');
+      if (pendingApp) {
+        message += `💳 *PAGO PENDIENTE*\n`;
+        message += `Folio ${pendingApp.id} requiere pago de $99.00 MXN\n\n`;
+      }
+      
+      // Check if any permit is ready for download
+      const readyPermits = result.rows.filter(app => app.status === 'PERMIT_READY');
+      if (readyPermits.length > 0) {
+        message += `💡 *OPCIONES DISPONIBLES:*\n`;
+        message += `• Escribe el número de folio para acciones\n`;
+        message += `• Escribe "menu" para volver al menú principal\n`;
+        
+        // Set state to handle folio responses
+        state.status = 'awaiting_folio_selection';
+        state.availablePermits = result.rows.map(p => ({ 
+          id: p.id, 
+          status: p.status,
+          payment_processor_order_id: p.payment_processor_order_id 
+        }));
+        await this.stateManager.setState(from, state);
+      } else {
+        message += `\n🔙 Escribe "menu" o cualquier mensaje para volver`;
+      }
       
       await this.sendMessage(from, message);
       
-    } catch (error) {
-      logger.error('Error creating application', { error: error.message });
-      await this.sendMessage(from, '❌ Hubo un error. Por favor intenta más tarde o contacta soporte.');
-    }
-  }
-
-  /**
-   * Send contextual help message
-   */
-  async sendContextualHelp(from, context) {
-    let message = `📚 *CENTRO DE AYUDA*`;
-    
-    // Add context-specific help
-    if (context.status === 'PENDING_PAYMENT') {
-      message = `💳 *AYUDA - PAGO PENDIENTE*\n\n` +
-                `Tienes un pago pendiente de $${context.amount}\n\n` +
-                `*Opciones de pago:*\n` +
-                `• Tarjeta de crédito/débito\n` +
-                `• OXXO (se procesa en 1-4 horas)\n\n` +
-                `*Link de pago:*\n${context.paymentLink}\n\n`;
-    }
-    
-    message += `
-
-🤖 *CÓMO USAR ESTE SERVICIO:*
-
-Puedes comunicarte conmigo de 3 formas:
-
-1️⃣ *Usando números del menú principal*
-   Solo escribe el número (1, 2, 3, etc.)
-
-2️⃣ *Escribiendo lo que necesitas*
-   Ejemplos:
-   • "nuevo permiso"
-   • "quiero pagar"
-   • "ver mi solicitud"
-   • "necesito ayuda"
-
-3️⃣ *Usando comandos (opcional)*
-   • /permiso - Nueva solicitud
-   • /estado - Ver estado
-   • /pagar - Enlaces de pago
-   • /mis-permisos - Ver permisos
-
-💡 *CONSEJOS ÚTILES:*
-• Ten tu CURP/RFC y datos del vehículo a la mano
-• Para vehículos de varios colores, usa "y" (Ej: Rojo y Negro)
-• Escribe "menu" o "hola" para ver las opciones principales
-• Puedes cancelar en cualquier momento escribiendo "cancelar"
-
-💰 *INFORMACIÓN DEL SERVICIO:*
-• Costo: $150 MXN
-• Validez: 30 días  
-• Listo en: 5-10 minutos después del pago
-• Pagos: Tarjeta o OXXO
-
-📞 *SOPORTE:*
-• Email: soporte@permisosdigitales.com.mx
-• Horario: Lun-Vie 9:00-18:00
-
-💬 Escribe "1" o "nuevo permiso" para comenzar.`;
-    
-    await this.sendMessage(from, message);
-  }
-
-  /**
-   * Check for duplicate application
-   */
-  async checkDuplicateApplication(userId, vin) {
-    const applicationRepository = require('../../repositories/application.repository');
-    const existingApps = await applicationRepository.findByUserId(userId);
-    
-    const duplicate = existingApps.find(app => 
-      app.numero_serie === vin && 
-      ['AWAITING_PAYMENT', 'AWAITING_OXXO_PAYMENT', 'PAYMENT_PROCESSING', 'GENERATING_PERMIT', 'PERMIT_READY'].includes(app.status)
-    );
-    
-    if (duplicate) {
-      return {
-        isDuplicate: true,
-        status: duplicate.status,
-        applicationId: duplicate.id,
-        paymentLink: duplicate.payment_link,
-        marca: duplicate.marca,
-        linea: duplicate.linea
-      };
-    }
-    
-    return { isDuplicate: false };
-  }
-  
-  /**
-   * Handle duplicate application
-   */
-  async handleDuplicateApplication(from, duplicate) {
-    let message = `⚠️ Ya tienes una solicitud para este vehículo:\n\n` +
-                  `🚗 ${duplicate.marca} ${duplicate.linea}\n`;
-    
-    switch (duplicate.status) {
-      case 'AWAITING_PAYMENT':
-      case 'AWAITING_OXXO_PAYMENT':
-        message += `💳 Estado: Pago pendiente\n\n` +
-                   `Link de pago:\n${duplicate.paymentLink}`;
-        break;
-      case 'PAYMENT_PROCESSING':
-        message += `⚙️ Estado: Procesando pago...\n\n` +
-                   `Tu permiso estará listo pronto.`;
-        break;
-      case 'GENERATING_PERMIT':
-        message += `🖨️ Estado: Generando permiso...\n\n` +
-                   `Te avisaremos cuando esté listo.`;
-        break;
-      case 'PERMIT_READY':
-        message += `✅ Estado: Permiso listo\n\n` +
-                   `Envía /mis-permisos para descargar.`;
-        break;
-    }
-    
-    await this.sendMessage(from, message);
-  }
-  
-  /**
-   * Handle payment confirmation (called by webhook)
-   */
-  async handlePaymentConfirmation(applicationId, phoneNumber) {
-    await this.sendMessage(phoneNumber, 
-      `✅ ¡Pago confirmado! 🎉\n\n` +
-      `Tu permiso se está generando y estará listo en 5-10 minutos.\n\n` +
-      `Te avisaré cuando esté listo para descargar. 📩`
-    );
-  }
-
-  /**
-   * Handle permit ready (called by generation service)
-   */
-  async handlePermitReady(applicationId, permitUrl, phoneNumber) {
-    const message = `📄 ¡Tu permiso está listo!\n\n` +
-                    `📥 Descárgalo aquí:\n${permitUrl}\n\n` +
-                    `⏰ El enlace es válido por 48 horas.\n\n` +
-                    `💡 Tip: Guarda el PDF en tu teléfono y en Google Drive.\n\n` +
-                    `¿Necesitas ayuda? Estoy aquí 24/7 🤖`;
-    
-    await this.sendMessage(phoneNumber, message);
-  }
-  
-  /**
-   * Cancel current operation
-   */
-  async cancelCurrent(from) {
-    const stateKey = `wa:${from}`;
-    await redisClient.del(stateKey);
-    await this.sendMessage(from, 
-      `❌ Operación cancelada.\n\n` +
-      `Comandos disponibles:\n` +
-      `• /permiso - Nueva solicitud\n` +
-      `• /estado - Ver tus solicitudes\n` +
-      `• /ayuda - Ver más opciones`
-    );
-  }
-
-  /**
-   * Start permit application (alias for startNewApplication)
-   */
-  async startPermitApplication(from) {
-    try {
-      await this.startNewApplication(from);
-    } catch (error) {
-      logger.error('Error starting permit application', { error: error.message, from });
-      await this.sendMessage(from, 
-        '❌ Error al iniciar la solicitud.\n\n' +
-        'Por favor intenta de nuevo o contacta soporte.'
-      );
-    }
-  }
-
-  /**
-   * Send help message (alias for sendContextualHelp)
-   */
-  async sendHelp(from, context) {
-    try {
-      await this.sendContextualHelp(from, context);
-    } catch (error) {
-      logger.error('Error sending help', { error: error.message, from });
-      // Send a basic help message as fallback
-      await this.sendMessage(from, 
-        '📚 *AYUDA RÁPIDA*\n\n' +
-        '• /permiso - Nueva solicitud\n' +
-        '• /estado - Ver solicitudes\n' +
-        '• /pagar - Enlaces de pago\n' +
-        '• /reset - Reiniciar conversación\n\n' +
-        'Soporte: soporte@permisosdigitales.com.mx'
-      );
-    }
-  }
-
-  /**
-   * Clear state from memory cache
-   */
-  clearStateFromMemory(stateKey) {
-    try {
-      if (this.memoryStateCache.has(stateKey)) {
-        this.memoryStateCache.delete(stateKey);
-        logger.info('Cleared state from memory cache', { stateKey });
+      // Only clear state if we're not waiting for folio selection
+      if (!readyPermits.length) {
+        await this.stateManager.clearState(from);
       }
+      
     } catch (error) {
-      logger.error('Error clearing state from memory', { error: error.message, stateKey });
+      logger.error('Error al consultar estado', { error: error.message, from });
+      await this.sendMessage(from, 
+        `❌ Hubo un error al consultar tu historial.\n\n` +
+        `Intenta en: 🌐 permisosdigitales.com.mx\n\n` +
+        `Regresando al menú principal...`
+      );
+      await this.stateManager.clearState(from);
+      // Show main menu after a short delay
+      setTimeout(async () => {
+        await this.showMainMenu(from);
+      }, 1000);
     }
   }
-  
+
   /**
-   * Save progress to database
+   * Handle response after permit delivery notification
    */
-  async saveProgress(applicationId, data) {
+  async handlePermitDeliveredResponse(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Start new application
+        await this.stateManager.clearState(from);
+        return await this.startApplication(from);
+        
+      case '2':
+        // Show main menu
+        await this.stateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      default:
+        // Check if it's a greeting
+        if (this.isGreeting(response)) {
+          await this.stateManager.clearState(from);
+          return await this.handleGreeting(from);
+        }
+        
+        // Invalid response - show options again
+        await this.sendMessage(from, 
+          `Por favor elige una opción:\n\n` +
+          `1️⃣ Iniciar nueva solicitud\n` +
+          `2️⃣ Ver menú principal\n\n` +
+          `Responde con 1 o 2`
+        );
+        break;
+    }
+  }
+
+  /**
+   * Handle response after permit downloaded
+   */
+  async handlePermitDownloadedResponse(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Resend by email
+        if (state.permitData && state.permitData.email) {
+          try {
+            const emailService = require('../email.service');
+            await emailService.sendEmail(
+              state.permitData.email,
+              `Permiso de Circulación - Folio ${state.permitData.folioNumber}`,
+              `<h2>Tu Permiso de Circulación está Listo 🎉</h2>
+              <p>Hola,</p>
+              <p><strong>Folio:</strong> ${state.permitData.folioNumber}<br>
+              <strong>Validez:</strong> 30 días</p>
+              
+              <h3>📥 Descarga tu permiso (archivo ZIP con todos los documentos):</h3>
+              <p style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+                <strong>Enlace directo de descarga:</strong><br>
+                <a href="${state.permitData.downloadUrl}" style="color: #007bff; font-size: 16px; word-break: break-all;">${state.permitData.downloadUrl}</a><br>
+                <em style="color: #666; font-size: 14px;">💡 Tip: Si el enlace no descarga automáticamente, haz clic derecho y selecciona "Guardar enlace como..."</em>
+              </p>
+              
+              <p style="color: #dc3545;"><strong>⏰ IMPORTANTE:</strong> Este enlace expira en 48 horas. Descarga y guarda tu permiso ahora.</p>
+              
+              <h3>🌐 Acceso alternativo desde el portal web:</h3>
+              <p style="background-color: #e8f4fd; padding: 15px; border-radius: 5px;">
+                <strong>Portal:</strong> <a href="https://permisosdigitales.com.mx/permits">https://permisosdigitales.com.mx/permits</a><br><br>
+                <strong>Para iniciar sesión usa:</strong><br>
+                • <strong>Teléfono:</strong> Tu número de WhatsApp<br>
+                • <strong>Contraseña temporal:</strong> La que recibiste por WhatsApp al crear tu solicitud<br>
+                <em style="color: #666;">Si no recuerdas tu contraseña, usa la opción "Olvidé mi contraseña" en la página de inicio de sesión.</em>
+              </p>
+              
+              <h3>¿Necesitas ayuda?</h3>
+              <p style="background-color: #fff3cd; padding: 15px; border-radius: 5px;">
+                📧 Envía un correo a <a href="mailto:soporte@permisosdigitales.com.mx">soporte@permisosdigitales.com.mx</a> con:<br>
+                • Tu número de folio: <strong>${state.permitData.folioNumber}</strong><br>
+                • Tu número de teléfono registrado<br>
+                • Tu nombre completo<br><br>
+                Te responderemos en menos de 24 horas.
+              </p>
+              
+              <p>Gracias por usar Permisos Digitales.<br>
+              <strong>Equipo de Permisos Digitales</strong></p>`,
+              `Tu Permiso de Circulación - Folio ${state.permitData.folioNumber}\n\n` +
+              `DESCARGA DIRECTA:\n${state.permitData.downloadUrl}\n` +
+              `(Si no descarga automáticamente, copia y pega el enlace en tu navegador)\n\n` +
+              `ACCESO WEB:\nhttps://permisosdigitales.com.mx/permits\n` +
+              `Usa tu número de teléfono y la contraseña temporal que recibiste por WhatsApp.\n\n` +
+              `¿NECESITAS AYUDA?\n` +
+              `Envía un correo a soporte@permisosdigitales.com.mx con:\n` +
+              `- Folio: ${state.permitData.folioNumber}\n` +
+              `- Tu teléfono registrado\n` +
+              `- Tu nombre completo\n\n` +
+              `El enlace expira en 48 horas.\n\nEquipo de Permisos Digitales`
+            );
+            
+            await this.sendMessage(from,
+              `✅ *Permiso enviado a:* ${state.permitData.email}\n\n` +
+              `Revisa tu bandeja de entrada o carpeta de spam.\n\n` +
+              `Escribe "menu" para volver al menú principal.`
+            );
+          } catch (error) {
+            logger.error('Error resending permit email', { error: error.message });
+            await this.sendMessage(from,
+              `❌ No se pudo enviar el email. Por favor intenta más tarde.\n\n` +
+              `Puedes descargar tu permiso desde:\nhttps://permisosdigitales.com.mx/permits`
+            );
+          }
+        } else {
+          await this.sendMessage(from,
+            `❌ No se encontró email asociado.\n\n` +
+            `Puedes descargar tu permiso desde:\nhttps://permisosdigitales.com.mx/permits`
+          );
+        }
+        await this.stateManager.clearState(from);
+        break;
+        
+      case '2':
+        // Start new application
+        await this.stateManager.clearState(from);
+        return await this.startApplication(from);
+        
+      case '3':
+        // Show main menu
+        await this.stateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      default:
+        // Check if it's a greeting
+        if (this.isGreeting(response)) {
+          await this.stateManager.clearState(from);
+          return await this.handleGreeting(from);
+        }
+        
+        // Show options again
+        await this.sendMessage(from,
+          `Por favor elige una opción:\n\n` +
+          `1️⃣ Reenviar por email\n` +
+          `2️⃣ Nuevo permiso\n` +
+          `3️⃣ Menú principal`
+        );
+        break;
+    }
+  }
+
+  // Privacy compliance methods remain the same but with better UX
+  async handleDataExport(from) {
     try {
-      const applicationRepository = require('../../repositories/application.repository');
-      await applicationRepository.update(applicationId, data);
-      logger.info('Application progress saved', { applicationId });
+      const user = await this.findOrCreateUser(from);
+      
+      await this.sendMessage(from, '⏳ Preparando tus datos...');
+      
+      // Log data access for audit
+      await privacyAuditService.logDataAccess(
+        user.id,
+        from,
+        'data_export',
+        ['personal_data', 'applications', 'payments'],
+        { source: 'whatsapp', requestedBy: 'user' }
+      );
+      
+      // Get user data
+      const userData = await this.gatherUserDataForExport(user.id);
+      
+      // Create secure download link
+      const downloadToken = crypto.randomBytes(32).toString('hex');
+      const downloadUrl = `https://api.permisosdigitales.com.mx/privacy/export/${downloadToken}`;
+      
+      // Store token in database for 24 hours (Meta compliance-friendly)
+      const insertQuery = `
+        INSERT INTO privacy_export_tokens 
+        (token, user_id, export_data, expires_at)
+        VALUES ($1, $2, $3, NOW() + INTERVAL '24 hours')
+        RETURNING id, expires_at
+      `;
+      
+      await db.query(insertQuery, [
+        downloadToken,
+        user.id,
+        JSON.stringify({ userId: user.id, data: userData })
+      ]);
+      
+      await this.sendMessage(from, 
+        `📊 *TUS DATOS ESTÁN LISTOS*\n\n` +
+        `Hemos preparado un archivo con toda tu información:\n\n` +
+        `📥 Descarga aquí:\n${downloadUrl}\n\n` +
+        `⏰ Este enlace expirará en 24 horas.\n\n` +
+        `El archivo incluye:\n` +
+        `• Información personal\n` +
+        `• Historial de solicitudes\n` +
+        `• Registros de pagos\n\n` +
+        `Escribe cualquier mensaje para volver al menú.`
+      );
+      
+      await this.stateManager.clearState(from);
+      
     } catch (error) {
-      logger.error('Error saving progress', { error: error.message, applicationId });
+      logger.error('Error al exportar datos', { error: error.message, from });
+      await this.sendMessage(from, 
+        `❌ Hubo un error al exportar tus datos.\n\n` +
+        `Intenta en: 🌐 permisosdigitales.com.mx\n\n` +
+        `O contacta a soporte:\n` +
+        `📧 soporte@permisosdigitales.com.mx\n\n` +
+        `Regresando al menú principal...`
+      );
+      await this.stateManager.clearState(from);
+      // Show main menu after a short delay
+      setTimeout(async () => {
+        await this.showMainMenu(from);
+      }, 1500);
     }
   }
-  
-  /**
-   * List user permits
-   */
-  async listUserPermits(from, context) {
-    if (context.status === 'NEW_USER' || !context.user) {
-      await this.sendMessage(from, `No tienes permisos registrados. Envía /permiso para iniciar.`);
-      return;
-    }
+
+  async handleOptOut(from) {
+    const client = await db.getPool().connect();
     
-    const applicationRepository = require('../../repositories/application.repository');
-    const permits = await applicationRepository.findByUserId(context.user.id);
-    const activePermits = permits.filter(p => p.status === 'PERMIT_READY');
-    
-    if (activePermits.length === 0) {
-      await this.sendMessage(from, `No tienes permisos activos. Envía /permiso para tramitar uno.`);
-      return;
-    }
-    
-    let message = `📋 *Tus permisos:*\n\n`;
-    
-    activePermits.forEach((permit, index) => {
-      const vencimiento = new Date(permit.fecha_vencimiento);
-      const hoy = new Date();
-      const diasRestantes = Math.floor((vencimiento - hoy) / (1000 * 60 * 60 * 24));
+    try {
+      await client.query('BEGIN');
       
-      let statusEmoji = '✅';
-      if (diasRestantes <= 0) statusEmoji = '❌';
-      else if (diasRestantes <= 7) statusEmoji = '⚠️';
+      const user = await this.findOrCreateUser(from);
       
-      message += `${index + 1}. ${statusEmoji} ${permit.marca} ${permit.linea}\n`;
-      message += `   📝 Folio: ${permit.folio}\n`;
-      message += `   📅 Vence: ${vencimiento.toLocaleDateString('es-MX')}\n`;
+      // Check if already opted out
+      const checkQuery = `
+        SELECT 1 FROM whatsapp_optout_list 
+        WHERE phone_number = $1
+      `;
+      const existing = await client.query(checkQuery, [from]);
       
-      if (diasRestantes > 0) {
-        message += `   ⏳ Días restantes: ${diasRestantes}\n`;
+      if (existing.rows.length > 0) {
+        await this.sendMessage(from, 
+          `✅ Ya estás dado de baja del servicio WhatsApp.\n\n` +
+          `Escribe cualquier mensaje para volver al menú.`
+        );
+        await this.stateManager.clearState(from);
+        return;
+      }
+      
+      // Add to opt-out list - check which columns exist
+      const columnCheckQuery = `
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'whatsapp_optout_list' 
+        AND column_name IN ('opt_out_reason', 'reason')
+      `;
+      const columnResult = await client.query(columnCheckQuery);
+      
+      let insertQuery;
+      const hasReasonColumn = columnResult.rows.some(row => row.column_name === 'opt_out_reason' || row.column_name === 'reason');
+      
+      if (hasReasonColumn) {
+        const reasonColumnName = columnResult.rows[0].column_name;
+        insertQuery = `
+          INSERT INTO whatsapp_optout_list (phone_number, user_id, ${reasonColumnName}, opt_out_source, created_at)
+          VALUES ($1, $2, $3, $4, NOW())
+        `;
+        await client.query(insertQuery, [from, user.id, 'user_request', 'whatsapp']);
       } else {
-        message += `   ❌ VENCIDO - Envía /renovar\n`;
+        // Table doesn't have reason column
+        insertQuery = `
+          INSERT INTO whatsapp_optout_list (phone_number, user_id, opt_out_source, created_at)
+          VALUES ($1, $2, $3, NOW())
+        `;
+        await client.query(insertQuery, [from, user.id, 'whatsapp']);
       }
       
-      if (permit.permit_url) {
-        message += `   📥 Descargar: ${permit.permit_url}\n`;
+      // Update user preferences if column exists
+      const userColumnCheck = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' 
+        AND column_name = 'whatsapp_notifications'
+      `);
+      
+      if (userColumnCheck.rows.length > 0) {
+        await client.query(
+          `UPDATE users SET whatsapp_notifications = false WHERE id = $1`,
+          [user.id]
+        );
       }
-      message += `\n`;
+      
+      // Log the opt-out
+      await privacyAuditService.logDataModification(
+        user.id,
+        from,
+        'whatsapp_notifications',
+        'true',
+        'false',
+        { reason: 'user_optout', source: 'whatsapp' }
+      );
+      
+      await client.query('COMMIT');
+      
+      await this.sendMessage(from, 
+        `✅ *BAJA COMPLETADA*\n\n` +
+        `Has sido dado de baja del servicio WhatsApp.\n\n` +
+        `• No recibirás más mensajes promocionales\n` +
+        `• Tus datos personales se mantienen seguros\n` +
+        `• Puedes seguir usando la web para tus permisos\n\n` +
+        `Si cambias de opinión, puedes reactivar el servicio en cualquier momento.\n\n` +
+        `Gracias por usar Permisos Digitales.`
+      );
+      
+      await this.stateManager.clearState(from);
+      
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Error al procesar baja', { error: error.message, from });
+      await this.sendMessage(from, 
+        `❌ Hubo un error al procesar tu solicitud.\n\n` +
+        `Regresando al menú principal...`
+      );
+      await this.stateManager.clearState(from);
+      // Show main menu after a short delay
+      setTimeout(async () => {
+        await this.showMainMenu(from);
+      }, 1500);
+    } finally {
+      client.release();
+    }
+  }
+
+  async handleDataDeletion(from) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      
+      // Check for active permits
+      const activePermitsQuery = `
+        SELECT COUNT(*) as count
+        FROM permit_applications
+        WHERE user_id = $1
+        AND status = 'COMPLETED'
+        AND fecha_vencimiento > NOW()
+      `;
+      const result = await db.query(activePermitsQuery, [user.id]);
+      
+      if (result.rows[0].count > 0) {
+        await this.sendMessage(from, 
+          `⚠️ *NO PODEMOS ELIMINAR TUS DATOS*\n\n` +
+          `Tienes ${result.rows[0].count} permiso(s) activo(s).\n\n` +
+          `Por requisitos legales, debemos mantener los datos mientras tengas permisos vigentes.\n\n` +
+          `Podrás solicitar la eliminación una vez que expiren.\n\n` +
+          `Escribe cualquier mensaje para volver al menú.`
+        );
+        await this.stateManager.clearState(from);
+        return;
+      }
+      
+      // Create deletion request with proper SQL syntax
+      const insertQuery = `
+        INSERT INTO data_deletion_requests
+        (user_id, requested_by, request_source, scheduled_date, status)
+        VALUES ($1, $2, 'whatsapp', NOW() + INTERVAL '30 days', 'pending')
+        RETURNING id, scheduled_date
+      `;
+      const deletion = await db.query(insertQuery, [user.id, from]);
+      
+      // Log the request
+      await privacyAuditService.scheduleDataDeletion(user.id, from, 30);
+      
+      const scheduledDate = new Date(deletion.rows[0].scheduled_date);
+      const formattedDate = scheduledDate.toLocaleDateString('es-MX');
+      
+      await this.sendMessage(from, 
+        `📋 *SOLICITUD DE ELIMINACIÓN REGISTRADA*\n\n` +
+        `ID de solicitud: #${deletion.rows[0].id}\n` +
+        `Fecha programada: ${formattedDate}\n\n` +
+        `Tu solicitud será procesada en 30 días.\n\n` +
+        `⚠️ Esto incluirá:\n` +
+        `• Todos tus datos personales\n` +
+        `• Historial de permisos\n` +
+        `• Información de pagos\n\n` +
+        `Si cambias de opinión, contacta a soporte antes de la fecha programada.\n\n` +
+        `Escribe cualquier mensaje para volver al menú.`
+      );
+      
+      await this.stateManager.clearState(from);
+      
+    } catch (error) {
+      logger.error('Error al procesar eliminación de datos', { error: error.message, from });
+      await this.sendMessage(from, 
+        `❌ Hubo un error al procesar tu solicitud.\n\n` +
+        `Por favor contacta a soporte:\n` +
+        `📧 soporte@permisosdigitales.com.mx\n\n` +
+        `Regresando al menú principal...`
+      );
+      await this.stateManager.clearState(from);
+      // Show main menu after a short delay
+      setTimeout(async () => {
+        await this.showMainMenu(from);
+      }, 1500);
+    }
+  }
+
+  // All other methods remain the same (checkRateLimit, validateField, sendMessage, etc.)
+  // ... [rest of the methods from simple-whatsapp.service.js]
+  
+  /**
+   * Check rate limit
+   */
+  checkRateLimit(from) {
+    const now = Date.now();
+    const userLimit = this.rateLimiter.get(from) || { count: 0, window: now };
+    
+    // Reset if outside window
+    if (now - userLimit.window > this.RATE_WINDOW) {
+      userLimit.count = 1;
+      userLimit.window = now;
+    } else {
+      userLimit.count++;
+    }
+    
+    this.rateLimiter.set(from, userLimit);
+    
+    // Clean old entries periodically
+    if (this.rateLimiter.size > 1000) {
+      const cutoff = now - this.RATE_WINDOW;
+      for (const [key, data] of this.rateLimiter.entries()) {
+        if (data.window < cutoff) {
+          this.rateLimiter.delete(key);
+        }
+      }
+    }
+    
+    return userLimit.count <= this.RATE_LIMIT;
+  }
+
+  /**
+   * Validate field with empathetic error messages
+   */
+  validateField(fieldKey, value) {
+    if (!value || typeof value !== 'string') {
+      return { valid: false, error: '🤔 Parece que no escribiste nada... ¿Lo intentas de nuevo?' };
+    }
+    
+    // Handle multi-line input - replace newlines with spaces and normalize
+    const normalized = value.replace(/\s+/g, ' ').trim();
+    
+    switch (fieldKey) {
+      case 'nombre_completo':
+        // Name validation - should contain at least first and last name
+        if (normalized.length < 2) {
+          return { valid: false, error: `📝 El nombre parece muy corto. Por favor ingresa tu nombre completo (nombre y apellidos).` };
+        }
+        
+        // Check if it's just a number
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `📝 Necesito tu nombre completo, no un número.\n\nEjemplo: Juan Pérez González` };
+        }
+        
+        // Check if it contains at least two words (name and surname)
+        const words = normalized.split(/\s+/).filter(word => word.length > 0);
+        if (words.length < 2) {
+          return { valid: false, error: `📝 Por favor ingresa tu nombre y apellidos completos.\n\nEjemplo: María García López` };
+        }
+        
+        // Check for valid name characters (letters, spaces, common accents, apostrophes, hyphens)
+        if (!/^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]+$/.test(normalized)) {
+          return { valid: false, error: `📝 El nombre solo puede contener letras, espacios y caracteres como ñ, acentos.\n\nEjemplo: José María Hernández-Vázquez` };
+        }
+        
+        // Check maximum length
+        if (normalized.length > 100) {
+          return { valid: false, error: `📝 El nombre parece muy largo. ¿Podrías usar solo tu nombre y apellidos principales?` };
+        }
+        
+        return { valid: true, value: normalized };
+      
+      case 'marca':
+        // Car brand validation - flexible but catches obvious garbage
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `🚗 La marca no puede ser solo números.\n\nEjemplo: Toyota, Nissan, Ford` };
+        }
+        
+        // Check for excessive special characters or random strings
+        if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ0-9\s-]+$/.test(normalized)) {
+          return { valid: false, error: `🚗 La marca solo puede contener letras, números, espacios y guiones.\n\nEjemplo: Mercedes-Benz, Volkswagen` };
+        }
+        
+        // Check for reasonable length and structure
+        if (normalized.length < 2) {
+          return { valid: false, error: `🚗 La marca parece muy corta.\n\nEjemplo: Ford, BMW, KIA` };
+        }
+        
+        if (normalized.length > 30) {
+          return { valid: false, error: `🚗 El nombre de la marca parece muy largo. ¿Podrías usar el nombre común?\n\nEjemplo: Chevrolet en lugar de General Motors Chevrolet` };
+        }
+        
+        // Check for too many repeated characters (like random strings)
+        if (/(.)\1{4,}/.test(normalized)) {
+          return { valid: false, error: `🚗 Por favor verifica la marca del vehículo.\n\nEjemplo: Honda, Toyota, Nissan` };
+        }
+        
+        return { valid: true, value: normalized };
+      
+      case 'linea':
+        // Car model validation - flexible but catches garbage
+        if (/^\d+$/.test(normalized) && normalized.length < 4) {
+          return { valid: false, error: `🚗 El modelo no puede ser solo números cortos.\n\nEjemplo: Corolla, Sentra, Civic` };
+        }
+        
+        // Allow alphanumeric models but catch random strings
+        if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ0-9\s-]+$/.test(normalized)) {
+          return { valid: false, error: `🚗 El modelo solo puede contener letras, números, espacios y guiones.\n\nEjemplo: Focus, X-Trail, Serie-3` };
+        }
+        
+        if (normalized.length < 2) {
+          return { valid: false, error: `🚗 El modelo parece muy corto.\n\nEjemplo: Rio, Golf, Fit` };
+        }
+        
+        if (normalized.length > 40) {
+          return { valid: false, error: `🚗 El nombre del modelo parece muy largo. ¿Podrías usar el nombre común?` };
+        }
+        
+        // Check for excessive random characters
+        if (/(.)\1{4,}/.test(normalized)) {
+          return { valid: false, error: `🚗 Por favor verifica el modelo del vehículo.\n\nEjemplo: Aveo, March, Tsuru` };
+        }
+        
+        return { valid: true, value: normalized };
+        
+      case 'color':
+        // Color validation - flexible but catches obvious garbage
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `🎨 El color no puede ser solo números.\n\nEjemplo: Blanco, Azul, Rojo` };
+        }
+        
+        // Allow color names and combinations (including slashes that will be converted)
+        if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ\s,y\/-]+$/.test(normalized)) {
+          return { valid: false, error: `🎨 El color solo puede contener letras y separadores.\n\nEjemplo: Rojo/Negro, Azul y Blanco` };
+        }
+        
+        if (normalized.length < 3) {
+          return { valid: false, error: `🎨 El color parece muy corto.\n\nEjemplo: Azul, Rojo, Verde` };
+        }
+        
+        if (normalized.length > 50) {
+          return { valid: false, error: `🎨 La descripción del color es muy larga. ¿Podrías simplificarla?` };
+        }
+        
+        // Check for repeated nonsense characters
+        if (/(.)\1{3,}/.test(normalized)) {
+          return { valid: false, error: `🎨 Por favor verifica el color del vehículo.\n\nEjemplo: Blanco, Negro, Plata` };
+        }
+        
+        // Sanitize color to prevent issues with slashes (keep existing logic)
+        const sanitizedColor = normalized.replace(/\//g, ' y ');
+        return { valid: true, value: sanitizedColor };
+      
+      case 'domicilio':
+        // Address validation - flexible but catches random strings
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `🏠 El domicilio no puede ser solo números.\n\nEjemplo: Calle 5 de Mayo 23, Centro` };
+        }
+        
+        // Allow addresses with various characters
+        if (!/^[a-záéíóúñA-ZÁÉÍÓÚÑ0-9\s.,#-]+$/.test(normalized)) {
+          return { valid: false, error: `🏠 El domicilio contiene caracteres no válidos.\n\nEjemplo: Av. Juárez #123, Col. Centro` };
+        }
+        
+        if (normalized.length < 10) {
+          return { valid: false, error: `🏠 El domicilio parece incompleto. Incluye calle, número y colonia.\n\nEjemplo: Calle Morelos 45, Centro` };
+        }
+        
+        if (normalized.length > 200) {
+          return { valid: false, error: `🏠 El domicilio es muy largo. ¿Podrías usar la forma más simple?` };
+        }
+        
+        // Check for excessive repeated characters (random strings)
+        if (/(.)\1{4,}/.test(normalized)) {
+          return { valid: false, error: `🏠 Por favor verifica tu domicilio.\n\nEjemplo: Av. Reforma 123, Col. Centro, Ciudad` };
+        }
+        
+        // Check that it has at least some structure (numbers and letters)
+        if (!/\d/.test(normalized)) {
+          return { valid: false, error: `🏠 El domicilio debe incluir al menos un número.\n\nEjemplo: Calle Hidalgo 25, Centro` };
+        }
+        
+        return { valid: true, value: normalized };
+        
+      case 'curp_rfc':
+        // CURP/RFC validation with garbage data prevention
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `📝 CURP/RFC no puede ser solo números.\n\nEjemplo RFC: ABCD123456XYZ\nEjemplo CURP: ABCD123456HDFXYZ01` };
+        }
+        
+        if (!/^[A-Z0-9]{12,18}$/.test(normalized.toUpperCase())) {
+          const length = normalized.length;
+          if (length < 12) {
+            return { valid: false, error: `📝 Formato incorrecto. El RFC debe tener 12-13 caracteres y el CURP 18 caracteres.\n\nEjemplo RFC: ABCD123456XYZ\nEjemplo CURP: ABCD123456HDFXYZ01` };
+          } else if (length > 18) {
+            return { valid: false, error: `📏 Creo que son muchos caracteres... Revisa que no hayas puesto espacios.` };
+          } else {
+            return { valid: false, error: `🤷 Algo no cuadra... Asegúrate de usar solo letras y números.\n\nEjemplo: ABCD123456HDFXYZ01` };
+          }
+        }
+        
+        // Check for repeated nonsense characters
+        if (/(.)\1{4,}/.test(normalized)) {
+          return { valid: false, error: `📝 Por favor verifica tu CURP/RFC.\n\nEjemplo: ABCD123456HDFXYZ01` };
+        }
+        
+        return { valid: true, value: normalized.toUpperCase() };
+        
+      case 'email':
+        // Email validation with garbage data prevention
+        if (/^\d+$/.test(normalized)) {
+          return { valid: false, error: `📧 Email no puede ser solo números.\n\nEjemplo: maria@gmail.com` };
+        }
+        
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+          if (!normalized.includes('@')) {
+            return { valid: false, error: `📧 Le falta el @ a tu correo\n\nEjemplo: maria@gmail.com` };
+          } else if (!normalized.includes('.')) {
+            return { valid: false, error: `📧 Le falta el punto (.) después del @\n\nEjemplo: juan@hotmail.com` };
+          } else {
+            return { valid: false, error: `📧 Formato de correo incorrecto.\n\nDebe ser como: nombre@correo.com` };
+          }
+        }
+        
+        // Check for repeated nonsense characters
+        if (/(.)\1{4,}/.test(normalized)) {
+          return { valid: false, error: `📧 Por favor verifica tu email.\n\nEjemplo: juan@correo.com` };
+        }
+        
+        return { valid: true, value: normalized.toLowerCase() };
+        
+      case 'ano_modelo':
+        // Year validation with garbage data prevention
+        const year = parseInt(normalized);
+        const currentYear = new Date().getFullYear();
+        
+        // Check for non-numeric garbage
+        if (!/^\d{4}$/.test(normalized)) {
+          return { valid: false, error: `📅 El año debe ser de 4 dígitos.\n\nEjemplo: ${currentYear - 2}` };
+        }
+        
+        if (isNaN(year)) {
+          return { valid: false, error: `📅 Solo necesito el número del año\n\nEjemplo: ${currentYear - 2}` };
+        } else if (year < 1900) {
+          return { valid: false, error: `🚗 ¿Un clásico? Por favor verifica el año...` };
+        } else if (year > currentYear + 1) {
+          return { valid: false, error: `🔮 ¡Ese carro es del futuro! Verifica el año por favor...` };
+        }
+        return { valid: true, value: year.toString() };
+        
+      case 'numero_serie':
+      case 'numero_motor':
+        // Serial/engine number validation
+        if (/^\d+$/.test(normalized) && normalized.length < 8) {
+          return { valid: false, error: `🔍 Solo números muy cortos no suelen ser correctos. Revisa tu tarjeta de circulación.\n\nEjemplo: AB1234567890` };
+        }
+        
+        // Explicitly check for spaces or newlines
+        if (/\s/.test(normalized)) {
+          return { valid: false, error: `🔍 No puede contener espacios o saltos de línea. Escríbelo todo junto.\n\nEjemplo: ABC123456789` };
+        }
+        
+        // Allow alphanumeric but catch random strings - also allow hyphens which are common
+        if (!/^[A-Z0-9-]+$/i.test(normalized)) {
+          return { valid: false, error: `🔍 Solo puede contener letras, números y guiones (sin espacios).\n\nEjemplo: ABC123456789 o 4G15-MN123456` };
+        }
+        
+        if (normalized.length < 5) {
+          return { valid: false, error: `🔍 Parece muy corto... Revisa en tu tarjeta de circulación, generalmente tiene más caracteres.` };
+        }
+        
+        if (normalized.length > 25) {
+          return { valid: false, error: `🔍 Parece muy largo. ¿Podrías verificar en tu tarjeta de circulación?` };
+        }
+        
+        // Check for excessive repeated characters
+        if (/(.)\1{5,}/.test(normalized)) {
+          return { valid: false, error: `🔍 Por favor verifica el número en tu tarjeta de circulación.\n\nEjemplo: ABC123456789` };
+        }
+        
+        // Check for too many consecutive vowels or consonants (likely garbage)
+        if (/[aeiouAEIOU]{4,}|[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{6,}/.test(normalized)) {
+          return { valid: false, error: `🔍 Por favor verifica el número. Parece tener un formato inusual.\n\nEjemplo: ABC123456789` };
+        }
+        
+        return { valid: true, value: normalized.toUpperCase() };
+        
+      default:
+        if (normalized.length === 0) {
+          return { valid: false, error: '✍️ No olvides escribir algo...' };
+        } else if (normalized.length > 500) {
+          return { valid: false, error: '📝 Uy, es mucho texto... ¿Podrías resumirlo un poco?' };
+        }
+        return { valid: true, value: normalized };
+    }
+  }
+
+  /**
+   * Normalize phone number to WhatsApp format
+   */
+  normalizePhoneNumber(phoneNumber) {
+    if (!phoneNumber) return null;
+    
+    // Remove all non-digit characters
+    let cleaned = phoneNumber.toString().replace(/\D/g, '');
+    
+    // Handle various Mexican phone formats
+    if (cleaned.length === 10) {
+      // Local number without country code: XXXXXXXXXX -> 52XXXXXXXXXX
+      cleaned = '52' + cleaned;
+    } else if (cleaned.startsWith('1') && cleaned.length === 11) {
+      // Mobile number without country code: 1XXXXXXXXXX -> 52XXXXXXXXXX
+      cleaned = '52' + cleaned.substring(1);
+    } else if (cleaned.startsWith('521') && cleaned.length === 13) {
+      // WhatsApp format with mobile prefix: 521XXXXXXXXXX (keep as is for WhatsApp API)
+      // This is the correct format for Mexican mobile numbers in WhatsApp
+      cleaned = cleaned;
+    } else if (cleaned.startsWith('52') && cleaned.length === 13 && cleaned[2] === '1') {
+      // Another variation: 521XXXXXXXXXX (keep as is for WhatsApp API)
+      cleaned = cleaned;
+    } else if (cleaned.startsWith('52') && cleaned.length === 12) {
+      // Standard international format: 52XXXXXXXXXX (keep as is)
+      // This is our target format
+    }
+    
+    // Validate final format: should be 52XXXXXXXXXX (12 digits) or 521XXXXXXXXXX (13 digits for mobile)
+    if (!/^52\d{10}$/.test(cleaned) && !/^521\d{10}$/.test(cleaned)) {
+      logger.warn('Normalización de teléfono resultó en formato inválido', { 
+        original: phoneNumber, 
+        cleaned,
+        length: cleaned.length 
+      });
+      // Return the best attempt rather than throwing error
+      return cleaned;
+    }
+    
+    logger.debug('Phone number normalized', { 
+      original: phoneNumber, 
+      normalized: cleaned,
+      format: `+${cleaned.substring(0,2)}-${cleaned.substring(2,12)}`
     });
     
-    await this.sendMessage(from, message);
-  }
-  
-  /**
-   * Renew permit
-   */
-  async renewPermit(from, context) {
-    await this.sendMessage(from, 
-      `🔄 *Renovación de permisos*\n\n` +
-      `Esta función estará disponible pronto.\n\n` +
-      `Por ahora, puedes crear un nuevo permiso con /permiso`
-    );
-  }
-  
-  /**
-   * Get status emoji
-   */
-  getStatusEmoji(status) {
-    const emojis = {
-      'DRAFT': '📝',
-      'PAYMENT_PENDING': '💳',
-      'AWAITING_PAYMENT': '⏳',
-      'PAYMENT_PROCESSING': '⚙️',
-      'GENERATING_PERMIT': '🖨️',
-      'PERMIT_READY': '✅',
-      'FAILED': '❌',
-      'CANCELLED': '🚫'
-    };
-    return emojis[status] || '❓';
-  }
-  
-  /**
-   * Get status text in Spanish
-   */
-  getStatusText(status) {
-    const texts = {
-      'DRAFT': 'Borrador',
-      'PAYMENT_PENDING': 'Pago pendiente',
-      'AWAITING_PAYMENT': 'Esperando pago',
-      'PAYMENT_PROCESSING': 'Procesando pago',
-      'GENERATING_PERMIT': 'Generando permiso',
-      'PERMIT_READY': 'Permiso listo',
-      'FAILED': 'Error',
-      'CANCELLED': 'Cancelado'
-    };
-    return texts[status] || status;
-  }
-  
-  /**
-   * Check rate limit for spam protection
-   */
-  async checkRateLimit(from) {
-    const key = `rate:${from}`;
-    const now = Date.now();
-    
-    // Clean old entries
-    this.cleanRateLimiter();
-    
-    // Get current attempts
-    const userRateData = this.rateLimiter.get(key) || { count: 0, windowStart: now };
-    
-    // Check if we're in the same window
-    if (now - userRateData.windowStart > this.RATE_LIMIT_WINDOW) {
-      // New window
-      userRateData.count = 1;
-      userRateData.windowStart = now;
-    } else {
-      // Same window
-      userRateData.count++;
-    }
-    
-    // Check limit
-    if (userRateData.count > this.RATE_LIMIT_MAX) {
-      logger.warn('Rate limit exceeded', { from, count: userRateData.count });
-      
-      // Only send notification once per window
-      const notifyKey = `${from}:${userRateData.windowStart}`;
-      if (!this.rateLimitNotified.has(notifyKey)) {
-        await this.sendMessage(from, 
-          '⏱️ Demasiados mensajes. Por favor espera un momento antes de continuar.\n\n' +
-          '💡 Tip: Espera 1 minuto antes de enviar más mensajes.'
-        );
-        this.rateLimitNotified.set(notifyKey, true);
-      }
-      return false;
-    }
-    
-    // Update rate limiter
-    this.rateLimiter.set(key, userRateData);
-    return true;
-  }
-  
-  /**
-   * Clean old rate limiter entries
-   */
-  cleanRateLimiter() {
-    const now = Date.now();
-    const rateLimiterBefore = this.rateLimiter.size;
-    const rateLimitNotifiedBefore = this.rateLimitNotified.size;
-    let rateLimiterCleaned = 0;
-    let notificationsCleaned = 0;
-    
-    // Clean rate limiter entries (2x window = 2 minutes old)
-    for (const [key, data] of this.rateLimiter.entries()) {
-      if (now - data.windowStart > this.RATE_LIMIT_WINDOW * 2) {
-        this.rateLimiter.delete(key);
-        rateLimiterCleaned++;
-      }
-    }
-    
-    // Clean old notification entries
-    for (const [key] of this.rateLimitNotified.entries()) {
-      try {
-        const windowStart = parseInt(key.split(':')[1]);
-        if (isNaN(windowStart) || now - windowStart > this.RATE_LIMIT_WINDOW * 2) {
-          this.rateLimitNotified.delete(key);
-          notificationsCleaned++;
-        }
-      } catch (error) {
-        // Delete malformed keys
-        this.rateLimitNotified.delete(key);
-        notificationsCleaned++;
-      }
-    }
-    
-    // Log cleanup if significant
-    if (rateLimiterCleaned > 0 || notificationsCleaned > 0) {
-      logger.info('Rate limiter cleanup completed', {
-        rateLimiterEntries: { before: rateLimiterBefore, after: this.rateLimiter.size, cleaned: rateLimiterCleaned },
-        notificationEntries: { before: rateLimitNotifiedBefore, after: this.rateLimitNotified.size, cleaned: notificationsCleaned }
-      });
-    }
-  }
-  
-  /**
-   * Cleanup method for graceful shutdown
-   */
-  cleanup() {
-    if (this.rateLimiterCleanupInterval) {
-      clearInterval(this.rateLimiterCleanupInterval);
-      this.rateLimiterCleanupInterval = null;
-      logger.info('Rate limiter cleanup interval cleared');
-    }
-    
-    // Final cleanup
-    this.cleanRateLimiter();
-    
-    // Cleanup health monitor
-    if (this.healthMonitor) {
-      this.healthMonitor.cleanup();
-    }
-    
-    // Cleanup error recovery
-    if (this.errorRecovery) {
-      this.errorRecovery.cleanup();
-    }
-    
-    // Cleanup state manager
-    if (this.stateManager) {
-      this.stateManager.cleanupExpiredEntries();
-    }
-    
-    logger.info('WhatsApp service cleanup completed');
+    return cleaned;
   }
 
   /**
-   * Get memory usage statistics
+   * Create visual progress bar
    */
-  getMemoryStats() {
-    const processMemory = process.memoryUsage();
-    
-    return {
-      process: {
-        rss: Math.round(processMemory.rss / 1024 / 1024), // MB
-        heapUsed: Math.round(processMemory.heapUsed / 1024 / 1024), // MB
-        heapTotal: Math.round(processMemory.heapTotal / 1024 / 1024), // MB
-        external: Math.round(processMemory.external / 1024 / 1024) // MB
-      },
-      service: {
-        rateLimiter: this.rateLimiter.size,
-        rateLimitNotified: this.rateLimitNotified.size,
-        memoryStateCache: this.memoryStateCache.size,
-        configInitialized: this._configInitialized,
-        healthMonitorActive: !!this.healthMonitor
-      },
-      components: {
-        stateManager: this.stateManager ? this.stateManager.getStatistics() : null,
-        errorRecovery: this.errorRecovery ? this.errorRecovery.getStatistics() : null
-      }
-    };
+  getProgressBar(current, total) {
+    const filled = Math.round((current / total) * 10);
+    const empty = 10 - filled;
+    return '█'.repeat(filled) + '░'.repeat(empty);
+  }
+
+  /**
+   * Send message via WhatsApp API
+   */
+  async sendMessage(to, message) {
+    try {
+      // Normalize the recipient phone number
+      const normalizedTo = this.normalizePhoneNumber(to);
+      
+      // Enhanced logging for Meta review
+      logger.info('📤 [OUTGOING] Preparing WhatsApp message', {
+        to: normalizedTo,
+        messagePreview: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        messageLength: message.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      const requestBody = {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: normalizedTo,
+        type: 'text',
+        text: { body: message }
+      };
+      
+      logger.info('🌐 [API CALL] Calling WhatsApp Business API', {
+        url: this.config.apiUrl,
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer [REDACTED]',
+          'Content-Type': 'application/json'
+        },
+        body: requestBody
+      });
+      
+      const response = await axios.post(this.config.apiUrl, requestBody, {
+        headers: {
+          'Authorization': `Bearer ${this.config.accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = response.data;
+      logger.info('✅ [SUCCESS] WhatsApp message sent', { 
+        to: normalizedTo, 
+        messageId: data.messages[0].id,
+        status: 'sent',
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      // Log detailed error information for debugging
+      const errorDetails = {
+        message: error.message,
+        to,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        responseData: error.response?.data,
+        headers: error.response?.headers
+      };
+      
+      logger.error('Error al enviar mensaje', errorDetails);
+      throw error;
+    }
   }
 
   /**
    * Sanitize user input
    */
   sanitizeInput(input) {
-    if (!input || typeof input !== 'string') {
-      return '';
-    }
+    if (!input || typeof input !== 'string') return '';
     
     return input
       .trim()
-      .replace(/[<>]/g, '') // Remove potential HTML
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove control characters
-      .substring(0, this.MAX_INPUT_LENGTH);
+      .substring(0, 500) // Max length
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, '') // Remove control characters
+      .normalize('NFC'); // Unicode normalization
   }
-  
+
   /**
-   * Sanitize field value based on field type
+   * Helper methods for user and application management
    */
-  sanitizeFieldValue(value, fieldKey) {
-    const maxLength = this.MAX_FIELD_LENGTHS[fieldKey] || this.MAX_INPUT_LENGTH;
+  async findOrCreateUser(phoneNumber, email = null) {
+    // Normalize phone number for consistent storage
+    const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
     
-    let sanitized = this.sanitizeInput(value);
+    // Generate phone variations to check
+    const phoneVariations = [
+      normalizedPhone,                                    // 52XXXXXXXXXX
+      '521' + normalizedPhone.substring(2),              // 521XXXXXXXXXX
+      normalizedPhone.substring(2),                       // XXXXXXXXXX
+      '+' + normalizedPhone,                              // +52XXXXXXXXXX
+      '+521' + normalizedPhone.substring(2)              // +521XXXXXXXXXX
+    ];
     
-    // Field-specific sanitization
-    switch (fieldKey) {
-      case 'email':
-        sanitized = sanitized.toLowerCase();
-        break;
-      case 'curp_rfc':
-      case 'numero_serie':
-      case 'numero_motor':
-        sanitized = sanitized.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        break;
-      case 'ano_modelo':
-        sanitized = sanitized.replace(/[^0-9]/g, '');
-        break;
-    }
-    
-    return sanitized.substring(0, maxLength);
-  }
-  
-  /**
-   * In-memory state fallback for Redis failures
-   */
-  
-  async getStateFromMemory(key) {
-    const cached = this.memoryStateCache.get(key);
-    if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour
-      return cached.data;
-    }
-    return null;
-  }
-  
-  async saveStateToMemory(key, data) {
-    this.memoryStateCache.set(key, {
-      data: JSON.stringify(data),
-      timestamp: Date.now()
+    logger.info('Buscando usuario con variaciones de teléfono', { 
+      original: phoneNumber,
+      normalized: normalizedPhone,
+      variations: phoneVariations 
     });
     
-    // Clean old entries
-    if (this.memoryStateCache.size > 100) {
-      const oldestKey = this.memoryStateCache.keys().next().value;
-      this.memoryStateCache.delete(oldestKey);
+    // Try to find existing user with any phone variation
+    const searchQuery = `
+      SELECT DISTINCT u.* 
+      FROM users u
+      WHERE u.whatsapp_phone = ANY($1::text[])
+         OR u.phone = ANY($1::text[])
+         OR u.whatsapp_phone LIKE '%' || $2
+         OR u.phone LIKE '%' || $2
+         ${email ? 'OR u.email = $3' : ''}
+      ORDER BY u.created_at ASC
+      LIMIT 1
+    `;
+    
+    const params = email 
+      ? [phoneVariations, normalizedPhone.substring(2), email]
+      : [phoneVariations, normalizedPhone.substring(2)];
+    
+    const searchResult = await db.query(searchQuery, params);
+    
+    if (searchResult.rows.length > 0) {
+      const user = searchResult.rows[0];
+      logger.info('Usuario existente encontrado', { 
+        userId: user.id,
+        foundBy: user.whatsapp_phone === normalizedPhone ? 'whatsapp_phone' : 
+                 user.phone === normalizedPhone ? 'phone' : 'variation',
+        hasEmail: !!user.email
+      });
+      
+      // Update whatsapp_phone if missing or different
+      if (!user.whatsapp_phone || user.whatsapp_phone !== normalizedPhone) {
+        await db.query(
+          'UPDATE users SET whatsapp_phone = $1 WHERE id = $2',
+          [normalizedPhone, user.id]
+        );
+        logger.info('Teléfono WhatsApp del usuario actualizado', { userId: user.id, phone: normalizedPhone });
+      }
+      
+      // Update email if provided and user has placeholder email
+      if (email && user.email && user.email.includes('@permisos.mx')) {
+        await db.query(
+          'UPDATE users SET email = $1 WHERE id = $2',
+          [email, user.id]
+        );
+        logger.info('Email del usuario actualizado', { userId: user.id, email });
+      }
+      
+      return user;
+    }
+    
+    // No existing user found - create new one
+    logger.info('Creando nuevo usuario', { phone: normalizedPhone, email });
+    
+    // Require real email for new users
+    if (!email || email.trim() === '') {
+      throw new Error('El correo electrónico es requerido para crear tu cuenta.');
+    }
+    const userEmail = email;
+    
+    // Check if source column exists
+    const columnCheck = await db.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'users' AND column_name = 'source'
+    `);
+    
+    const hasSourceColumn = columnCheck.rows.length > 0;
+    
+    const createQuery = hasSourceColumn ? `
+      INSERT INTO users (whatsapp_phone, email, password_hash, created_at, source)
+      VALUES ($1, $2, $3, NOW(), 'whatsapp')
+      RETURNING *
+    ` : `
+      INSERT INTO users (whatsapp_phone, email, password_hash, created_at)
+      VALUES ($1, $2, $3, NOW())
+      RETURNING *
+    `;
+    
+    // Generate a placeholder password hash for WhatsApp users (they don't use password auth)
+    const placeholderPassword = `whatsapp_user_${normalizedPhone}_${Date.now()}`;
+    const passwordHash = await bcrypt.hash(placeholderPassword, 10);
+    
+    const createParams = [normalizedPhone, userEmail, passwordHash];
+    const createResult = await db.query(createQuery, createParams);
+    
+    logger.info('Nuevo usuario creado', { 
+      userId: createResult.rows[0].id,
+      phone: normalizedPhone,
+      email 
+    });
+    
+    return createResult.rows[0];
+  }
+
+  async checkActiveApplication(userId) {
+    const query = `
+      SELECT id, created_at, folio, importe, payment_processor_order_id
+      FROM permit_applications
+      WHERE user_id = $1
+      AND status = 'AWAITING_PAYMENT'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const result = await db.query(query, [userId]);
+    return result.rows.length > 0 ? result.rows[0] : null;
+  }
+
+  async countRecentApplications(userId) {
+    const query = `
+      SELECT 
+        COUNT(CASE WHEN created_at > NOW() - INTERVAL '24 hours' THEN 1 END) as today,
+        COUNT(CASE WHEN created_at > NOW() - INTERVAL '7 days' THEN 1 END) as week,
+        MIN(created_at) as oldest_today
+      FROM permit_applications
+      WHERE user_id = $1
+      AND created_at > NOW() - INTERVAL '7 days'
+    `;
+    const result = await db.query(query, [userId]);
+    return {
+      today: parseInt(result.rows[0].today || 0),
+      week: parseInt(result.rows[0].week || 0),
+      oldestToday: result.rows[0].oldest_today
+    };
+  }
+
+  /**
+   * Get user applications
+   */
+  async getUserApplications(from) {
+    const user = await this.findOrCreateUser(from);
+    
+    const query = `
+      SELECT 
+        a.id, 
+        a.status, 
+        a.created_at, 
+        a.payment_processor_order_id,
+        a.fecha_expedicion,
+        a.fecha_vencimiento,
+        a.marca as vehicle_brand,
+        a.linea as vehicle_model,
+        a.color,
+        a.ano_modelo,
+        a.importe,
+        a.folio,
+        a.nombre_completo,
+        a.curp_rfc,
+        a.domicilio,
+        a.numero_serie,
+        a.numero_motor,
+        CASE 
+          WHEN a.status = 'AWAITING_PAYMENT' THEN 'pending'
+          WHEN a.status IN ('PROCESSING', 'COMPLETED') THEN 'paid'
+          ELSE 'cancelled'
+        END as payment_status
+      FROM permit_applications a
+      WHERE a.user_id = $1
+      ORDER BY a.created_at DESC
+    `;
+    
+    const result = await db.query(query, [user.id]);
+    return result.rows;
+  }
+
+  async checkLastApplicationTime(userId) {
+    const query = `
+      SELECT created_at
+      FROM permit_applications
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const result = await db.query(query, [userId]);
+    if (result.rows.length > 0) {
+      const lastTime = new Date(result.rows[0].created_at);
+      const now = new Date();
+      const minutesDiff = (now - lastTime) / (1000 * 60);
+      return minutesDiff;
+    }
+    return Infinity; // No previous applications
+  }
+
+  async checkUnpaidApplicationCount(userId) {
+    const query = `
+      SELECT COUNT(*) as count
+      FROM permit_applications
+      WHERE user_id = $1
+        AND status = 'AWAITING_PAYMENT'
+        AND created_at > NOW() - INTERVAL '7 days'
+    `;
+    const result = await db.query(query, [userId]);
+    return parseInt(result.rows[0].count) || 0;
+  }
+
+  async cancelOldUnpaidApplications(userId, excludeId = null) {
+    try {
+      let query;
+      let params;
+      
+      if (excludeId) {
+        query = `
+          UPDATE permit_applications 
+          SET status = 'CANCELLED', 
+              updated_at = NOW()
+          WHERE user_id = $1 
+          AND status = 'AWAITING_PAYMENT'
+          AND id != $2
+          RETURNING id
+        `;
+        params = [userId, excludeId];
+      } else {
+        query = `
+          UPDATE permit_applications 
+          SET status = 'CANCELLED', 
+              updated_at = NOW()
+          WHERE user_id = $1 
+          AND status = 'AWAITING_PAYMENT'
+          RETURNING id
+        `;
+        params = [userId];
+      }
+      
+      const result = await db.query(query, params);
+      
+      if (result.rows.length > 0) {
+        logger.info('Solicitudes antiguas sin pagar canceladas', {
+          userId,
+          cancelledCount: result.rows.length,
+          cancelledIds: result.rows.map(r => r.id)
+        });
+      }
+      
+      return result.rows.length;
+    } catch (error) {
+      logger.error('Error al cancelar solicitudes antiguas', { error: error.message, userId });
+      return 0;
     }
   }
-  
-  /**
-   * Handle user opt-out request
-   */
-  async handleOptOut(from) {
-    const client = await db.getPool().connect();
-    
+
+  async gatherUserDataForExport(userId) {
     try {
-      const userAccountService = require('./user-account.service');
-      const user = await userAccountService.findByWhatsAppPhone(from);
+      // Get user info
+      const userQuery = `
+        SELECT id, first_name, last_name, email, phone, whatsapp_phone, 
+               created_at, privacy_consent_date, privacy_consent_version
+        FROM users WHERE id = $1
+      `;
+      const userResult = await db.query(userQuery, [userId]);
       
-      // Start transaction
-      await client.query('BEGIN');
+      if (!userResult.rows[0]) {
+        throw new Error('User not found');
+      }
       
+      const user = userResult.rows[0];
+      
+      // Get applications - using only existing columns
+      const appsQuery = `
+        SELECT id, status, created_at, fecha_expedicion, fecha_vencimiento,
+               nombre_completo, curp_rfc, domicilio, marca, linea, color,
+               numero_serie, numero_motor, ano_modelo,
+               payment_processor_order_id, importe, folio
+        FROM permit_applications WHERE user_id = $1
+        ORDER BY created_at DESC
+      `;
+      const appsResult = await db.query(appsQuery, [userId]);
+      
+      // Get payment events
+      const paymentsQuery = `
+        SELECT pe.id, pe.event_type, pe.event_data, pe.created_at, pe.amount
+        FROM payment_events pe
+        JOIN permit_applications pa ON pe.application_id = pa.id
+        WHERE pa.user_id = $1
+        ORDER BY pe.created_at DESC
+      `;
+      const paymentsResult = await db.query(paymentsQuery, [userId]);
+      
+      // Get WhatsApp interaction logs - check if table exists first
+      let whatsappLogsResult = { rows: [] };
       try {
-        if (!user) {
-          // Even if no user found, add to opt-out list
-          await this.addToOptOutListWithClient(client, from, null, 'user_command');
-        } else {
-          // Update user record
-          const updateQuery = `
-            UPDATE users 
-            SET whatsapp_opted_out = TRUE,
-                whatsapp_optout_date = NOW(),
-                whatsapp_phone = NULL,
-                updated_at = NOW()
-            WHERE id = $1
-            RETURNING id, email, first_name`;
+        const tableExistsQuery = `
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = 'whatsapp_notifications'
+          )
+        `;
+        const tableExists = await db.query(tableExistsQuery);
+        
+        if (tableExists.rows[0].exists) {
+          const whatsappLogsQuery = `
+            SELECT 
+              wn.id,
+              wn.notification_type,
+              wn.message_content,
+              wn.status,
+              wn.sent_at,
+              wn.created_at
+            FROM whatsapp_notifications wn
+            WHERE wn.user_id = $1
+            ORDER BY wn.created_at DESC
+            LIMIT 100
+          `;
+          whatsappLogsResult = await db.query(whatsappLogsQuery, [userId]);
+        }
+      } catch (e) {
+        logger.warn('No se pudieron obtener logs de WhatsApp', { error: e.message });
+      }
+      
+      // Get privacy consent history - check if table exists first
+      let consentHistory = [];
+      try {
+        const tableCheck = await db.query(`
+          SELECT EXISTS (
+            SELECT 1 FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'whatsapp_consent_audit'
+          )
+        `);
+        
+        if (tableCheck.rows[0].exists) {
+          const consentQuery = `
+            SELECT 
+              action,
+              created_at
+            FROM whatsapp_consent_audit
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+          `;
+          const consentResult = await db.query(consentQuery, [userId]);
+          consentHistory = consentResult.rows;
+        }
+      } catch (e) {
+        // Table might not exist in production yet
+        logger.warn('No se pudo obtener historial de auditoría de consentimiento', { error: e.message });
+      }
+      
+      // Get opt-out status
+      const optOutQuery = `
+        SELECT 
+          opted_out_at,
+          opt_out_source
+        FROM whatsapp_optout_list
+        WHERE phone_number = $1 OR user_id = $2
+        LIMIT 1
+      `;
+      let optOutStatus = null;
+      try {
+        const optOutResult = await db.query(optOutQuery, [user.whatsapp_phone, userId]);
+        optOutStatus = optOutResult.rows[0];
+      } catch (e) {
+        logger.warn('No se pudo obtener estado de baja', { error: e.message });
+      }
+      
+      return {
+        user: {
+          ...user,
+          // Remove sensitive fields
+          password_hash: undefined,
+          reset_token: undefined,
+          verification_token: undefined
+        },
+        applications: appsResult.rows.map(app => ({
+          ...app,
+          // Format dates for readability
+          created_at: new Date(app.created_at).toISOString(),
+          fecha_expedicion: app.fecha_expedicion ? new Date(app.fecha_expedicion).toISOString() : null,
+          fecha_vencimiento: app.fecha_vencimiento ? new Date(app.fecha_vencimiento).toISOString() : null
+        })),
+        payments: paymentsResult.rows.map(payment => ({
+          ...payment,
+          created_at: new Date(payment.created_at).toISOString(),
+          // Parse event_data if it's a string
+          event_data: typeof payment.event_data === 'string' ? JSON.parse(payment.event_data) : payment.event_data
+        })),
+        whatsappLogs: whatsappLogsResult.rows.map(log => ({
+          ...log,
+          created_at: new Date(log.created_at).toISOString(),
+          sent_at: log.sent_at ? new Date(log.sent_at).toISOString() : null
+        })),
+        privacyInfo: {
+          consentHistory,
+          optOutStatus,
+          dataRetentionDays: 90,
+          lastExportRequest: new Date().toISOString()
+        },
+        exportDate: new Date().toISOString()
+      };
+      
+    } catch (error) {
+      logger.error('Error al recopilar datos del usuario para exportar', { error: error.message, userId });
+      throw error;
+    }
+  }
+
+  /**
+   * Handle navigation commands
+   */
+  async handleNavigationCommand(from, command) {
+    try {
+      const state = await this.stateManager.getState(from) || {};
+      
+      switch (command) {
+        case 'home':
+        case 'menu':
+          // Save progress if user is in the middle of filling a form
+          if (state.status === 'collecting' && state.data) {
+            state.draftData = state.data;
+            state.draftField = state.currentField || 0;
+            await this.stateManager.setState(from, state);
+            
+            await this.sendMessage(from, 
+              `💾 Tu progreso ha sido guardado automáticamente.\n\n` +
+              `Podrás continuar donde te quedaste cuando regreses.`
+            );
+            
+            // Small delay before showing menu
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
           
-          const result = await client.query(updateQuery, [user.id]);
-          const updatedUser = result.rows[0];
+          // Navigate to main menu without clearing state
+          navigationManager.navigateToHome(from);
+          return await this.showMainMenu(from);
           
-          // Add to opt-out list
-          await this.addToOptOutListWithClient(client, from, user.id, 'user_command');
+        case 'back':
+          const backEntry = navigationManager.navigateBack(from);
+          if (backEntry) {
+            return await this.navigateToState(from, backEntry);
+          } else {
+            await this.sendMessage(from, 
+              `↩️ No hay página anterior disponible.\n\n` +
+              `Escribe *menu* para ir al menú principal.`
+            );
+          }
+          break;
           
-          // Log consent change
-          await this.logConsentChangeWithClient(client, user.id, from, 'opted_out', {
-            previous_state: { opted_out: false, phone: from },
-            new_state: { opted_out: true, phone: null },
-            source: 'whatsapp'
+        case 'forward':
+          const forwardEntry = navigationManager.navigateForward(from);
+          if (forwardEntry) {
+            return await this.navigateToState(from, forwardEntry);
+          } else {
+            await this.sendMessage(from, 
+              `↪️ No hay página siguiente disponible.`
+            );
+          }
+          break;
+          
+        case 'help':
+          // Show help without changing state
+          await this.showNavigationHelp(from);
+          // Remind current context after a delay
+          setTimeout(async () => {
+            const current = navigationManager.getCurrentNavigation(from);
+            if (current) {
+              await this.sendMessage(from, 
+                `\n📍 Estás en: ${current.title}\n\n` +
+                `Continúa con tu actividad o escribe *menu* para el menú principal.`
+              );
+            }
+          }, 2000);
+          break;
+          
+        case 'commands':
+          await this.showAllCommands(from);
+          break;
+          
+        case 'status':
+          // Don't clear state when checking status
+          return await this.checkStatus(from);
+          
+        case 'privacy':
+          return await this.showPrivacyMenu(from);
+          
+        case 'exit':
+        case 'cancel':
+          await this.stateManager.clearState(from);
+          navigationManager.clearHistory(from);
+          await this.sendMessage(from, 
+            `👋 Sesión terminada.\n\n` +
+            `Gracias por usar Permisos Digitales.\n` +
+            `Escribe cualquier palabra para comenzar de nuevo.`
+          );
+          break;
+          
+        default:
+          await this.sendMessage(from, 
+            `❓ Comando no reconocido: ${command}\n\n` +
+            `Escribe *ayuda* para ver los comandos disponibles.`
+          );
+      }
+    } catch (error) {
+      logger.error('Error al procesar comando de navegación', { error: error.message, from, command });
+      await this.sendMessage(from, '❌ Error al procesar el comando. Intenta de nuevo.');
+    }
+  }
+
+  /**
+   * Navigate to a specific state from navigation history
+   */
+  async navigateToState(from, navigationEntry) {
+    const { state, data } = navigationEntry;
+    
+    // Restore preserved state if available
+    if (data && data.preservedStateKey) {
+      const preserved = navigationManager.getPreservedState(from, data.preservedStateKey);
+      if (preserved) {
+        await this.stateManager.setState(from, preserved);
+      }
+    }
+    
+    // Navigate based on state
+    switch (state) {
+      case 'MAIN_MENU':
+        return await this.showMainMenu(from);
+      case 'PRIVACY_MENU':
+        return await this.showPrivacyMenu(from);
+      case 'NEW_APPLICATION':
+        return await this.startApplication(from);
+      case 'FORM_FILLING':
+        // Restore form state and continue
+        const formData = navigationManager.getPreservedState(from, 'form_data');
+        if (formData) {
+          const currentState = await this.stateManager.getState(from) || {};
+          currentState.data = formData;
+          currentState.status = 'collecting';
+          currentState.currentField = data.step - 1;
+          await this.stateManager.setState(from, currentState);
+          
+          const field = this.fields[currentState.currentField];
+          await this.sendFieldPrompt(from, field, currentState.currentField);
+        }
+        break;
+      case 'CONFIRMATION':
+        // Restore confirmation state
+        if (data && data.formData) {
+          const currentState = await this.stateManager.getState(from) || {};
+          currentState.data = data.formData;
+          currentState.status = 'confirming';
+          await this.stateManager.setState(from, currentState);
+          await this.showConfirmation(from, currentState);
+        }
+        break;
+      case 'STATUS_CHECK':
+        return await this.checkStatus(from);
+      default:
+        return await this.showMainMenu(from);
+    }
+  }
+
+  /**
+   * Handle links in messages
+   */
+  async handleLinks(from, links) {
+    if (links.length === 1) {
+      const link = links[0];
+      
+      // Check if it's our privacy policy
+      if (link.includes('permisosdigitales.com.mx/politica-de-privacidad')) {
+        await this.sendMessage(from, 
+          `📄 *POLÍTICA DE PRIVACIDAD*\n\n` +
+          `Puedes ver nuestra política completa en:\n` +
+          `${link}\n\n` +
+          `También puedes acceder a opciones de privacidad escribiendo *3* en el menú principal.`
+        );
+      } else if (link.includes('permisosdigitales.com.mx')) {
+        await this.sendMessage(from, 
+          `🌐 *SITIO WEB DETECTADO*\n\n` +
+          `Para acceder a nuestro sitio web, visita:\n` +
+          `${link}\n\n` +
+          `Aquí en WhatsApp también puedo ayudarte. Escribe *menu* para ver las opciones.`
+        );
+      } else {
+        await this.sendMessage(from, 
+          `🔗 *ENLACE DETECTADO*\n\n` +
+          `Has compartido este enlace:\n` +
+          `${link}\n\n` +
+          `Si necesitas ayuda con algo específico, escribe *menu* para ver las opciones disponibles.`
+        );
+      }
+    } else {
+      await this.sendMessage(from, 
+        `🔗 *MÚLTIPLES ENLACES DETECTADOS*\n\n` +
+        `Has compartido ${links.length} enlaces. Si necesitas ayuda específica, por favor comparte un enlace a la vez.\n\n` +
+        `Escribe *menu* para ver las opciones disponibles.`
+      );
+    }
+  }
+
+  /**
+   * Show navigation help
+   */
+  async showNavigationHelp(from) {
+    await this.sendMessage(from, 
+      `🧭 *COMANDOS DE NAVEGACIÓN*\n\n` +
+      `Puedes usar estos comandos en cualquier momento:\n\n` +
+      `🏠 *menu* o *inicio* - Ir al menú principal\n` +
+      `↩️ *atrás* o *regresar* - Página anterior\n` +
+      `↪️ *adelante* o *siguiente* - Página siguiente\n` +
+      `❓ *ayuda* - Mostrar esta ayuda\n` +
+      `📊 *estado* - Ver estado de tu solicitud\n` +
+      `🔐 *privacidad* - Opciones de privacidad\n` +
+      `🚪 *salir* o *cancelar* - Terminar sesión\n\n` +
+      `💡 También puedes escribir números (1-4) para seleccionar opciones del menú.`
+    );
+  }
+
+  /**
+   * Show all available commands
+   */
+  async showAllCommands(from) {
+    await this.sendMessage(from, 
+      `📚 *TODOS LOS COMANDOS DISPONIBLES*\n\n` +
+      `*Navegación:*\n` +
+      `• menu, inicio, home\n` +
+      `• atrás, regresar, back\n` +
+      `• adelante, siguiente, forward\n` +
+      `• ayuda, help, ?\n` +
+      `• salir, exit, cancelar\n\n` +
+      `*Funciones:*\n` +
+      `• estado, status\n` +
+      `• privacidad, privacy\n` +
+      `• comandos\n\n` +
+      `*Durante el formulario:*\n` +
+      `• Puedes escribir el nombre del campo para editarlo\n` +
+      `• Ejemplo: "email" para cambiar tu correo\n\n` +
+      `💡 Tip: Los comandos funcionan con o sin caracteres especiales.\n` +
+      `Ejemplo: menu, ayuda, estado (también: !menu, #ayuda)`
+    );
+  }
+
+  /**
+   * Update form filling to include navigation and personality
+   */
+  async sendFieldPrompt(from, field, fieldIndex, state) {
+    // Calculate actual fields user will see (excluding pre-filled email)
+    const emailSkipped = state.userEmail && state.data.email;
+    const totalFieldsForUser = emailSkipped ? this.fields.length - 1 : this.fields.length;
+    
+    // Calculate user-facing field number (sequential, not skipping)
+    let userFieldNumber = fieldIndex + 1;
+    if (emailSkipped && fieldIndex > 2) { // Email is field index 2
+      userFieldNumber = fieldIndex; // Adjust because we skip email
+    }
+    
+    // Field prompt already includes examples, just add step counter
+    const prompt = `${field.prompt}\n\n*Paso ${userFieldNumber} de ${totalFieldsForUser}*`;
+    
+    await this.sendMessage(from, prompt);
+    
+    // Update state with last field
+    state.lastFieldKey = field.key;
+    await this.stateManager.setState(from, state);
+  }
+
+  /**
+   * Handle permit ready notification from permit generation service
+   * Sends download links to the user via WhatsApp
+   * @param {string} applicationId - Application ID
+   * @param {string} permitUrl - S3 presigned URL for the permit PDF
+   * @param {string} phoneNumber - WhatsApp phone number
+   */
+  async handlePermitReady(applicationId, permitUrl, phoneNumber) {
+    try {
+      logger.info('Handling permit ready notification', {
+        applicationId,
+        phoneNumber: phoneNumber ? phoneNumber.substring(0, 6) + '****' : 'not provided',
+        hasPermitUrl: !!permitUrl
+      });
+
+      // Normalize phone number
+      const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
+      
+      // Get or assign assistant for consistency
+      const assistant = this.getAssistantForUser(normalizedPhone);
+      
+      // Try to get user info to check if they need login credentials
+      let loginCredentialsMessage = '';
+      try {
+        const applicationRepository = require('../../repositories/application.repository');
+        const userRepository = require('../../repositories/user.repository');
+        const db = require('../../db');
+        
+        // Get application data to find user
+        const appData = await applicationRepository.getApplicationForGeneration(applicationId);
+        
+        if (appData && appData.user_id) {
+          // Get user details
+          const user = await userRepository.findById(appData.user_id);
+          
+          // Check if this is a WhatsApp user who might benefit from web access
+          // We identify them by: 1) having whatsapp_phone, 2) source = 'whatsapp'
+          if (user && user.whatsapp_phone && user.source === 'whatsapp') {
+            // Check if they have a real email (not placeholder)
+            const hasRealEmail = user.email && 
+              !user.email.includes('@permisos.mx') && 
+              !user.email.includes('@whatsapp.permisos.mx');
+            
+            if (hasRealEmail) {
+              // Check if we already sent them credentials before
+              // Use a simple check: see if this is their first successful permit
+              const permitCountResult = await db.query(
+                `SELECT COUNT(*) as count FROM permit_applications 
+                 WHERE user_id = $1 AND status = 'PERMIT_READY'`,
+                [user.id]
+              );
+              
+              const isFirstPermit = permitCountResult.rows[0].count === '0' || permitCountResult.rows[0].count === '1';
+              
+              // Only send credentials on first permit completion
+              if (isFirstPermit) {
+                // Generate temporary password
+                
+                // Generate strong but user-friendly password
+                const words = ['Solar', 'Luna', 'Cielo', 'Mar', 'Monte', 'Rio', 'Viento', 'Fuego', 'Tierra', 'Agua'];
+                const word1 = words[Math.floor(Math.random() * words.length)];
+                const word2 = words[Math.floor(Math.random() * words.length)];
+                const num1 = Math.floor(Math.random() * 900) + 100;
+                const num2 = Math.floor(Math.random() * 900) + 100;
+                const temporaryPassword = `${word1}-${num1}-${word2}-${num2}`;
+                
+                // Update user's password
+                const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+                await userRepository.update(user.id, { 
+                  password_hash: passwordHash
+                });
+                
+                // Add login credentials to message
+                loginCredentialsMessage = `\n\n🔐 *ACCESO A TU CUENTA EN LÍNEA (OPCIONAL):*\n` +
+                  `Ahora puedes acceder a tu cuenta en:\n` +
+                  `🌐 permisosdigitales.com.mx\n\n` +
+                  `📧 *Email:* ${user.email}\n` +
+                  `🔑 *Contraseña temporal:* ${temporaryPassword}\n\n` +
+                  `Beneficios de tu cuenta:\n` +
+                  `• Ver historial de permisos\n` +
+                  `• Descargar permisos anteriores\n` +
+                  `• Renovar fácilmente\n\n` +
+                  `Te recomendamos guardar estos datos para futuros accesos.`;
+                
+                logger.info('Generated login credentials for WhatsApp user', {
+                  userId: user.id,
+                  applicationId,
+                  isFirstPermit: true
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Don't fail the main flow if credential generation fails
+        logger.error('Error generating login credentials', {
+          error: error.message,
+          applicationId
+        });
+      }
+      
+      // Generate clean download URL for all PDFs
+      let downloadUrl = permitUrl; // Default to S3 URL if clean URL generation fails
+      try {
+        const axios = require('axios');
+        const apiUrl = process.env.API_URL || 'https://api.permisosdigitales.com.mx';
+        
+        // Get application folio
+        const appQuery = 'SELECT folio FROM permit_applications WHERE id = $1';
+        const appResult = await db.query(appQuery, [applicationId]);
+        const folioNumber = appResult.rows[0]?.folio || applicationId;
+        
+        const response = await axios.post(`${apiUrl}/permits/generate-link`, {
+          applicationId,
+          folioNumber
+        });
+        
+        if (response.data.success) {
+          downloadUrl = response.data.url;
+          logger.info('Generated clean download URL for permit ready notification', {
+            applicationId,
+            folioNumber,
+            url: downloadUrl
           });
         }
-        
-        // Commit database changes
-        await client.query('COMMIT');
-        
-        // Clear Redis state after successful database commit
+      } catch (urlError) {
+        logger.error('Failed to generate clean URL, using S3 URL', {
+          error: urlError.message,
+          applicationId
+        });
+      }
+      
+      // Create the message with download link
+      const message = `🎉 *¡TU PERMISO ESTÁ LISTO!*\n\n` +
+        `${assistant.emoji} Hola, soy ${assistant.name}.\n\n` +
+        `Tu permiso de circulación está listo para descargar:\n\n` +
+        `📄 *Folio:* ${applicationId}\n` +
+        `⏰ *Válido por:* 30 días\n\n` +
+        `📥 *DESCARGA TODOS TUS DOCUMENTOS:*\n${downloadUrl}\n\n` +
+        `📦 *Incluye:*\n` +
+        `• Permiso Digital\n` +
+        `• Certificado\n` +
+        `• Placas en Proceso\n` +
+        `• Recomendaciones\n\n` +
+        `💡 *Importante:*\n` +
+        `• Este enlace expira en 48 horas\n` +
+        `• Se descargará un archivo ZIP con todos los documentos\n` +
+        `• También lo enviamos a tu email` +
+        loginCredentialsMessage + `\n\n` +
+        `¿Necesitas otro permiso?\n` +
+        `Escribe *1* para iniciar nueva solicitud\n` +
+        `Escribe *2* para ver el menú principal`;
+      
+      // Send the message
+      await this.sendMessage(normalizedPhone, message);
+      
+      // Clear any existing state for this user
+      await this.stateManager.clearState(normalizedPhone);
+      
+      // Set a simple state to handle their response
+      const state = {
+        status: 'permit_delivered',
+        lastPermitId: applicationId,
+        timestamp: Date.now()
+      };
+      await this.stateManager.setState(normalizedPhone, state);
+      
+      logger.info('Permit ready notification sent successfully', {
+        applicationId,
+        phoneNumber: normalizedPhone.substring(0, 6) + '****'
+      });
+      
+      return true;
+      
+    } catch (error) {
+      logger.error('Error handling permit ready notification', {
+        error: error.message,
+        stack: error.stack,
+        applicationId,
+        phoneNumber: phoneNumber ? phoneNumber.substring(0, 6) + '****' : 'not provided'
+      });
+      
+      // Try to send a fallback message if possible
+      if (phoneNumber) {
         try {
-          const stateKey = `wa:${from}`;
-          await redisClient.del(stateKey);
-        } catch (redisError) {
-          // Log but don't fail - Redis error is not critical
-          logger.error('Error clearing Redis state after opt-out', { error: redisError.message, from });
-        }
-        
-        logger.info(`User ${user?.id || 'unknown'} opted out via WhatsApp command`, { phone: from });
-        
-        // Send appropriate confirmation message
-        if (!user) {
-          await this.sendMessage(from, 
-            '✅ Has sido dado de baja del servicio de WhatsApp.\n\n' +
-            'Ya no recibirás más mensajes de Permisos Digitales.\n\n' +
-            'Si cambias de opinión, puedes volver a activar el servicio desde nuestra página web.'
+          const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
+          await this.sendMessage(normalizedPhone, 
+            `✅ Tu permiso está listo (Folio: ${applicationId})\n\n` +
+            `Por favor revisa tu correo electrónico para descargarlo.\n\n` +
+            `Si necesitas ayuda, escribe *ayuda*`
           );
-        } else {
-          await this.sendMessage(from, 
-            `✅ ${user.first_name}, has sido dado de baja exitosamente.\n\n` +
-            '🚫 Ya no recibirás notificaciones por WhatsApp.\n\n' +
-            '📧 Seguirás recibiendo notificaciones importantes por correo electrónico.\n\n' +
-            '💡 Puedes reactivar el servicio en cualquier momento desde tu perfil en:\n' +
-            'https://permisosdigitales.com.mx/perfil\n\n' +
-            'Gracias por usar Permisos Digitales.'
-          );
+        } catch (fallbackError) {
+          logger.error('Failed to send fallback message', { 
+            error: fallbackError.message,
+            applicationId 
+          });
         }
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Check rate limiting for renewal attempts
+   */
+  async checkRenewalRateLimit(from) {
+    const { createRenewalError } = require('../../utils/renewal-errors');
+    const key = `renewal_rate_limit:${from}`;
+    const maxAttempts = 10; // Increased for testing
+    const windowMs = 10 * 60 * 1000; // 10 minutes (reduced for testing)
+    
+    try {
+      const currentCount = await redisClient.get(key);
+      
+      if (currentCount && parseInt(currentCount) >= maxAttempts) {
+        const ttl = await redisClient.ttl(key);
+        const minutesRemaining = Math.ceil(ttl / 60);
         
-      } catch (error) {
-        // Rollback on any error
-        await client.query('ROLLBACK');
-        throw error;
+        // Create specific rate limit error with user-friendly message
+        const userMessage = `⚠️ *LÍMITE DE RENOVACIONES ALCANZADO*\n\n` +
+          `Has alcanzado el límite de ${maxAttempts} intentos de renovación por hora.\n\n` +
+          `⏰ Intenta de nuevo en ${minutesRemaining} minutos.\n\n` +
+          `Si necesitas ayuda urgente, escribe "ayuda"`;
+          
+        throw createRenewalError('rate_limit', new Error(`Rate limit exceeded: ${minutesRemaining} minutes remaining`));
+      }
+      
+      // Increment counter
+      const newCount = parseInt(currentCount || 0) + 1;
+      await redisClient.setex(key, Math.floor(windowMs / 1000), newCount);
+      
+      logger.info(`Renewal rate limit check passed for ${from}`, {
+        phone: from,
+        attempts: newCount,
+        maxAttempts
+      });
+      
+      return true;
+    } catch (error) {
+      if (error.name && error.name.includes('Renewal')) {
+        throw error; // Re-throw renewal errors
+      }
+      
+      logger.error('Redis rate limit check failed, allowing request', { error: error.message, from });
+      return true; // Allow on Redis failure
+    }
+  }
+
+  /**
+   * Handle renewal flow - main entry point
+   */
+  /**
+   * Handle edit renewal flow - user wants to edit permit details before renewal
+   */
+  async handleEditRenewal(from) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      const renewablePermits = await this.checkRenewablePermits(user.id);
+      
+      if (renewablePermits.length === 0) {
+        await this.sendMessage(from,
+          '❌ *NO HAY PERMISOS PARA EDITAR*\n\n' +
+          'Los permisos se pueden renovar:\n' +
+          '• 7 días antes de vencer\n' +
+          '• Hasta 30 días después de vencidos\n\n' +
+          'Escribe "1" para crear un nuevo permiso o "menu" para volver al menú.'
+        );
+        return;
+      }
+      
+      if (renewablePermits.length === 1) {
+        // Auto-select and start editing
+        return await this.startRenewalEditing(from, renewablePermits[0]);
+      } else {
+        // Show selection list for editing
+        return await this.showEditablePermitsList(from, renewablePermits);
       }
       
     } catch (error) {
-      logger.error('Error handling opt-out', { error: error.message, from });
+      logger.error('Error en flujo de edición de renovación', { error: error.message, from });
       await this.sendMessage(from, 
-        '❌ Hubo un error al procesar tu solicitud.\n\n' +
-        'Por favor contacta a soporte@permisosdigitales.com.mx'
+        '❌ Hubo un error al procesar tu solicitud de edición.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
       );
-    } finally {
-      client.release();
     }
   }
-  
-  /**
-   * Add phone number to opt-out list (with transaction support)
-   */
-  async addToOptOutListWithClient(client, phoneNumber, userId, source, reason = null) {
+
+  async handleRenewalFlow(from, permitId = null, directRenewal = true) {
+    const { getUserFriendlyMessage } = require('../../utils/renewal-errors');
+    
     try {
-      const query = `
-        INSERT INTO whatsapp_optout_list 
-        (phone_number, user_id, opt_out_source, opt_out_reason)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (phone_number) 
-        DO UPDATE SET 
-          updated_at = NOW(),
-          opt_out_source = EXCLUDED.opt_out_source
-      `;
-      
-      await client.query(query, [phoneNumber, userId, source, reason]);
-      logger.info('Added to WhatsApp opt-out list', { phoneNumber, userId, source });
-    } catch (error) {
-      logger.error('Error adding to opt-out list', { error: error.message, phoneNumber });
-      throw error;
-    }
-  }
-  
-  /**
-   * Add phone number to opt-out list (standalone)
-   */
-  async addToOptOutList(phoneNumber, userId, source, reason = null) {
-    try {
-      const query = `
-        INSERT INTO whatsapp_optout_list 
-        (phone_number, user_id, opt_out_source, opt_out_reason)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (phone_number) 
-        DO UPDATE SET 
-          updated_at = NOW(),
-          opt_out_source = EXCLUDED.opt_out_source
-      `;
-      
-      await db.query(query, [phoneNumber, userId, source, reason]);
-      logger.info('Added to WhatsApp opt-out list', { phoneNumber, userId, source });
-    } catch (error) {
-      logger.error('Error adding to opt-out list', { error: error.message, phoneNumber });
-      throw error;
-    }
-  }
-  
-  /**
-   * Check if phone number is opted out
-   */
-  async isOptedOut(phoneNumber) {
-    try {
-      // Check opt-out list
-      const optOutQuery = `
-        SELECT id FROM whatsapp_optout_list 
-        WHERE phone_number = $1 
-        LIMIT 1
-      `;
-      const optOutResult = await db.query(optOutQuery, [phoneNumber]);
-      
-      if (optOutResult.rows.length > 0) {
-        return true;
+      // Check rate limiting first
+      try {
+        await this.checkRenewalRateLimit(from);
+      } catch (error) {
+        if (error.name === 'RenewalRateLimitError') {
+          await this.sendMessage(from, error.userMessage);
+          // Clear state when rate limited to prevent confusion
+          await this.stateManager.clearState(from);
+          return;
+        }
+        throw error; // Re-throw other errors
       }
       
-      // Also check user record
-      const userQuery = `
-        SELECT id FROM users 
-        WHERE whatsapp_phone = $1 
-        AND whatsapp_opted_out = TRUE 
-        LIMIT 1
-      `;
-      const userResult = await db.query(userQuery, [phoneNumber]);
+      const user = await this.findOrCreateUser(from);
       
-      return userResult.rows.length > 0;
+      // If no permitId, show list of renewable permits
+      if (!permitId) {
+        const renewablePermits = await this.checkRenewablePermits(user.id);
+        
+        if (renewablePermits.length === 0) {
+          await this.sendMessage(from,
+            '❌ *NO HAY PERMISOS PARA RENOVAR*\n\n' +
+            'Los permisos se pueden renovar:\n' +
+            '• 7 días antes de vencer\n' +
+            '• Hasta 30 días después de vencidos\n\n' +
+            'Escribe "1" para crear un nuevo permiso o "menu" para volver al menú.'
+          );
+          return;
+        }
+        
+        if (renewablePermits.length === 1) {
+          // Auto-select if only one
+          permitId = renewablePermits[0].id;
+        } else {
+          // Show selection list
+          return await this.showRenewablePermitsList(from, renewablePermits);
+        }
+      }
+      
+      // Validate permit eligibility
+      const isEligible = await this.isEligibleForRenewal(permitId, user.id);
+      if (!isEligible) {
+        await this.sendMessage(from, 
+          '❌ Este permiso no es elegible para renovación.\n\n' +
+          'Escribe "menu" para ver opciones o "estado" para verificar tus solicitudes.'
+        );
+        return;
+      }
+      
+      // Get the permit details for renewal
+      const originalPermit = await this.getPermitById(permitId, user.id);
+      if (!originalPermit) {
+        await this.sendMessage(from, 
+          '❌ No encontré ese permiso en tu cuenta.\n\n' +
+          'Escribe "menu" para ver opciones.'
+        );
+        return;
+      }
+      
+      // If directRenewal is true, create application immediately
+      if (directRenewal) {
+        return await this.createDirectRenewal(from, originalPermit, user);
+      } else {
+        // Show renewal confirmation (old flow)
+        await this.showRenewalConfirmation(from, originalPermit);
+      }
+      
     } catch (error) {
-      logger.error('Error checking opt-out status', { error: error.message, phoneNumber });
+      logger.error('Error en flujo de renovación', { error: error.message, from });
+      await this.sendMessage(from, 
+        '❌ Hubo un error al procesar tu renovación.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
+      );
+    }
+  }
+
+  /**
+   * Show list of renewable permits for selection
+   */
+  async showRenewablePermitsList(from, renewablePermits) {
+    let message = '♻️ *PERMISOS RENOVABLES*\n\n';
+    
+    renewablePermits.forEach((permit, index) => {
+      const daysText = permit.days_until_expiration >= 0 
+        ? `vence en ${permit.days_until_expiration} días`
+        : `venció hace ${Math.abs(permit.days_until_expiration)} días`;
+      
+      message += `${index + 1}. *Folio:* ${permit.folio || permit.id}\n`;
+      message += `   🚗 ${permit.marca} ${permit.linea} ${permit.color}\n`;
+      message += `   📅 ${daysText}\n\n`;
+    });
+    
+    message += 'Escribe el número del permiso a renovar (1-' + renewablePermits.length + ')';
+    await this.sendMessage(from, message);
+    
+    // Set state for selection
+    const state = {
+      status: 'renewal_selection',
+      renewablePermits: renewablePermits,
+      timestamp: Date.now()
+    };
+    await this.stateManager.setState(from, state);
+  }
+
+  /**
+   * Show renewal confirmation with existing data
+   */
+  async showRenewalConfirmation(from, originalPermit) {
+    // Format expiration info
+    const expirationDate = new Date(originalPermit.fecha_vencimiento);
+    const today = new Date();
+    const daysUntilExpiration = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+    let expirationText = '';
+    
+    if (daysUntilExpiration > 0) {
+      expirationText = `⚠️ Vence en ${daysUntilExpiration} días`;
+    } else if (daysUntilExpiration === 0) {
+      expirationText = '⚠️ Vence hoy';
+    } else {
+      expirationText = `❌ Venció hace ${Math.abs(daysUntilExpiration)} días`;
+    }
+    
+    // Show data summary for confirmation
+    await this.sendMessage(from,
+      `♻️ *RENOVACIÓN DE PERMISO*\n\n` +
+      `📋 Folio actual: ${originalPermit.folio || originalPermit.id}\n` +
+      `${expirationText}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n` +
+      `📝 *DATOS REGISTRADOS:*\n` +
+      `━━━━━━━━━━━━━━━━━━\n\n` +
+      `👤 *Información Personal:*\n` +
+      `• Nombre: ${originalPermit.nombre_completo}\n` +
+      `• CURP/RFC: ${originalPermit.curp_rfc}\n` +
+      `• Email: ${originalPermit.email}\n` +
+      `• Domicilio: ${originalPermit.domicilio}\n\n` +
+      `🚗 *Información del Vehículo:*\n` +
+      `• ${originalPermit.marca} ${originalPermit.linea}\n` +
+      `• Color: ${originalPermit.color}\n` +
+      `• Año: ${originalPermit.ano_modelo}\n` +
+      `• No. Serie: ${this.maskSerialNumber(originalPermit.numero_serie)}\n` +
+      `• No. Motor: ${this.maskSerialNumber(originalPermit.numero_motor)}\n\n` +
+      `━━━━━━━━━━━━━━━━━━\n\n` +
+      `¿Esta información sigue siendo correcta?\n\n` +
+      `✅ Escribe *1* - Sí, renovar con estos datos\n` +
+      `✏️ Escribe *2* - Necesito actualizar información\n` +
+      `❌ Escribe *3* - Cancelar renovación`
+    );
+    
+    // Set state for renewal confirmation
+    const state = {
+      status: 'renewal_confirmation',
+      originalPermitId: originalPermit.id,
+      renewalData: originalPermit,
+      timestamp: Date.now()
+    };
+    await this.stateManager.setState(from, state);
+  }
+
+  /**
+   * Helper function to mask sensitive data
+   */
+  maskSerialNumber(value) {
+    if (!value || value.length < 8) return value;
+    const visibleChars = 4;
+    const masked = value.substring(0, visibleChars) + '...' + value.substring(value.length - visibleChars);
+    return masked;
+  }
+
+  /**
+   * Handle renewal confirmation responses
+   */
+  async handleRenewalConfirmation(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Create new application with same data
+        await this.processRenewal(from, state);
+        break;
+        
+      case '2':
+        // Start update flow
+        await this.startRenewalUpdate(from, state);
+        break;
+        
+      case '3':
+        // Cancel renewal
+        await this.stateManager.clearState(from);
+        await this.sendMessage(from, 
+          '❌ Renovación cancelada.\n\n' +
+          'Escribe "menu" para ver opciones.'
+        );
+        break;
+        
+      default:
+        await this.sendMessage(from,
+          'Por favor elige una opción:\n\n' +
+          '1️⃣ Renovar con datos actuales\n' +
+          '2️⃣ Actualizar información\n' +
+          '3️⃣ Cancelar'
+        );
+    }
+  }
+
+  /**
+   * Process renewal - create new application with existing data
+   */
+  async processRenewal(from, state) {
+    const renewalData = state.renewalData;
+    const user = await this.findOrCreateUser(from);
+    
+    try {
+      // Call backend renewal API
+      const response = await axios.post(`${process.env.API_URL || 'http://localhost:3001'}/api/applications/${state.originalPermitId}/renew`, {
+        userId: user.id
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-ID': user.id.toString()
+        }
+      });
+      
+      const result = response.data;
+      
+      if (!result.success || !result.paymentLink) {
+        throw new Error('Invalid renewal response from API');
+      }
+      
+      const newApplication = result.data;
+      const paymentLink = result.paymentLink;
+      
+      // Create short URL for payment link
+      const urlShortener = require('./url-shortener.service');
+      const shortUrl = await urlShortener.createShortUrl(paymentLink, newApplication.id);
+      
+      // Store payment info in state
+      const newState = {
+        status: 'renewal_payment',
+        pendingPayment: {
+          applicationId: newApplication.id,
+          link: shortUrl || paymentLink,
+          originalLink: paymentLink,
+          amount: result.payment.amount,
+          timestamp: Date.now()
+        },
+        isRenewal: true,
+        originalPermitId: state.originalPermitId
+      };
+      await this.stateManager.setState(from, newState);
+      
+      // Send payment message with correct amount
+      await this.sendMessage(from,
+        `✅ *RENOVACIÓN LISTA PARA PAGO*\n\n` +
+        `━━━━━━━━━━━━━━━━━━\n` +
+        `📱 *Nuevo Folio:* ${newApplication.folio || newApplication.id}\n` +
+        `💰 *Costo:* $${result.payment.amount.toFixed(2)} ${result.payment.currency}\n` +
+        `⏱️ *Tiempo:* 5 minutos después del pago\n` +
+        `━━━━━━━━━━━━━━━━━━\n\n` +
+        `💳 *LINK DE PAGO:*\n${shortUrl || paymentLink}\n\n` +
+        `📌 *Opciones de pago:*\n` +
+        `• Tarjeta de crédito/débito (inmediato)\n` +
+        `• OXXO (confirmación en 1-4 horas)\n\n` +
+        `💡 *Tip:* Guarda este mensaje para pagar más tarde\n\n` +
+        `¿Necesitas ayuda? Escribe "ayuda"`
+      );
+      
+      logger.info('Renewal processed successfully', {
+        originalPermitId: state.originalPermitId,
+        newApplicationId: newApplication.id,
+        userId: user.id
+      });
+      
+    } catch (error) {
+      const { getUserFriendlyMessage } = require('../../utils/renewal-errors');
+      
+      logger.error('Error processing renewal', { 
+        error: error.message, 
+        from,
+        originalPermitId: state.originalPermitId,
+        stack: error.stack,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
+      
+      // Parse API error response for better user messaging
+      let userMessage = '❌ Hubo un error al procesar la renovación.\n\n';
+      
+      // Handle axios errors
+      if (error.response) {
+        const status = error.response.status;
+        if (status === 429) {
+          userMessage = '⚠️ *LÍMITE DE RENOVACIONES ALCANZADO*\n\n' +
+                       'Has alcanzado el límite de intentos de renovación por hora.\n\n' +
+                       '⏰ Intenta de nuevo en 60 minutos.\n\n' +
+                       'Si necesitas ayuda urgente, escribe "ayuda"';
+        } else if (status === 400) {
+          userMessage = '❌ *NO SE PUEDE RENOVAR*\n\n' +
+                       'Este permiso no cumple con los requisitos para renovación:\n\n' +
+                       '• Solo se puede renovar 7 días antes del vencimiento\n' +
+                       '• Hasta 30 días después del vencimiento\n' +
+                       '• Cada permiso solo se puede renovar una vez\n\n' +
+                       'Escribe "estado" para ver tus permisos actuales.';
+        } else if (status === 402) {
+          userMessage = '💳 *ERROR DE PAGO*\n\n' +
+                       'No pudimos crear la sesión de pago.\n\n' +
+                       'Por favor, inténtalo nuevamente en unos minutos.\n\n' +
+                       'Si el problema persiste, escribe "ayuda"';
+        }
+      } else if (error.code === 'ECONNRESET' || error.code === 'ENOTFOUND' || error.message.includes('timeout')) {
+        userMessage = '🔧 *PROBLEMA TÉCNICO TEMPORAL*\n\n' +
+                     'Tenemos problemas técnicos temporales.\n\n' +
+                     'Por favor, inténtalo nuevamente en unos minutos.\n\n' +
+                     'Tu información está segura.';
+      } else {
+        // Generic error with helpful suggestions
+        userMessage = '❌ *ERROR INESPERADO*\n\n' +
+                     'Ocurrió un error inesperado al procesar tu renovación.\n\n' +
+                     '🔄 *Qué puedes hacer:*\n' +
+                     '• Intenta nuevamente en 5 minutos\n' +
+                     '• Verifica tu conexión a internet\n' +
+                     '• Escribe "ayuda" para contactar soporte\n\n' +
+                     '💡 Tu información está segura y no se perdió.';
+      }
+      
+      await this.sendMessage(from, userMessage);
+    }
+  }
+
+  /**
+   * Start renewal field update flow
+   */
+  async startRenewalUpdate(from, state) {
+    state.status = 'renewal_field_selection';
+    await this.stateManager.setState(from, state);
+    
+    await this.sendMessage(from,
+      `✏️ *ACTUALIZAR INFORMACIÓN*\n\n` +
+      `¿Qué necesitas actualizar?\n\n` +
+      `1️⃣ Un campo específico\n` +
+      `2️⃣ Datos personales completos\n` +
+      `3️⃣ Datos del vehículo completos\n` +
+      `4️⃣ Todo (hacer solicitud nueva)\n\n` +
+      `Responde con el número (1-4)`
+    );
+  }
+
+  /**
+   * Handle renewal permit selection
+   */
+  async handleRenewalSelection(from, response, state) {
+    const selection = parseInt(response.trim());
+    
+    if (isNaN(selection) || selection < 1 || selection > state.renewablePermits.length) {
+      await this.sendMessage(from, 
+        `Por favor elige un número válido entre 1 y ${state.renewablePermits.length}`
+      );
+      return;
+    }
+    
+    const selectedPermit = state.renewablePermits[selection - 1];
+    
+    // Get full permit details and proceed to confirmation
+    const user = await this.findOrCreateUser(from);
+    const originalPermit = await this.getPermitById(selectedPermit.id, user.id);
+    
+    if (!originalPermit) {
+      await this.sendMessage(from, 
+        '❌ Error al cargar los datos del permiso.\n\n' +
+        'Escribe "menu" para volver al menú.'
+      );
+      return;
+    }
+    
+    // Show renewal confirmation
+    await this.showRenewalConfirmation(from, originalPermit);
+  }
+
+  /**
+   * Handle renewal field selection for updates
+   */
+  async handleRenewalFieldSelection(from, response, state) {
+    const selection = response.trim();
+    
+    switch (selection) {
+      case '1':
+        // Single field update - show field list
+        await this.showRenewalFieldList(from, state);
+        break;
+        
+      case '2':
+        // Update all personal data
+        await this.sendMessage(from, 
+          '✏️ *ACTUALIZAR DATOS PERSONALES*\n\n' +
+          'Esta función estará disponible pronto.\n\n' +
+          'Por ahora puedes:\n' +
+          '• Usar opción 1 para actualizar campos específicos\n' +
+          '• Usar opción 4 para hacer una solicitud nueva\n\n' +
+          'Escribe "1" para campos específicos o "4" para solicitud nueva.'
+        );
+        break;
+        
+      case '3':
+        // Update all vehicle data
+        await this.sendMessage(from, 
+          '✏️ *ACTUALIZAR DATOS DEL VEHÍCULO*\n\n' +
+          'Esta función estará disponible pronto.\n\n' +
+          'Por ahora puedes:\n' +
+          '• Usar opción 1 para actualizar campos específicos\n' +
+          '• Usar opción 4 para hacer una solicitud nueva\n\n' +
+          'Escribe "1" para campos específicos o "4" para solicitud nueva.'
+        );
+        break;
+        
+      case '4':
+        // Start fresh application
+        await this.stateManager.clearState(from);
+        await this.sendMessage(from,
+          '🔄 Iniciando nueva solicitud...\n\n' +
+          'Esto te permitirá actualizar toda la información.'
+        );
+        setTimeout(async () => {
+          await this.startApplication(from);
+        }, 1000);
+        break;
+        
+      default:
+        await this.sendMessage(from, 
+          'Por favor elige una opción del 1 al 4:\n\n' +
+          '1️⃣ Un campo específico\n' +
+          '2️⃣ Datos personales completos\n' +
+          '3️⃣ Datos del vehículo completos\n' +
+          '4️⃣ Todo (hacer solicitud nueva)'
+        );
+    }
+  }
+
+  /**
+   * Show list of fields for renewal update
+   */
+  async showRenewalFieldList(from, state) {
+    const fields = {
+      'nombre': 'Nombre completo',
+      'curp': 'CURP/RFC',
+      'email': 'Email',
+      'domicilio': 'Domicilio',
+      'marca': 'Marca del vehículo',
+      'linea': 'Modelo/Línea',
+      'color': 'Color',
+      'ano': 'Año',
+      'serie': 'Número de serie',
+      'motor': 'Número de motor'
+    };
+    
+    let message = '📝 *CAMPOS DISPONIBLES*\n\n';
+    message += 'Escribe la palabra clave del campo:\n\n';
+    
+    for (const [key, label] of Object.entries(fields)) {
+      const currentValue = this.getFieldValue(state.renewalData, key);
+      message += `• *${key}* - ${label}\n`;
+      message += `  Actual: ${this.truncateValue(currentValue)}\n\n`;
+    }
+    
+    message += 'O escribe "cancelar" para volver atrás.';
+    
+    state.status = 'renewal_single_field';
+    await this.stateManager.setState(from, state);
+    await this.sendMessage(from, message);
+  }
+
+  /**
+   * Get field value from renewal data
+   */
+  getFieldValue(renewalData, key) {
+    const fieldMap = {
+      'nombre': 'nombre_completo',
+      'curp': 'curp_rfc',
+      'email': 'email',
+      'domicilio': 'domicilio',
+      'marca': 'marca',
+      'linea': 'linea',
+      'color': 'color',
+      'ano': 'ano_modelo',
+      'serie': 'numero_serie',
+      'motor': 'numero_motor'
+    };
+    
+    const dbField = fieldMap[key] || key;
+    return renewalData[dbField] || 'No definido';
+  }
+
+  /**
+   * Truncate value for display
+   */
+  truncateValue(value) {
+    if (!value) return 'No definido';
+    if (value.length > 30) {
+      return value.substring(0, 27) + '...';
+    }
+    return value;
+  }
+
+  /**
+   * Handle renewal edit selection (user selects which permit to edit)
+   */
+  async handleRenewalEditSelection(from, response, state) {
+    const selection = parseInt(response.trim());
+    
+    if (isNaN(selection) || selection < 1 || selection > state.renewablePermits.length) {
+      await this.sendMessage(from, 
+        `Por favor elige un número válido entre 1 y ${state.renewablePermits.length}`
+      );
+      return;
+    }
+    
+    const selectedPermit = state.renewablePermits[selection - 1];
+    
+    // Get full permit details and start editing
+    const user = await this.findOrCreateUser(from);
+    const originalPermit = await this.getPermitById(selectedPermit.id, user.id);
+    
+    if (!originalPermit) {
+      await this.sendMessage(from, 
+        '❌ Error al cargar los datos del permiso.\n\n' +
+        'Escribe "menu" para volver al menú.'
+      );
+      return;
+    }
+    
+    // Start editing this permit
+    await this.startRenewalEditing(from, originalPermit);
+  }
+
+  /**
+   * Handle renewal field editing (user is editing specific fields)
+   */
+  async handleRenewalFieldEditing(from, response, state) {
+    const input = response.toLowerCase().trim();
+    
+    // Handle cancel
+    if (input === 'cancelar' || input === 'cancel' || input === 'menu') {
+      await this.stateManager.clearState(from);
+      return await this.showMainMenu(from);
+    }
+    
+    // Handle renovar - proceed with edited data
+    if (input === 'renovar' || input === 'renewal') {
+      const user = await this.findOrCreateUser(from);
+      return await this.createEditedRenewal(from, state.originalPermit, state.editData, user);
+    }
+    
+    // Handle field selection
+    const fieldMap = {
+      'marca': 'marca',
+      'linea': 'linea', 
+      'modelo': 'linea',
+      'color': 'color',
+      'año': 'ano_modelo',
+      'ano': 'ano_modelo',
+      'motor': 'numero_motor',
+      'serie': 'numero_serie',
+      'nombre': 'nombre_completo'
+    };
+    
+    const fieldKey = fieldMap[input];
+    
+    if (fieldKey) {
+      // Start editing this field
+      await this.sendMessage(from,
+        `✏️ *EDITANDO: ${input.toUpperCase()}*\n\n` +
+        `📝 *Valor actual:* ${state.editData[fieldKey] || 'No definido'}\n\n` +
+        `💡 Escribe el nuevo valor:\n\n` +
+        `🔙 O escribe "atras" para volver.`
+      );
+      
+      // Update state to handle field input
+      state.status = 'renewal_field_input';
+      state.currentField = fieldKey;
+      state.currentFieldName = input;
+      await this.stateManager.setState(from, state);
+      
+    } else {
+      await this.sendMessage(from,
+        '❌ Campo no reconocido.\n\n' +
+        'Campos disponibles:\n' +
+        '• *marca* - Marca del vehículo\n' +
+        '• *linea* - Línea/modelo\n' +
+        '• *color* - Color del vehículo\n' +
+        '• *año* - Año del modelo\n' +
+        '• *motor* - Número de motor\n' +
+        '• *serie* - Número de serie\n' +
+        '• *nombre* - Nombre completo\n\n' +
+        'Escribe el nombre del campo o "cancelar".'
+      );
+    }
+  }
+
+  /**
+   * Handle renewal field input (user is entering new field value)
+   */
+  async handleRenewalFieldInput(from, response, state) {
+    const input = response.trim();
+    
+    // Handle back navigation
+    if (input.toLowerCase() === 'atras' || input.toLowerCase() === 'back') {
+      // Go back to field selection
+      state.status = 'renewal_field_editing';
+      delete state.currentField;
+      delete state.currentFieldName;
+      await this.stateManager.setState(from, state);
+      
+      return await this.startRenewalEditing(from, state.originalPermit);
+    }
+    
+    // Validate and update the field
+    const fieldKey = state.currentField;
+    const fieldName = state.currentFieldName;
+    
+    // Basic validation
+    if (!input || input.length < 1) {
+      await this.sendMessage(from,
+        '❌ Por favor ingresa un valor válido.\n\n' +
+        `✏️ *Editando:* ${fieldName}\n` +
+        `📝 *Valor actual:* ${state.editData[fieldKey] || 'No definido'}\n\n` +
+        'Escribe el nuevo valor o "atras" para volver.'
+      );
+      return;
+    }
+    
+    // Update the field
+    state.editData[fieldKey] = input;
+    
+    await this.sendMessage(from,
+      `✅ *CAMPO ACTUALIZADO*\n\n` +
+      `📝 *${fieldName.toUpperCase()}:* ${input}\n\n` +
+      `🔧 ¿Quieres cambiar otro campo?\n\n` +
+      `• Escribe el número del campo a cambiar\n` +
+      `• O escribe *"renovar"* para proceder al pago\n` +
+      `• O escribe *"cancelar"* para salir`
+    );
+    
+    // Go back to field editing state
+    state.status = 'renewal_field_editing';
+    delete state.currentField;
+    delete state.currentFieldName;
+    await this.stateManager.setState(from, state);
+  }
+
+  /**
+   * Handle quick field editing from renewal reminders (e.g., "1 Toyota")
+   */
+  async handleQuickFieldEdit(from, fieldNumber, newValue) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      const renewablePermits = await this.checkRenewablePermits(user.id);
+      
+      if (renewablePermits.length === 0) {
+        await this.sendMessage(from,
+          '❌ *NO HAY PERMISOS PARA EDITAR*\n\n' +
+          'Los permisos se pueden renovar:\n' +
+          '• 7 días antes de vencer\n' +
+          '• Hasta 30 días después de vencidos\n\n' +
+          'Escribe "menu" para volver al menú.'
+        );
+        return;
+      }
+      
+      // Auto-select the first renewable permit
+      const permit = renewablePermits[0];
+      
+      // Map field numbers to field keys (without email)
+      const fieldMap = {
+        1: 'nombre_completo',
+        2: 'curp_rfc', 
+        3: 'marca',
+        4: 'linea',
+        5: 'color',
+        6: 'ano_modelo',
+        7: 'numero_serie',
+        8: 'numero_motor',
+        9: 'domicilio'
+      };
+      
+      const fieldKey = fieldMap[fieldNumber];
+      
+      if (!fieldKey) {
+        await this.sendMessage(from,
+          `❌ Número de campo inválido: ${fieldNumber}\n\n` +
+          'Campos disponibles:\n' +
+          '1. Nombre completo\n' +
+          '2. CURP o RFC\n' +
+          '3. Marca\n' +
+          '4. Modelo\n' +
+          '5. Color\n' +
+          '6. Año\n' +
+          '7. Número de serie (VIN)\n' +
+          '8. Número de motor\n' +
+          '9. Domicilio\n\n' +
+          'Ejemplo: *3 Toyota* para cambiar la marca'
+        );
+        return;
+      }
+      
+      // Get field labels for confirmation
+      const fieldLabels = {
+        'nombre_completo': 'Nombre completo',
+        'curp_rfc': 'CURP o RFC',
+        'marca': 'Marca',
+        'linea': 'Modelo',
+        'color': 'Color',
+        'ano_modelo': 'Año',
+        'numero_serie': 'Número de serie (VIN)',
+        'numero_motor': 'Número de motor',
+        'domicilio': 'Domicilio'
+      };
+      
+      // Create edited permit data
+      const editedData = { ...permit };
+      editedData[fieldKey] = newValue;
+      
+      // Send confirmation and proceed to create renewal
+      await this.sendMessage(from,
+        `✅ *CAMPO ACTUALIZADO*\n\n` +
+        `📝 *${fieldLabels[fieldKey]}:* ${newValue}\n\n` +
+        `🔄 Creando renovación con el cambio...\n\n` +
+        `⏳ Un momento...`
+      );
+      
+      // Create renewal with edited data
+      return await this.createEditedRenewal(from, permit, editedData, user);
+      
+    } catch (error) {
+      logger.error('Error in quick field edit:', error);
+      await this.sendMessage(from,
+        '❌ Hubo un error al procesar tu edición.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
+      );
+    }
+  }
+
+  /**
+   * Handle renewal field selection from reminder (single number input like "1")
+   */
+  async handleRenewalFieldSelectionFromReminder(from, fieldNumber) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      const renewablePermits = await this.checkRenewablePermits(user.id);
+      
+      if (renewablePermits.length === 0) {
+        await this.sendMessage(from,
+          '❌ *NO HAY PERMISOS PARA RENOVAR*\n\n' +
+          'Los permisos se pueden renovar:\n' +
+          '• 7 días antes de vencer\n' +
+          '• Hasta 30 días después de vencidos\n\n' +
+          'Escribe "menu" para volver al menú.'
+        );
+        return;
+      }
+      
+      // Auto-select the first renewable permit
+      const permit = renewablePermits[0];
+      
+      // Map field numbers to field keys and labels
+      const fieldMap = {
+        1: { key: 'nombre_completo', label: 'Nombre completo', example: 'Juan Carlos Pérez González' },
+        2: { key: 'curp_rfc', label: 'CURP o RFC', example: 'PERJ850124HDFRZN01' },
+        3: { key: 'marca', label: 'Marca', example: 'Toyota' },
+        4: { key: 'linea', label: 'Modelo', example: 'Corolla' },
+        5: { key: 'color', label: 'Color', example: 'Azul' },
+        6: { key: 'ano_modelo', label: 'Año', example: '2020' },
+        7: { key: 'numero_serie', label: 'Número de serie (VIN)', example: '1HGBH41JXMN109186' },
+        8: { key: 'numero_motor', label: 'Número de motor', example: '4G15-MN123456' },
+        9: { key: 'domicilio', label: 'Domicilio', example: 'Calle Juárez 123, Centro, Guadalajara, Jalisco' }
+      };
+      
+      const fieldInfo = fieldMap[fieldNumber];
+      
+      if (!fieldInfo) {
+        await this.sendMessage(from,
+          `❌ Número de campo inválido: ${fieldNumber}\n\n` +
+          'Campos disponibles para editar:\n' +
+          '1. Nombre completo\n' +
+          '2. CURP o RFC\n' +
+          '3. Marca\n' +
+          '4. Modelo\n' +
+          '5. Color\n' +
+          '6. Año\n' +
+          '7. Número de serie (VIN)\n' +
+          '8. Número de motor\n' +
+          '9. Domicilio\n\n' +
+          'Responde con el número del campo (1-9) que quieres cambiar.'
+        );
+        return;
+      }
+      
+      const currentValue = permit[fieldInfo.key] || 'No especificado';
+      
+      // Show current value and request new value
+      await this.sendMessage(from,
+        `✏️ *EDITAR ${fieldInfo.label.toUpperCase()}*\n\n` +
+        `📋 *Valor actual:* ${currentValue}\n\n` +
+        `💡 *Ejemplo:* ${fieldInfo.example}\n\n` +
+        `📝 Escribe el nuevo valor para *${fieldInfo.label}*:\n\n` +
+        `❌ Escribe "cancelar" para salir`
+      );
+      
+      // Set state for field editing
+      const state = {
+        status: 'renewal_field_input',
+        originalPermitId: permit.id,
+        renewalData: permit,
+        currentField: fieldInfo.key,
+        currentFieldName: fieldInfo.label,
+        editData: { ...permit }, // Copy permit data for editing
+        timestamp: Date.now()
+      };
+      await this.stateManager.setState(from, state);
+      
+    } catch (error) {
+      logger.error('Error in renewal field selection:', error);
+      await this.sendMessage(from,
+        '❌ Hubo un error al procesar tu selección.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
+      );
+    }
+  }
+
+  /**
+   * Handle opt-out request
+   */
+  async handleOptOut(from) {
+    try {
+      const notificationService = require('../whatsapp-notification-preferences.service');
+      const user = await notificationService.disableNotificationsByPhone(from);
+      
+      if (user) {
+        await this.sendMessage(from,
+          `✅ *NOTIFICACIONES DESACTIVADAS*\n\n` +
+          `${user.nombre_completo ? user.nombre_completo.split(' ')[0] : 'Usuario'}, ` +
+          `has dejado de recibir recordatorios automáticos de renovación.\n\n` +
+          `📋 *Aún puedes usar:*\n` +
+          `• *estado* - Ver mis permisos\n` +
+          `• *renovar* - Renovar permiso manualmente\n` +
+          `• *nuevo* - Solicitar permiso nuevo\n\n` +
+          `🔔 *Para reactivar recordatorios:*\n` +
+          `Escribe *recordatorios*\n\n` +
+          `✨ Seguimos aquí para ayudarte cuando nos necesites.`
+        );
+      } else {
+        await this.sendMessage(from,
+          `✅ *NOTIFICACIONES DESACTIVADAS*\n\n` +
+          `No recibirás más recordatorios automáticos.\n\n` +
+          `🔔 *Para reactivar:* Escribe *recordatorios*`
+        );
+      }
+      
+      logger.info('User opted out of WhatsApp notifications', { phone: from });
+    } catch (error) {
+      logger.error('Error handling opt-out:', error);
+      await this.sendMessage(from,
+        '❌ Error al procesar tu solicitud. Inténtalo nuevamente.'
+      );
+    }
+  }
+
+  /**
+   * Handle opt-in request
+   */
+  async handleOptIn(from) {
+    try {
+      const user = await this.findOrCreateUser(from);
+      const notificationService = require('../whatsapp-notification-preferences.service');
+      await notificationService.enableNotifications(user.id, from);
+      
+      const name = user.nombre_completo ? user.nombre_completo.split(' ')[0] : 'Usuario';
+      
+      await this.sendMessage(from,
+        `🔔 *RECORDATORIOS ACTIVADOS*\n\n` +
+        `¡Perfecto ${name}! Has reactivado los recordatorios automáticos.\n\n` +
+        `📅 *Recibirás notificaciones:*\n` +
+        `• 7 días antes del vencimiento\n` +
+        `• 3 días antes (urgente)\n` +
+        `• 1 día antes (último aviso)\n` +
+        `• El día del vencimiento\n` +
+        `• Durante el período de gracia\n\n` +
+        `⚡ *Renovación express:* Solo 30 segundos\n` +
+        `💰 *Costo:* $99 MXN\n\n` +
+        `🚫 *Para desactivar:* Escribe *stop*\n\n` +
+        `¿Necesitas algo más? Escribe *ayuda*`
+      );
+      
+      logger.info('User opted in to WhatsApp notifications', { 
+        userId: user.id, 
+        phone: from 
+      });
+    } catch (error) {
+      logger.error('Error handling opt-in:', error);
+      await this.sendMessage(from,
+        '❌ Error al activar recordatorios. Inténtalo nuevamente.'
+      );
+    }
+  }
+
+  /**
+   * Create direct renewal - skip confirmation and go straight to payment
+   */
+  async createDirectRenewal(from, originalPermit, user) {
+    try {
+      // Create renewal application immediately using original permit data
+      const applicationService = require('../application.service');
+      const stripePaymentLinkService = require('./stripe-payment-link.service');
+      const { PaymentFees } = require('../../constants/payment.constants');
+      
+      const renewalData = {
+        user_id: user.id,
+        nombre_completo: originalPermit.nombre_completo,
+        curp_rfc: originalPermit.curp_rfc,
+        domicilio: originalPermit.domicilio,
+        marca: originalPermit.marca,
+        linea: originalPermit.linea,
+        color: originalPermit.color,
+        ano_modelo: originalPermit.ano_modelo,
+        numero_motor: originalPermit.numero_motor,
+        numero_serie: originalPermit.numero_serie,
+        renewed_from_id: originalPermit.id,
+        whatsapp_phone: from
+      };
+      
+      // createApplicationWithOxxo returns { application, payment }
+      const result = await applicationService.createApplicationWithOxxo(renewalData, renewalData.user_id);
+      const application = result.application;
+      
+      // Create Stripe checkout session
+      const checkoutSession = await stripePaymentLinkService.createCheckoutSession({
+        applicationId: application.id,
+        amount: PaymentFees.RENEWAL_FEE || 99,
+        currency: 'MXN',
+        customerEmail: user.email,
+        metadata: {
+          renewal: true,
+          original_application_id: originalPermit.id,
+          source: 'whatsapp_renewal'
+        },
+        successUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-success?session_id={CHECKOUT_SESSION_ID}&renewal=true`,
+        cancelUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-cancelled?renewal=true`
+      });
+
+      // Update application with payment session ID
+      const applicationRepository = require('../../repositories/application.repository');
+      await applicationRepository.updateApplication(
+        application.id, 
+        { payment_processor_order_id: checkoutSession.id }
+      );
+      
+      // Send success message with payment link
+      await this.sendMessage(from,
+        `✅ *RENOVACIÓN CREADA EXITOSAMENTE*\n\n` +
+        `📋 *Nuevo Folio:* ${application.id}\n` +
+        `🔄 *Renovación de:* ${originalPermit.folio || originalPermit.id}\n` +
+        `🚗 *Vehículo:* ${originalPermit.marca} ${originalPermit.linea}\n` +
+        `🎨 *Color:* ${originalPermit.color}\n\n` +
+        `💳 *PROCEDER AL PAGO ($99 MXN):*\n` +
+        `${checkoutSession.url}\n\n` +
+        `⏰ *Link válido por:* 24 horas\n` +
+        `📱 *Tu folio:* ${application.id}\n\n` +
+        `Una vez completado el pago, tu permiso estará listo en 1-2 horas. ¡Gracias! 🚗✨`
+      );
+      
+      // Clear any existing state
+      await this.stateManager.clearState(from);
+      
+      logger.info('Direct renewal created successfully', {
+        userId: user.id,
+        originalPermitId: originalPermit.id,
+        newApplicationId: application.id,
+        checkoutSessionId: checkoutSession.id,
+        from
+      });
+      
+    } catch (error) {
+      logger.error('Error creating direct renewal:', error);
+      await this.sendMessage(from,
+        '❌ Hubo un error al crear tu renovación.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
+      );
+    }
+  }
+
+  /**
+   * Create renewal with edited data
+   */
+  async createEditedRenewal(from, originalPermit, editedData, user) {
+    try {
+      // Create renewal application with edited data
+      const applicationService = require('../application.service');
+      const stripePaymentLinkService = require('./stripe-payment-link.service');
+      const { PaymentFees } = require('../../constants/payment.constants');
+      
+      const renewalData = {
+        user_id: user.id,
+        nombre_completo: editedData.nombre_completo || originalPermit.nombre_completo,
+        curp_rfc: editedData.curp_rfc || originalPermit.curp_rfc,
+        domicilio: editedData.domicilio || originalPermit.domicilio,
+        marca: editedData.marca || originalPermit.marca,
+        linea: editedData.linea || originalPermit.linea,
+        color: editedData.color || originalPermit.color,
+        ano_modelo: editedData.ano_modelo || originalPermit.ano_modelo,
+        numero_motor: editedData.numero_motor || originalPermit.numero_motor,
+        numero_serie: editedData.numero_serie || originalPermit.numero_serie,
+        renewed_from_id: originalPermit.id,
+        whatsapp_phone: from
+      };
+      
+      // createApplicationWithOxxo returns { application, payment }
+      const result = await applicationService.createApplicationWithOxxo(renewalData, renewalData.user_id);
+      const application = result.application;
+      
+      // Create Stripe checkout session
+      const checkoutSession = await stripePaymentLinkService.createCheckoutSession({
+        applicationId: application.id,
+        amount: PaymentFees.RENEWAL_FEE || 99,
+        currency: 'MXN',
+        customerEmail: user.email,
+        metadata: {
+          renewal: true,
+          original_application_id: originalPermit.id,
+          source: 'whatsapp_renewal_edited'
+        },
+        successUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-success?session_id={CHECKOUT_SESSION_ID}&renewal=true`,
+        cancelUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-cancelled?renewal=true`
+      });
+
+      // Update application with payment session ID
+      const applicationRepository = require('../../repositories/application.repository');
+      await applicationRepository.updateApplication(
+        application.id, 
+        { payment_processor_order_id: checkoutSession.id }
+      );
+      
+      // Send success message with updated details and payment link
+      await this.sendMessage(from,
+        `✅ *RENOVACIÓN CON CAMBIOS CREADA*\n\n` +
+        `📋 *Nuevo Folio:* ${application.id}\n` +
+        `🔄 *Renovación de:* ${originalPermit.folio || originalPermit.id}\n\n` +
+        `📝 *DATOS ACTUALIZADOS:*\n` +
+        `🚗 *Vehículo:* ${renewalData.marca} ${renewalData.linea}\n` +
+        `🎨 *Color:* ${renewalData.color}\n` +
+        `📅 *Año:* ${renewalData.ano_modelo}\n` +
+        `⚙️ *Motor:* ${renewalData.numero_motor}\n` +
+        `🔢 *Serie:* ${renewalData.numero_serie}\n\n` +
+        `💳 *PROCEDER AL PAGO ($99 MXN):*\n` +
+        `${checkoutSession.url}\n\n` +
+        `⏰ *Link válido por:* 24 horas\n` +
+        `📱 *Tu folio:* ${application.id}\n\n` +
+        `Una vez completado el pago, tu permiso estará listo en 1-2 horas. ¡Gracias! 🚗✨`
+      );
+      
+      // Clear state
+      await this.stateManager.clearState(from);
+      
+      logger.info('Edited renewal created successfully', {
+        userId: user.id,
+        originalPermitId: originalPermit.id,
+        newApplicationId: application.id,
+        editedFields: Object.keys(editedData),
+        checkoutSessionId: checkoutSession.id,
+        from
+      });
+      
+    } catch (error) {
+      logger.error('Error creating edited renewal:', error);
+      await this.sendMessage(from,
+        '❌ Hubo un error al crear tu renovación con los cambios.\n\n' +
+        'Por favor intenta de nuevo o escribe "ayuda" para soporte.'
+      );
+    }
+  }
+
+  /**
+   * Show list of permits that can be edited for renewal
+   */
+  async showEditablePermitsList(from, renewablePermits) {
+    let message = '✏️ *SELECCIONA PERMISO PARA EDITAR*\n\n';
+    
+    renewablePermits.forEach((permit, index) => {
+      const daysText = permit.days_until_expiration >= 0 
+        ? `vence en ${permit.days_until_expiration} días`
+        : `venció hace ${Math.abs(permit.days_until_expiration)} días`;
+      
+      message += `${index + 1}. *Folio:* ${permit.folio || permit.id}\n`;
+      message += `   🚗 ${permit.marca} ${permit.linea} ${permit.color}\n`;
+      message += `   📅 ${daysText}\n\n`;
+    });
+    
+    message += 'Escribe el número del permiso a editar (1-' + renewablePermits.length + ')';
+    await this.sendMessage(from, message);
+    
+    // Set state for editing selection
+    const state = {
+      status: 'renewal_edit_selection',
+      renewablePermits: renewablePermits,
+      timestamp: Date.now()
+    };
+    await this.stateManager.setState(from, state);
+  }
+
+  /**
+   * Start renewal editing flow for a specific permit
+   */
+  async startRenewalEditing(from, permit) {
+    try {
+      // Show current permit details and ask what to edit
+      await this.sendMessage(from,
+        `✏️ *EDITAR PERMISO PARA RENOVACIÓN*\n\n` +
+        `📋 *Datos Actuales:*\n` +
+        `• *Folio:* ${permit.folio || permit.id}\n` +
+        `• *Nombre:* ${permit.nombre_completo}\n` +
+        `• *Marca:* ${permit.marca}\n` +
+        `• *Línea:* ${permit.linea}\n` +
+        `• *Color:* ${permit.color}\n` +
+        `• *Año:* ${permit.ano_modelo}\n` +
+        `• *Motor:* ${permit.numero_motor}\n` +
+        `• *Serie:* ${permit.numero_serie}\n\n` +
+        `🔧 *¿QUÉ DESEAS CAMBIAR?*\n\n` +
+        `1️⃣ *marca* - Marca del vehículo\n` +
+        `2️⃣ *linea* - Línea/modelo\n` +
+        `3️⃣ *color* - Color del vehículo\n` +
+        `4️⃣ *año* - Año del modelo\n` +
+        `5️⃣ *motor* - Número de motor\n` +
+        `6️⃣ *serie* - Número de serie\n` +
+        `7️⃣ *nombre* - Nombre completo\n\n` +
+        `Escribe el nombre del campo que quieres cambiar.`
+      );
+      
+      // Set state for field editing
+      const state = {
+        status: 'renewal_field_editing',
+        originalPermit: permit,
+        editData: { ...permit }, // Copy original data for editing
+        timestamp: Date.now()
+      };
+      await this.stateManager.setState(from, state);
+      
+    } catch (error) {
+      logger.error('Error starting renewal editing:', error);
+      await this.sendMessage(from,
+        '❌ Error al iniciar edición. Intenta de nuevo.'
+      );
+    }
+  }
+
+  /**
+   * Handle input processed through enhanced state management system
+   * This method bridges the new enhanced system with existing handlers
+   */
+  async handleEnhancedInput(from, enhancedResult) {
+    try {
+      const { routingResult, enhancedState } = enhancedResult;
+      
+      // Convert enhanced routing result to actionable response
+      const actionResult = await this.migrationAdapter.handleEnhancedRoutingResult(
+        from, 
+        routingResult, 
+        enhancedState
+      );
+
+      logger.info('Processing enhanced action result', {
+        from: from.substring(0, 6) + '****',
+        action: actionResult.action,
+        routingType: routingResult.type
+      });
+
+      // Execute the appropriate action based on enhanced routing
+      switch (actionResult.action) {
+        case 'renewal_field_selection':
+          // This handles Angel's case: typing "1" to select field to edit
+          await this.handleEnhancedRenewalFieldSelection(from, actionResult.fieldNumber, actionResult.enhancedState);
+          break;
+
+        case 'menu_selection':
+          // Convert to legacy menu selection
+          const legacyState = { status: 'showing_menu', data: actionResult.enhancedState.data };
+          await this.handleMenuSelection(from, actionResult.option.toString(), legacyState);
+          break;
+
+        case 'form_input':
+          // Handle form text input with context
+          await this.handleEnhancedFormInput(from, actionResult.text, actionResult.enhancedState);
+          break;
+
+        case 'global_command':
+          // Handle global commands like menu, ayuda
+          await this.handleEnhancedGlobalCommand(from, actionResult.command, actionResult.enhancedState);
+          break;
+
+        case 'context_command':
+          // Handle context-specific commands
+          await this.handleEnhancedContextCommand(from, actionResult.command, actionResult.enhancedState);
+          break;
+
+        case 'invalid_input':
+          // Send user-friendly error message with valid options
+          await this.sendMessage(from, actionResult.message);
+          break;
+
+        default:
+          // Fallback to legacy system
+          logger.info('Falling back to legacy system', {
+            from: from.substring(0, 6) + '****',
+            action: actionResult.action
+          });
+          
+          // Convert enhanced state back to legacy and continue with legacy processing
+          await this.migrationAdapter.syncEnhancedToLegacy(from, actionResult.enhancedState);
+          return false; // Indicate fallback to caller
+      }
+
+      // Sync enhanced state back to legacy for backward compatibility
+      await this.migrationAdapter.syncEnhancedToLegacy(from, actionResult.enhancedState);
+      
+      return true; // Successfully handled
+
+    } catch (error) {
+      logger.error('Error handling enhanced input', {
+        error: error.message,
+        from: from.substring(0, 6) + '****'
+      });
+      
+      // Fallback to main menu on error
+      await this.showMainMenu(from);
       return false;
     }
   }
-  
-  /**
-   * Log consent change for audit trail (with transaction support)
-   */
-  async logConsentChangeWithClient(client, userId, phoneNumber, action, details) {
-    try {
-      const query = `
-        INSERT INTO whatsapp_consent_audit
-        (user_id, phone_number, action, previous_state, new_state, source, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, NOW())
-      `;
-      
-      await client.query(query, [
-        userId,
-        phoneNumber,
-        action,
-        JSON.stringify(details.previous_state || {}),
-        JSON.stringify(details.new_state || {}),
-        details.source || 'whatsapp'
-      ]);
-      
-      logger.info('Logged WhatsApp consent change', { userId, action });
-    } catch (error) {
-      logger.error('Error logging consent change', { error: error.message, userId, action });
-      // Re-throw in transaction context
-      throw error;
-    }
-  }
-  
-  /**
-   * Log consent change for audit trail (standalone)
-   */
-  async logConsentChange(userId, phoneNumber, action, details) {
-    try {
-      const query = `
-        INSERT INTO whatsapp_consent_audit
-        (user_id, phone_number, action, previous_state, new_state, source, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, NOW())
-      `;
-      
-      await db.query(query, [
-        userId,
-        phoneNumber,
-        action,
-        JSON.stringify(details.previous_state || {}),
-        JSON.stringify(details.new_state || {}),
-        details.source || 'whatsapp'
-      ]);
-      
-      logger.info('Logged WhatsApp consent change', { userId, action });
-    } catch (error) {
-      logger.error('Error logging consent change', { error: error.message, userId, action });
-      // Don't throw - this is audit logging
-    }
-  }
 
   /**
-   * Send message with error handling
+   * Handle renewal field selection through enhanced system (Angel's case)
    */
-  async sendMessage(to, message) {
+  async handleEnhancedRenewalFieldSelection(from, fieldNumber, enhancedState) {
     try {
-      const config = this.getConfig();
+      // Get the permit data from enhanced state
+      const permit = enhancedState.data.permit || enhancedState.data.editData;
       
-      // Validate message
-      if (!message || message.length > 4096) {
-        throw new Error('Invalid message length');
+      if (!permit) {
+        await this.sendMessage(from, '❌ No se encontraron datos del permiso para editar.');
+        return await this.showMainMenu(from);
       }
-      
-      // Normalize Mexican phone numbers: 521... -> 52...
-      const normalizedTo = to.startsWith('521') && to.length === 13 ? '52' + to.substring(3) : to;
-      
-      const response = await fetch(config.apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${config.accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: normalizedTo,
-          type: 'text',
-          text: { body: message }
-        })
-      });
-      
-      if (!response.ok) {
-        let errorData = 'Unknown error';
-        try {
-          errorData = await response.text();
-        } catch (e) {
-          logger.error('Error reading error response', { error: e.message });
+
+      // Map field numbers to permit fields (matching existing system)
+      const fieldMap = {
+        1: { key: 'marca', label: 'Marca del vehículo', example: 'Toyota, Nissan, Ford' },
+        2: { key: 'linea', label: 'Línea/modelo', example: 'Corolla, Sentra, F-150' },
+        3: { key: 'color', label: 'Color del vehículo', example: 'Blanco, Azul y Rojo' },
+        4: { key: 'ano_modelo', label: 'Año del modelo', example: '2020, 2018, 2015' },
+        5: { key: 'numero_motor', label: 'Número de motor', example: '4G15-MN123456' },
+        6: { key: 'numero_serie', label: 'Número de serie (VIN)', example: '1HGBH41JXMN109186' },
+        7: { key: 'nombre_completo', label: 'Nombre completo', example: 'Juan Carlos Pérez González' },
+        8: { key: 'email', label: 'Correo electrónico', example: 'juan.perez@gmail.com' },
+        9: { key: 'domicilio', label: 'Domicilio', example: 'Calle Juárez 123, Centro, Guadalajara, Jalisco' }
+      };
+
+      const field = fieldMap[fieldNumber];
+      if (!field) {
+        await this.sendMessage(from, 
+          '❌ Número de campo inválido. Escribe un número del 1 al 9.\n\n' +
+          'Escribe "renovar" para ver las opciones disponibles.'
+        );
+        return;
+      }
+
+      // Show current value and ask for new value
+      const currentValue = permit[field.key] || 'No especificado';
+      await this.sendMessage(from,
+        `✏️ **EDITAR ${field.label.toUpperCase()}**\n\n` +
+        `📋 **Valor actual:** ${currentValue}\n\n` +
+        `💡 **Ejemplo:** ${field.example}\n\n` +
+        `Escribe el nuevo valor para **${field.label}**:\n\n` +
+        `❌ Escribe "cancelar" para salir`
+      );
+
+      // Update enhanced state for field editing
+      const updatedState = await this.migrationAdapter.enhancedStateManager.createState(
+        'form', 
+        'renewal_edit', 
+        {
+          ...enhancedState.data,
+          currentField: field.key,
+          currentFieldName: field.label,
+          permit: permit
         }
-        throw new Error(`WhatsApp API error: ${response.status} - ${errorData}`);
-      }
-      
-      const data = await response.json();
-      logger.info('WhatsApp message sent', { 
-        originalTo: to, 
-        normalizedTo: normalizedTo,
-        messageId: data.messages[0].id 
-      });
-      return data;
+      );
+
+      // Save enhanced state
+      await this.migrationAdapter.enhancedStateManager.setState(from, updatedState);
+
+      // Also update legacy state for backward compatibility
+      const legacyState = {
+        status: 'renewal_field_input',
+        currentField: field.key,
+        currentFieldName: field.label,
+        permit: permit,
+        editData: permit,
+        timestamp: Date.now()
+      };
+      await this.stateManager.setState(from, legacyState);
+
     } catch (error) {
-      logger.error('Error sending WhatsApp message', { 
+      logger.error('Error in enhanced renewal field selection', {
         error: error.message,
-        to,
-        messageLength: message?.length 
+        from: from.substring(0, 6) + '****',
+        fieldNumber
       });
-      throw error;
+      
+      await this.sendMessage(from, '❌ Error al seleccionar campo. Intenta de nuevo.');
+      await this.showMainMenu(from);
     }
   }
-}
 
-// Initialize configuration validation when module loads
-try {
-  SimpleWhatsAppService.validateConfig();
-} catch (error) {
-  logger.error('WhatsApp service configuration error', { error: error.message });
-  // Don't crash the app if WhatsApp config is missing
+  /**
+   * Handle form input through enhanced system
+   */
+  async handleEnhancedFormInput(from, text, enhancedState) {
+    // Delegate to existing form handlers based on context
+    if (enhancedState.context === 'renewal_edit') {
+      const legacyState = {
+        status: 'renewal_field_input',
+        currentField: enhancedState.data.currentField,
+        permit: enhancedState.data.permit,
+        editData: enhancedState.data.permit,
+        timestamp: Date.now()
+      };
+      return await this.handleRenewalFieldInput(from, text, legacyState);
+    }
+    
+    // Fallback to legacy form handling
+    const legacyState = { status: 'collecting', data: enhancedState.data };
+    return await this.handleDataCollection(from, text, legacyState);
+  }
+
+  /**
+   * Handle global commands through enhanced system
+   */
+  async handleEnhancedGlobalCommand(from, command, enhancedState) {
+    switch (command) {
+      case 'menu':
+      case 'menú':
+      case 'inicio':
+        await this.migrationAdapter.enhancedStateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      case 'ayuda':
+        return await this.sendHelp(from);
+        
+      default:
+        return await this.showMainMenu(from);
+    }
+  }
+
+  /**
+   * Handle context-specific commands through enhanced system
+   */
+  async handleEnhancedContextCommand(from, command, enhancedState) {
+    switch (command) {
+      case 'renovar':
+        return await this.handleRenewalFlow(from);
+        
+      case 'estado':
+        return await this.checkStatus(from);
+        
+      case 'cancelar':
+      case 'cancel':
+        await this.migrationAdapter.enhancedStateManager.clearState(from);
+        return await this.showMainMenu(from);
+        
+      default:
+        return await this.showMainMenu(from);
+    }
+  }
+
 }
 
 module.exports = SimpleWhatsAppService;

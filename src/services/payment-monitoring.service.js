@@ -69,7 +69,7 @@ class PaymentMonitoringService {
       this.slidingWindowData.payments.push({
         timestamp,
         method,
-        amount: amount || 150, // Default to permit price
+        amount: amount || 99, // Default to permit price
         applicationId,
         userId,
         status: 'attempt'
@@ -137,7 +137,7 @@ class PaymentMonitoringService {
       this.slidingWindowData.payments.push({
         timestamp,
         method,
-        amount: amount || 150,
+        amount: amount || 99,
         paymentIntentId,
         status: 'success',
         processingTime
@@ -204,7 +204,7 @@ class PaymentMonitoringService {
       this.slidingWindowData.payments.push({
         timestamp,
         method,
-        amount: amount || 150,
+        amount: amount || 99,
         applicationId,
         userId,
         status: 'failure',
@@ -258,7 +258,7 @@ class PaymentMonitoringService {
    * Get average payment amount
    */
   getAveragePaymentAmount() {
-    if (this.metrics.paymentAmounts.length === 0) return 150; // Default to permit price
+    if (this.metrics.paymentAmounts.length === 0) return 99; // Default to permit price
     return this.metrics.paymentAmounts.reduce((a, b) => a + b, 0) / this.metrics.paymentAmounts.length;
   }
 
@@ -394,7 +394,7 @@ class PaymentMonitoringService {
       ? processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length
       : 0;
     
-    const revenue = successful.reduce((sum, p) => sum + (p.amount || 150), 0);
+    const revenue = successful.reduce((sum, p) => sum + (p.amount || 99), 0);
     
     return {
       total: windowPayments.length,
@@ -404,7 +404,7 @@ class PaymentMonitoringService {
       failureRate: windowPayments.length > 0 ? failed.length / windowPayments.length : 0,
       avgProcessingTime,
       revenue,
-      avgPaymentAmount: successful.length > 0 ? revenue / successful.length : 150
+      avgPaymentAmount: successful.length > 0 ? revenue / successful.length : 99
     };
   }
 

@@ -18,6 +18,21 @@ function createRateLimiter(options = {}) {
     legacyHeaders: false,
     skipSuccessfulRequests: false,
     skipFailedRequests: false,
+    // Fix for trust proxy warning in production
+    // Use a custom key generator that properly handles proxy headers
+    keyGenerator: (req) => {
+      // In production, use X-Forwarded-For header from trusted proxy
+      // Otherwise use req.ip directly
+      if (process.env.NODE_ENV === 'production') {
+        // Get the first IP from X-Forwarded-For header (client IP)
+        const forwarded = req.headers['x-forwarded-for'];
+        if (forwarded) {
+          const ips = forwarded.split(',').map(ip => ip.trim());
+          return ips[0] || req.ip;
+        }
+      }
+      return req.ip;
+    },
     handler: (req, res, next) => {
       const error = new RateLimitError(
         message,
@@ -48,14 +63,14 @@ const limiters = {
 
   auth: createRateLimiter({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 2000, // Increased from 1000 to 2000
     message: 'Too many authentication attempts, please try again later.',
     name: 'Authentication'
   }),
 
   admin: createRateLimiter({
     windowMs: 5 * 60 * 1000,
-    max: 500,
+    max: 1000, // Increased from 500 to 1000
     message: 'Too many admin API requests, please try again later.',
     name: 'Admin API'
   }),

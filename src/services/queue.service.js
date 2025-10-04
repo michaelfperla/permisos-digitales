@@ -155,6 +155,11 @@ class EmailQueueService {
       return await this.processEmail(job);
     });
 
+    // WhatsApp retry processor
+    this.queue.process('whatsapp-retry', 3, async (job) => {
+      return await this.processWhatsAppRetry(job);
+    });
+
     // Status sync processor
     this.statusSyncQueue.process('sync-status', async (job) => {
       return await this.syncEmailStatus(job);
@@ -166,28 +171,48 @@ class EmailQueueService {
    */
   setupEventHandlers() {
     this.queue.on('completed', async (job, result) => {
-      logger.info('[EmailQueue] Email sent successfully', {
-        jobId: job.id,
-        emailId: job.data.emailId,
-        recipient: job.data.recipient
-      });
+      if (job.name === 'whatsapp-retry') {
+        logger.info('[WhatsAppQueue] WhatsApp retry sent successfully', {
+          jobId: job.id,
+          applicationId: job.data.data?.applicationId,
+          phoneNumber: job.data.data?.phoneNumber?.substring(0, 6) + '****' || 'unknown'
+        });
+      } else {
+        logger.info('[EmailQueue] Email sent successfully', {
+          jobId: job.id,
+          emailId: job.data.emailId,
+          recipient: job.data.recipient
+        });
 
-      // Schedule status sync
-      await this.statusSyncQueue.add('sync-status', {
-        emailId: job.data.emailId,
-        sesMessageId: result.messageId
-      }, {
-        delay: 5000 // Check status after 5 seconds
-      });
+        // Schedule status sync for emails only
+        if (job.data.emailId && result?.messageId) {
+          await this.statusSyncQueue.add('sync-status', {
+            emailId: job.data.emailId,
+            sesMessageId: result.messageId
+          }, {
+            delay: 5000 // Check status after 5 seconds
+          });
+        }
+      }
     });
 
     this.queue.on('failed', (job, err) => {
-      logger.error('[EmailQueue] Email job failed', {
-        jobId: job.id,
-        emailId: job.data.emailId,
-        attempt: job.attemptsMade,
-        error: err.message
-      });
+      if (job.name === 'whatsapp-retry') {
+        logger.error('[WhatsAppQueue] WhatsApp retry job failed', {
+          jobId: job.id,
+          applicationId: job.data.data?.applicationId,
+          phoneNumber: job.data.data?.phoneNumber?.substring(0, 6) + '****' || 'unknown',
+          attempt: job.attemptsMade,
+          error: err.message
+        });
+      } else {
+        logger.error('[EmailQueue] Email job failed', {
+          jobId: job.id,
+          emailId: job.data.emailId,
+          attempt: job.attemptsMade,
+          error: err.message
+        });
+      }
     });
 
     this.queue.on('stalled', (job) => {
@@ -373,6 +398,99 @@ class EmailQueueService {
   }
 
   /**
+   * Process WhatsApp retry job
+   */
+  async processWhatsAppRetry(job) {
+    const { data } = job.data;
+
+    try {
+      if (!data || !data.applicationId || !data.phoneNumber) {
+        throw new Error('Invalid WhatsApp retry job data');
+      }
+
+      const { applicationId, permitUrl, phoneNumber, retryCount = 1 } = data;
+
+      logger.info('[WhatsAppRetry] Processing WhatsApp retry', {
+        applicationId,
+        phoneNumber: phoneNumber.substring(0, 6) + '****',
+        retryCount,
+        attempt: job.attemptsMade + 1
+      });
+
+      // Validate phone number format (security check)
+      const phoneRegex = /^(\+?52)?1?\d{10}$/;
+      if (!phoneRegex.test(phoneNumber.replace(/\s+/g, ''))) {
+        throw new Error(`Invalid phone format for retry: ${phoneNumber.substring(0, 6)}****`);
+      }
+
+      // Lazy load WhatsApp service to avoid circular dependency
+      const SimpleWhatsAppService = require('./whatsapp/simple-whatsapp.service');
+      const whatsappService = new SimpleWhatsAppService();
+      await whatsappService.initialize();
+
+      // Attempt to send WhatsApp notification
+      await whatsappService.handlePermitReady(applicationId, permitUrl, phoneNumber);
+
+      // Log successful retry
+      const { paymentRepository } = require('../repositories');
+      await paymentRepository.createPaymentEvent(
+        applicationId,
+        'whatsapp.notification.retry.success',
+        {
+          type: 'permit_ready',
+          phoneNumber: phoneNumber.substring(0, 6) + '****',
+          retryCount: retryCount,
+          attempt: job.attemptsMade + 1,
+          timestamp: new Date().toISOString()
+        },
+        null
+      );
+
+      logger.info('[WhatsAppRetry] WhatsApp retry successful', {
+        applicationId,
+        phoneNumber: phoneNumber.substring(0, 6) + '****',
+        retryCount
+      });
+
+      return {
+        success: true,
+        applicationId,
+        retryCount
+      };
+    } catch (error) {
+      logger.error('[WhatsAppRetry] WhatsApp retry failed', {
+        error: error.message,
+        applicationId: data?.applicationId,
+        phoneNumber: data?.phoneNumber?.substring(0, 6) + '****' || 'unknown',
+        attempt: job.attemptsMade + 1
+      });
+
+      // Log failure if this is the final attempt
+      if (job.attemptsMade >= (job.opts.attempts - 1)) {
+        try {
+          const { paymentRepository } = require('../repositories');
+          await paymentRepository.createPaymentEvent(
+            data.applicationId,
+            'whatsapp.notification.retry.exhausted',
+            {
+              type: 'permit_ready',
+              phoneNumber: data.phoneNumber?.substring(0, 6) + '****' || 'unknown',
+              finalError: error.message,
+              totalAttempts: job.attemptsMade + 1,
+              timestamp: new Date().toISOString()
+            },
+            null
+          );
+        } catch (logError) {
+          logger.error('[WhatsAppRetry] Failed to log retry exhaustion', logError);
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  /**
    * Sync email status from SES
    */
   async syncEmailStatus(job) {
@@ -549,6 +667,68 @@ class EmailQueueService {
       logger.error('[EmailQueue] Failed to process retry queue', {
         error: error.message
       });
+    }
+  }
+
+  /**
+   * Add job to queue (unified interface for emails and WhatsApp)
+   * @param {Object} jobData - Job data
+   * @param {number} priority - Job priority
+   * @returns {Promise} Job result
+   */
+  async addEmailToQueue(jobData, priority = 3) {
+    try {
+      if (!this.queue) {
+        logger.warn('[Queue] Queue not initialized, cannot queue job', { jobData });
+        return { error: 'Queue service unavailable' };
+      }
+
+      const { type, to, subject, data } = jobData;
+
+      if (type === 'whatsapp-retry') {
+        // Handle WhatsApp retry jobs
+        logger.info('[Queue] Adding WhatsApp retry job to queue', {
+          applicationId: data?.applicationId,
+          phoneNumber: data?.phoneNumber?.substring(0, 6) + '****' || 'unknown',
+          retryCount: data?.retryCount || 1
+        });
+
+        const job = await this.queue.add('whatsapp-retry', { data }, {
+          priority: priority,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 10000 // Start with 10 second delay for WhatsApp
+          },
+          removeOnComplete: 50,
+          removeOnFail: 100
+        });
+
+        return { success: true, jobId: job.id, type: 'whatsapp-retry' };
+      } else {
+        // Handle regular email jobs
+        return await this.queueEmail({
+          to,
+          subject,
+          template: data?.template,
+          templateData: data?.templateData || {},
+          htmlBody: data?.htmlBody,
+          textBody: data?.textBody,
+          priority: priority,
+          scheduledFor: data?.scheduledFor,
+          metadata: data?.metadata || {},
+          deduplicate: data?.deduplicate !== false
+        });
+      }
+    } catch (error) {
+      logger.error('[Queue] Failed to add job to queue', {
+        error: error.message,
+        jobData: {
+          type: jobData?.type,
+          to: jobData?.to?.substring(0, 20) + '...' || 'unknown'
+        }
+      });
+      throw error;
     }
   }
 

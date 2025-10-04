@@ -205,21 +205,50 @@ class ApplicationCleanupJob {
    */
   async expireOldPermits() {
     try {
-      const query = `
+      // Use business rule logic to determine expiration
+      const { isPermitExpiredByBusinessRules } = require('../utils/permit-business-days');
+      
+      // First, get all PERMIT_READY permits to check with business rules
+      const selectQuery = `
+        SELECT id, user_id, fecha_expedicion, fecha_vencimiento, updated_at
+        FROM permit_applications 
+        WHERE status = $1 
+        AND fecha_vencimiento IS NOT NULL
+      `;
+      
+      const selectResult = await db.query(selectQuery, [ApplicationStatus.PERMIT_READY]);
+      
+      const expiredPermitIds = [];
+      
+      // Check each permit using business rules
+      for (const permit of selectResult.rows) {
+        // Use fecha_expedicion as the base date (should be set when permit became PERMIT_READY)
+        // Only fall back to updated_at if fecha_expedicion is missing
+        const permitReadyDate = permit.fecha_expedicion || permit.updated_at;
+        
+        if (permitReadyDate && isPermitExpiredByBusinessRules(permitReadyDate)) {
+          expiredPermitIds.push(permit.id);
+        }
+      }
+      
+      if (expiredPermitIds.length === 0) {
+        return 0;
+      }
+      
+      // Update expired permits
+      const updateQuery = `
         UPDATE permit_applications 
         SET 
           status = $1,
           updated_at = NOW()
         WHERE 
-          status = $2 
-          AND fecha_vencimiento < CURRENT_DATE
-          AND fecha_vencimiento IS NOT NULL
+          id = ANY($2)
         RETURNING id, user_id, fecha_expedicion, fecha_vencimiento
       `;
-
-      const result = await db.query(query, [
+      
+      const result = await db.query(updateQuery, [
         ApplicationStatus.VENCIDO,
-        ApplicationStatus.PERMIT_READY
+        expiredPermitIds
       ]);
 
       const expiredCount = result.rows.length;
@@ -292,16 +321,25 @@ class ApplicationCleanupJob {
       const cardResult = await db.query(cardQuery, [ApplicationStatus.PAYMENT_PROCESSING, oneHourAgo]);
       stats.cardStuck = parseInt(cardResult.rows[0].count);
 
-      // Count permits that have expired (past fecha_vencimiento)
+      // Count permits that have expired using business rules
+      const { isPermitExpiredByBusinessRules } = require('../utils/permit-business-days');
+      
       const expiredPermitsQuery = `
-        SELECT COUNT(*) as count
+        SELECT id, fecha_expedicion, updated_at
         FROM permit_applications 
         WHERE status = $1 
-        AND fecha_vencimiento < CURRENT_DATE
         AND fecha_vencimiento IS NOT NULL
       `;
       const permitsResult = await db.query(expiredPermitsQuery, [ApplicationStatus.PERMIT_READY]);
-      stats.expiredPermits = parseInt(permitsResult.rows[0].count);
+      
+      let expiredCount = 0;
+      for (const permit of permitsResult.rows) {
+        const permitReadyDate = permit.fecha_expedicion || permit.updated_at;
+        if (permitReadyDate && isPermitExpiredByBusinessRules(permitReadyDate)) {
+          expiredCount++;
+        }
+      }
+      stats.expiredPermits = expiredCount;
 
       stats.total = stats.awaitingPaymentExpired + stats.oxxoExpired + stats.cardStuck + stats.expiredPermits;
 

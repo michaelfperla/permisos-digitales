@@ -1,5 +1,6 @@
-const logger = require('../../utils/enhanced-logger');
+const { logger } = require('../../utils/logger');
 const redisClient = require('../../utils/redis-client');
+const SecureRedisWrapper = require('./redis-wrapper');
 
 /**
  * Centralized state management for WhatsApp conversations
@@ -12,6 +13,14 @@ class StateManager {
     this.accessOrder = new Map(); // Track access order for LRU
     this.CACHE_TTL = 3600000; // 1 hour
     this.MAX_MEMORY_ENTRIES = 100;
+    
+    // Initialize secure Redis wrapper if encryption is enabled
+    if (process.env.ENABLE_REDIS_ENCRYPTION === 'true') {
+      this.redis = new SecureRedisWrapper(redisClient);
+      logger.info('StateManager: Redis encryption enabled');
+    } else {
+      this.redis = redisClient;
+    }
   }
 
   /**
@@ -22,7 +31,7 @@ class StateManager {
     
     try {
       // Try Redis first
-      const redisData = await redisClient.get(key);
+      const redisData = await this.redis.get(key);
       if (redisData) {
         try {
           return JSON.parse(redisData);
@@ -32,7 +41,7 @@ class StateManager {
             userId 
           });
           // Clear corrupted Redis data
-          await redisClient.del(key);
+          await this.redis.del(key);
         }
       }
     } catch (redisError) {
@@ -81,7 +90,7 @@ class StateManager {
     
     // Save to Redis (primary)
     try {
-      await redisClient.setex(key, ttl, stateData);
+      await this.redis.setex(key, ttl, stateData);
     } catch (redisError) {
       logger.error('Redis set operation failed', { 
         error: redisError.message, 
@@ -112,7 +121,7 @@ class StateManager {
     
     // Clear from Redis
     try {
-      await redisClient.del(key);
+      await this.redis.del(key);
     } catch (redisError) {
       logger.error('Redis delete operation failed', { 
         error: redisError.message, 
@@ -207,6 +216,11 @@ class StateManager {
     
     // Add to end (most recently used)
     this.accessOrder.set(key, Date.now());
+    
+    // Check if eviction is needed
+    if (this.memoryCache.size > this.MAX_MEMORY_ENTRIES) {
+      this._evictLRU();
+    }
   }
 
   /**

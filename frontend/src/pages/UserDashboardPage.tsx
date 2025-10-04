@@ -57,6 +57,7 @@ const UserDashboardPage: React.FC = () => {
     COMPLETED: 'Completado',
     CANCELLED: 'Cancelado',
     EXPIRED: 'Expirado',
+    VENCIDO: 'Vencido',
     RENEWAL_PENDING: 'Renovación Pendiente',
     RENEWAL_APPROVED: 'Renovación Aprobada',
     RENEWAL_REJECTED: 'Renovación Rechazada',
@@ -96,6 +97,7 @@ const UserDashboardPage: React.FC = () => {
         return <Icon IconComponent={FaCheckCircle} className={styles.iconCompleted} />;
       case 'CANCELLED':
       case 'EXPIRED':
+      case 'VENCIDO':
         return <Icon IconComponent={FaTimesCircle} className={styles.iconCancelled} />;
       case 'PROOF_SUBMITTED':
         return <Icon IconComponent={FaClipboardCheck} className={styles.iconSubmitted} />;

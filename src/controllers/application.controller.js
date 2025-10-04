@@ -7,8 +7,9 @@ const { logger } = require('../utils/logger');
 const { handleControllerError, createError } = require('../utils/error-helpers');
 const { validateApplicationId, validateYear } = require('../utils/validation-helpers');
 const { ApplicationStatus, DEFAULT_PERMIT_FEE } = require('../constants');
-const { applicationRepository, paymentRepository } = require('../repositories');
+const { applicationRepository, paymentRepository, userRepository } = require('../repositories');
 const db = require('../db');
+const { withTransaction } = require('../utils/db-transaction');
 const metricsCollector = require('../monitoring/metrics-collector');
 
 /**
@@ -68,6 +69,17 @@ exports.createApplication = async (req, res, next) => {
   try {
     logger.info(`[createApplication] Starting preliminary application for user ID: ${userId}`);
 
+    // Get user's account email as fallback
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      logger.error(`[createApplication] User ${userId} not found`);
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado.',
+        error: 'USER_NOT_FOUND'
+      });
+    }
+
     const validatedData = {
       nombre_completo: String(nombre_completo || '').trim(),
       curp_rfc: String(curp_rfc || '').trim(),
@@ -81,11 +93,23 @@ exports.createApplication = async (req, res, next) => {
         const yearValidation = validateYear(ano_modelo);
         return yearValidation.isValid ? yearValidation.value : new Date().getFullYear();
       })(),
+      // Use provided email or fallback to user's account email (no fake emails)
+      email: email?.trim() || user.account_email || null
     };
+
+    // Log which email we're using for transparency
+    if (email?.trim()) {
+      logger.info(`[createApplication] Using provided delivery email: ${validatedData.email}`);
+    } else if (user.account_email) {
+      logger.info(`[createApplication] Using user's account email: ${validatedData.email}`);
+    } else {
+      logger.info(`[createApplication] No email provided - will use phone for customer identification`);
+    }
 
     const customer = await stripePaymentService.createCustomer({
       name: validatedData.nombre_completo,
-      email: email,
+      email: validatedData.email,
+      phone: user.whatsapp_phone || user.phone || ''
     });
     logger.info(`[createApplication] Created Stripe Customer ID: ${customer.id} for user ${userId}`);
 
@@ -103,6 +127,8 @@ exports.createApplication = async (req, res, next) => {
       status: ApplicationStatus.AWAITING_PAYMENT,
       importe: DEFAULT_PERMIT_FEE,
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      // Only set delivery_email if it's not a placeholder
+      delivery_email: (email?.trim() || user.account_email) ? validatedData.email : null
     };
 
     const newApplication = await applicationRepository.create(applicationData);
@@ -633,95 +659,179 @@ exports.updateApplication = async (req, res, next) => {
 exports.renewApplication = async (req, res, next) => {
   const userId = req.session.userId;
   const originalApplicationId = parseInt(req.params.id, 10);
+  const { createRenewalError, withRetry, getUserFriendlyMessage } = require('../utils/renewal-errors');
+  const { PaymentFees } = require('../constants/payment.constants');
 
   if (isNaN(originalApplicationId)) {
-    return res.status(400).json({ message: 'Formato de ID de solicitud inválido.' });
+    return res.status(400).json({ 
+      success: false,
+      message: 'Formato de ID de solicitud inválido.',
+      code: 'INVALID_APPLICATION_ID'
+    });
   }
 
   try {
     logger.info(`Processing renewal for application ID: ${originalApplicationId} by user ${userId}`);
 
-    const originalApp = await applicationRepository.findById(originalApplicationId);
+    // Wrap the entire renewal process with retry logic for transient failures
+    const renewalResult = await withRetry(async () => {
+      try {
+        const originalApp = await applicationRepository.findById(originalApplicationId);
 
-    if (!originalApp || originalApp.user_id !== userId) {
-      logger.warn(`Renewal failed: Application ${originalApplicationId} not found or not owned by user ${userId}`);
-      return res.status(404).json({ message: 'Solicitud no encontrada o no autorizada.' });
-    }
-
-    if (originalApp.status !== 'PERMIT_READY' && originalApp.status !== 'ACTIVE') {
-      logger.warn(`Renewal failed: Application ${originalApplicationId} has status ${originalApp.status}`);
-      return res.status(400).json({
-        message: 'Solo los permisos activos o completados pueden ser renovados.'
-      });
-    }
-
-    const renewalCount = (originalApp.renewal_count || 0) + 1;
-    
-    const renewalData = {
-      user_id: userId,
-      nombre_completo: originalApp.nombre_completo,
-      curp_rfc: originalApp.curp_rfc,
-      domicilio: originalApp.domicilio,
-      marca: originalApp.marca,
-      linea: originalApp.linea,
-      color: originalApp.color,
-      numero_serie: originalApp.numero_serie,
-      numero_motor: originalApp.numero_motor,
-      ano_modelo: originalApp.ano_modelo,
-      renewed_from_id: originalApplicationId,
-      renewal_count: renewalCount,
-      status: ApplicationStatus.AWAITING_PAYMENT
-    };
-
-    const newApplication = await applicationRepository.createRenewalApplication(renewalData);
-
-    if (!newApplication) {
-      throw new Error('Error al crear la solicitud de renovación.');
-    }
-    logger.info(`Renewal application created with ID: ${newApplication.id} for user ${userId}`);
-
-    const paymentInstructions = {
-      message: 'Solicitud de renovación creada exitosamente. Por favor realice su pago utilizando uno de los métodos a continuación y envíe el comprobante de pago.',
-      application: {
-        id: newApplication.id,
-        status: newApplication.status,
-        created_at: newApplication.created_at,
-        renewed_from_id: originalApplicationId
-      },
-      applicationId: newApplication.id,
-      originalApplicationId: originalApplicationId,
-      paymentAmount: '197.00 MXN',
-      paymentMethods: [
-        {
-          type: 'Transferencia Bancaria',
-          instructions: 'Transfiera el monto exacto a la siguiente cuenta:',
-          accountDetails: {
-            bank: 'Nombre del Banco',
-            accountHolder: 'Nombre de la Compañía',
-            accountNumber: 'XXXX-XXXX-XXXX-XXXX',
-            clabe: 'XXXXXXXXXXXXXXXXXXXXX',
-            reference: `APP-${newApplication.id}`
-          }
-        },
-        {
-          type: 'Depósito en Efectivo',
-          instructions: 'Realice un depósito en efectivo a la siguiente cuenta:',
-          accountDetails: {
-            bank: 'Nombre del Banco',
-            accountHolder: 'Nombre de la Compañía',
-            accountNumber: 'XXXX-XXXX-XXXX-XXXX',
-            reference: `APP-${newApplication.id}`
-          }
+        if (!originalApp || originalApp.user_id !== userId) {
+          throw createRenewalError('eligibility_check', new Error('Application not found or unauthorized'));
         }
-      ],
-      nextSteps: 'Después de realizar su pago, regrese a la solicitud y haga clic en "Subir Comprobante" para enviar evidencia de su pago. Por favor incluya su ID de solicitud en la referencia del pago.'
+
+        if (originalApp.status !== 'PERMIT_READY' && originalApp.status !== 'ACTIVE') {
+          throw createRenewalError('eligibility_check', new Error('invalid_status'));
+        }
+
+        const renewalCount = (originalApp.renewal_count || 0) + 1;
+        
+        const renewalData = {
+          user_id: userId,
+          nombre_completo: originalApp.nombre_completo,
+          curp_rfc: originalApp.curp_rfc,
+          domicilio: originalApp.domicilio,
+          marca: originalApp.marca,
+          linea: originalApp.linea,
+          color: originalApp.color,
+          numero_serie: originalApp.numero_serie,
+          numero_motor: originalApp.numero_motor,
+          ano_modelo: originalApp.ano_modelo,
+          renewed_from_id: originalApplicationId,
+          renewal_count: renewalCount,
+          status: ApplicationStatus.AWAITING_PAYMENT
+        };
+
+        // Get user data first (outside transaction)
+        const user = await userRepository.findById(userId);
+        if (!user) {
+          throw createRenewalError('database_connection', new Error('User not found'));
+        }
+
+        // Execute renewal creation and payment setup in transaction
+        const stripePaymentLinkService = require('../services/whatsapp/stripe-payment-link.service');
+        
+        return await withTransaction(async (client) => {
+          try {
+            // Create renewal application within transaction
+            const newApplication = await applicationRepository.createRenewalApplication(renewalData, client);
+            
+            if (!newApplication) {
+              throw new Error('Failed to create renewal application');
+            }
+            
+            logger.info(`Renewal application created with ID: ${newApplication.id} for user ${userId}`);
+
+            // Create Stripe checkout session
+            const checkoutSession = await stripePaymentLinkService.createCheckoutSession({
+              applicationId: newApplication.id,
+              amount: PaymentFees.RENEWAL_FEE,
+              currency: 'MXN',
+              customerEmail: user.email,
+              metadata: {
+                renewal: true,
+                original_application_id: originalApplicationId,
+                source: 'renewal_api'
+              },
+              successUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-success?session_id={CHECKOUT_SESSION_ID}&renewal=true`,
+              cancelUrl: `${process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx'}/payment-cancelled?renewal=true`
+            });
+
+            // Update application with payment session ID within same transaction
+            await applicationRepository.updateApplication(
+              newApplication.id, 
+              { payment_processor_order_id: checkoutSession.id },
+              client
+            );
+
+            return {
+              application: newApplication,
+              checkoutSession: checkoutSession,
+              renewalCount: renewalCount
+            };
+          } catch (error) {
+            if (error.message && error.message.includes('stripe')) {
+              throw createRenewalError('payment_session', error);
+            }
+            throw createRenewalError('database_transaction', error);
+          }
+        });
+      } catch (error) {
+        // If it's already a renewal error, re-throw it
+        if (error.name && error.name.includes('Renewal')) {
+          throw error;
+        }
+        
+        // Categorize other errors
+        if (error.message && error.message.includes('connection')) {
+          throw createRenewalError('database_connection', error);
+        }
+        
+        throw createRenewalError('unexpected', error);
+      }
+    });
+
+    const renewalResponse = {
+      success: true,
+      message: 'Solicitud de renovación creada exitosamente.',
+      data: {
+        id: renewalResult.application.id,
+        status: renewalResult.application.status,
+        created_at: renewalResult.application.created_at,
+        renewed_from_id: originalApplicationId,
+        renewal_count: renewalResult.renewalCount
+      },
+      payment: {
+        amount: PaymentFees.RENEWAL_FEE,
+        currency: 'MXN',
+        sessionId: renewalResult.checkoutSession.id,
+        paymentUrl: renewalResult.checkoutSession.url
+      },
+      // Include paymentLink for backward compatibility with WhatsApp service
+      paymentLink: renewalResult.checkoutSession.url
     };
 
-    res.status(201).json(paymentInstructions);
+    res.status(201).json(renewalResponse);
 
   } catch (error) {
-    logger.error(`Error creating renewal for application ${originalApplicationId}:`, error);
-    next(error);
+    logger.error(`Error creating renewal for application ${originalApplicationId}:`, {
+      userId,
+      originalApplicationId,
+      error: error.message,
+      stack: error.stack,
+      errorType: error.name,
+      errorCode: error.code
+    });
+
+    // Get user-friendly error message
+    const userMessage = getUserFriendlyMessage(error);
+    
+    // Determine appropriate HTTP status code
+    let statusCode = 500;
+    let errorCode = 'RENEWAL_ERROR';
+    
+    if (error.name === 'RenewalEligibilityError') {
+      statusCode = 400;
+      errorCode = 'RENEWAL_NOT_ELIGIBLE';
+    } else if (error.name === 'RenewalRateLimitError') {
+      statusCode = 429;
+      errorCode = 'RATE_LIMIT_EXCEEDED';
+    } else if (error.name === 'RenewalValidationError') {
+      statusCode = 400;
+      errorCode = 'VALIDATION_ERROR';
+    } else if (error.name === 'RenewalPaymentError') {
+      statusCode = 402;
+      errorCode = 'PAYMENT_ERROR';
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      message: userMessage,
+      code: errorCode,
+      ...(process.env.NODE_ENV === 'development' && { debug: error.message })
+    });
   }
 };
 

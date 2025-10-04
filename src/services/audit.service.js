@@ -21,6 +21,13 @@ class AuditService extends BaseService {
    */
   async ensureTablesExist() {
     if (this.tablesCreated) return;
+    
+    // Defensive check for database dependency
+    if (!this.db || !this.db.query) {
+      console.warn('AuditService: Database dependency not available, skipping table creation');
+      this.tablesCreated = true; // Prevent repeated attempts
+      return;
+    }
 
     try {
       // Check if admin_audit_logs exists
@@ -136,6 +143,12 @@ class AuditService extends BaseService {
         }
       };
 
+      // Defensive check for database dependency
+      if (!this.db || !this.db.query) {
+        console.warn('AuditService: Database dependency not available, skipping audit log');
+        return null;
+      }
+
       // Use pg-pool style query
       const result = await this.db.query(
         `INSERT INTO admin_audit_logs (admin_id, action, entity_type, entity_id, changes, ip_address, user_agent, request_id, session_id, metadata)
@@ -218,7 +231,7 @@ class AuditService extends BaseService {
       const logsResult = await this.db.query(
         `SELECT 
           admin_audit_logs.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name
         FROM admin_audit_logs
         LEFT JOIN users ON admin_audit_logs.admin_id = users.id
@@ -357,7 +370,7 @@ class AuditService extends BaseService {
       const historyResult = await this.db.query(
         `SELECT 
           admin_audit_logs.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name
          FROM admin_audit_logs
          LEFT JOIN users ON admin_audit_logs.admin_id = users.id
@@ -484,7 +497,7 @@ class AuditService extends BaseService {
       const eventsResult = await this.db.query(
         `SELECT 
           admin_security_events.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name,
           resolver.email as resolved_by_email,
           resolver.full_name as resolved_by_name

@@ -123,7 +123,7 @@ class AuditService extends BaseService {
       const logsResult = await this.db.query(
         `SELECT 
           admin_audit_logs.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name
         FROM admin_audit_logs
         LEFT JOIN users ON admin_audit_logs.admin_id = users.id
@@ -232,7 +232,7 @@ class AuditService extends BaseService {
       const historyResult = await this.db.query(
         `SELECT 
           admin_audit_logs.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name
          FROM admin_audit_logs
          LEFT JOIN users ON admin_audit_logs.admin_id = users.id
@@ -349,7 +349,7 @@ class AuditService extends BaseService {
       const eventsResult = await this.db.query(
         `SELECT 
           admin_security_events.*,
-          users.email as admin_email,
+          users.account_email as admin_email,
           users.full_name as admin_name,
           resolver.email as resolved_by_email,
           resolver.full_name as resolved_by_name

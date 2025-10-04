@@ -5,24 +5,43 @@
 
 const applicationRepository = require('../../repositories/application.repository');
 const userService = require('../user.service');
-const stripePaymentService = require('../stripe-payment.service');
 const { logger } = require('../../utils/logger');
 
 class PermitApplicationService {
   /**
-   * Create application from WhatsApp data
+   * Create application from WhatsApp data (with optional email)
    */
-  async createFromWhatsApp(phoneNumber, formData) {
+  async createFromWhatsApp(phoneNumber, formData, existingUserId = null) {
     try {
-      // Create or find user with real email
-      const userAccountService = require('./user-account.service');
-      const user = await userAccountService.createOrFindUser(
-        phoneNumber,
-        formData.email,
-        formData.nombre_completo
-      );
+      // Normalize phone number to ensure consistency
+      const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
       
-      // Create application
+      let user;
+      
+      if (existingUserId) {
+        // Use existing user (for returning users)
+        const userRepository = require('../../repositories/user.repository');
+        user = await userRepository.findById(existingUserId);
+        
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        logger.info('Using existing user for WhatsApp application', { 
+          userId: existingUserId, 
+          phoneNumber: normalizedPhone 
+        });
+      } else {
+        // Create or find user (email is now optional)
+        const userAccountService = require('./user-account.service');
+        user = await userAccountService.createOrFindUser(
+          normalizedPhone,
+          formData.email || null,  // Email is optional
+          formData.nombre_completo
+        );
+      }
+      
+      // Create application with delivery email
       const application = await applicationRepository.create({
         user_id: user.id,
         status: 'AWAITING_PAYMENT',
@@ -35,18 +54,22 @@ class PermitApplicationService {
         numero_serie: formData.numero_serie,
         numero_motor: formData.numero_motor,
         ano_modelo: formData.ano_modelo,
-        importe: 150.00,
+        delivery_email: formData.email || null, // Store delivery email per permit
+        importe: 99.00,
         source: 'whatsapp',
         source_metadata: { phone_number: phoneNumber }
       });
       
       logger.info('Application created from WhatsApp', {
         applicationId: application.id,
-        phoneNumber
+        userId: user.id,
+        phoneNumber,
+        normalizedPhone,
+        userPhone: user.whatsapp_phone
       });
       
-      // Create Stripe payment link
-      const paymentLink = await this.createPaymentLink(application, phoneNumber);
+      // Create Stripe payment link with both payment methods (use normalized phone)
+      const paymentLink = await this.createPaymentLink(application, normalizedPhone);
       
       return {
         success: true,
@@ -61,7 +84,7 @@ class PermitApplicationService {
   }
   
   /**
-   * Create Stripe payment link
+   * Create Stripe payment link with both payment methods
    */
   async createPaymentLink(application, phoneNumber) {
     const baseUrl = process.env.FRONTEND_URL || 'https://permisosdigitales.com.mx';
@@ -84,12 +107,13 @@ class PermitApplicationService {
     });
     */
     
-    // Option 2: Use Checkout Session (more control, recommended)
+    // Option 2: Use Checkout Session with BOTH payment methods
     const paymentLink = await stripeLinkService.createCheckoutSession({
       applicationId: application.id,
       amount: application.importe,
       currency: 'MXN',
-      customerEmail: application.user?.email || application.email, // Use user email or application email
+      customerEmail: application.delivery_email || null, // Use delivery email (optional)
+      paymentMethodTypes: ['card', 'oxxo'], // Always include both
       metadata: {
         source: 'whatsapp',
         phone_number: phoneNumber
@@ -115,6 +139,34 @@ class PermitApplicationService {
     
     const result = await require('../../db').query(query, [phoneNumber]);
     return result.rows[0];
+  }
+
+  /**
+   * Normalize phone number to WhatsApp 521 format
+   */
+  normalizePhoneNumber(phoneNumber) {
+    if (!phoneNumber) return null;
+    
+    // Remove all non-numeric characters
+    const cleaned = phoneNumber.toString().replace(/[^\d]/g, '');
+    
+    // If already in 521 format, return as-is
+    if (cleaned.startsWith('521') && cleaned.length === 13) {
+      return cleaned;
+    }
+    
+    // If starts with 52 (10 digits), convert to 521
+    if (cleaned.startsWith('52') && cleaned.length === 12) {
+      return '521' + cleaned.slice(2);
+    }
+    
+    // If just 10 digits, add 521 prefix
+    if (cleaned.length === 10) {
+      return '521' + cleaned;
+    }
+    
+    // Return original if can't normalize
+    return cleaned;
   }
 }
 

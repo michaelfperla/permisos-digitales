@@ -134,22 +134,22 @@ class WhatsAppStateCleanupJob {
    * Clean up incomplete database sessions with transaction safety
    */
   async cleanupDatabaseSessions() {
-    const client = await db.getClient();
+    const pool = db.getPool();
+    const client = await pool.connect();
     
     try {
       await client.query('BEGIN');
       
-      // Delete incomplete applications older than 24 hours with no payment
+      // Mark incomplete applications older than 24 hours with no payment as expired
       const result = await client.query(`
-        UPDATE applications 
-        SET deleted_at = NOW(),
-            status = 'EXPIRED'
+        UPDATE permit_applications 
+        SET status = 'EXPIRED',
+            updated_at = NOW()
         WHERE status IN ('AWAITING_PAYMENT', 'INCOMPLETE')
-          AND deleted_at IS NULL
           AND created_at < NOW() - INTERVAL '24 hours'
           AND NOT EXISTS (
             SELECT 1 FROM payments 
-            WHERE payments.application_id = applications.id 
+            WHERE payments.application_id = permit_applications.id 
             AND payments.status = 'succeeded'
           )
         RETURNING id

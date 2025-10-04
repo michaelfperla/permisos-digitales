@@ -28,7 +28,7 @@ class ApplicationRepository extends BaseRepository {
     let query = `
       SELECT pa.id, pa.status, pa.created_at,
              pa.payment_reference, pa.nombre_completo, pa.marca, pa.linea, pa.ano_modelo,
-             u.email as user_email
+             u.account_email as user_email
       FROM permit_applications pa
       JOIN users u ON pa.user_id = u.id
       WHERE 1=1
@@ -109,6 +109,7 @@ class ApplicationRepository extends BaseRepository {
           numero_motor,
           curp_rfc,
           domicilio,
+          delivery_email,
           importe,
           folio,
           fecha_vencimiento,
@@ -121,14 +122,8 @@ class ApplicationRepository extends BaseRepository {
           recomendaciones_file_path
         FROM permit_applications
         WHERE user_id = $1
-          AND (
-            -- Show permits that have been paid and are active or expired
-            status IN ('PERMIT_READY', 'COMPLETED', 'VENCIDO')
-            OR
-            -- Show permits that are currently in payment process (not yet expired)
-            (status IN ('AWAITING_PAYMENT', 'AWAITING_OXXO_PAYMENT', 'PAYMENT_PROCESSING', 'PAYMENT_RECEIVED', 'GENERATING_PERMIT')
-             AND (expires_at IS NULL OR expires_at > NOW()))
-          )
+          AND status IN ('PERMIT_READY', 'COMPLETED')
+          AND permit_file_path IS NOT NULL
         ORDER BY created_at DESC
       `;
 
@@ -158,8 +153,8 @@ class ApplicationRepository extends BaseRepository {
         WHERE user_id = $1
           AND status = 'PERMIT_READY'
           AND fecha_vencimiento IS NOT NULL
-          AND fecha_vencimiento <= (CURRENT_DATE + INTERVAL '30 days')
-          AND fecha_vencimiento >= CURRENT_DATE
+          AND fecha_vencimiento <= ((NOW() AT TIME ZONE 'America/Mexico_City')::DATE + INTERVAL '30 days')
+          AND fecha_vencimiento >= (NOW() AT TIME ZONE 'America/Mexico_City')::DATE
         ORDER BY fecha_vencimiento ASC
       `;
 
@@ -299,7 +294,7 @@ class ApplicationRepository extends BaseRepository {
           pa.id,
           pa.user_id,
           CONCAT(u.first_name, ' ', u.last_name) as user_name,
-          u.email as user_email,
+          u.account_email as user_email,
           u.phone as user_phone,
           pa.puppeteer_error_at as error_time,
           pa.puppeteer_error_message as error_message,
@@ -423,7 +418,7 @@ class ApplicationRepository extends BaseRepository {
    * @param {Object} updateData - Update data including file paths
    * @returns {Promise<void>}
    */
-  async updateApplication(applicationId, updateData) {
+  async updateApplication(applicationId, updateData, client = null) {
     try {
       const fields = [];
       const values = [];
@@ -451,7 +446,8 @@ class ApplicationRepository extends BaseRepository {
         WHERE id = $${paramCount}
       `;
 
-      await db.query(query, values);
+      const dbClient = client || db;
+      await dbClient.query(query, values);
       
       logger.info(`Application ${applicationId} updated with fields: ${Object.keys(updateData).join(', ')}`);
     } catch (error) {
@@ -672,7 +668,7 @@ class ApplicationRepository extends BaseRepository {
    * @param {Object} renewalData - Data for the renewal application
    * @returns {Promise<Object>} Created application
    */
-  async createRenewalApplication(renewalData) {
+  async createRenewalApplication(renewalData, client = null) {
     try {
       const {
         user_id,
@@ -705,7 +701,8 @@ class ApplicationRepository extends BaseRepository {
         ano_modelo, renewed_from_id, renewal_count, status
       ];
 
-      const { rows } = await db.query(query, params);
+      const dbClient = client || db;
+      const { rows } = await dbClient.query(query, params);
       logger.info(`Created renewal application ID ${rows[0].id} from original ID ${renewed_from_id}`);
       return rows[0];
     } catch (error) {
@@ -885,6 +882,32 @@ class ApplicationRepository extends BaseRepository {
         paramCount++;
         fields.push(`fecha_vencimiento = $${paramCount}`);
         values.push(fecha_vencimiento);
+      }
+      
+      // When status becomes PERMIT_READY, calculate expiration based on business rules
+      if (status && status === 'PERMIT_READY') {
+        const { calculatePermitExpirationDate } = require('../utils/permit-business-days');
+        
+        // Use fecha_expedicion if available, otherwise current time (when permit becomes ready)
+        const permitReadyDate = fecha_expedicion || new Date();
+        const businessRuleExpiration = calculatePermitExpirationDate(permitReadyDate);
+        
+        // Always set the calculated expiration for PERMIT_READY status
+        if (!fecha_vencimiento) {
+          paramCount++;
+          fields.push(`fecha_vencimiento = $${paramCount}`);
+          values.push(businessRuleExpiration);
+        }
+        
+        // Also ensure fecha_expedicion is set to the ready date if not provided
+        if (!fecha_expedicion) {
+          // Use Mexico timezone for consistency
+          const { convertToMexicoTimezone } = require('../utils/permit-business-days');
+          const mexicoToday = convertToMexicoTimezone(new Date());
+          paramCount++;
+          fields.push(`fecha_expedicion = $${paramCount}`);
+          values.push(mexicoToday.toISOString().split('T')[0]);
+        }
       }
 
       // Add queue completion fields
@@ -1137,7 +1160,7 @@ class ApplicationRepository extends BaseRepository {
           pa.numero_serie, pa.numero_motor, pa.importe,
           pa.payment_reference, pa.payment_processor_order_id,
           pa.created_at, pa.updated_at,
-          u.email as user_email,
+          u.account_email as user_email,
           u.first_name,
           u.last_name,
           u.whatsapp_phone
@@ -1250,13 +1273,13 @@ class ApplicationRepository extends BaseRepository {
       const query = `
         SELECT 
           id, marca, linea, ano_modelo, fecha_expedicion, fecha_vencimiento,
-          (fecha_vencimiento - CURRENT_DATE) AS days_remaining
+          (fecha_vencimiento - (NOW() AT TIME ZONE 'America/Mexico_City')::DATE) AS days_remaining
         FROM permit_applications
         WHERE user_id = $1
           AND status = 'PERMIT_READY'
           AND fecha_vencimiento IS NOT NULL
-          AND fecha_vencimiento > CURRENT_DATE
-          AND fecha_vencimiento <= (CURRENT_DATE + INTERVAL '1 day' * $2)
+          AND fecha_vencimiento > (NOW() AT TIME ZONE 'America/Mexico_City')::DATE
+          AND fecha_vencimiento <= ((NOW() AT TIME ZONE 'America/Mexico_City')::DATE + INTERVAL '1 day' * $2)
         ORDER BY fecha_vencimiento ASC
       `;
 
@@ -1290,16 +1313,16 @@ class ApplicationRepository extends BaseRepository {
           pa.linea,
           pa.ano_modelo,
           pa.fecha_vencimiento,
-          (pa.fecha_vencimiento - CURRENT_DATE) AS days_remaining,
-          u.email as user_email,
+          (pa.fecha_vencimiento - (NOW() AT TIME ZONE 'America/Mexico_City')::DATE) AS days_remaining,
+          u.account_email as user_email,
           u.first_name,
           u.last_name
         FROM permit_applications pa
         JOIN users u ON pa.user_id = u.id
         WHERE pa.status = 'PERMIT_READY'
           AND pa.fecha_vencimiento IS NOT NULL
-          AND pa.fecha_vencimiento > CURRENT_DATE
-          AND pa.fecha_vencimiento <= (CURRENT_DATE + INTERVAL '1 day' * $1)
+          AND pa.fecha_vencimiento > (NOW() AT TIME ZONE 'America/Mexico_City')::DATE
+          AND pa.fecha_vencimiento <= ((NOW() AT TIME ZONE 'America/Mexico_City')::DATE + INTERVAL '1 day' * $1)
         ORDER BY pa.fecha_vencimiento ASC
       `;
 

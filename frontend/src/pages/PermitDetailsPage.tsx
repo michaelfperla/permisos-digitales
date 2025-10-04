@@ -13,6 +13,11 @@ import OxxoVoucherModal from '../components/payment/OxxoVoucherModal';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ResponsiveContainer from '../components/ui/ResponsiveContainer/ResponsiveContainer';
 import Tabs from '../components/ui/Tabs/Tabs';
+import { 
+  formatDateMexicoWithTZ, 
+  calculatePermitExpirationDate, 
+  getExpirationStatusMessage 
+} from '../utils/permitBusinessDays';
 import { usePermitDetails } from '../hooks/usePermitDetails';
 import styles from './PermitDetailsPage.module.css';
 import { Application, ApplicationDetails } from '../services/applicationService';
@@ -290,18 +295,53 @@ const PermitDetailsPage: React.FC = () => {
                   <div className={styles.infoItem}>
                     <span className={styles.infoTabLabel}>Fecha de Expedición:</span>
                     <span className={styles.infoTabValue}>
-                      {formatDate(dates.fecha_expedicion)}
+                      {formatDateMexicoWithTZ(dates.fecha_expedicion)}
                     </span>
                   </div>
                 )}
-                {dates?.fecha_vencimiento && (
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoTabLabel}>Fecha de Vencimiento:</span>
-                    <span className={styles.infoTabValue}>
-                      {formatDate(dates.fecha_vencimiento)}
-                    </span>
-                  </div>
-                )}
+                {(() => {
+                  // Calculate correct expiration based on business rules
+                  if (status === 'PERMIT_READY' && (dates?.fecha_expedicion || application?.updated_at)) {
+                    const permitReadyDate = dates?.fecha_expedicion || application?.updated_at;
+                    const calculatedExpiration = calculatePermitExpirationDate(permitReadyDate);
+                    const statusInfo = getExpirationStatusMessage(permitReadyDate, status);
+                    
+                    return (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoTabLabel}>Fecha de Vencimiento:</span>
+                        <span className={styles.infoTabValue}>
+                          {formatDateMexicoWithTZ(calculatedExpiration)}
+                          {statusInfo.urgency !== 'normal' && (
+                            <div style={{ 
+                              fontSize: '0.9em', 
+                              color: statusInfo.urgency === 'expired' ? 'var(--color-danger)' : 
+                                     statusInfo.urgency === 'critical' ? 'var(--color-warning)' : 
+                                     'var(--color-info)',
+                              marginTop: '4px',
+                              fontWeight: 'bold'
+                            }}>
+                              {statusInfo.message}
+                            </div>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  }
+                  
+                  // For other statuses, show stored date if available
+                  if (dates?.fecha_vencimiento) {
+                    return (
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoTabLabel}>Fecha de Vencimiento:</span>
+                        <span className={styles.infoTabValue}>
+                          {formatDateMexicoWithTZ(dates.fecha_vencimiento)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  
+                  return null;
+                })()}
               </div>
             </div>
           )}

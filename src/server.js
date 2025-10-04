@@ -15,6 +15,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 const { logger } = require('./utils/logger');
 console.log('[Server] Logger loaded');
+const EnvironmentValidator = require('./utils/environment-validator');
+console.log('[Server] Environment validator loaded');
 const { PermisosStartupOrchestrator } = require('./core/startup-orchestrator');
 console.log('[Server] Startup orchestrator loaded');
 
@@ -54,6 +56,9 @@ async function startApplication() {
   });
 
   try {
+    // Validate environment before proceeding
+    EnvironmentValidator.validate();
+    
     // Create startup orchestrator
     const orchestrator = new PermisosStartupOrchestrator();
     

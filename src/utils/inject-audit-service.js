@@ -9,17 +9,14 @@ const getAuditService = () => {
     const container = require('../core/service-container-singleton').getInstance();
     return container.get('auditService');
   } catch (error) {
-    // Fallback to creating a new instance
+    // Fallback to creating a new instance with proper structure
     const AuditService = require('../services/audit.service');
-    const mockContainer = {
-      get: (serviceName) => {
-        if (serviceName === 'database') return require('../db');
-        if (serviceName === 'redis') return require('../utils/redis-client');
-        if (serviceName === 'logger') return require('../utils/logger').logger;
-        return null;
-      }
+    const mockDependencies = {
+      database: require('../db'),
+      redis: require('../utils/redis-client'),
+      logger: require('../utils/logger').logger
     };
-    return new AuditService(mockContainer);
+    return new AuditService(mockDependencies);
   }
 };
 

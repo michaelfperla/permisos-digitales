@@ -132,12 +132,6 @@ function App() {
           } />
 
           <Route path="/profile" element={<SuspenseRoute><ProfilePage /></SuspenseRoute>} />
-          
-          {/* Legal pages for authenticated users - these will use UserLayout */}
-          <Route path="/terminos-y-condiciones" element={<SuspenseRoute><TermsAndConditionsPage /></SuspenseRoute>} />
-          <Route path="/politica-de-privacidad" element={<SuspenseRoute><PrivacyPolicyPage /></SuspenseRoute>} />
-          <Route path="/contacto" element={<SuspenseRoute><ContactPage /></SuspenseRoute>} />
-          <Route path="/eliminar-datos" element={<SuspenseRoute><DataDeletionPage /></SuspenseRoute>} />
         </Route>
       </Route>
 
@@ -148,7 +142,11 @@ function App() {
         <Route path="/" element={<SuspenseRoute><HomePage /></SuspenseRoute>} />
       </Route>
 
-      {/* Public legal and contact pages - accessible without authentication */}
+      {/* 
+        IMPORTANT: Legal and contact pages MUST remain publicly accessible without authentication
+        This is required for legal compliance (GDPR, CCPA, etc.)
+        DO NOT move these routes inside ProtectedRoute
+      */}
       <Route path="/acerca-de" element={<SuspenseRoute><AboutPage /></SuspenseRoute>} />
       <Route path="/ayuda" element={<SuspenseRoute><HelpPage /></SuspenseRoute>} />
       <Route path="/terminos-y-condiciones" element={<SuspenseRoute><TermsAndConditionsPage /></SuspenseRoute>} />

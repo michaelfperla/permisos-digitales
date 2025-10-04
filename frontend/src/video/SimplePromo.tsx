@@ -28,7 +28,7 @@ export const SimplePromo: React.FC = () => {
           <div style={{marginTop: 40}}>
             <p style={{fontSize: 24}}>✓ Sin filas</p>
             <p style={{fontSize: 24}}>✓ 100% Digital</p>
-            <p style={{fontSize: 24}}>✓ $150 MXN</p>
+            <p style={{fontSize: 24}}>✓ $99 MXN</p>
           </div>
         </Sequence>
       </div>

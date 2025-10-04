@@ -148,7 +148,7 @@ exports.generatePermit = async (applicationId) => {
     // Create permit data from application data (not extracting from page)
     const permitData = {
       folio: `HTZ-${applicationId}`,
-      importe: appData.importe || 150.00,
+      importe: appData.importe || 99.00,
       fechaExpedicion: new Date().toISOString().split('T')[0],
       fechaVencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
     };
@@ -550,7 +550,7 @@ async function fillPermitForm(page, appData) {
       const importeSelector = '[name="importe"]';
       await page.waitForSelector(importeSelector, { visible: true, timeout: 5000 });
 
-      const importeValue = appData.importe ? appData.importe.toString() : '150.00';
+      const importeValue = appData.importe ? appData.importe.toString() : '99.00';
       logger.info(`Setting importe field to: ${importeValue}`);
 
       // Clear and type the value
@@ -560,7 +560,7 @@ async function fillPermitForm(page, appData) {
       logger.warn(`Could not fill importe field: ${importeError.message}`);
       // Try JavaScript fallback
       try {
-        await page.$eval('[name="importe"]', (input, value) => input.value = value, '150.00');
+        await page.$eval('[name="importe"]', (input, value) => input.value = value, '99.00');
         logger.info('Set importe field using JavaScript fallback');
       } catch (jsError) {
         logger.warn(`JavaScript fallback for importe also failed: ${jsError.message}`);

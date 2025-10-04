@@ -198,17 +198,21 @@ const LoginForm: React.FC = () => {
 
       <MobileFormGroup>
         <MobileFormLabel htmlFor="email" required>
-          Correo electrónico
+          Correo electrónico o Teléfono
         </MobileFormLabel>
         <MobileFormInput
-          type="email"
+          type="text"
           id="email"
+          placeholder="correo@ejemplo.com o 6641234567"
           error={errors.email?.message}
           {...register('email')}
           required
-          autoComplete="email"
-          inputMode="email"
+          autoComplete="username"
+          inputMode="text"
         />
+        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+          Puedes usar tu email o número de WhatsApp (10 dígitos)
+        </small>
       </MobileFormGroup>
 
       <MobileFormGroup>

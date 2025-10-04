@@ -135,7 +135,7 @@ exports.getDashboardStats = async (req, res) => {
         'application_created' as event_type,
         pa.id as entity_id,
         pa.created_at,
-        u.email as user_email,
+        u.account_email as user_email,
         u.first_name,
         u.last_name,
         pa.status
@@ -341,7 +341,7 @@ exports.getAllApplications = async (req, res) => {
         pa.importe,
         pa.renewed_from_id,
         pa.renewal_count,
-        u.email as user_email,
+        u.account_email as user_email,
         u.phone as user_phone,
         CONCAT(u.first_name, ' ', u.last_name) as user_full_name,
         u.account_type as user_account_type,
@@ -413,7 +413,7 @@ exports.getAllApplications = async (req, res) => {
         pa.nombre_completo ILIKE $${params.length - 1} OR
         pa.curp_rfc ILIKE $${params.length - 1} OR
         pa.numero_serie ILIKE $${params.length - 1} OR
-        u.email ILIKE $${params.length - 1} OR
+        u.account_email ILIKE $${params.length - 1} OR
         u.phone ILIKE $${params.length - 1} OR
         CONCAT(u.first_name, ' ', u.last_name) ILIKE $${params.length - 1} OR
         CAST(pa.id AS TEXT) = $${params.length}
@@ -715,7 +715,7 @@ exports.updateApplicationStatus = async (req, res) => {
       const currentAppQuery = `
         SELECT 
           pa.*,
-          u.email as user_email,
+          u.account_email as user_email,
           u.first_name as user_first_name,
           u.last_name as user_last_name,
           u.phone as user_phone
@@ -794,6 +794,32 @@ exports.updateApplicationStatus = async (req, res) => {
       ]);
       
       await client.query('COMMIT');
+      
+      // Trigger PDF generation if status changed to PAYMENT_RECEIVED
+      if (status === 'PAYMENT_RECEIVED' && previousStatus !== 'PAYMENT_RECEIVED') {
+        try {
+          const { getInstance } = require('../services/pdf-queue-factory.service');
+          const pdfQueueService = getInstance();
+          
+          if (pdfQueueService) {
+            await pdfQueueService.addJob({
+              applicationId,
+              userId: currentApp.user_id,
+              triggeredBy: 'admin_status_change',
+              adminId,
+              originalStatus: previousStatus
+            });
+            
+            logger.info(`PDF generation queued for application ${applicationId} due to admin status change to PAYMENT_RECEIVED`);
+          } else {
+            logger.warn('PDF Queue service not available, PDF generation will be picked up by processor job');
+          }
+        } catch (pdfError) {
+          // Don't fail the status update if PDF queueing fails
+          // The PDF processor job will pick it up based on PAYMENT_RECEIVED status
+          logger.error('Error queueing PDF generation:', pdfError);
+        }
+      }
       
       // Send notifications if requested
       if (notify && currentApp.user_email) {
@@ -898,7 +924,7 @@ exports.getApplicationDetails = async (req, res) => {
     const applicationQuery = `
       SELECT 
         pa.*,
-        u.email as user_email,
+        u.account_email as user_email,
         u.phone as user_phone,
         CONCAT(u.first_name, ' ', u.last_name) as user_full_name,
         u.account_type as user_account_type,
@@ -930,7 +956,10 @@ exports.getApplicationDetails = async (req, res) => {
       WHERE application_id = $1
       ORDER BY created_at DESC
     `;
-    const pdfResult = await db.query(pdfAttemptsQuery, [applicationId]).catch(() => ({ rows: [] }));
+    const pdfResult = await db.query(pdfAttemptsQuery, [applicationId]).catch((error) => {
+      logger.debug('PDF queue table not found, skipping PDF attempts', { error: error.message });
+      return { rows: [] };
+    });
 
     // Get payment recovery attempts  
     const recoveryQuery = `
@@ -1080,7 +1109,11 @@ exports.downloadPermit = async (req, res) => {
     }
     
     // Set appropriate headers
-    const fileName = `Permiso_${application.folio || applicationId}.pdf`;
+    // Use the original filename from the file path if available, otherwise use folio
+    const originalFileName = path.basename(filePath);
+    const fileName = originalFileName.includes('_') && originalFileName.endsWith('.pdf') 
+      ? originalFileName 
+      : `Permiso_${application.folio || applicationId}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     
@@ -1164,7 +1197,11 @@ exports.downloadRecommendations = async (req, res) => {
     }
     
     // Set appropriate headers
-    const fileName = `Recomendaciones_${application.folio || applicationId}.pdf`;
+    // Use the original filename from the file path if available, otherwise use folio
+    const originalFileName = path.basename(filePath);
+    const fileName = originalFileName.includes('_') && originalFileName.endsWith('.pdf') 
+      ? originalFileName 
+      : `Recomendaciones_${application.folio || applicationId}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     
@@ -1222,7 +1259,7 @@ exports.exportApplications = async (req, res) => {
         pa.numero_motor,
         pa.renewed_from_id,
         pa.renewal_count,
-        u.email as user_email,
+        u.account_email as user_email,
         u.phone as user_phone,
         CONCAT(u.first_name, ' ', u.last_name) as user_full_name,
         u.account_type as user_account_type,
@@ -1283,7 +1320,7 @@ exports.exportApplications = async (req, res) => {
         pa.nombre_completo ILIKE $${params.length - 1} OR
         pa.curp_rfc ILIKE $${params.length - 1} OR
         pa.numero_serie ILIKE $${params.length - 1} OR
-        u.email ILIKE $${params.length - 1} OR
+        u.account_email ILIKE $${params.length - 1} OR
         u.phone ILIKE $${params.length - 1} OR
         CONCAT(u.first_name, ' ', u.last_name) ILIKE $${params.length - 1} OR
         CAST(pa.id AS TEXT) = $${params.length}
@@ -1416,3 +1453,117 @@ exports.exportApplications = async (req, res) => {
     return ApiResponse.error(res, 'Error al exportar aplicaciones', 500);
   }
 };
+
+/**
+ * Update application status
+ * Allows admins to change the status of any permit application
+ * NOTE: This is a duplicate - using the implementation at line 684 instead
+ */
+// Commented out duplicate implementation - see line 684 for active version
+/*
+exports.updateApplicationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, reason } = req.body;
+    const adminId = req.session.userId;
+    
+    // Validate status
+    const validStatuses = [
+      'AWAITING_PAYMENT',
+      'AWAITING_OXXO_PAYMENT', 
+      'PAYMENT_PROCESSING',
+      'PAYMENT_FAILED',
+      'PAYMENT_RECEIVED',
+      'GENERATING_PERMIT',
+      'ERROR_GENERATING_PERMIT',
+      'PERMIT_READY',
+      'COMPLETED',
+      'CANCELLED',
+      'EXPIRED',
+      'VENCIDO',
+      'RENEWAL_PENDING',
+      'RENEWAL_APPROVED',
+      'RENEWAL_REJECTED'
+    ];
+    
+    if (!validStatuses.includes(status)) {
+      return ApiResponse.error(res, 'Estado no válido', 400);
+    }
+    
+    const db = require('../db');
+    
+    // Check if application exists
+    const appResult = await db.query(
+      'SELECT id, status, user_id FROM permit_applications WHERE id = $1',
+      [id]
+    );
+    
+    if (appResult.rows.length === 0) {
+      return ApiResponse.error(res, 'Aplicación no encontrada', 404);
+    }
+    
+    const currentStatus = appResult.rows[0].status;
+    const userId = appResult.rows[0].user_id;
+    
+    // Update the status
+    await db.query(
+      'UPDATE permit_applications SET status = $1, updated_at = NOW() WHERE id = $2',
+      [status, id]
+    );
+    
+    // Log the admin action for audit trail
+    if (auditService) {
+      await auditService.logAdminAction({
+        adminId,
+        action: 'UPDATE_APPLICATION_STATUS',
+        resourceType: 'permit_application',
+        resourceId: id,
+        details: {
+          previousStatus: currentStatus,
+          newStatus: status,
+          reason: reason || null
+        }
+      });
+    }
+    
+    // Trigger PDF generation if status changed to PAYMENT_RECEIVED
+    if (status === 'PAYMENT_RECEIVED' && currentStatus !== 'PAYMENT_RECEIVED') {
+      try {
+        const { getInstance } = require('../services/pdf-queue-factory.service');
+        const pdfQueueService = getInstance();
+        
+        if (pdfQueueService) {
+          await pdfQueueService.addJob({
+            applicationId: parseInt(id, 10),
+            userId: userId,
+            triggeredBy: 'admin_status_change',
+            adminId: adminId,
+            originalStatus: currentStatus
+          });
+          
+          logger.info(`PDF generation queued for application ${id} due to admin status change to PAYMENT_RECEIVED`);
+        } else {
+          logger.warn('PDF Queue service not available, PDF generation will be picked up by processor job');
+        }
+      } catch (pdfError) {
+        // Don't fail the status update if PDF queueing fails
+        logger.error('Error queueing PDF generation:', pdfError);
+      }
+    }
+    
+    // Get updated application details
+    const updatedApp = await applicationRepository.getById(id);
+    
+    logger.info(`Admin ${adminId} changed application ${id} status from ${currentStatus} to ${status}`);
+    
+    return ApiResponse.success(res, {
+      message: 'Estado actualizado exitosamente',
+      application: updatedApp
+    });
+    
+  } catch (error) {
+    logger.error('Error updating application status:', error);
+    return ApiResponse.error(res, 'Error al actualizar el estado de la aplicación', 500);
+  }
+};
+*/

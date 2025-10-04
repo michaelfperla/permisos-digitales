@@ -133,7 +133,7 @@ exports.bulkUpdateApplicationStatus = async (req, res) => {
             
             // Get current application
             const currentAppResult = await client.query(
-              `SELECT pa.*, u.email as user_email, u.phone as user_phone
+              `SELECT pa.*, u.account_email as user_email, u.phone as user_phone
                FROM permit_applications pa
                JOIN users u ON pa.user_id = u.id
                WHERE pa.id = $1 FOR UPDATE`,
@@ -1017,7 +1017,7 @@ exports.bulkCleanupApplications = async (req, res) => {
         pa.certificado_file_path,
         pa.placas_file_path,
         pa.recomendaciones_file_path,
-        u.email as user_email
+        u.account_email as user_email
       FROM permit_applications pa
       JOIN users u ON pa.user_id = u.id
       WHERE pa.status = ANY($1::text[])

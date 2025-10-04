@@ -61,14 +61,14 @@ exports.createApplicationWithOxxo = async (formData, userId) => {
       throw new Error('User not found');
     }
 
-    const userEmail = user.email;
+    const userEmail = user.account_email;
     const userName = `${user.first_name} ${user.last_name}`;
 
     // Fix: Use stripePaymentService instead of undefined paymentService
     const customer = await stripePaymentService.createCustomer({
       name: formData.nombre_completo || userName,
       email: userEmail,
-      phone: formData.phone || ''
+      phone: user.whatsapp_phone || formData.phone || user.phone || ''
     });
 
     const paymentData = {
@@ -95,7 +95,7 @@ exports.createApplicationWithOxxo = async (formData, userId) => {
       eventData: {
         status: paymentResult.status || 'pending_payment',
         paymentMethod: 'oxxo_cash',
-        amount: paymentResult.amount || 150.00,
+        amount: paymentResult.amount || 99.00,
         currency: paymentResult.currency || 'MXN',
         oxxoReference: paymentResult.oxxoReference,
         expiresAt: paymentResult.expiresAt,

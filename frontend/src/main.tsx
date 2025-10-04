@@ -22,17 +22,24 @@ import './styles/text-standardization.css';
 // Initialize timer tracking after imports are resolved
 initializeTimerTracking();
 
-// Register service worker for offline functionality in production
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// SERVICE WORKER DISABLED - Causing login session issues
+// Unregister any existing service workers to fix authentication problems (only once)
+if ('serviceWorker' in navigator && !localStorage.getItem('sw_cleanup_done')) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/service-worker.js')
-      .then((registration) => {
-        console.info('Service Worker registered with scope:', registration.scope);
-      })
-      .catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      if (registrations.length > 0) {
+        Promise.all(registrations.map(reg => reg.unregister())).then((results) => {
+          const unregisteredCount = results.filter(success => success).length;
+          if (unregisteredCount > 0) {
+            console.info(`Service Workers unregistered: ${unregisteredCount} of ${registrations.length}`);
+            localStorage.setItem('sw_cleanup_done', 'true');
+          }
+        });
+      } else {
+        // No service workers found, mark as cleaned
+        localStorage.setItem('sw_cleanup_done', 'true');
+      }
+    });
   });
 }
 

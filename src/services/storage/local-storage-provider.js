@@ -73,8 +73,8 @@ class LocalStorageProvider extends StorageProvider {
     if (preserveOriginal && originalName && originalName !== 'file') {
       // Sanitize the filename to remove any path traversal attempts
       const sanitized = path.basename(originalName);
-      // Replace spaces with underscores for consistency
-      return sanitized.replace(/\s+/g, '_');
+      // Keep the original filename exactly as-is (including spaces)
+      return sanitized;
     }
     
     // Otherwise, generate a unique filename

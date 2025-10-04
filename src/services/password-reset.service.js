@@ -182,7 +182,7 @@ async function requestPasswordReset(email, ipAddress = 'unknown') {
     }
 
     // Prepare personalized email data
-    const resetUrl = `${config.appUrl}/#/reset-password`;
+    const resetUrl = `${config.frontendUrl}/reset-password?token=${token}`;
     const emailData = {
       userName: user.first_name || 'Usuario',
       lastLoginInfo: user.last_login_at 
@@ -193,10 +193,9 @@ async function requestPasswordReset(email, ipAddress = 'unknown') {
         : null
     };
 
-    // Send reset email with additional context
+    // Send reset email with proper URL containing token
     const emailSent = await emailService.sendPasswordResetEmail(
       user.email,
-      token,
       resetUrl,
       emailData
     );

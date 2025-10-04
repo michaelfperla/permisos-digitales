@@ -476,7 +476,7 @@ exports.updateUser = async (req, res, next) => {
 
     // Check if email is being changed and if it's already in use
     if (email && email !== existingUser.email) {
-      const emailCheckQuery = 'SELECT id FROM users WHERE email = $1 AND id != $2';
+      const emailCheckQuery = 'SELECT id FROM users WHERE account_email = $1 AND id != $2';
       const emailCheckResult = await db.query(emailCheckQuery, [email, userId]);
       
       if (emailCheckResult.rows.length > 0) {
@@ -687,7 +687,7 @@ exports.resetUserPassword = async (req, res, next) => {
     logger.info(`Admin ${adminId} is resetting password for user ${userId}`);
 
     // Check if user exists
-    const userQuery = 'SELECT id, email, first_name, last_name FROM users WHERE id = $1';
+    const userQuery = 'SELECT id, account_email as email, first_name, last_name FROM users WHERE id = $1';
     const userResult = await db.query(userQuery, [userId]);
     
     if (userResult.rows.length === 0) {

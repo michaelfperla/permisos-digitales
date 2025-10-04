@@ -21,9 +21,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ApplicationDetailsPage.module.css';
 import Button from '../../components/ui/Button/Button';
 import ResponsiveContainer from '../../components/ui/ResponsiveContainer/ResponsiveContainer';
-import Icon from '../../shared/components/ui/Icon';
+import Icon from '../../shared/components/ui/Icon/Icon';
 import { useToast } from '../../shared/hooks/useToast';
-import { getApplicationDetails, getPaymentProofDetails, verifyPayment, rejectPayment } from '../services/adminService';
+import { getApplicationDetails, updateApplicationStatus } from '../services/adminService';
+import { 
+  formatDateMexicoWithTZ, 
+  calculatePermitExpirationDate, 
+  getExpirationStatusMessage 
+} from '../../utils/permitBusinessDays';
 
 const ApplicationDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,8 +36,15 @@ const ApplicationDetailsPage: React.FC = () => {
   const { showToast } = useToast();
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [statusChangeReason, setStatusChangeReason] = useState('');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  
+  // Debug logging
+  console.log('[ApplicationDetailsPage] Rendering with ID:', id);
 
-  // Fetch application details
+  // Fetch application details with proper error handling
   const {
     data: application,
     isLoading,
@@ -41,8 +53,16 @@ const ApplicationDetailsPage: React.FC = () => {
     refetch,
   } = useQuery({
     queryKey: ['applicationDetails', id],
-    queryFn: () => getApplicationDetails(id!),
+    queryFn: async () => {
+      if (!id) {
+        throw new Error('Application ID is required');
+      }
+      return getApplicationDetails(id);
+    },
     enabled: !!id,
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Handle application details error
@@ -235,6 +255,30 @@ const ApplicationDetailsPage: React.FC = () => {
     }
   };
 
+  // Handle status change
+  const handleStatusChange = async () => {
+    if (!id || !selectedStatus) return;
+    
+    try {
+      setIsUpdatingStatus(true);
+      const result = await updateApplicationStatus(parseInt(id), selectedStatus, statusChangeReason);
+      
+      if (result.success) {
+        showToast('Estado actualizado exitosamente', 'success');
+        setShowStatusModal(false);
+        setSelectedStatus('');
+        setStatusChangeReason('');
+        refetch(); // Refresh application data
+      } else {
+        showToast(`Error: ${result.message || 'Error al actualizar estado'}`, 'error');
+      }
+    } catch (error: any) {
+      showToast(`Error: ${error.message || 'Error al actualizar estado'}`, 'error');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -289,6 +333,19 @@ const ApplicationDetailsPage: React.FC = () => {
         </div>
 
         <div className={styles.headerActions}>
+          {/* Status change button - always visible for admins */}
+          <Button
+            variant="warning"
+            size="small"
+            icon={<Icon IconComponent={FaExclamationTriangle} size="sm" />}
+            onClick={() => {
+              setSelectedStatus(application?.status || '');
+              setShowStatusModal(true);
+            }}
+          >
+            Cambiar Estado
+          </Button>
+          
           {/* Legacy payment proof actions */}
           {application?.status === 'PROOF_SUBMITTED' && (
             <>
@@ -449,13 +506,38 @@ const ApplicationDetailsPage: React.FC = () => {
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Fecha de Expedición:</span>
                 <span className={styles.detailValue}>
-                  {formatDate(application?.fecha_expedicion)}
+                  {application?.fecha_expedicion ? formatDateMexicoWithTZ(application.fecha_expedicion) : 'N/A'}
                 </span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Fecha de Vencimiento:</span>
                 <span className={styles.detailValue}>
-                  {formatDate(application?.fecha_vencimiento)}
+                  {(() => {
+                    // Calculate correct expiration based on business rules
+                    if (application?.status === 'PERMIT_READY' && (application?.fecha_expedicion || application?.updated_at)) {
+                      const permitReadyDate = application.fecha_expedicion || application.updated_at;
+                      const calculatedExpiration = calculatePermitExpirationDate(permitReadyDate);
+                      const statusInfo = getExpirationStatusMessage(permitReadyDate, application.status);
+                      
+                      return (
+                        <span>
+                          {formatDateMexicoWithTZ(calculatedExpiration)}
+                          {statusInfo.urgency !== 'normal' && (
+                            <span style={{ 
+                              marginLeft: '8px', 
+                              color: statusInfo.urgency === 'expired' ? 'var(--color-danger)' : 
+                                     statusInfo.urgency === 'critical' ? 'var(--color-warning)' : 
+                                     'var(--color-info)' 
+                            }}>
+                              ({statusInfo.message})
+                            </span>
+                          )}
+                        </span>
+                      );
+                    }
+                    
+                    return application?.fecha_vencimiento ? formatDateMexicoWithTZ(application.fecha_vencimiento) : 'N/A';
+                  })()}
                 </span>
               </div>
               <div className={styles.detailItem}>
@@ -748,6 +830,85 @@ const ApplicationDetailsPage: React.FC = () => {
                 disabled={isVerifying}
               >
                 {isVerifying ? 'Procesando...' : 'Confirmar Verificación'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Change Modal */}
+      {showStatusModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Cambiar Estado de Aplicación</h2>
+              <Button
+                variant="text"
+                size="icon"
+                className={styles.modalClose}
+                onClick={() => {
+                  setShowStatusModal(false);
+                  setSelectedStatus('');
+                  setStatusChangeReason('');
+                }}
+                icon={<Icon IconComponent={FaTimes} size="md" />}
+                aria-label="Cerrar modal"
+              />
+            </div>
+            <div className={styles.modalBody}>
+              <p className={styles.modalText}>
+                Seleccione el nuevo estado para esta aplicación:
+              </p>
+              <select
+                className={styles.statusSelect}
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                style={{ width: '100%', padding: '8px', marginBottom: '16px' }}
+              >
+                <option value="">-- Seleccione un estado --</option>
+                <option value="AWAITING_PAYMENT">Esperando Pago</option>
+                <option value="AWAITING_OXXO_PAYMENT">Esperando Pago OXXO</option>
+                <option value="PAYMENT_PROCESSING">Procesando Pago</option>
+                <option value="PAYMENT_FAILED">Pago Fallido</option>
+                <option value="PAYMENT_RECEIVED">Pago Recibido</option>
+                <option value="GENERATING_PERMIT">Generando Permiso</option>
+                <option value="ERROR_GENERATING_PERMIT">Error al Generar Permiso</option>
+                <option value="PERMIT_READY">Permiso Listo</option>
+                <option value="COMPLETED">Completado</option>
+                <option value="CANCELLED">Cancelado</option>
+                <option value="EXPIRED">Expirado</option>
+                <option value="VENCIDO">Vencido</option>
+                <option value="RENEWAL_PENDING">Renovación Pendiente</option>
+                <option value="RENEWAL_APPROVED">Renovación Aprobada</option>
+                <option value="RENEWAL_REJECTED">Renovación Rechazada</option>
+              </select>
+              <textarea
+                className={styles.rejectReasonInput}
+                value={statusChangeReason}
+                onChange={(e) => setStatusChangeReason(e.target.value)}
+                placeholder="Razón del cambio (opcional)"
+                rows={3}
+              />
+            </div>
+            <div className={styles.modalFooter}>
+              <Button 
+                variant="secondary" 
+                size="small" 
+                onClick={() => {
+                  setShowStatusModal(false);
+                  setSelectedStatus('');
+                  setStatusChangeReason('');
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                size="small"
+                onClick={handleStatusChange}
+                disabled={!selectedStatus || selectedStatus === application?.status || isUpdatingStatus}
+              >
+                {isUpdatingStatus ? 'Actualizando...' : 'Confirmar Cambio'}
               </Button>
             </div>
           </div>

@@ -98,9 +98,9 @@ const createPool = () => {
     }
     
     poolConfig = {
-      // Database connection with secure SSL configuration
+      // Database connection with SSL configuration from environment
       connectionString: config.database.url,
-      ssl: false, // Disabled - AWS RDS within VPC doesn't need SSL
+      ssl: sslConfig, // Use SSL configuration based on environment settings
       max: config.database.pool.max,
       min: config.database.pool.min,
       idleTimeoutMillis: config.database.pool.idleTimeoutMillis,

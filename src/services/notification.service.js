@@ -296,21 +296,30 @@ async function sendPermitReadyNotification(notificationData, channels = [CHANNEL
               supportEmail: config.supportEmail || 'soporte@permisos-digitales.mx'
             };
 
-            // Send email notification
-            const emailSent = await emailService.sendPermitReadyNotification(
-              user.email,
-              emailDetails
-            );
-
-            results[channel] = {
-              success: emailSent,
-              error: emailSent ? null : 'Email delivery failed'
-            };
-
-            if (emailSent) {
-              logger.info(`Permit ready notification sent via email to ${user.email} for application ${application.id}`);
+            // Check if user has email (WhatsApp users may have NULL emails)
+            if (!user.account_email) {
+              logger.info(`Skipping email notification - user ${user.id} has no email (WhatsApp user)`);
+              results[channel] = {
+                success: false,
+                error: 'User has no email address'
+              };
             } else {
-              logger.warn(`Failed to send permit ready notification via email to ${user.email} for application ${application.id}`);
+              // Send email notification
+              const emailSent = await emailService.sendPermitReadyNotification(
+                user.account_email,
+                emailDetails
+              );
+
+              results[channel] = {
+                success: emailSent,
+                error: emailSent ? null : 'Email delivery failed'
+              };
+
+              if (emailSent) {
+                logger.info(`Permit ready notification sent via email to ${user.account_email} for application ${application.id}`);
+              } else {
+                logger.warn(`Failed to send permit ready notification via email to ${user.account_email} for application ${application.id}`);
+              }
             }
           } catch (emailError) {
             logger.error(`Error processing email channel for permit ready:`, {
@@ -327,13 +336,13 @@ async function sendPermitReadyNotification(notificationData, channels = [CHANNEL
 
         case CHANNELS.SMS:
           // Future SMS implementation - could send a short message with permit folio
-          logger.info(`SMS notification for permit ready would be sent to user ${user.email}`);
+          logger.info(`SMS notification for permit ready would be sent to user ${user.id} (${user.account_email || 'no email'})`);
           results[channel] = { success: false, error: 'SMS not yet implemented' };
           break;
 
         case CHANNELS.WHATSAPP:
           // Future WhatsApp implementation - could send permit PDF directly
-          logger.info(`WhatsApp notification for permit ready would be sent to user ${user.email}`);
+          logger.info(`WhatsApp notification for permit ready would be sent to user ${user.id} (${user.account_email || 'no email'})`);
           results[channel] = { success: false, error: 'WhatsApp not yet implemented' };
           break;
 

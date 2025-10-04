@@ -8,6 +8,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaExclamationTriangle,
+  FaWhatsapp,
 } from 'react-icons/fa';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 
@@ -208,6 +209,17 @@ const AdminLayout: React.FC = () => {
           >
             <Icon IconComponent={FaUsers} className={styles.navIcon} />
             <span className={styles.navText}>Usuarios</span>
+          </NavLink>
+
+          <NavLink
+            to="/whatsapp-monitoring"
+            className={({ isActive }) =>
+              isActive ? `${styles.navLink} ${styles.active}` : styles.navLink
+            }
+            onClick={handleNavLinkClick}
+          >
+            <Icon IconComponent={FaWhatsapp} className={styles.navIcon} />
+            <span className={styles.navText}>WhatsApp</span>
           </NavLink>
         </nav>
 

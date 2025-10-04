@@ -128,6 +128,42 @@ class MockRedisClient {
     }
   }
 
+  async ping() {
+    return 'PONG';
+  }
+
+  async scan(cursor = '0', ...args) {
+    // Extract MATCH pattern and COUNT from args
+    let matchPattern = '*';
+    let count = 10;
+    
+    for (let i = 0; i < args.length; i += 2) {
+      if (args[i] === 'MATCH') {
+        matchPattern = args[i + 1];
+      } else if (args[i] === 'COUNT') {
+        count = parseInt(args[i + 1], 10);
+      }
+    }
+    
+    const allKeys = await this.keys(matchPattern);
+    const startIndex = parseInt(cursor, 10);
+    const endIndex = Math.min(startIndex + count, allKeys.length);
+    const keys = allKeys.slice(startIndex, endIndex);
+    const nextCursor = endIndex >= allKeys.length ? '0' : endIndex.toString();
+    
+    return [nextCursor, keys];
+  }
+
+  async smembers(key) {
+    // For mock, just return empty array since sets aren't fully implemented
+    return [];
+  }
+
+  async sadd(key, ...members) {
+    // For mock, just return count of members added
+    return members.length;
+  }
+
   // Add event emitter methods to avoid errors
   on() { return this; }
 }
@@ -361,6 +397,22 @@ class ResilientRedisWrapper {
     return this.executeCommand('del', keys);
   }
   
+  async ping() {
+    return this.executeCommand('ping', []);
+  }
+  
+  async scan(cursor, ...args) {
+    return this.executeCommand('scan', [cursor, ...args]);
+  }
+  
+  async smembers(key) {
+    return this.executeCommand('smembers', [key]);
+  }
+  
+  async sadd(key, ...members) {
+    return this.executeCommand('sadd', [key, ...members]);
+  }
+  
   // Health check method
   isHealthy() {
     return isRedisHealthy && this.client && this.client.status === 'ready';
@@ -461,6 +513,22 @@ const createProductionExports = () => ({
       const wrapper = new ResilientRedisWrapper(getRedisClient());
       return wrapper.del(...keys);
     },
+    async ping() {
+      const wrapper = new ResilientRedisWrapper(getRedisClient());
+      return wrapper.ping();
+    },
+    async scan(cursor, ...args) {
+      const wrapper = new ResilientRedisWrapper(getRedisClient());
+      return wrapper.scan(cursor, ...args);
+    },
+    async smembers(key) {
+      const wrapper = new ResilientRedisWrapper(getRedisClient());
+      return wrapper.smembers(key);
+    },
+    async sadd(key, ...members) {
+      const wrapper = new ResilientRedisWrapper(getRedisClient());
+      return wrapper.sadd(key, ...members);
+    },
     isHealthy() {
       const wrapper = new ResilientRedisWrapper(getRedisClient());
       return wrapper.isHealthy();
@@ -483,6 +551,10 @@ const createDevelopmentExports = () => ({
     exists: (key) => getRedisClient().exists(key),
     del: (...keys) => getRedisClient().del(...keys),
     keys: (pattern) => getRedisClient().keys(pattern),
+    ping: () => getRedisClient().ping(),
+    scan: (cursor, ...args) => getRedisClient().scan(cursor, ...args),
+    smembers: (key) => getRedisClient().smembers(key),
+    sadd: (key, ...members) => getRedisClient().sadd(key, ...members),
     on: (...args) => getRedisClient().on(...args)
 });
 

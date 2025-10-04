@@ -1,0 +1,527 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.titleIcon {
+  color: #3b82f6;
+  font-size: 20px;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.periodSelector {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.periodButton {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.periodButton:hover {
+  color: #374151;
+}
+
+.periodButton.active {
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.refreshButton:hover {
+  background: #2563eb;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.metricCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.metricIcon {
+  font-size: 18px;
+  color: #3b82f6;
+}
+
+.metricLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.metricValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.metricBreakdown {
+  display: flex;
+  gap: 1rem;
+  font-size: 13px;
+}
+
+.incoming {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.outgoing {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.metricSubtext {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Insights Grid */
+.insightsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.insightCard {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.insightTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.insightIcon {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.insightValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-bottom: 0.5rem;
+}
+
+.insightDescription {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Chart Section */
+.chartSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chartTitle {
+  margin: 0 0 1.5rem 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.chartContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chart {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+  height: 200px;
+  padding: 1rem 0;
+  overflow-x: auto;
+}
+
+.chartBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 40px;
+}
+
+.barContainer {
+  height: 150px;
+  display: flex;
+  align-items: end;
+  width: 100%;
+}
+
+.bar {
+  width: 100%;
+  background: #3b82f6;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+  min-height: 2px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.bar:hover {
+  background: #2563eb;
+}
+
+.incomingBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #10b981;
+  border-radius: 2px 2px 0 0;
+}
+
+.barLabel {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  transform: rotate(-45deg);
+  white-space: nowrap;
+}
+
+.barValue {
+  font-size: 11px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.chartLegend {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 13px;
+  color: #374151;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Intents Section */
+.intentsSection {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+  margin: 0 0 1.5rem 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.intentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.intentItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto 100px;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.intentRank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.intentName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.intentCount {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.intentBar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.intentProgress {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.noIntents {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Loading and Error States */
+.loadingState,
+.errorState,
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorIcon,
+.emptyIcon {
+  font-size: 48px;
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.emptyIcon {
+  color: #9ca3af;
+}
+
+.retryButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 1rem;
+}
+
+.retryButton:hover {
+  background: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .controls {
+    justify-content: space-between;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .insightsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .header {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .periodSelector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .metricsGrid,
+  .insightsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metricCard,
+  .insightCard {
+    padding: 1rem;
+  }
+
+  .metricValue {
+    font-size: 24px;
+  }
+
+  .chart {
+    gap: 2px;
+  }
+
+  .chartBar {
+    min-width: 30px;
+  }
+
+  .intentItem {
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+  }
+
+  .intentCount,
+  .intentBar {
+    grid-column: 2;
+  }
+}

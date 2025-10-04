@@ -86,7 +86,7 @@ export const PaymentScene: React.FC = () => {
               fontFamily: 'Inter, sans-serif',
             }}
           >
-            $150
+            $99
           </span>
           <span
             style={{

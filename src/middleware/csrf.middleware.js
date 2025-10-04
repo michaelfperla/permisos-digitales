@@ -4,49 +4,76 @@ const { logger } = require('../utils/logger');
 const ApiResponse = require('../utils/api-response');
 const { getCookieDomain, logDomainInfo } = require('../utils/domain-utils');
 
-// Configure CSRF protection middleware with dynamic domain support
-const createCsrfProtection = (req) => {
-  // Log domain information for debugging
-  logDomainInfo(req, 'csrf');
+// Pre-create CSRF middleware for primary domain only
+const isProduction = process.env.NODE_ENV === 'production';
+// Single domain strategy to avoid cross-domain issues
+const PRIMARY_DOMAIN = isProduction ? '.permisosdigitales.com.mx' : undefined;
 
+// Create single CSRF middleware instance
+const csrfMiddleware = csrf({
+  cookie: {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+    maxAge: 14400, // 4 hours in seconds (matches session TTL)
+    domain: PRIMARY_DOMAIN
+  },
+  ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
+  value: (req) => {
+    // Try header first (common for AJAX/API calls)
+    const fromHeader = req.headers['x-csrf-token'];
+    if (fromHeader) return fromHeader;
+
+    // Fallback to body (for traditional forms)
+    const fromBody = req.body && req.body._csrf;
+    if (fromBody) return fromBody;
+
+    // Fallback to query (less common, but possible)
+    const fromQuery = req.query && req.query._csrf;
+    if (fromQuery) return fromQuery;
+
+    return null; // Indicate token not found
+  }
+});
+
+logger.info('[CSRF] Created CSRF middleware for domain:', PRIMARY_DOMAIN || 'localhost');
+
+// CSRF protection middleware that uses the correct pre-created instance
+const csrfProtection = (req, res, next) => {
   const cookieDomain = getCookieDomain(req);
 
-  if (process.env.NODE_ENV === 'development') {
-    logger.debug(`[CSRF] Cookie domain set to: ${cookieDomain || 'undefined (no domain restriction)'}`);
+  // Check if domain detection returned null (invalid domain)
+  if (cookieDomain === null) {
+    logger.error('[CSRF] Security: Invalid domain detected', {
+      host: req.get('host'),
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    return res.status(403).json({
+      error: 'Invalid domain',
+      message: 'This domain is not authorized to access this service'
+    });
   }
 
-  return csrf({
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Use 'strict' in production for better security
-      path: '/',
-      maxAge: 3600, // 1 hour in seconds
-      domain: cookieDomain // Dynamic domain based on request host
-    },
-    ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
-    value: (req) => {
-      // Try header first (common for AJAX/API calls)
-      const fromHeader = req.headers['x-csrf-token'];
-      if (fromHeader) return fromHeader;
+  // In production, verify domain matches our expected primary domain
+  if (isProduction && cookieDomain !== PRIMARY_DOMAIN) {
+    logger.error('[CSRF] Security: Rejecting non-primary domain', {
+      domain: cookieDomain,
+      expectedDomain: PRIMARY_DOMAIN,
+      host: req.get('host'),
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    // Reject request for security - only allow primary domain
+    return res.status(403).json({
+      error: 'Domain not supported',
+      message: 'This domain is not authorized to access this service'
+    });
+  }
 
-      // Fallback to body (for traditional forms)
-      const fromBody = req.body && req.body._csrf;
-      if (fromBody) return fromBody;
-
-      // Fallback to query (less common, but possible)
-      const fromQuery = req.query && req.query._csrf;
-      if (fromQuery) return fromQuery;
-
-      return null; // Indicate token not found
-    }
-  });
-};
-
-// Dynamic CSRF protection middleware
-const csrfProtection = (req, res, next) => {
-  const protection = createCsrfProtection(req);
-  protection(req, res, next);
+  // Use the single CSRF middleware instance
+  csrfMiddleware(req, res, next);
 };
 
 // Error handler for CSRF errors

@@ -11,11 +11,16 @@ const { isAuthenticated, isAdminPortal } = require('../middleware/auth.middlewar
 const { requireInternalApiKey } = require('../middleware/internal-auth.middleware');
 const rateLimiter = require('../middleware/rate-limit.middleware');
 
+// Health check endpoint
+router.get('/health', whatsappController.getHealth.bind(whatsappController));
+
 // Webhook endpoints (no auth required for WhatsApp)
 router.get('/webhook', whatsappController.verifyWebhook.bind(whatsappController));
 router.post('/webhook', whatsappController.handleWebhook.bind(whatsappController));
 
 // Internal webhook endpoints (require internal API key)
+// TODO: Implement these methods in simple controller
+/*
 router.post('/webhook/payment-confirmed',
   requireInternalApiKey,
   whatsappController.handlePaymentConfirmation.bind(whatsappController)
@@ -25,6 +30,7 @@ router.post('/webhook/permit-ready',
   requireInternalApiKey,
   whatsappController.handlePermitReady.bind(whatsappController)
 );
+*/
 
 // Admin endpoints - commented out for simple controller
 // TODO: Implement these in simple controller if needed

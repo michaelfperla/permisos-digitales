@@ -31,8 +31,8 @@ export enum Currency {
 }
 
 export const PaymentFees = {
-  DEFAULT_PERMIT_FEE: 150.00,
-  RENEWAL_FEE: 150.00,
+  DEFAULT_PERMIT_FEE: 99.00,
+  RENEWAL_FEE: 99.00,
   REPLACEMENT_FEE: 75.00,
   LATE_RENEWAL_FEE: 200.00,
   

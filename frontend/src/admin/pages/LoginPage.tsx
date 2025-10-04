@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FaUser, FaLock, FaShieldAlt, FaSpinner, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 
 import Alert from '../../components/ui/Alert/Alert';
 import Button from '../../components/ui/Button/Button';
@@ -19,10 +20,11 @@ import { adminLoginSchema, AdminLoginFormData } from '../../shared/schemas/auth.
 import { logger } from '../../utils/logger';
 import AdminAuthLayout from '../layouts/AdminAuthLayout';
 import api from '../services/api';
-import { getCsrfToken as fetchCsrfToken } from '../services/authService';
+import { getCsrfToken as fetchCsrfToken, clearCsrfTokenCache } from '../services/authService';
+import styles from './LoginPage.module.css';
 
 // Set this to true to use a simplified rendering for debugging
-const USE_SIMPLE_RENDERING = true;
+const USE_SIMPLE_RENDERING = false;
 
 const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
@@ -52,18 +54,29 @@ const LoginPage: React.FC = () => {
     authError,
   });
 
-  // Add useEffect for navigation after successful login
+  // Secure navigation with proper cleanup and race condition prevention
   useEffect(() => {
-    logger.debug('[LoginPage useEffect] Running effect', {
+    let navigationTimer: NodeJS.Timeout;
+    
+    logger.debug('[LoginPage useEffect] Auth state check:', {
       isAuthenticated,
       isAuthLoading,
     });
 
     if (isAuthenticated && !isAuthLoading) {
-      logger.debug('[LoginPage useEffect] Condition met. Calling navigate...');
-      // Navigate to the intended destination or dashboard
-      navigate(location.state?.from?.pathname || '/', { replace: true });
+      logger.debug('[LoginPage useEffect] Authentication confirmed, navigating...');
+      // Small delay to prevent race conditions
+      navigationTimer = setTimeout(() => {
+        const targetPath = location.state?.from?.pathname || '/admin/dashboard';
+        navigate(targetPath, { replace: true });
+      }, 100);
     }
+
+    return () => {
+      if (navigationTimer) {
+        clearTimeout(navigationTimer);
+      }
+    };
   }, [isAuthenticated, isAuthLoading, navigate, location.state?.from?.pathname]);
 
   // Get CSRF token on component mount
@@ -113,15 +126,20 @@ const LoginPage: React.FC = () => {
       setIsLoading(true);
       setError('');
 
-      // Make sure we have a CSRF token
+      // STRICT CSRF token validation - no bypasses allowed
       let tokenToUse = csrfToken;
       if (!tokenToUse) {
         try {
           tokenToUse = await getCsrfToken();
+          if (!tokenToUse || tokenToUse.length < 10) {
+            throw new Error('Invalid CSRF token received');
+          }
         } catch (tokenErr) {
-          logger.error('Failed to get CSRF token before login:', tokenErr);
-          setError('Error al obtener token de seguridad. Intente nuevamente.');
+          logger.error('CRITICAL: CSRF token validation failed:', tokenErr);
+          setError('Error de seguridad crítico. Recargue la página e intente nuevamente.');
           setIsLoading(false);
+          // Force page reload to get fresh CSRF token
+          setTimeout(() => window.location.reload(), 2000);
           return;
         }
       }
@@ -208,6 +226,9 @@ const LoginPage: React.FC = () => {
 
         logger.debug('[LoginPage handleSubmit] Calling authContext.login with user data:', userData);
 
+        // Clear CSRF token cache to ensure fresh state for new user
+        clearCsrfTokenCache();
+
         // Call the context login function, passing the user data
         // This will trigger the useEffect for navigation
         login(userData as AdminUser);
@@ -279,8 +300,8 @@ const LoginPage: React.FC = () => {
           onSubmit={handleSubmit(onSubmit)}
           style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
         >
-          <input type="email" placeholder="Correo electrónico" required {...register('email')} />
-          <input type="password" placeholder="Contraseña" required {...register('password')} />
+          <input type="email" placeholder="Correo electrónico" required autoComplete="off" {...register('email')} />
+          <input type="password" placeholder="Contraseña" required autoComplete="new-password" {...register('password')} />
           <Button
             variant="primary"
             type="submit"
@@ -296,54 +317,92 @@ const LoginPage: React.FC = () => {
     );
   }
 
-  // Regular rendering
+  // Modern Admin Login Panel
   return (
-    <AdminAuthLayout>
-      <MobileForm title="Portal Administrativo" onSubmit={handleSubmit(onSubmit)}>
-        {error && (
-          <Alert variant="error">
-            {error}
-          </Alert>
-        )}
+    <div className={styles.adminLoginPanel}>
+      <div className={styles.loginContainer}>
+        <div className={styles.loginCard}>
+          <div className={styles.loginHeader}>
+            <div className={styles.adminBadge}>
+              <FaShieldAlt className={styles.adminIcon} />
+              Portal Administrativo
+            </div>
+            <h1 className={styles.loginTitle}>Acceso Seguro</h1>
+            <p className={styles.loginSubtitle}>
+              Ingrese sus credenciales para continuar
+            </p>
+          </div>
 
-        <MobileFormGroup>
-          <MobileFormLabel htmlFor="email" required>
-            Correo electrónico
-          </MobileFormLabel>
-          <MobileFormInput
-            type="email"
-            id="email"
-            error={errors.email?.message}
-            {...register('email')}
-            required
-            autoComplete="username"
-            inputMode="email"
-            placeholder="Ingrese su correo electrónico"
-          />
-        </MobileFormGroup>
+          <form className={styles.loginForm} onSubmit={handleSubmit(onSubmit)}>
+            {error && (
+              <div className={styles.errorMessage}>
+                <FaExclamationTriangle className={styles.errorIcon} />
+                {error}
+              </div>
+            )}
 
-        <MobileFormGroup>
-          <MobileFormLabel htmlFor="password" required>
-            Contraseña
-          </MobileFormLabel>
-          <MobileFormInput
-            type="password"
-            id="password"
-            error={errors.password?.message}
-            {...register('password')}
-            required
-            autoComplete="current-password"
-            placeholder="Ingrese su contraseña"
-          />
-        </MobileFormGroup>
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.formLabel}>
+                Correo electrónico *
+              </label>
+              <div className={styles.inputWrapper}>
+                <input
+                  type="email"
+                  id="email"
+                  className={styles.formInput}
+                  placeholder="Correo electrónico"
+                  autoComplete="off"
+                  {...register('email')}
+                />
+                <FaUser className={styles.inputIcon} />
+              </div>
+              {errors.email && (
+                <div className={styles.fieldError}>
+                  {errors.email.message}
+                </div>
+              )}
+            </div>
 
-        <MobileFormActions>
-          <Button type="submit" variant="primary" disabled={isLoading}>
-            {isLoading ? 'Procesando...' : 'Iniciar Sesión'}
-          </Button>
-        </MobileFormActions>
-      </MobileForm>
-    </AdminAuthLayout>
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.formLabel}>
+                Contraseña *
+              </label>
+              <div className={styles.inputWrapper}>
+                <input
+                  type="password"
+                  id="password"
+                  className={styles.formInput}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  {...register('password')}
+                />
+                <FaLock className={styles.inputIcon} />
+              </div>
+              {errors.password && (
+                <div className={styles.fieldError}>
+                  {errors.password.message}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className={styles.loginButton}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <FaSpinner className={styles.loadingSpinner} />
+                  Validando credenciales...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
 

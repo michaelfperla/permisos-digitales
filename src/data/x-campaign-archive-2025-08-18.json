@@ -1,0 +1,520 @@
+[
+  {
+    "day": 0,
+    "posts": [
+      {"time": "20:00", "content": "¡VIERNES EN LA NOCHE!\n\n¿Auto nuevo esperándote?\n¿Fin de semana planeado?\n\n¡Perfecto! 🎉\n\nTu permiso provisional:\n✅ Listo para mañana\n✅ Aventuras aseguradas\n\n¡Va que va!"},
+      {"time": "22:00", "content": "Viernes de preparación:\n\n¿Mañana empieza la aventura?\n¿Con tu auto nuevo?\n\n¡Todo listo! 🚗\n\nPermiso provisional:\n✅ Sábado asegurado\n✅ Libertad programada\n\n¡Qué emoción!"},
+      {"time": "23:00", "content": "Último post del viernes:\n\n¿Auto nuevo listo?\n¿Permiso listo?\n¿Tú listo?\n\n¡MAÑANA EMPIEZA TODO! 🌟\n\nSábado de aventuras:\n✅ Todo preparado\n✅ Libertad esperando\n\n¡Buenas noches!"}
+    ]
+  },
+  {
+    "day": 1,
+    "posts": [
+      {"time": "7:00", "content": "¿Nuevo auto?\n¿Primera vez manejando?\n\nQué emoción 🚗\n\nTu permiso provisional:\n✅ 5 minutos\n✅ Listo para la carretera\n\nDale, que te espera tu aventura"},
+      {"time": "9:00", "content": "¿Entrevista en otra ciudad?\n¿Tu auto nuevo puede llevarte?\n\n¡Claro que sí! 💼\n\nPermiso provisional:\n✅ WhatsApp listo\n✅ Proceso de 5 minutos\n\nListo para conquistar ese empleo"},
+      {"time": "11:00", "content": "¿Viendo autos en el lote?\n¿Cuál te gusta?\n\nLa pregunta real: ¿Cuándo lo manejo? 🔑\n\nRespuesta:\n✅ En 5 minutos\n✅ Con tu permiso\n\nYa no hay excusas"},
+      {"time": "13:00", "content": "Confesión del almuerzo:\n\nMe encanta ver las fotos 📸\n\nSus autos nuevos + sonrisas:\n✅ 5 minutos para el permiso\n✅ Toda una vida de aventuras\n\nEso es lo que hacemos aquí"},
+      {"time": "15:00", "content": "¿Los niños necesitan que los recojas?\n¿Temprano de la escuela?\n\nModo héroe: ACTIVADO 👨‍👧‍👦\n\nTu auto nuevo + permiso:\n✅ Papá del año\n✅ Niños felices\n\nFamiliailia primero"},
+      {"time": "17:00", "content": "5 PM:\n¿Todo mundo sale del trabajo?\n\nTú sales directo a tu auto 🚗\n\n5 minutos de diferencia:\n✅ Cambian tu día\n✅ Cambian tu vida\n\nEsa es la libertad"},
+      {"time": "19:00", "content": "¿Mañana tienes planes importantes?\n¿Estás listo?\n\nTranquilidad total 🏠\n\nTu permiso provisional:\n✅ Desde tu sofá\n✅ Con tu café\n\nEstar listo se siente bien"},
+      {"time": "21:00", "content": "Historia de hoy:\n\nMaría de Puebla 💫\n\nSu timeline:\n✅ Compró su primer auto\n✅ 4:47 para el permiso\n✅ Ya planea Cholula trip\n\nAsí se hace, María ✨"},
+      {"time": "23:00", "content": "¿Trabajas de noche?\n¿Horarios diferentes?\n\nTu auto nuevo también 🌙\n\nPermiso provisional:\n✅ 24/7 available\n✅ Para todos los horarios\n\nTodos merecen libertad"},
+      {"time": "2:00", "content": "2 AM y aquí andamos\n\n¿Necesitas tu permiso?\n\nNo importa la hora 🚨\n\nNosotros:\n✅ WhatsApp no duerme\n✅ Nosotros tampoco\n\nSiempre aquí para ti"},
+      {"time": "4:00", "content": "¿Entras temprano al trabajo?\n¿Antes que salga el sol?\n\nTu auto nuevo te lleva 🌅\n\nPermiso provisional:\n✅ Ready desde ayer\n✅ Ready para hoy\n\nLos winners empiezan temprano"},
+      {"time": "6:00", "content": "Buenos días, madrugador\n\n¿Gym? ¿Trabajo? ¿Lo que sea?\n\nTu libertad empieza temprano 💪\n\nAuto nuevo + permiso:\n✅ Ventaja madrugadora\n✅ Día conquistado\n\nAsí se hace"}
+    ]
+  },
+  {
+    "day": 2,
+    "posts": [
+      {"time": "7:00", "content": "Martes de tutorial, banda. ¿Nuevo auto esperándote? Paso 1: permisosdigitales.com.mx Paso 2: 5 minutos Paso 3: A manejar 🎯"},
+      {"time": "9:00", "content": "Tu jefe: 'Necesito que vayas a la sucursal' Tú con auto nuevo: 'Ya voy' Con permiso provisional: 'Ya llegué' 💼"},
+      {"time": "11:00", "content": "Coffee break question: ¿Por qué esperar semanas para manejar tu auto nuevo? WhatsApp + 5 minutos = libertad inmediata ☕"},
+      {"time": "13:00", "content": "Tutorial martes: Si puedes pedir comida por app, puedes sacar tu permiso. Mismo teléfono, misma facilidad, misma rapidez 📱"},
+      {"time": "15:00", "content": "¿Emergencia familiar? Tu auto nuevo + permiso provisional = llegaste. No hay situación que no se resuelva con movilidad"},
+      {"time": "17:00", "content": "Rush hour diferentes rules: Mientras otros esperan camión, tú ya manejas tu auto nuevo. 5 minutos bien invertidos 🚗"},
+      {"time": "19:00", "content": "Giro inesperado: En lugar de planear 'cómo ir', ahora planeas 'a dónde ir'. Tu permiso provisional cambió el juego 🗺️"},
+      {"time": "21:00", "content": "Success story: Carlos de Monterrey, 4 minutos para el permiso, 2 horas manejando a ver a sus papás. Así se hace, carnal 🏠"},
+      {"time": "23:00", "content": "¿Turno nocturno? Tu auto nuevo no discrimina horarios. Permiso provisional listo when you are 🌃"},
+      {"time": "2:00", "content": "Madrugada productive time: Mientras otros duermen, tú resuelves. Permiso en WhatsApp, sin despertarnos 💤"},
+      {"time": "4:00", "content": "4 AM crew reportándose. ¿Construcción? ¿Entrega? ¿Hospital? Tu auto nuevo te lleva antes que el tráfico despierte 🏗️"},
+      {"time": "6:00", "content": "Manejo al amanecer. Tu permiso provisional está listo desde ayer. Tu aventura empieza ahora ☀️"}
+    ]
+  },
+  {
+    "day": 3,
+    "posts": [
+      {"time": "7:00", "content": "Miércoles de WhatsApp, banda. El único lugar donde 'mensaje enviado' significa 'permiso recibido' en 5 minutos 💚"},
+      {"time": "9:00", "content": "Office reality: 'Necesitamos que vayas ahí' Ya no es problema cuando tu auto nuevo tiene su permiso provisional ready ✅"},
+      {"time": "11:00", "content": "Mid-week motivation: Tu auto nuevo te espera. Tu permiso te espera. La carretera te espera. ¿Qué esperas tú? 🛣️"},
+      {"time": "13:00", "content": "Miércoles wisdom: La vida es muy corta para no manejar tu auto nuevo HOY. 5 minutos = libertad inmediata 🔓"},
+      {"time": "15:00", "content": "¿Miércoles de familia? Tu auto nuevo + permiso provisional = más tiempo juntos, menos tiempo esperando transporte 👨‍👩‍👧‍👦"},
+      {"time": "17:00", "content": "Hump day energía: Subiste la semana, ahora maneja tu auto nuevo bajándola. Permiso provisional = downhill desde aquí 📈"},
+      {"time": "19:00", "content": "Vibras de miércoles en la noche: ¿Cena fuera? ¿Visita a los abuelos? Tu auto nuevo dice 'dale'. Tu permiso dice 'vámonos' 🌮"},
+      {"time": "21:00", "content": "Testimonio real: Ana de Guadalajara, auto nuevo el lunes, permiso el martes, road trip familiar el miércoles 🎉"},
+      {"time": "23:00", "content": "Midweek midnight: El momento perfecto para sacar tu permiso. Silencio, concentración, 5 minutos de productividad 🌙"},
+      {"time": "2:00", "content": "2 AM check: ¿Turno de emergencia? ¿Junta tardía? Tu auto nuevo no pregunta por qué, solo te lleva. Permiso listo 🚨"},
+      {"time": "4:00", "content": "Pre-dawn hustle: Los winners empiezan temprano. Tu auto nuevo + permiso provisional = ventaja competitiva 🏆"},
+      {"time": "6:00", "content": "Casi energía de jueves: Tu auto nuevo está listo para lo que venga. Tu permiso provisional también. Tú también 💪"}
+    ]
+  },
+  {
+    "day": 4,
+    "posts": [
+      {"time": "7:00", "content": "Jueves de gratitud: Agradecido con la tecnología que hace que tu permiso provisional llegue antes que tu café se enfríe ☕"},
+      {"time": "9:00", "content": "Pensamiento de jueves: ¿Por qué las mejores oportunidades siempre necesitan movilidad? Tu auto nuevo + permiso = listo para todo 🎯"},
+      {"time": "11:00", "content": "11 AM realization: Has tenido tu auto nuevo 3 días. Tu permiso provisional 3 días. Tu libertad: infinita 🔄"},
+      {"time": "13:00", "content": "Reflexión del almuerzo: Antes pensabas 'ojalá pudiera ir'. Ahora piensas 'a qué hora llego'. Cambio total 🎮"},
+      {"time": "15:00", "content": "Jueves de familia: ¿Recogida escolar? ¿Doctor? ¿Súper? Tu auto nuevo con permiso provisional = logística familiar resuelta 🏫"},
+      {"time": "17:00", "content": "Casi energía de viernes: La semana casi acaba, pero tu libertad de manejo just started. Permiso provisional = listo para el fin de semana 🎊"},
+      {"time": "19:00", "content": "Planeación de jueves en la noche: Mañana es viernes. ¿A dónde lleva tu auto nuevo? Spoiler: a donde tú quieras 🗺️"},
+      {"time": "21:00", "content": "Success story: Miguel de CDMX compró auto el miércoles, permiso el jueves, viernes de road trip. Timing perfecto ⏰"},
+      {"time": "23:00", "content": "Late Thursday vibes: ¿Weekend plans loading? Tu permiso provisional ya está ready. Solo falta que tú decidas dónde 🤔"},
+      {"time": "2:00", "content": "Thursday night/Friday morning: ¿Early Friday meeting? Tu auto nuevo te lleva fresh and ready. Permiso provisional FTW 🌃"},
+      {"time": "4:00", "content": "Pre-Friday energía: Los que empiezan temprano, llegan lejos. Tu auto nuevo + permiso provisional = head start 🏁"},
+      {"time": "6:00", "content": "Friday eve: Tu auto nuevo está listo para el weekend. Tu permiso provisional también. ¿Estás tú? 🎉"}
+    ]
+  },
+  {
+    "day": 5,
+    "posts": [
+      {"time": "7:00", "content": "¡VIERNES! Tu auto nuevo dice 'weekend mode ON'. Tu permiso provisional dice 'dale gas'. Tú dices 'vámonos' 🎉"},
+      {"time": "9:00", "content": "Friday work mood: Productive porque sabes que a las 6 PM tu auto nuevo te saca de aquí. Permiso provisional = motivation 💼"},
+      {"time": "11:00", "content": "TGIF feeling: La mejor parte de tener auto nuevo en viernes? Infinitas posibilidades para el weekend. Permiso listo ✨"},
+      {"time": "13:00", "content": "Viernes lunch break: Ya estás pensando en el roadtrip del weekend. Tu auto nuevo está listo. Tu permiso también 🛣️"},
+      {"time": "15:00", "content": "Friday afternoon family time: ¿Pizza? ¿Parque? ¿Casa de los abuelos? Tu auto nuevo con permiso = family fun unlocked 🍕"},
+      {"time": "17:00", "content": "5 PM Friday hit different when you have auto nuevo + permiso provisional. Weekend mode: ACTIVATED 🔥"},
+      {"time": "19:00", "content": "Friday night energía: Tu auto nuevo pregunta '¿a dónde vamos?' Tu permiso provisional dice 'anywhere'. Tu decides 🌟"},
+      {"time": "21:00", "content": "Weekend story llegando: Sofía de Puebla, auto nuevo el jueves, permiso el viernes, Acapulco el sábado. Living the dream 🏖️"},
+      {"time": "23:00", "content": "Friday night libertad: ¿Late dinner? ¿Movie? ¿Surprise visit? Tu auto nuevo + permiso provisional = spontaneous adventures 🌙"},
+      {"time": "2:00", "content": "Friday night/Saturday morning: Las mejores aventuras empiezan cuando otros duermen. Tu permiso no duerme tampoco 🚗"},
+      {"time": "4:00", "content": "Early Saturday prep: ¿Beach day? ¿Mountain trip? ¿City exploration? Tu auto nuevo dice 'ready when you are' 🏔️"},
+      {"time": "6:00", "content": "Saturday morning loading: Tu permiso provisional está ready desde el viernes. Tu weekend adventure starts now ☀️"}
+    ]
+  },
+  {
+    "day": 6,
+    "posts": [
+      {"time": "7:00", "content": "¡SÁBADO! Tu auto nuevo dice 'adventure time'. Tu permiso provisional dice 'let's go'. Tú dices 'finally weekend' 🎊"},
+      {"time": "9:00", "content": "Saturday morning different: No más esperar camión para ir al mercado. Tu auto nuevo + permiso provisional = libertad total 🛍️"},
+      {"time": "11:00", "content": "Weekend vibes: Tu auto nuevo está lavadito, tu permiso provisional está ready, tu mood está perfect. Saturday done right ✨"},
+      {"time": "13:00", "content": "Sábado de familia: ¿Comida con los abuelos? ¿Parque con los niños? Tu auto nuevo hace todo más fácil y más divertido 👨‍👩‍👧‍👦"},
+      {"time": "15:00", "content": "Saturday afternoon energía: ¿Antojo de playa? ¿Ganas de montaña? Tu permiso provisional dice 'done', tu auto nuevo dice 'vamos' 🏖️"},
+      {"time": "17:00", "content": "Golden hour Saturday: El mejor momento para manejar tu auto nuevo. Sunset drive with permiso provisional = perfect weekend 🌅"},
+      {"time": "19:00", "content": "Saturday noche plans: ¿Cena romántica? ¿Reunión de amigos? Tu auto nuevo + permiso provisional = any plan possible 💕"},
+      {"time": "21:00", "content": "Weekend success: Roberto de Tijuana, auto nuevo el viernes, permiso el sábado, Ensenada en la tarde. Weekend goals achieved 🎯"},
+      {"time": "23:00", "content": "Saturday night adventures: Tu auto nuevo no tiene horario de trabajo. Tu permiso provisional tampoco. Night owl approved 🦉"},
+      {"time": "2:00", "content": "Late Saturday/early Sunday: ¿24-hour taco run? ¿Sunrise spot hunting? Tu permiso provisional enables all adventures 🌮"},
+      {"time": "4:00", "content": "Pre-Sunday energía: Los que madruggan para domingo familiar, llegan primero. Tu auto nuevo + permiso = family time optimized 👪"},
+      {"time": "6:00", "content": "Sunday morning prep: Tu permiso provisional está ready para domingo familiar perfecto. Auto nuevo tambien. ¿Listos? ⛪"}
+    ]
+  },
+  {
+    "day": 7,
+    "posts": [
+      {"time": "7:00", "content": "¡DOMINGO FAMILIAR! Tu auto nuevo dice 'family time'. Tu permiso provisional dice 'vámonos todos'. Perfect Sunday loading 👨‍👩‍👧‍👦"},
+      {"time": "9:00", "content": "Sunday tradition: Antes ibas caminando a misa. Ahora llevas a toda la familia en tu auto nuevo. Permiso provisional = family upgrade ⛪"},
+      {"time": "11:00", "content": "Domingo de mercado: Tu auto nuevo + permiso provisional = más compras, menos carga, más comodidad para toda la familia 🛒"},
+      {"time": "13:00", "content": "Sunday lunch special: ¿Casa de la abuela? Tu auto nuevo la lleva hasta la puerta. Domingo familiar perfecto con permiso provisional 🏠"},
+      {"time": "15:00", "content": "Tarde de domingo: ¿Parque? ¿Plaza? ¿Visita familiar? Tu auto nuevo + permiso provisional hacen domingo más domingo 🌳"},
+      {"time": "17:00", "content": "Sunday noche magic: El momento perfecto para family drive. Tu permiso provisional convierte tu auto nuevo en family memories maker 💫"},
+      {"time": "19:00", "content": "Domingo dinner time: Tu auto nuevo reunió a toda la familia hoy. Gracias permiso provisional por hacer domingos perfectos 🍽️"},
+      {"time": "21:00", "content": "Week 1 complete: Laura de Morelia, auto nuevo el lunes, permiso el domingo, 7 días de libertad total. Week 1: conquistado 🏆"},
+      {"time": "23:00", "content": "Sunday reflection: Tu primera semana con auto nuevo + permiso provisional. ¿Cómo se sintió la libertad? Amazing, right? 🤔"},
+      {"time": "2:00", "content": "Sunday night/Monday prep: Tu auto nuevo está ready para la nueva semana. Tu permiso provisional también. Monday motivation loading 💪"},
+      {"time": "4:00", "content": "Pre-Monday energía: Nueva semana, misma libertad. Tu permiso provisional no caduca el domingo. Freedom continues 🔄"},
+      {"time": "6:00", "content": "Monday morning prep: Tu auto nuevo + permiso provisional = nueva semana de posibilidades infinitas. Let's do this 🚀"}
+    ]
+  },
+  {
+    "day": 8,
+    "posts": [
+      {"time": "7:00", "content": "¿Lunes de entrevista importante?\n¿Tu futuro depende de llegar?\n\nTranquilidad total 💼\n\nTu auto nuevo + permiso:\n✅ Llegas temprano\n✅ Llegas confiado\n\nEse trabajo es tuyo"},
+      {"time": "9:00", "content": "¿Oportunidad de negocio?\n¿Meeting en otra ciudad?\n\nYour time to shine ✨\n\nPermiso provisional ready:\n✅ No excusas\n✅ No límites\n\nLos winners mueven rápido"},
+      {"time": "11:00", "content": "¿Doctor urgent appointment?\n¿Familiailiar necesita llegar al hospital?\n\nTu auto nuevo = héroe familiar 🏥\n\nPermiso provisional:\n✅ Emergencias covered\n✅ Familiailia protegida\n\nSalud primero"},
+      {"time": "13:00", "content": "Realidad del almuerzo:\n\nTu compañero: \"No puedo ir\"\nTú: \"Yo te llevo\" 🚗\n\nPermiso provisional:\n✅ Solución inmediata\n✅ Nivel buen amigo\n\nAsí se hace"},
+      {"time": "15:00", "content": "¿Junta importante de último minuto?\n¿Necesitas estar ahí YA?\n\nAuto nuevo mode: ACTIVATED 🔥\n\nTu permiso provisional:\n✅ No stress\n✅ Just drive\n\nProfessional hero"},
+      {"time": "17:00", "content": "5 PM crisis management:\n\n¿Cliente importante?\n¿Reunión urgente?\n\nTu auto nuevo salva el día 💼\n\nPermiso provisional:\n✅ Business continuity\n✅ Success guaranteed\n\nGanador mentality"},
+      {"time": "19:00", "content": "¿Primera cita importante?\n¿Quieres causar buena impresión?\n\nAuto nuevo + permiso = perfect combo 💕\n\nTu confidence level:\n✅ Through the roof\n✅ Irresistible\n\nLove is in the air"},
+      {"time": "21:00", "content": "Success story:\n\nDiego de Querétaro 🌟\n\nSu semana:\n✅ Interview el lunes\n✅ Got the job\n✅ Auto nuevo celebrando\n\nPermiso provisional = career changer"},
+      {"time": "23:00", "content": "¿Work from home?\n¿Pero meeting presencial surprise?\n\nTu auto nuevo rescues the day 💻\n\nPermiso provisional:\n✅ Remote flexibility\n✅ Present when needed\n\nBest of both worlds"},
+      {"time": "2:00", "content": "¿Turno de emergencia called?\n¿Hospital needs you NOW?\n\nHealthcare heroes unite 🏥\n\nTu permiso provisional:\n✅ 24/7 service ready\n✅ Lives saved\n\nGracias por servir"},
+      {"time": "4:00", "content": "¿Construcción shift starting?\n¿Building dreams at dawn?\n\nTu auto nuevo builds futures 🏗️\n\nPermiso provisional:\n✅ Ventaja madrugadora\n✅ Hard work respect\n\nBuilding Mexico"},
+      {"time": "6:00", "content": "¿Medical rounds starting?\n¿Patients counting on you?\n\nDoctors drive with purpose 👩‍⚕️\n\nTu permiso provisional:\n✅ Healing mobility\n✅ Lives matter\n\nHealth heroes"}
+    ]
+  },
+  {
+    "day": 9,
+    "posts": [
+      {"time": "7:00", "content": "¿Martes de oportunidad?\n¿Business meeting que puede cambiar todo?\n\nYour moment is NOW 🎯\n\nAuto nuevo + permiso:\n✅ Punctual arrival\n✅ Confident presence\n\nCierra ese deal"},
+      {"time": "9:00", "content": "¿Presentación importante?\n¿Clientes esperando?\n\nShow time, professional 💼\n\nTu permiso provisional:\n✅ Stress-free arrival\n✅ Focus on winning\n\nNail that presentation"},
+      {"time": "11:00", "content": "¿Emergencia familiar?\n¿Necesitas estar ahí AHORA?\n\nFamiliailia calls, tú respondes 👨‍👩‍👧‍👦\n\nPermiso provisional:\n✅ No delays\n✅ Just love\n\nFamiliaily first, always"},
+      {"time": "13:00", "content": "Martes lunch revelation:\n\nTu vida antes: \"Ojalá pudiera\"\nTu vida ahora: \"Ya voy\" 🚗\n\nPermiso provisional:\n✅ Cambio total\n✅ Life upgrader\n\nDifferent level"},
+      {"time": "15:00", "content": "¿School emergency call?\n¿Your kid needs you?\n\nSuper parent mode: ON 🦸‍♀️\n\nTu auto nuevo:\n✅ Hero transportation\n✅ Parent of the year\n\nKids come first"},
+      {"time": "17:00", "content": "¿Job interview at 6 PM?\n¿After work opportunity?\n\nDouble shift winner 💪\n\nPermiso provisional:\n✅ Time optimizer\n✅ Career builder\n\nHustle never stops"},
+      {"time": "19:00", "content": "¿Dinner with important people?\n¿Networking que puede abrirte puertas?\n\nConnections change everything 🤝\n\nTu permiso provisional:\n✅ Opportunity enabler\n✅ Network builder\n\nRelationships matter"},
+      {"time": "21:00", "content": "Testimonio real:\n\nCarmen de Mérida ✨\n\nSu Tuesday:\n✅ Medical emergency\n✅ Got there in time\n✅ Familiaily saved\n\nPermiso provisional = hero maker"},
+      {"time": "23:00", "content": "¿Night shift in different location?\n¿New job, new schedule?\n\nAdaptability is strength 🌙\n\nTu permiso provisional:\n✅ Schedule flexible\n✅ Life flexible\n\nChange is good"},
+      {"time": "2:00", "content": "¿Late night inspiration?\n¿Need to drive somewhere to think?\n\nClarity comes with movement 🌌\n\nPermiso provisional:\n✅ Midnight clarity\n✅ Life decisions\n\nThink while driving"},
+      {"time": "4:00", "content": "¿Early morning gym session?\n¿Before work motivation?\n\nFitness drives success 💪\n\nTu auto nuevo:\n✅ Health enabler\n✅ Morning warrior\n\nStrong body, strong mind"},
+      {"time": "6:00", "content": "¿Wednesday prep meeting?\n¿Getting ready for mid-week?\n\nPreparation meets opportunity 📋\n\nPermiso provisional:\n✅ Always ready\n✅ Never surprised\n\nSuccess is planned"}
+    ]
+  },
+  {
+    "day": 10,
+    "posts": [
+      {"time": "7:00", "content": "¿Miércoles de health checkup?\n¿Appointment que has postponed?\n\nTu salud no espera 🏥\n\nAuto nuevo + permiso:\n✅ No más excusas\n✅ Health first\n\nTu cuerpo te lo agradece"},
+      {"time": "9:00", "content": "¿Client emergency?\n¿Tu business reputation on the line?\n\nSave the day, entrepreneur 🏢\n\nPermiso provisional:\n✅ Rapid response\n✅ Trust maintained\n\nBusiness hero"},
+      {"time": "11:00", "content": "¿Job interview across town?\n¿Career opportunity waiting?\n\nYour future is calling 📞\n\nTu permiso provisional:\n✅ Destiny driver\n✅ Success navigator\n\nAnswer that call"},
+      {"time": "13:00", "content": "Miércoles wisdom:\n\nDistancia no es obstáculo\nTiempo no es problema 🕒\n\nTu auto nuevo:\n✅ Geography resuelto\n✅ Time optimized\n\nLimits are illusions"},
+      {"time": "15:00", "content": "¿Parent-teacher conference?\n¿Your child's future being discussed?\n\nInvested parent mode: ON 👨‍🏫\n\nPermiso provisional:\n✅ Education support\n✅ Active parenting\n\nKids' future matters"},
+      {"time": "17:00", "content": "¿Networking event after work?\n¿Connections that could change everything?\n\nYour network = your net worth 💰\n\nTu auto nuevo:\n✅ Relationship builder\n✅ Opportunity creator\n\nConnect to prosper"},
+      {"time": "19:00", "content": "¿Date night planeando?\n¿Romantic dinner somewhere special?\n\nLove needs logistics 💕\n\nPermiso provisional:\n✅ Romance enabler\n✅ Memory maker\n\nLove is in motion"},
+      {"time": "21:00", "content": "Historia inspiradora:\n\nLuis de Toluca 🌟\n\nSu miércoles:\n✅ Important meeting\n✅ Closed biggest deal\n✅ Celebrating in his car\n\nPermiso provisional = success story"},
+      {"time": "23:00", "content": "¿Late shift at hospital?\n¿Saving lives tonight?\n\nHealthcare warriors drive 🏥\n\nTu permiso provisional:\n✅ Lives saved\n✅ Heroes mobile\n\nGracias por tu servicio"},
+      {"time": "2:00", "content": "¿Security shift starting?\n¿Protecting what matters?\n\nGuardians need mobility 🛡️\n\nPermiso provisional:\n✅ Safety first\n✅ Protection mobile\n\nSecurity heroes"},
+      {"time": "4:00", "content": "¿Entrega route starting?\n¿Bringing joy to families?\n\nLogistics heroes unite 📦\n\nTu auto nuevo:\n✅ Economy driver\n✅ Happiness deliverer\n\nKeeping Mexico moving"},
+      {"time": "6:00", "content": "¿Thursday opportunity prep?\n¿Getting ready for something big?\n\nSuccess favors the prepared 🎯\n\nPermiso provisional:\n✅ Opportunity ready\n✅ Success mobile\n\nThursday warrior"}
+    ]
+  },
+  {
+    "day": 11,
+    "posts": [
+      {"time": "7:00", "content": "¿Jueves de medical specialist?\n¿Appointment que esperaste meses?\n\nTu salud no puede esperar más 👩‍⚕️\n\nAuto nuevo + permiso:\n✅ Health priority\n✅ Life saver\n\nTu bienestar importa"},
+      {"time": "9:00", "content": "¿Business presentation?\n¿Investors waiting for your pitch?\n\nShow them what you're made of 💼\n\nPermiso provisional:\n✅ Confidence driver\n✅ Success transporter\n\nNail that pitch"},
+      {"time": "11:00", "content": "¿Unexpected job opportunity?\n¿Company wants to meet you TODAY?\n\nOpportunity knocks once 🚪\n\nTu permiso provisional:\n✅ Instant readiness\n✅ Career game changer\n\nAnswer that knock"},
+      {"time": "13:00", "content": "Thursday reflection:\n\nSemana pasada: \"Ojalá pudiera\"\nEsta semana: \"Ya llegué\" 🎯\n\nTu auto nuevo:\n✅ Life transformer\n✅ Dream enabler\n\nEvolution in motion"},
+      {"time": "15:00", "content": "¿School event for your kid?\n¿Want to be there for their moment?\n\nPresent parent = best parent 👨‍👧‍👦\n\nPermiso provisional:\n✅ Memory maker\n✅ Love transporter\n\nBe there for them"},
+      {"time": "17:00", "content": "¿After-work opportunity?\n¿Side hustle meeting?\n\nMultiple income streams flow 💰\n\nTu auto nuevo:\n✅ Hustle enabler\n✅ Dream chaser\n\nHustle never sleeps"},
+      {"time": "19:00", "content": "¿Dinner with mentors?\n¿Learning from successful people?\n\nWisdom shared over meals 🍽️\n\nPermiso provisional:\n✅ Wisdom seeker\n✅ Growth driver\n\nLearn from the best"},
+      {"time": "21:00", "content": "Success spotlight:\n\nRaquel de Oaxaca ✨\n\nSu jueves:\n✅ Medical emergency handled\n✅ Familiaily crisis resuelto\n✅ Hero status: achieved\n\nPermiso provisional = family hero"},
+      {"time": "23:00", "content": "¿Night shift essential worker?\n¿Keeping Mexico running?\n\nEssential heroes drive 🌃\n\nTu permiso provisional:\n✅ Essential mobility\n✅ Country backbone\n\nMexico runs on you"},
+      {"time": "2:00", "content": "¿Emergency responder?\n¿Lives depending on your arrival?\n\nFirst responders = first heroes 🚨\n\nPermiso provisional:\n✅ Life saver mobile\n✅ Hero transportation\n\nSeconds save lives"},
+      {"time": "4:00", "content": "¿Transportation worker?\n¿Moving people and dreams?\n\nMobility makes Mexico move 🚛\n\nTu auto nuevo:\n✅ Economy driver\n✅ Dream transporter\n\nMoving Mexico forward"},
+      {"time": "6:00", "content": "¿Friday prep mode?\n¿Weekend adventure planeando?\n\nFriday energía loading 🎉\n\nPermiso provisional:\n✅ Weekend ready\n✅ Adventure enabled\n\nFriday warrior llegando"}
+    ]
+  },
+  {
+    "day": 12,
+    "posts": [
+      {"time": "7:00", "content": "¡VIERNES DE HISTORIAS!\n¿Tu auto nuevo ya tiene adventures?\n\nStory time begins 📖\n\nTu permiso provisional:\n✅ Adventure enabler\n✅ Story creator\n\nWhat's your story?"},
+      {"time": "9:00", "content": "Friday work energía:\n\n¿Productive porque sabes que escape plan exists?\n\nThat's the power of libertad 💼\n\nAuto nuevo + permiso:\n✅ Motivation booster\n✅ Freedom insurance\n\nWork harder, play harder"},
+      {"time": "11:00", "content": "¿Weekend road trip planeando?\n¿Adventure calling your name?\n\nFriday planeando = weekend winning 🗺️\n\nPermiso provisional:\n✅ Trip enabled\n✅ Memories llegando\n\nAdventure awaits"},
+      {"time": "13:00", "content": "Viernes lunch story:\n\nTu colega: \"¿Cómo llegaste tan rápido?\"\nTú: \"Magic\" 🪄\n\nTu auto nuevo:\n✅ Time saver\n✅ Life enhancer\n\nMagic is real"},
+      {"time": "15:00", "content": "¿Friday afternoon family time?\n¿Kids want to go somewhere fun?\n\nFamiliaily adventure mode: ON 👨‍👩‍👧‍👦\n\nPermiso provisional:\n✅ Familiaily joy enabler\n✅ Memory factory\n\nFridays are for family"},
+      {"time": "17:00", "content": "5 PM Friday revelation:\n\n¿Weekend starts NOW?\n\nThat's the beauty of mobility 🔓\n\nTu auto nuevo:\n✅ Weekend early starter\n✅ Freedom activator\n\nWeekend mode: ACTIVATED"},
+      {"time": "19:00", "content": "¿Friday night date?\n¿Romance needs transportation?\n\nLove is a journey, literally 💕\n\nPermiso provisional:\n✅ Romance runner\n✅ Love driver\n\nFriday night magic"},
+      {"time": "21:00", "content": "Weekend story preview:\n\nPablo de Guadalajara 🌟\n\nSu plan:\n✅ Viernes: auto nuevo\n✅ Sábado: Chapala lake\n✅ Domingo: family memories\n\nWeekend warrior"},
+      {"time": "23:00", "content": "¿Friday night adventure?\n¿Spontaneous road trip?\n\nBest adventures are unplanned 🌙\n\nTu permiso provisional:\n✅ Spontaneity enabler\n✅ Adventure ready\n\nFriday night libertad"},
+      {"time": "2:00", "content": "¿Late Friday/early Saturday?\n¿Best adventures start at midnight?\n\nNight owls fly free 🦉\n\nPermiso provisional:\n✅ 24/7 adventures\n✅ Night libertad\n\nMidnight warriors"},
+      {"time": "4:00", "content": "¿Saturday morning prep?\n¿Beach day loading?\n\nEarly birds catch the best waves 🏖️\n\nTu auto nuevo:\n✅ Beach transporter\n✅ Sun seeker\n\nSaturday morning magic"},
+      {"time": "6:00", "content": "¿Saturday adventure starting?\n¿Weekend stories being written?\n\nYour story starts now 📝\n\nPermiso provisional:\n✅ Story starter\n✅ Memory maker\n\nSaturday storyteller"}
+    ]
+  },
+  {
+    "day": 13,
+    "posts": [
+      {"time": "7:00", "content": "¡SÁBADO DE HISTORIAS REALES!\n¿Your auto nuevo created memories this week?\n\nSuccess story Saturday 🌟\n\nTu permiso provisional:\n✅ Memory factory\n✅ Story generator\n\nShare your wins"},
+      {"time": "9:00", "content": "Historia de la mañana:\n\nIsabel de Morelia 💫\n\n\"Mi auto nuevo me llevó a interview\nGot the job, got the future\"\n\nPermiso provisional:\n✅ Career changer\n✅ Dream maker\n\nIsabel wins"},
+      {"time": "11:00", "content": "¿Saturday market run?\n¿Familiaily grocery adventure?\n\nWeekend logistics = family time optimized 🛒\n\nTu auto nuevo:\n✅ Familiaily helper\n✅ Time saver\n\nMore time for fun"},
+      {"time": "13:00", "content": "Success story spotlight:\n\nMarcos de Puebla 🎯\n\n\"Emergency call, family needed me\nGot there in time, crisis resuelto\"\n\nPermiso provisional:\n✅ Familiaily hero maker\n✅ Crisis solver\n\nMarcos saves the day"},
+      {"time": "15:00", "content": "¿Saturday afternoon adventure?\n¿Familiaily wants to explore?\n\nExploration mode: ACTIVATED 🗺️\n\nTu permiso provisional:\n✅ Adventure enabler\n✅ Discovery driver\n\nSaturday explorers"},
+      {"time": "17:00", "content": "Golden hour story:\n\nLaura de Querétaro ✨\n\n\"Date night in my new car\nRomance level: maximum\"\n\nAuto nuevo + permiso:\n✅ Romance enhancer\n✅ Love transporter\n\nLaura's love story"},
+      {"time": "19:00", "content": "¿Saturday noche family time?\n¿Dinner at grandma's house?\n\nFamiliaily connections drive happiness 👵\n\nPermiso provisional:\n✅ Familiaily bond strengthener\n✅ Love multiplier\n\nFamiliaily first, always"},
+      {"time": "21:00", "content": "Weekend winner:\n\nAndrea de Tijuana 🏆\n\n\"Business meeting on Saturday\nClosed the deal, secured the future\"\n\nTu permiso provisional:\n✅ Weekend warrior enabler\n✅ Success driver\n\nAndrea conquers"},
+      {"time": "23:00", "content": "¿Saturday night libertad?\n¿Adventures that start late?\n\nNight adventures hit different 🌙\n\nTu auto nuevo:\n✅ Night rider\n✅ Freedom driver\n\nSaturday night magic"},
+      {"time": "2:00", "content": "Late Saturday story:\n\nRoberto el security guard 🛡️\n\n\"Night shift, keeping Mexico safe\nMy car gets me there ready\"\n\nPermiso provisional:\n✅ Hero transporter\n✅ Safety enabler\n\nRoberto protects"},
+      {"time": "4:00", "content": "¿Sunday morning prep?\n¿Familiaily day planeando?\n\nSundays are for familia 👨‍👩‍👧‍👦\n\nTu auto nuevo:\n✅ Familiaily day enabler\n✅ Sunday maximizer\n\nSunday prep warrior"},
+      {"time": "6:00", "content": "¿Sunday family adventure loading?\n¿Perfect family day llegando?\n\nFamiliaily time = best time ☀️\n\nPermiso provisional:\n✅ Familiaily joy driver\n✅ Sunday perfector\n\nDomingo familiar"}
+    ]
+  },
+  {
+    "day": 14,
+    "posts": [
+      {"time": "7:00", "content": "¡DOMINGO DE CUSTOMER HEROES!\n¿Your permiso provisional changed someone's life?\n\nTwo weeks of libertad stories 🎊\n\nTu auto nuevo:\n✅ Life changer\n✅ Dream enabler\n\nCelebrating you"},
+      {"time": "9:00", "content": "Sunday inspiration:\n\nCarlos el teacher 👨‍🏫\n\n\"My new car helps me reach more students\nEducation drives change\"\n\nPermiso provisional:\n✅ Education enabler\n✅ Future builder\n\nCarlos teaches mobility"},
+      {"time": "11:00", "content": "¿Sunday family church time?\n¿Bringing everyone together?\n\nFaith moves mountains, cars move families ⛪\n\nTu auto nuevo:\n✅ Faith transporter\n✅ Familiaily uniter\n\nSunday blessings"},
+      {"time": "13:00", "content": "Hero spotlight:\n\nDr. Ana from Monterrey 👩‍⚕️\n\n\"Emergency call, patient needed help\nGot there fast, life saved\"\n\nTu permiso provisional:\n✅ Life saver enabler\n✅ Medical hero driver\n\nDr. Ana saves lives"},
+      {"time": "15:00", "content": "¿Domingo family gathering?\n¿Reuniting with loved ones?\n\nFamiliaily reunions = happiness multiplied 👨‍👩‍👧‍👦\n\nPermiso provisional:\n✅ Familiaily connector\n✅ Love transporter\n\nSunday love"},
+      {"time": "17:00", "content": "Customer victory:\n\nMiguel el entrepreneur 💼\n\n\"Sunday business meeting\nSealed the deal, secured the future\"\n\nTu auto nuevo:\n✅ Business enabler\n✅ Success driver\n\nMiguel builds empire"},
+      {"time": "19:00", "content": "¿Sunday noche reflection?\n¿Week of adventures completed?\n\nTwo weeks of stories = lifetime of memories 📖\n\nPermiso provisional:\n✅ Memory creator\n✅ Story writer\n\nYour story continues"},
+      {"time": "21:00", "content": "Weekend warrior:\n\nSofía la nurse 👩‍⚕️\n\n\"Weekend shift, caring for others\nMy car helps me help others\"\n\nTu permiso provisional:\n✅ Care enabler\n✅ Service driver\n\nSofía heals Mexico"},
+      {"time": "23:00", "content": "¿Sunday night preparation?\n¿Week 3 adventures loading?\n\nBest stories are yet to come 🌟\n\nTu auto nuevo:\n✅ Future story writer\n✅ Adventure preparer\n\nWeek 3 llegando"},
+      {"time": "2:00", "content": "Sunday night hero:\n\nJavier el security 🛡️\n\n\"Protecting families while they sleep\nMy permit helps me serve\"\n\nPermiso provisional:\n✅ Protection enabler\n✅ Safety driver\n\nJavier guards dreams"},
+      {"time": "4:00", "content": "¿Monday morning prep?\n¿Week 3 of libertad starting?\n\nEvery week = new possibilities 🚀\n\nTu permiso provisional:\n✅ Week starter\n✅ Possibility enabler\n\nMonday warrior loading"},
+      {"time": "6:00", "content": "¿New week beginning?\n¿More stories to create?\n\nWeek 3 = level up time 💪\n\nTu auto nuevo:\n✅ Subir de nivelper\n✅ Story creator\n\nMonday motivation"}
+    ]
+  },
+  {
+    "day": 15,
+    "posts": [
+      {"time": "7:00", "content": "¿Lunes de week 3?\n¿Ready for next level adventures?\n\nLevelup Monday energía 🚀\n\nTu permiso provisional:\n✅ Growth enabler\n✅ Evolution driver\n\nWeek 3 = next level"},
+      {"time": "9:00", "content": "Success story Monday:\n\nPaola la small business owner 💼\n\n\"Week 1: bought car\nWeek 2: grew business\nWeek 3: expanding territory\"\n\nPermiso provisional:\n✅ Business grower\n✅ Territory expander\n\nPaola conquers"},
+      {"time": "11:00", "content": "¿Monday business expansion?\n¿New territories to conquer?\n\nBusiness growth needs mobility 🗺️\n\nTu auto nuevo:\n✅ Business expander\n✅ Territory connector\n\nConquer new markets"},
+      {"time": "13:00", "content": "Week 3 revelation:\n\nTu life antes: Limited radius\nTu life ahora: Unlimited possibilities 🌐\n\nPermiso provisional:\n✅ Radius expander\n✅ Limit breaker\n\nBoundaries broken"},
+      {"time": "15:00", "content": "Customer inspiration:\n\nRaúl el student 🎓\n\n\"University presentations across city\nMy car = academic success\"\n\nTu permiso provisional:\n✅ Education transporter\n✅ Future builder\n\nRaúl studies mobility"},
+      {"time": "17:00", "content": "¿Monday noche networking?\n¿Building connections after work?\n\nNetworks drive success 🤝\n\nTu auto nuevo:\n✅ Connection builder\n✅ Network expander\n\nConnect to prosper"},
+      {"time": "19:00", "content": "Hero Monday:\n\nCarmen la social worker 👩‍⚕️\n\n\"Visiting families across the state\nMy permit helps me help others\"\n\nPermiso provisional:\n✅ Service enabler\n✅ Hope transporter\n\nCarmen changes lives"},
+      {"time": "21:00", "content": "¿Monday night planeando?\n¿Week 3 strategies loading?\n\nPlanners inherit the earth 📋\n\nTu permiso provisional:\n✅ Strategy enabler\n✅ Plan executor\n\nMonday planners win"},
+      {"time": "23:00", "content": "Success spotlight:\n\nFernando el delivery hero 📦\n\n\"Week 3: covering more territory\nMore deliveries = more families happy\"\n\nTu auto nuevo:\n✅ Happiness deliverer\n✅ Joy transporter\n\nFernando spreads joy"},
+      {"time": "2:00", "content": "¿Monday night essential work?\n¿Keeping Mexico running while others sleep?\n\nNight heroes drive Mexico forward 🌃\n\nPermiso provisional:\n✅ Essential enabler\n✅ Hero transporter\n\nNight warriors"},
+      {"time": "4:00", "content": "¿Tuesday prep starting?\n¿Week 3 momentum building?\n\nMomentum multiplies success 📈\n\nTu auto nuevo:\n✅ Momentum builder\n✅ Success accelerator\n\nTuesday warrior llegando"},
+      {"time": "6:00", "content": "¿Week 3, Day 2 loading?\n¿Building on yesterday's wins?\n\nSuccess builds on success 🏗️\n\nPermiso provisional:\n✅ Win stacker\n✅ Success builder\n\nTuesday builder"}
+    ]
+  },
+  {
+    "day": 16,
+    "posts": [
+      {"time": "7:00", "content": "¿Martes de expansion?\n¿Territory growing every day?\n\nGrowth Tuesday energía 📈\n\nTu permiso provisional:\n✅ Growth accelerator\n✅ Expansion enabler\n\nTerritory expander"},
+      {"time": "9:00", "content": "Business hero Tuesday:\n\nLucía la consultant 💼\n\n\"Week 3: serving clients statewide\nMy car = business multiplier\"\n\nTu auto nuevo:\n✅ Business multiplier\n✅ Service expander\n\nLucía serves more"},
+      {"time": "11:00", "content": "¿Tuesday opportunity hunting?\n¿New deals across the city?\n\nOpportunity hunters never rest 🎯\n\nPermiso provisional:\n✅ Opportunity hunter\n✅ Deal closer\n\nHunt those opportunities"},
+      {"time": "13:00", "content": "Week 3 wisdom:\n\nDistance = no problem\nTime = optimized\nPossibilities = infinite ♾️\n\nTu permiso provisional:\n✅ Problem solver\n✅ Time optimizer\n\nLimits eliminated"},
+      {"time": "15:00", "content": "Student success:\n\nJorge el graduate student 🎓\n\n\"Research across multiple libraries\nMy permit = academic libertad\"\n\nTu auto nuevo:\n✅ Knowledge seeker\n✅ Research enabler\n\nJorge researches libertad"},
+      {"time": "17:00", "content": "¿Tuesday noche family time?\n¿Multiple family visits in one night?\n\nFamiliaily connections multiply 👨‍👩‍👧‍👦\n\nPermiso provisional:\n✅ Familiaily multiplier\n✅ Love connector\n\nTuesday family tour"},
+      {"time": "19:00", "content": "Healthcare hero:\n\nDr. Ricardo el specialist 👨‍⚕️\n\n\"Tuesday clinics across three cities\nMy car = healing multiplier\"\n\nTu permiso provisional:\n✅ Healing enabler\n✅ Care expander\n\nDr. Ricardo heals more"},
+      {"time": "21:00", "content": "¿Tuesday night skill building?\n¿Evening classes across town?\n\nInvestment in yourself = best investment 📚\n\nTu auto nuevo:\n✅ Skill builder\n✅ Future investor\n\nTuesday learner"},
+      {"time": "23:00", "content": "Service hero:\n\nAlejandra la therapist 👩‍⚕️\n\n\"Evening sessions, helping families\nMy permit helps me help healing\"\n\nPermiso provisional:\n✅ Healing transporter\n✅ Hope driver\n\nAlejandra heals hearts"},
+      {"time": "2:00", "content": "¿Tuesday night emergency response?\n¿Someone needs help NOW?\n\nEmergency heroes save lives 🚨\n\nTu permiso provisional:\n✅ Life saver\n✅ Emergency enabler\n\nTuesday night heroes"},
+      {"time": "4:00", "content": "¿Wednesday prep intensive?\n¿Mid-week momentum building?\n\nMid-week = momentum week 💪\n\nTu auto nuevo:\n✅ Momentum maker\n✅ Wednesday warrior\n\nMid-week strength"},
+      {"time": "6:00", "content": "¿Week 3 mid-point approaching?\n¿Hump day energía loading?\n\nHump day = breakthrough day 🏔️\n\nPermiso provisional:\n✅ Breakthrough enabler\n✅ Peak performer\n\nWednesday warrior"}
+    ]
+  },
+  {
+    "day": 17,
+    "posts": [
+      {"time": "7:00", "content": "¿Miércoles de breakthroughs?\n¿Mid-week magic happening?\n\nBreakthrough Wednesday energía ⚡\n\nTu permiso provisional:\n✅ Breakthrough driver\n✅ Magic enabler\n\nMid-week miracle worker"},
+      {"time": "9:00", "content": "Breakthrough story:\n\nMartin el salesperson 💼\n\n\"Week 3: biggest sale ever\nCovered entire state\nMy car = commission multiplier\"\n\nTu auto nuevo:\n✅ Success multiplier\n✅ Commission driver\n\nMartin breaks records"},
+      {"time": "11:00", "content": "¿Wednesday expansion mode?\n¿Territory conquering continues?\n\nConquerors never rest 🗺️\n\nPermiso provisional:\n✅ Territory conqueror\n✅ Map expander\n\nWednesday conqueror"},
+      {"time": "13:00", "content": "Mid-week revelation:\n\nTu radius before: neighborhood\nTu radius now: entire state 🌟\n\nTu permiso provisional:\n✅ State expander\n✅ Horizon broadener\n\nBoundaries erased"},
+      {"time": "15:00", "content": "Familiaily hero Wednesday:\n\nGabriela la working mom 👩‍👧‍👦\n\n\"School pickup + work meetings\nMy car = supermom enabler\"\n\nTu auto nuevo:\n✅ Supermom transporter\n✅ Familiaily juggler\n\nGabriela juggles perfectly"},
+      {"time": "17:00", "content": "¿Wednesday noche opportunities?\n¿After-work networking expansion?\n\nNetworks expand with mobility 🤝\n\nPermiso provisional:\n✅ Network expander\n✅ Connection multiplier\n\nWednesday networker"},
+      {"time": "19:00", "content": "Education hero:\n\nProfesor David 👨‍🏫\n\n\"Teaching at multiple schools\nMy permit = education multiplier\"\n\nTu permiso provisional:\n✅ Education expander\n✅ Knowledge spreader\n\nDavid teaches more"},
+      {"time": "21:00", "content": "¿Wednesday night growth?\n¿Evening side hustle expansion?\n\nHustle expands with mobility 💰\n\nTu auto nuevo:\n✅ Hustle expander\n✅ Income multiplier\n\nWednesday hustler"},
+      {"time": "23:00", "content": "Service expansion:\n\nEnfermera Patricia 👩‍⚕️\n\n\"Night shift, multiple hospitals\nMy car = care multiplier\"\n\nPermiso provisional:\n✅ Care expander\n✅ Service multiplier\n\nPatricia cares more"},
+      {"time": "2:00", "content": "¿Wednesday night essential services?\n¿Keeping communities running?\n\nEssential workers expand service 🌃\n\nTu permiso provisional:\n✅ Service expander\n✅ Community strengthener\n\nEssential heroes"},
+      {"time": "4:00", "content": "¿Thursday breakthrough prep?\n¿Week 3 climax approaching?\n\nClimax energía building 📈\n\nTu auto nuevo:\n✅ Climax driver\n✅ Peak preparer\n\nThursday peak llegando"},
+      {"time": "6:00", "content": "¿Week 3 momentum peaking?\n¿Thursday energía loading?\n\nPeak performance llegando 🏔️\n\nPermiso provisional:\n✅ Peak enabler\n✅ Performance maximizer\n\nThursday peak"}
+    ]
+  },
+  {
+    "day": 18,
+    "posts": [
+      {"time": "7:00", "content": "¿Jueves de peak performance?\n¿Week 3 hitting maximum velocity?\n\nPeak Thursday energía 🏔️\n\nTu permiso provisional:\n✅ Peak performer\n✅ Maximum enabler\n\nThursday mountain climber"},
+      {"time": "9:00", "content": "Peak performance story:\n\nValeria la real estate agent 🏠\n\n\"Week 3: covering entire metro area\nMy car = property multiplier\"\n\nTu auto nuevo:\n✅ Territory multiplier\n✅ Success expander\n\nValeria sells everywhere"},
+      {"time": "11:00", "content": "¿Thursday opportunity maximization?\n¿Every minute optimized?\n\nOptimizers inherit success ⚡\n\nPermiso provisional:\n✅ Time maximizer\n✅ Opportunity optimizer\n\nThursday optimizer"},
+      {"time": "13:00", "content": "Week 3 mastery:\n\nYou've mastered mobility\nYou've conquistado territory\nYou've maximized time 🎯\n\nTu permiso provisional:\n✅ Mastery enabler\n✅ Conquest driver\n\nMastery achieved"},
+      {"time": "15:00", "content": "Familiaily mastery:\n\nOscar el family man 👨‍👩‍👧‍👦\n\n\"Thursday: school + work + family time\nMy car = time multiplier\"\n\nTu auto nuevo:\n✅ Time multiplier\n✅ Familiaily optimizer\n\nOscar masters time"},
+      {"time": "17:00", "content": "¿Thursday noche peak networking?\n¿Connections at maximum velocity?\n\nPeak networkers build empires 🤝\n\nPermiso provisional:\n✅ Empire builder\n✅ Connection maximizer\n\nThursday empire builder"},
+      {"time": "19:00", "content": "Healthcare peak:\n\nDr. Claudia la emergency physician 👩‍⚕️\n\n\"Thursday: three hospitals covered\nMy permit = life multiplication\"\n\nTu permiso provisional:\n✅ Life multiplier\n✅ Care maximizer\n\nDr. Claudia saves more"},
+      {"time": "21:00", "content": "¿Thursday night peak productivity?\n¿Evening goals maximized?\n\nPeak performers never rest 💪\n\nTu auto nuevo:\n✅ Peak enabler\n✅ Goal maximizer\n\nThursday peak performer"},
+      {"time": "23:00", "content": "Service peak:\n\nTécnico Roberto 🔧\n\n\"Thursday: emergency calls citywide\nMy car = service multiplier\"\n\nPermiso provisional:\n✅ Service maximizer\n✅ Emergency enabler\n\nRoberto fixes everything"},
+      {"time": "2:00", "content": "¿Thursday night peak essential work?\n¿Maximum service delivery?\n\nPeak service heroes 🌃\n\nTu permiso provisional:\n✅ Service peaker\n✅ Community maximizer\n\nPeak essential worker"},
+      {"time": "4:00", "content": "¿Friday preparation at peak?\n¿Week 3 finale approaching?\n\nFinale energía building 🎊\n\nTu auto nuevo:\n✅ Finale preparer\n✅ Week closer\n\nFriday finale llegando"},
+      {"time": "6:00", "content": "¿Week 3 finale Friday loading?\n¿Peak week ending strong?\n\nStrong finishes create momentum 🚀\n\nPermiso provisional:\n✅ Strong finisher\n✅ Momentum creator\n\nFriday finale"}
+    ]
+  },
+  {
+    "day": 19,
+    "posts": [
+      {"time": "7:00", "content": "¡VIERNES FINALE DE WEEK 3!\n¿Ready to close the strongest week yet?\n\nFinale Friday energía 🎊\n\nTu permiso provisional:\n✅ Week closer\n✅ Finale enabler\n\nFriday finale champion"},
+      {"time": "9:00", "content": "Week 3 finale story:\n\nArmando el logistics manager 📦\n\n\"This week: entire supply chain optimized\nMy car = efficiency multiplier\"\n\nTu auto nuevo:\n✅ Efficiency multiplier\n✅ Chain optimizer\n\nArmando optimizes Mexico"},
+      {"time": "11:00", "content": "¿Friday opportunity finale?\n¿Week 3 ending with biggest win?\n\nBig finales create bigger beginnings 🏆\n\nPermiso provisional:\n✅ Big finish enabler\n✅ Win maximizer\n\nFriday big finish"},
+      {"time": "13:00", "content": "Week 3 reflection:\n\nWeek 1: learned libertad\nWeek 2: expanded territory\nWeek 3: maximized potential 🌟\n\nTu permiso provisional:\n✅ Potential maximizer\n✅ Freedom expander\n\nEvolution complete"},
+      {"time": "15:00", "content": "Familiaily finale Friday:\n\nMarisa la entrepreneur mom 👩‍💼\n\n\"Week 3: business expanded, family happy\nMy car = life balancer\"\n\nTu auto nuevo:\n✅ Life balancer\n✅ Success multiplier\n\nMarisa balances everything"},
+      {"time": "17:00", "content": "¿Friday noche celebration mode?\n¿Week 3 victories being celebrated?\n\nCelebrators become repeaters 🎉\n\nPermiso provisional:\n✅ Victory enabler\n✅ Celebration driver\n\nFriday celebrator"},
+      {"time": "19:00", "content": "Service finale:\n\nBombero Captain Luis 🚒\n\n\"Week 3: responded to calls across region\nMy permit = hero multiplier\"\n\nTu permiso provisional:\n✅ Hero multiplier\n✅ Service maximizer\n\nCapitan Luis saves more"},
+      {"time": "21:00", "content": "¿Friday night victory lap?\n¿Week 3 achievements being celebrated?\n\nVictory laps fuel future wins 🏁\n\nTu auto nuevo:\n✅ Victory driver\n✅ Achievement transporter\n\nFriday victory lap"},
+      {"time": "23:00", "content": "Week 3 mastery achieved:\n\nTeacher Elena 👩‍🏫\n\n\"Three weeks: from nervous to confident\nMy car = confidence multiplier\"\n\nPermiso provisional:\n✅ Confidence builder\n✅ Mastery enabler\n\nElena masters mobility"},
+      {"time": "2:00", "content": "¿Friday night into Saturday?\n¿Week 3 flowing into weekend?\n\nMomentum flows into weekend 🌊\n\nTu permiso provisional:\n✅ Momentum carrier\n✅ Flow enabler\n\nWeekend flow"},
+      {"time": "4:00", "content": "¿Saturday prep perfection?\n¿Week 3 setting up perfect weekend?\n\nPerfect setups create perfect weekends 🎯\n\nTu auto nuevo:\n✅ Weekend preparer\n✅ Perfect setter\n\nSaturday perfection"},
+      {"time": "6:00", "content": "¿Weekend mastery beginning?\n¿Week 3 graduates listo para todo?\n\nMastery enables everything ✨\n\nPermiso provisional:\n✅ Mastery driver\n✅ Everything enabler\n\nSaturday master"}
+    ]
+  },
+  {
+    "day": 20,
+    "posts": [
+      {"time": "7:00", "content": "¡SÁBADO DE MASTERY!\n¿Week 3 graduate listo para todo?\n\nMastery Saturday energía ✨\n\nTu permiso provisional:\n✅ Mastery enabler\n✅ Anything driver\n\nSaturday master"},
+      {"time": "9:00", "content": "Mastery story:\n\nArquitecto Pablo 🏗️\n\n\"Three weeks: project sites across state\nMy car = blueprint multiplier\"\n\nTu auto nuevo:\n✅ Blueprint enabler\n✅ Vision transporter\n\nPablo builds dreams"},
+      {"time": "11:00", "content": "¿Saturday mastery application?\n¿Using all skills learned?\n\nMasters apply everything learned 🎯\n\nPermiso provisional:\n✅ Skill applier\n✅ Knowledge driver\n\nSaturday skill master"},
+      {"time": "13:00", "content": "Three-week transformation:\n\nBefore: limited possibilities\nAfter: unlimited potential\nNow: mastery in motion 🚀\n\nTu permiso provisional:\n✅ Transformation driver\n✅ Potential unlocker\n\nTransformation complete"},
+      {"time": "15:00", "content": "Familiaily mastery Saturday:\n\nPapá Hector 👨‍👧‍👦\n\n\"Saturday adventures with kids\nMy car = memory multiplier\"\n\nTu auto nuevo:\n✅ Memory maker\n✅ Adventure enabler\n\nHector creates memories"},
+      {"time": "17:00", "content": "¿Saturday noche mastery networking?\n¿Connections at master level?\n\nMasters connect with masters 🤝\n\nPermiso provisional:\n✅ Master connector\n✅ Elite networker\n\nSaturday elite networker"},
+      {"time": "19:00", "content": "Healthcare mastery:\n\nDr. Specialist Carmen 👩‍⚕️\n\n\"Saturday: consultations across region\nMy permit = healing mastery\"\n\nTu permiso provisional:\n✅ Healing master\n✅ Care maximizer\n\nDr. Carmen masters healing"},
+      {"time": "21:00", "content": "¿Saturday night mastery celebration?\n¿Three weeks of growth being honored?\n\nMasters celebrate progress 🎊\n\nTu auto nuevo:\n✅ Progress celebrator\n✅ Growth acknowledger\n\nSaturday progress party"},
+      {"time": "23:00", "content": "Business mastery:\n\nConsultant Ricardo 💼\n\n\"Three weeks: client base tripled\nMy car = business mastery tool\"\n\nPermiso provisional:\n✅ Business master\n✅ Success multiplier\n\nRicardo masters business"},
+      {"time": "2:00", "content": "¿Saturday night mastery service?\n¿Peak performance even at night?\n\nTrue masters serve anytime 🌃\n\nTu permiso provisional:\n✅ Anytime master\n✅ Peak performer\n\nSaturday night master"},
+      {"time": "4:00", "content": "¿Sunday mastery prep?\n¿Week 3 ending with mastery?\n\nMastery endings create mastery beginnings 🔄\n\nTu auto nuevo:\n✅ Mastery cycler\n✅ Excellence driver\n\nSunday mastery prep"},
+      {"time": "6:00", "content": "¿Week 3 finale Sunday loading?\n¿Mastery week ending perfectly?\n\nPerfect endings create perfect beginnings ☀️\n\nPermiso provisional:\n✅ Perfect ender\n✅ Beginning creator\n\nSunday perfection"}
+    ]
+  },
+  {
+    "day": 21,
+    "posts": [
+      {"time": "7:00", "content": "¡DOMINGO MASTERY FINALE!\n¿Three weeks of transformation complete?\n\nMastery finale Sunday 🏆\n\nTu permiso provisional:\n✅ Transformation completer\n✅ Mastery enabler\n\nSunday transformation finale"},
+      {"time": "9:00", "content": "Three-week mastery story:\n\nEmpresaria Angela 👩‍💼\n\n\"Week 1: nervous beginner\nWeek 2: confident driver\nWeek 3: business master\"\n\nTu auto nuevo:\n✅ Master maker\n✅ Confidence builder\n\nAngela masters success"},
+      {"time": "11:00", "content": "¿Sunday mastery family time?\n¿Applying all skills with familia?\n\nFamiliaily mastery = life mastery 👨‍👩‍👧‍👦\n\nPermiso provisional:\n✅ Familiaily master\n✅ Life optimizer\n\nSunday family master"},
+      {"time": "13:00", "content": "Three-week evolution complete:\n\nWeek 1: Freedom discovered\nWeek 2: Territory expanded\nWeek 3: Mastery achieved 🌟\n\nTu permiso provisional:\n✅ Evolution driver\n✅ Mastery enabler\n\nEvolution complete"},
+      {"time": "15:00", "content": "Service mastery Sunday:\n\nParamedic Juan 🚑\n\n\"Three weeks: response time optimized\nMy car = life-saving mastery\"\n\nTu auto nuevo:\n✅ Life saver\n✅ Response optimizer\n\nJuan masters life-saving"},
+      {"time": "17:00", "content": "¿Sunday noche mastery reflection?\n¿Three weeks of growth being appreciated?\n\nReflection creates next-level growth 📈\n\nPermiso provisional:\n✅ Growth reflector\n✅ Level advancer\n\nSunday reflection master"},
+      {"time": "19:00", "content": "Education mastery:\n\nDirectora Lupita 👩‍🏫\n\n\"Three weeks: serving multiple schools\nMy permit = education mastery\"\n\nTu permiso provisional:\n✅ Education master\n✅ Service multiplier\n\nLupita masters education"},
+      {"time": "21:00", "content": "¿Week 3 finale celebration?\n¿Mastery achievements being honored?\n\nCelebration fuels next level 🎊\n\nTu auto nuevo:\n✅ Celebration enabler\n✅ Achievement honorer\n\nSunday celebration master"},
+      {"time": "23:00", "content": "Three-week mastery graduate:\n\nIngeniero Victor 👨‍💻\n\n\"From permit newbie to mobility master\nMy car = engineering optimization\"\n\nPermiso provisional:\n✅ Master creator\n✅ Optimization enabler\n\nVictor engineers success"},
+      {"time": "2:00", "content": "¿Sunday night mastery service?\n¿Even weekends optimized?\n\nTrue masters optimize everything 🌙\n\nTu permiso provisional:\n✅ Everything optimizer\n✅ Master enabler\n\nSunday night optimizer"},
+      {"time": "4:00", "content": "¿Week 4 master prep?\n¿Siguiente nivel mastery loading?\n\nMasters never stop growing 📈\n\nTu auto nuevo:\n✅ Growth driver\n✅ Master evolver\n\nMonday master prep"},
+      {"time": "6:00", "content": "¿Week 4 beginning?\n¿Mastery level 2 starting?\n\nMastery has no limits 🚀\n\nPermiso provisional:\n✅ Limitless enabler\n✅ Master evolver\n\nMonday mastery level 2"}
+    ]
+  },
+  {
+    "day": 22,
+    "posts": [
+      {"time": "7:00", "content": "¿Lunes de Week 4?\n¿Ready to connect all of Mexico?\n\nConnection Monday energía 🗺️\n\nTu permiso provisional:\n✅ Mexico connector\n✅ Nation uniter\n\nMonday Mexico connector"},
+      {"time": "9:00", "content": "Mexico connection story:\n\nTruckero Miguel 🚛\n\n\"Week 4: Tijuana to Cancún route\nMy permit = Mexico connector\"\n\nTu auto nuevo:\n✅ Nation crosser\n✅ Mexico uniter\n\nMiguel connects Mexico"},
+      {"time": "11:00", "content": "¿Monday Mexico exploration?\n¿New states to discover?\n\nExploration expands horizons 🌅\n\nPermiso provisional:\n✅ Horizon expander\n✅ Discovery enabler\n\nMonday explorer"},
+      {"time": "13:00", "content": "Week 4 vision:\n\nTu Mexico antes: distant dreams\nTu Mexico ahora: daily reality\nTu Mexico future: unlimited 🇲🇽\n\nTu permiso provisional:\n✅ Dream realizer\n✅ Future creator\n\nMexico dreamer"},
+      {"time": "15:00", "content": "Familiaily Mexico connection:\n\nAbuela Rosa's granddaughter 👵\n\n\"Monday: visiting abuela in Oaxaca\nMy car = family bridge\"\n\nTu auto nuevo:\n✅ Familiaily bridge\n✅ Love connector\n\nFamiliaily connection maker"},
+      {"time": "17:00", "content": "¿Monday noche Mexico business?\n¿Connecting markets across states?\n\nBusiness connects Mexico 💼\n\nPermiso provisional:\n✅ Market connector\n✅ Economy driver\n\nMonday market connector"},
+      {"time": "19:00", "content": "Cultural connection:\n\nArtist Frida 🎨\n\n\"Monday: art exhibition in Guadalajara\nMy permit = culture connector\"\n\nTu permiso provisional:\n✅ Culture transporter\n✅ Art enabler\n\nFrida connects culture"},
+      {"time": "21:00", "content": "¿Monday night Mexico service?\n¿Helping communities across states?\n\nService connects hearts 💙\n\nTu auto nuevo:\n✅ Heart connector\n✅ Service enabler\n\nMonday service connector"},
+      {"time": "23:00", "content": "Education connection:\n\nProfesor Alejandro 👨‍🏫\n\n\"Monday: teaching exchange program\nMy car = knowledge bridge\"\n\nPermiso provisional:\n✅ Knowledge bridge\n✅ Learning connector\n\nAlejandro bridges knowledge"},
+      {"time": "2:00", "content": "¿Monday night emergency connection?\n¿Helping Mexico 24/7?\n\nEmergency heroes connect Mexico 🚨\n\nTu permiso provisional:\n✅ Emergency connector\n✅ Help transporter\n\nMonday night connector"},
+      {"time": "4:00", "content": "¿Tuesday Mexico prep?\n¿More connections to make?\n\nConnections multiply connections 🔗\n\nTu auto nuevo:\n✅ Connection multiplier\n✅ Network builder\n\nTuesday connector prep"},
+      {"time": "6:00", "content": "¿Mexico network expanding?\n¿Tuesday connections loading?\n\nNetworks drive nations 🌐\n\nPermiso provisional:\n✅ Nation driver\n✅ Network expander\n\nTuesday network builder"}
+    ]
+  },
+  {
+    "day": 23,
+    "posts": [
+      {"time": "7:00", "content": "¿Martes de family reunions?\n¿Connecting families across Mexico?\n\nFamiliaily Tuesday energía 👨‍👩‍👧‍👦\n\nTu permiso provisional:\n✅ Familiaily reuniter\n✅ Love connector\n\nTuesday family connector"},
+      {"time": "9:00", "content": "Familiaily reunion story:\n\nFamiliailia Hernandez 👨‍👩‍👧‍👦\n\n\"Tuesday: grandparents in Michoacán\nOur cars = family magnet\"\n\nTu auto nuevo:\n✅ Familiaily magnet\n✅ Generation connector\n\nHernandez family unites"},
+      {"time": "11:00", "content": "¿Tuesday cross-state family visit?\n¿Connecting with relatives?\n\nFamiliaily connections heal hearts 💙\n\nPermiso provisional:\n✅ Heart healer\n✅ Familiaily bridge\n\nTuesday family healer"},
+      {"time": "13:00", "content": "Familiaily network expansion:\n\nBefore: local family only\nNow: estado-wide familia\nFuture: all-Mexico family 🗺️\n\nTu permiso provisional:\n✅ Familiaily expander\n✅ Network multiplier\n\nFamiliaily network builder"},
+      {"time": "15:00", "content": "Abuelos connection:\n\nNietos visiting from CDMX 👴👵\n\n\"Tuesday: surprise visit to abuelos\nOur car = love delivery system\"\n\nTu auto nuevo:\n✅ Love deliverer\n✅ Joy transporter\n\nGrandparent joy creator"},
+      {"time": "17:00", "content": "¿Tuesday noche family dinner?\n¿Multiple households connecting?\n\nFamiliaily dinners multiply love 🍽️\n\nPermiso provisional:\n✅ Love multiplier\n✅ Dinner enabler\n\nTuesday dinner connector"},
+      {"time": "19:00", "content": "Tía connection story:\n\nTía Carmen's network 👩‍👧‍👦\n\n\"Tuesday: visiting all sobrinos\nMy car = aunt duty multiplier\"\n\nTu permiso provisional:\n✅ Aunt duty enabler\n✅ Sobrino connector\n\nTía Carmen loves more"},
+      {"time": "21:00", "content": "¿Tuesday night family support?\n¿Being there when familia needs you?\n\nFamiliaily support travels at any hour 🌙\n\nTu auto nuevo:\n✅ Support transporter\n✅ Familiaily helper\n\nTuesday night family support"},
+      {"time": "23:00", "content": "Primo connection:\n\nPrimos from Jalisco 🤝\n\n\"Tuesday: cousin reunion\nOur cars = cousin connector\"\n\nPermiso provisional:\n✅ Cousin connector\n✅ Friendship enabler\n\nPrimo network activated"},
+      {"time": "2:00", "content": "¿Tuesday night family emergency?\n¿Being there when it matters?\n\nFamiliaily emergencies need family heroes 🚨\n\nTu permiso provisional:\n✅ Familiaily hero maker\n✅ Emergency responder\n\nTuesday night family hero"},
+      {"time": "4:00", "content": "¿Wednesday family prep?\n¿More family connections planned?\n\nFamiliaily planeando creates family joy 📅\n\nTu auto nuevo:\n✅ Joy planner\n✅ Familiaily organizer\n\nWednesday family prep"},
+      {"time": "6:00", "content": "¿Wednesday family expansion?\n¿Even more relatives to visit?\n\nFamiliaily networks never end 💫\n\nPermiso provisional:\n✅ Network expander\n✅ Familiaily multiplier\n\nWednesday family network"}
+    ]
+  },
+  {
+    "day": 24,
+    "posts": [
+      {"time": "7:00", "content": "¿Miércoles de holiday prep?\n¿Getting ready for celebrations?\n\nHoliday Wednesday energía 🎊\n\nTu permiso provisional:\n✅ Holiday enabler\n✅ Celebration driver\n\nWednesday holiday prep"},
+      {"time": "9:00", "content": "Holiday prep story:\n\nFamiliailia Martinez preparing 🎄\n\n\"Wednesday: shopping across three cities\nOur cars = holiday magic makers\"\n\nTu auto nuevo:\n✅ Magic maker\n✅ Holiday enabler\n\nMartinez holiday magic"},
+      {"time": "11:00", "content": "¿Wednesday cross-city shopping?\n¿Finding perfect holiday gifts?\n\nPerfect gifts require mobility 🎁\n\nPermiso provisional:\n✅ Gift hunter\n✅ Perfect finder\n\nWednesday gift hunter"},
+      {"time": "13:00", "content": "Holiday transformation:\n\nBefore: limited holiday plans\nNow: unlimited celebrations\nFuture: holiday mastery 🌟\n\nTu permiso provisional:\n✅ Holiday master\n✅ Celebration multiplier\n\nHoliday master"},
+      {"time": "15:00", "content": "Vacation prep:\n\nFamiliaily Rivera's beach trip 🏖️\n\n\"Wednesday: final preparations\nOur car = vacation enabler\"\n\nTu auto nuevo:\n✅ Vacation enabler\n✅ Beach transporter\n\nRivera beach bound"},
+      {"time": "17:00", "content": "¿Wednesday noche holiday shopping?\n¿Last-minute celebration needs?\n\nCelebrations never wait 🛍️\n\nPermiso provisional:\n✅ Celebration saver\n✅ Last-minute hero\n\nWednesday celebration saver"},
+      {"time": "19:00", "content": "Holiday tradition keeper:\n\nAbuela Elena's traditions 👵\n\n\"Wednesday: maintaining family traditions\nMy car = tradition transporter\"\n\nTu permiso provisional:\n✅ Tradition keeper\n✅ Culture preserver\n\nElena preserves traditions"},
+      {"time": "21:00", "content": "¿Wednesday night holiday planeando?\n¿Coordinating family celebrations?\n\nCoordination creates perfect holidays 📋\n\nTu auto nuevo:\n✅ Holiday coordinator\n✅ Celebration planner\n\nWednesday holiday planner"},
+      {"time": "23:00", "content": "Travel prep story:\n\nFamiliailia Gonzalez road trip 🛣️\n\n\"Wednesday: preparing for adventure\nOur cars = adventure enablers\"\n\nPermiso provisional:\n✅ Adventure enabler\n✅ Road trip maker\n\nGonzalez adventure llegando"},
+      {"time": "2:00", "content": "¿Wednesday night travel prep?\n¿Holiday adventure starting?\n\nAdventures start with preparation 🌙\n\nTu permiso provisional:\n✅ Adventure starter\n✅ Preparation enabler\n\nWednesday night adventurer"},
+      {"time": "4:00", "content": "¿Thursday celebration prep?\n¿Holiday excitement building?\n\nExcitement builds with mobility 🚀\n\nTu auto nuevo:\n✅ Excitement builder\n✅ Celebration prep\n\nThursday excitement builder"},
+      {"time": "6:00", "content": "¿Thursday holiday energía?\n¿Celebration mode activating?\n\nCelebration mode = maximum joy 🎉\n\nPermiso provisional:\n✅ Joy maximizer\n✅ Celebration activator\n\nThursday celebration mode"}
+    ]
+  },
+  {
+    "day": 25,
+    "posts": [
+      {"time": "7:00", "content": "¿Jueves de cultural celebrations?\n¿Mexican traditions in motion?\n\nCultural Thursday energía 🇲🇽\n\nTu permiso provisional:\n✅ Culture transporter\n✅ Tradition enabler\n\nThursday culture keeper"},
+      {"time": "9:00", "content": "Cultural celebration story:\n\nFiestas patronales coordinator 🎊\n\n\"Thursday: organizing celebration\nMy car = culture multiplier\"\n\nTu auto nuevo:\n✅ Culture multiplier\n✅ Tradition coordinator\n\nCulture celebration master"},
+      {"time": "11:00", "content": "¿Thursday tradition participation?\n¿Being part of Mexican heritage?\n\nHeritage lives through participation 🏛️\n\nPermiso provisional:\n✅ Heritage participator\n✅ Culture keeper\n\nThursday heritage keeper"},
+      {"time": "13:00", "content": "Cultural network expansion:\n\nBefore: local traditions only\nNow: state-wide celebrations\nFuture: all-Mexico culture 🌟\n\nTu permiso provisional:\n✅ Culture expander\n✅ Tradition multiplier\n\nCultural network builder"},
+      {"time": "15:00", "content": "Festival participation:\n\nDanza folklorica group 💃\n\n\"Thursday: festival in three cities\nOur cars = culture spreaders\"\n\nTu auto nuevo:\n✅ Culture spreader\n✅ Art transporter\n\nCulture spreading team"},
+      {"time": "17:00", "content": "¿Thursday noche cultural event?\n¿Mexican pride in motion?\n\nMexican pride travels everywhere 🇲🇽\n\nPermiso provisional:\n✅ Pride transporter\n✅ Culture mobile\n\nThursday pride mover"},
+      {"time": "19:00", "content": "Community tradition:\n\nPosadas organizer Maria 🏠\n\n\"Thursday: organizing posadas route\nMy car = tradition facilitator\"\n\nTu permiso provisional:\n✅ Tradition facilitator\n✅ Community connector\n\nMaria facilitates tradition"},
+      {"time": "21:00", "content": "¿Thursday night cultural sharing?\n¿Spreading Mexican beauty?\n\nCultural sharing multiplies beauty 🌹\n\nTu auto nuevo:\n✅ Beauty multiplier\n✅ Culture spreader\n\nThursday beauty spreader"},
+      {"time": "23:00", "content": "Artisan network story:\n\nArtesano collective 🎨\n\n\"Thursday: delivering art statewide\nOur cars = art distributors\"\n\nPermiso provisional:\n✅ Art distributor\n✅ Beauty transporter\n\nArt distribution network"},
+      {"time": "2:00", "content": "¿Thursday night cultural service?\n¿Preserving traditions 24/7?\n\nCulture preservation never sleeps 🌙\n\nTu permiso provisional:\n✅ Culture preserver\n✅ Tradition guardian\n\nThursday night culture guardian"},
+      {"time": "4:00", "content": "¿Friday cultural celebration prep?\n¿Weekend traditions preparing?\n\nTraditions prepare for celebration 🎭\n\nTu auto nuevo:\n✅ Celebration preparer\n✅ Tradition starter\n\nFriday tradition prep"},
+      {"time": "6:00", "content": "¿Friday cultural energía building?\n¿Weekend celebrations loading?\n\nCultural celebrations create magic ✨\n\nPermiso provisional:\n✅ Magic creator\n✅ Celebration loader\n\nFriday cultural magic"}
+    ]
+  },
+  {
+    "day": 26,
+    "posts": [
+      {"time": "7:00", "content": "¡VIERNES DE COMMUNITY VALUES!\n¿Ready to strengthen Mexican communities?\n\nCommunity Friday energía 🏘️\n\nTu permiso provisional:\n✅ Community strengthener\n✅ Values transporter\n\nFriday community builder"},
+      {"time": "9:00", "content": "Community values story:\n\nVolunteer coordinator Luis 🤝\n\n\"Friday: organizing community service\nMy car = service multiplier\"\n\nTu auto nuevo:\n✅ Service multiplier\n✅ Community organizer\n\nLuis serves communities"},
+      {"time": "11:00", "content": "¿Friday community participation?\n¿Being part of something bigger?\n\nCommunity participation multiplies impact 📈\n\nPermiso provisional:\n✅ Impact multiplier\n✅ Community connector\n\nFriday impact maker"},
+      {"time": "13:00", "content": "Community value expansion:\n\nBefore: neighborhood helper\nNow: multi-city volunteer\nFuture: state-wide impact 🌟\n\nTu permiso provisional:\n✅ Impact expander\n✅ Service multiplier\n\nCommunity impact builder"},
+      {"time": "15:00", "content": "Friday family community:\n\nFamiliaily volunteer team 👨‍👩‍👧‍👦\n\n\"Friday: serving three communities\nOur cars = service delivery system\"\n\nTu auto nuevo:\n✅ Service deliverer\n✅ Familiaily uniter\n\nFamiliaily service team"},
+      {"time": "17:00", "content": "¿Friday noche community event?\n¿Bringing people together?\n\nCommunity events strengthen bonds 🤝\n\nPermiso provisional:\n✅ Bond strengthener\n✅ People connector\n\nFriday bond builder"},
+      {"time": "19:00", "content": "Mexican value keeper:\n\nTradition keeper Carmen 🇲🇽\n\n\"Friday: sharing Mexican values\nMy car = value spreader\"\n\nTu permiso provisional:\n✅ Value spreader\n✅ Tradition keeper\n\nCarmen spreads values"},
+      {"time": "21:00", "content": "¿Friday night community support?\n¿Being there for neighbors?\n\nNeighbor support builds strong Mexico 💪\n\nTu auto nuevo:\n✅ Neighbor supporter\n✅ Community strengthener\n\nFriday neighbor support"},
+      {"time": "23:00", "content": "Community network story:\n\nNeighborhood watch team 👀\n\n\"Friday: community safety rounds\nOur cars = safety multipliers\"\n\nPermiso provisional:\n✅ Safety multiplier\n✅ Community protector\n\nCommunity safety team"},
+      {"time": "2:00", "content": "¿Friday night community service?\n¿24/7 community commitment?\n\nTrue community servants never rest 🌙\n\nTu permiso provisional:\n✅ Community servant\n✅ 24/7 helper\n\nFriday night community servant"},
+      {"time": "4:00", "content": "¿Saturday community prep?\n¿Weekend service planeando?\n\nWeekend service multiplies impact 📈\n\nTu auto nuevo:\n✅ Weekend servicer\n✅ Impact planner\n\nSaturday service prep"},
+      {"time": "6:00", "content": "¿Saturday community energía?\n¿Weekend values in action?\n\nWeekend values create stronger communities 🏘️\n\nPermiso provisional:\n✅ Community strengthener\n✅ Weekend warrior\n\nSaturday community warrior"}
+    ]
+  },
+  {
+    "day": 27,
+    "posts": [
+      {"time": "7:00", "content": "¡SÁBADO DE MEXICAN FAMILY VALUES!\n¿Ready to strengthen familia bonds?\n\nFamiliaily Saturday energía 👨‍👩‍👧‍👦\n\nTu permiso provisional:\n✅ Familiaily bond strengthener\n✅ Value transporter\n\nSaturday family strengthener"},
+      {"time": "9:00", "content": "Mexican family values story:\n\nTío Roberto's family network 👨‍👧‍👦\n\n\"Saturday: visiting all family branches\nMy car = family tree connector\"\n\nTu auto nuevo:\n✅ Familiaily tree connector\n✅ Bond multiplier\n\nRoberto connects family"},
+      {"time": "11:00", "content": "¿Saturday family gathering?\n¿Mexican hospitality in action?\n\nMexican hospitality travels everywhere 🏠\n\nPermiso provisional:\n✅ Hospitality transporter\n✅ Familiaily gatherer\n\nSaturday hospitality driver"},
+      {"time": "13:00", "content": "Familiaily value multiplication:\n\nBefore: nuclear family only\nNow: extended family network\nFuture: all-Mexico familia 🌟\n\nTu permiso provisional:\n✅ Familiaily multiplier\n✅ Network expander\n\nFamiliaily network builder"},
+      {"time": "15:00", "content": "Compadrazgo system:\n\nCompadres network active 🤝\n\n\"Saturday: compadrazgo obligations\nOur cars = commitment keepers\"\n\nTu auto nuevo:\n✅ Commitment keeper\n✅ Loyalty transporter\n\nCompadrazgo network"},
+      {"time": "17:00", "content": "¿Saturday noche family dinner?\n¿Three generations gathering?\n\nGenerational connections create wisdom 👴👶\n\nPermiso provisional:\n✅ Wisdom connector\n✅ Generation bridge\n\nSaturday generation bridge"},
+      {"time": "19:00", "content": "Respect value keeper:\n\nAbuela's wisdom keeper 👵\n\n\"Saturday: teaching respect values\nMy car = wisdom transporter\"\n\nTu permiso provisional:\n✅ Wisdom transporter\n✅ Respect keeper\n\nRespect value keeper"},
+      {"time": "21:00", "content": "¿Saturday night family celebration?\n¿Mexican joy in motion?\n\nMexican joy multiplies when shared 🎊\n\nTu auto nuevo:\n✅ Joy multiplier\n✅ Celebration enabler\n\nSaturday joy multiplier"},
+      {"time": "23:00", "content": "Familiaily support network:\n\nFamiliaily crisis response team 🚨\n\n\"Saturday: family member needs help\nOur cars = family rescue system\"\n\nPermiso provisional:\n✅ Familiaily rescuer\n✅ Support multiplier\n\nFamiliaily rescue network"},
+      {"time": "2:00", "content": "¿Saturday night family commitment?\n¿Being there when familia needs you?\n\nFamiliaily commitment never sleeps 🌙\n\nTu permiso provisional:\n✅ Commitment keeper\n✅ Familiaily guardian\n\nSaturday night family guardian"},
+      {"time": "4:00", "content": "¿Sunday family prep?\n¿Domingo familiar planeando?\n\nDomingo familiar requires preparation 📅\n\nTu auto nuevo:\n✅ Domingo preparer\n✅ Familiaily planner\n\nSunday family prep"},
+      {"time": "6:00", "content": "¿Sunday family energía building?\n¿Domingo familiar llegando?\n\nDomingo familiar = Mexican perfection ☀️\n\nPermiso provisional:\n✅ Perfection enabler\n✅ Domingo driver\n\nSunday perfection"}
+    ]
+  },
+  {
+    "day": 28,
+    "posts": [
+      {"time": "7:00", "content": "¡DOMINGO FAMILIAR PERFECTO!\n¿Ready for the ultimate Mexican Sunday?\n\nDomingo familiar energía ☀️\n\nTu permiso provisional:\n✅ Sunday perfecter\n✅ Familiailia uniter\n\nSunday familia perfection"},
+      {"time": "9:00", "content": "Domingo familiar story:\n\nFamiliailia completa gathering 👨‍👩‍👧‍👦\n\n\"Sunday: four generations united\nOur cars = generation bridge\"\n\nTu auto nuevo:\n✅ Generation bridge\n✅ Familiaily uniter\n\nMulti-generation unity"},
+      {"time": "11:00", "content": "¿Sunday Mexican tradition?\n¿Misa, mercado, familia?\n\nMexican Sundays follow sacred rhythm ⛪\n\nPermiso provisional:\n✅ Tradition keeper\n✅ Rhythm enabler\n\nSunday tradition keeper"},
+      {"time": "13:00", "content": "Four weeks transformation:\n\nWeek 1: Individual libertad\nWeek 2: Territory expansion\nWeek 3: Mastery achievement\nWeek 4: Familiaily perfection 👨‍👩‍👧‍👦\n\nTu permiso provisional:\n✅ Transformation completer\n✅ Perfection enabler\n\nTransformation complete"},
+      {"time": "15:00", "content": "Sunday family feast:\n\nAbuela's cocina magic 👵\n\n\"Sunday: bringing everyone to the table\nMy car = feast facilitator\"\n\nTu auto nuevo:\n✅ Feast facilitator\n✅ Familiaily gatherer\n\nSunday feast enabler"},
+      {"time": "17:00", "content": "¿Sunday afternoon family time?\n¿Perfect Mexican Sunday unfolding?\n\nPerfect Sundays create perfect memories 📸\n\nPermiso provisional:\n✅ Memory creator\n✅ Perfection driver\n\nSunday memory maker"},
+      {"time": "19:00", "content": "Mexican Sunday values:\n\nFamiliailia first always 👨‍👩‍👧‍👦\n\n\"Sunday: values in action\nMy car = value transporter\"\n\nTu permiso provisional:\n✅ Value transporter\n✅ Priority keeper\n\nSunday value keeper"},
+      {"time": "21:00", "content": "¿Sunday noche reflection?\n¿Four weeks of growth complete?\n\nGrowth reflection creates more growth 📈\n\nTu auto nuevo:\n✅ Growth reflector\n✅ Progress measurer\n\nSunday growth reflector"},
+      {"time": "23:00", "content": "Four-week graduate:\n\nComplete transformation achieved 🌟\n\n\"From permit beginner to life master\nMy car = transformation vehicle\"\n\nPermiso provisional:\n✅ Life master maker\n✅ Transformation driver\n\nMaster transformation"},
+      {"time": "2:00", "content": "¿Sunday night gratitude?\n¿Four weeks of blessings counted?\n\nGratitude multiplies blessings 🙏\n\nTu permiso provisional:\n✅ Blessing multiplier\n✅ Gratitude transporter\n\nSunday gratitude keeper"},
+      {"time": "4:00", "content": "¿Final week prep?\n¿Week 5 mastery llegando?\n\nMastery never ends, it evolves 🚀\n\nTu auto nuevo:\n✅ Mastery evolver\n✅ Continuous improver\n\nMonday evolution prep"},
+      {"time": "6:00", "content": "¿Week 5 beginning?\n¿Master level 2 starting?\n\nTrue masters teach others 👨‍🏫\n\nPermiso provisional:\n✅ Master teacher\n✅ Knowledge spreader\n\nMonday master teacher"}
+    ]
+  },
+  {
+    "day": 29,
+    "posts": [
+      {"time": "7:00", "content": "¿Lunes de TU TURNO?\n¿Ready to inspire others?\n\nInspiration Monday energía ✨\n\nTu permiso provisional:\n✅ Inspiration driver\n✅ Others motivator\n\nMonday inspiration leader"},
+      {"time": "9:00", "content": "Tu turno story:\n\nTú, the success example 🌟\n\n\"Monday: showing others what's possible\nYour car = possibility demonstrator\"\n\nTu auto nuevo:\n✅ Possibility shower\n✅ Example setter\n\nYou inspire others"},
+      {"time": "11:00", "content": "¿Monday leadership moment?\n¿Showing others the way?\n\nLeadership starts with example 👨‍🏫\n\nPermiso provisional:\n✅ Example setter\n✅ Path shower\n\nMonday example leader"},
+      {"time": "13:00", "content": "Your transformation journey:\n\nWeek 1: You learned\nWeek 2: You grew\nWeek 3: You mastered\nWeek 4: You connected\nNow: You inspire 🎯\n\nTu permiso provisional:\n✅ Inspiration creator\n✅ Journey completer\n\nInspiration generator"},
+      {"time": "15:00", "content": "Tu turno to help:\n\nYour neighbor needs guidance 🤝\n\n\"Monday: sharing your success story\nYour car = help delivery system\"\n\nTu auto nuevo:\n✅ Help deliverer\n✅ Story sharer\n\nMonday helper"},
+      {"time": "17:00", "content": "¿Monday noche mentoring?\n¿Teaching others your secrets?\n\nMentors multiply success 📈\n\nPermiso provisional:\n✅ Success multiplier\n✅ Knowledge sharer\n\nMonday mentor"},
+      {"time": "19:00", "content": "Community inspiration:\n\nYou, the community example 🏘️\n\n\"Monday: inspiring your community\nYour car = inspiration transporter\"\n\nTu permiso provisional:\n✅ Community inspirer\n✅ Change starter\n\nCommunity inspiration leader"},
+      {"time": "21:00", "content": "¿Monday night pay-it-forward?\n¿Helping others like you were helped?\n\nPaying forward multiplies blessings 🔄\n\nTu auto nuevo:\n✅ Blessing multiplier\n✅ Kindness spreader\n\nMonday kindness spreader"},
+      {"time": "23:00", "content": "Success sharing story:\n\nYour friend needs confidence 💪\n\n\"Monday: showing them it's possible\nYour car = confidence builder\"\n\nPermiso provisional:\n✅ Confidence builder\n✅ Friend helper\n\nConfidence sharing friend"},
+      {"time": "2:00", "content": "¿Monday night service leadership?\n¿Being example even at night?\n\nTrue leaders serve anytime 🌙\n\nTu permiso provisional:\n✅ Anytime leader\n✅ Service example\n\nMonday night leader"},
+      {"time": "4:00", "content": "¿Tuesday inspiration prep?\n¿More people to help?\n\nInspiration opportunities multiply 📈\n\nTu auto nuevo:\n✅ Opportunity multiplier\n✅ Inspiration preparer\n\nTuesday inspiration prep"},
+      {"time": "6:00", "content": "¿Tuesday more inspiration?\n¿Your influence growing?\n\nInfluence grows through example ✨\n\nPermiso provisional:\n✅ Influence grower\n✅ Example multiplier\n\nTuesday influence builder"}
+    ]
+  },
+  {
+    "day": 30,
+    "posts": [
+      {"time": "7:00", "content": "¡30 DÍAS COMPLETE!\n¿Ready to celebrate your transformation?\n\nCelebration Tuesday energía 🎊\n\nTu permiso provisional:\n✅ Transformation completer\n✅ Journey finisher\n\nTuesday celebration champion"},
+      {"time": "9:00", "content": "30-day transformation story:\n\nYou, the complete success 🏆\n\n\"From permit newbie to life master\nYour car = transformation vehicle\"\n\nTu auto nuevo:\n✅ Life master maker\n✅ Success creator\n\nYou achieved mastery"},
+      {"time": "11:00", "content": "¿30 days of unlimited libertad?\n¿Every goal achieved?\n\nFreedom mastery achieved ✅\n\nPermiso provisional:\n✅ Freedom master\n✅ Goal achiever\n\nTuesday libertad master"},
+      {"time": "13:00", "content": "Complete journey reflection:\n\nDay 1: First steps\nWeek 1: Freedom discovered\nWeek 2: Territory expanded\nWeek 3: Mastery achieved\nWeek 4: Familiaily perfected\nDay 30: Legacy created 🌟\n\nTu permiso provisional:\n✅ Legacy creator\n✅ Journey completer\n\nLegacy achievement"},
+      {"time": "15:00", "content": "Tu success story:\n\nFamiliaily proud ✅\nMetas achieved ✅\nFreedom mastered ✅\nCommunity inspired ✅\n\nTu auto nuevo:\n✅ Dream enabler\n✅ Success multiplier\n\nYou succeeded completely"},
+      {"time": "17:00", "content": "¿30 days of impact?\n¿Life completely transformed?\n\nTransformation complete, impact eternal 💫\n\nPermiso provisional:\n✅ Impact creator\n✅ Life transformer\n\nTuesday impact master"},
+      {"time": "19:00", "content": "Community celebration:\n\nYou, the community success story 🏘️\n\n\"30 days: from individual to community leader\nYour car = leadership vehicle\"\n\nTu permiso provisional:\n✅ Leadership creator\n✅ Community builder\n\nCommunity leadership achieved"},
+      {"time": "21:00", "content": "¿30-day celebration with family?\n¿Sharing success with loved ones?\n\nSuccess shared = success multiplied 👨‍👩‍👧‍👦\n\nTu auto nuevo:\n✅ Success sharer\n✅ Joy multiplier\n\nTuesday success celebration"},
+      {"time": "23:00", "content": "30-day mastery graduate:\n\nYou mastered libertad ✅\nYou mastered mobility ✅\nYou mastered life ✅\n\nPermiso provisional:\n✅ Life master\n✅ Freedom graduate\n\nYou graduated life"},
+      {"time": "2:00", "content": "¿30-day gratitude moment?\n¿Thanking the journey?\n\nGratitude completes transformation 🙏\n\nTu permiso provisional:\n✅ Gratitude completer\n✅ Transformation finisher\n\nTuesday gratitude master"},
+      {"time": "4:00", "content": "¿Beyond 30 days?\n¿Infinite possibilities ahead?\n\nYour story continues forever ♾️\n\nTu auto nuevo:\n✅ Story continuer\n✅ Possibility creator\n\nInfinite story creator"},
+      {"time": "6:00", "content": "¡CAMPAIGN COMPLETE!\n¿Ready for your next adventure?\n\nYour libertad story never ends 🚀\n\nPermiso provisional:\n✅ Adventure enabler\n✅ Story writer\n\nYour story continues..."}
+    ]
+  }
+]

@@ -144,7 +144,7 @@ exports.deleteAccount = async (req, res, next) => {
     client = await db.getPool().connect();
     
     // Get user details
-    const userQuery = 'SELECT email, first_name, last_name, whatsapp_phone, account_status FROM users WHERE id = $1';
+    const userQuery = 'SELECT account_email as email, first_name, last_name, whatsapp_phone, account_status FROM users WHERE id = $1';
     const userResult = await client.query(userQuery, [userId]);
     
     if (userResult.rows.length === 0) {

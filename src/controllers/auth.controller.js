@@ -13,6 +13,7 @@ const { handleControllerError, createError } = require('../utils/error-helpers')
 const ApiResponse = require('../utils/api-response');
 const ProductionDebugger = require('../utils/production-debug');
 const metricsCollector = require('../monitoring/metrics-collector');
+const { normalizePhoneForStorage, getPhoneVariants } = require('../utils/phone-utils');
 
 // Will be injected by dependency container
 let auditService = null;
@@ -49,8 +50,8 @@ exports.register = async (req, res, next) => {
       return ApiResponse.tooManyRequests(res, 'Demasiados intentos de registro. Por favor, inténtalo de nuevo más tarde.');
     }
 
-    const checkUserQuery = 'SELECT id FROM users WHERE email = $1';
-    ProductionDebugger.logDatabaseOperation('user_check', true, { email, query: 'SELECT id FROM users WHERE email = $1' });
+    const checkUserQuery = 'SELECT id FROM users WHERE account_email = $1';
+    ProductionDebugger.logDatabaseOperation('user_check', true, { email, query: 'SELECT id FROM users WHERE account_email = $1' });
     const { rows: existingUsers } = await db.query(checkUserQuery, [email]);
     ProductionDebugger.logDatabaseOperation('user_check_result', true, { email, existingUsersCount: existingUsers.length });
 
@@ -64,6 +65,193 @@ exports.register = async (req, res, next) => {
       return ApiResponse.conflict(res, 'Ya existe un usuario con este correo electrónico.');
     }
 
+    // Check if phone number already exists (including WhatsApp accounts)
+    if (whatsapp_phone) {
+      const phoneVariants = getPhoneVariants(whatsapp_phone);
+      const checkPhoneQuery = 'SELECT id, account_email, source FROM users WHERE phone = ANY($1) OR whatsapp_phone = ANY($1)';
+      const { rows: existingPhoneUsers } = await db.query(checkPhoneQuery, [phoneVariants]);
+      
+      if (existingPhoneUsers.length > 0) {
+        const existingUser = existingPhoneUsers[0];
+        logger.warn('Registration failed: Phone already exists', { 
+          phone: whatsapp_phone,
+          existingSource: existingUser.source,
+          reason: 'phone_exists'
+        });
+        
+        if (existingUser.source === 'whatsapp') {
+          // WhatsApp account exists - upgrade to full account
+          logger.info('Upgrading WhatsApp account to full account', { 
+            phone: whatsapp_phone,
+            existingUserId: existingUser.id,
+            newEmail: email
+          });
+          
+          // Check if the WhatsApp user already has an account_email
+          if (existingUser.account_email) {
+            return ApiResponse.conflict(res, 
+              'Este número ya tiene una cuenta web. ' +
+              'Inicia sesión con tu teléfono o email, o usa "Olvidé mi contraseña" si no recuerdas tu contraseña.'
+            );
+          }
+          
+          // Check if email is already in use by another account
+          const emailCheckQuery = 'SELECT id, first_name, last_name FROM users WHERE account_email = $1 AND id != $2';
+          const { rows: emailConflicts } = await db.query(emailCheckQuery, [email, existingUser.id]);
+
+          if (emailConflicts.length > 0) {
+            logger.warn('Email already in use by another account during WhatsApp upgrade', {
+              email: sanitizerUtils.sanitizeUser({ email }).email,
+              whatsappUserId: existingUser.id,
+              conflictingUserId: emailConflicts[0].id,
+              conflictingUserName: `${emailConflicts[0].first_name} ${emailConflicts[0].last_name}`
+            });
+            
+            return ApiResponse.conflict(res, 
+              'Este correo ya está registrado con otra cuenta. ' +
+              'Por favor usa un correo diferente o inicia sesión con la cuenta existente usando ' +
+              '"Olvidé mi contraseña" si no recuerdas tu contraseña.'
+            );
+          }
+
+          // Upgrade the WhatsApp account with email and password
+          try {
+            const passwordHash = await hashPassword(password);
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            
+            const upgradeQuery = `
+              UPDATE users SET 
+                account_email = $1,
+                password_hash = $2,
+                first_name = $3,
+                last_name = $4,
+                is_email_verified = false,
+                email_verification_token = $5,
+                email_verification_expires = $6,
+                updated_at = CURRENT_TIMESTAMP
+              WHERE id = $7
+              RETURNING id, account_email as email, created_at
+            `;
+            
+            const { rows: updatedUserRows } = await db.query(upgradeQuery, [
+              email, passwordHash, first_name, last_name, 
+              verificationToken, verificationExpires, existingUser.id
+            ]);
+            
+            if (updatedUserRows.length === 0) {
+              logger.error('Failed to upgrade WhatsApp account', { existingUserId: existingUser.id });
+              throw new Error('Failed to upgrade WhatsApp account');
+            }
+            
+            const upgradedUser = updatedUserRows[0];
+            logger.info('WhatsApp account upgraded successfully', {
+              userId: upgradedUser.id,
+              email: sanitizerUtils.sanitizeUser({ email: upgradedUser.email }).email
+            });
+
+            await securityService.logActivity(upgradedUser.id, 'whatsapp_account_upgraded', req.ip, req.headers['user-agent'], { 
+              email: upgradedUser.email,
+              phone: whatsapp_phone
+            });
+
+            // Send verification email (non-blocking)
+            try {
+              const verificationUrl = `${config.frontendUrl}/verify-email?token=${verificationToken}`;
+              const emailSent = await emailService.sendEmailVerificationEmail(
+                email,
+                verificationUrl
+              );
+
+              if (emailSent) {
+                logger.info('Verification email sent for upgraded account', {
+                  email: sanitizerUtils.sanitizeUser({ email }).email
+                });
+              } else {
+                logger.warn('Failed to send verification email for upgraded account', {
+                  email: sanitizerUtils.sanitizeUser({ email }).email
+                });
+              }
+            } catch (emailError) {
+              logger.error('Error sending verification email for upgraded account', {
+                email: sanitizerUtils.sanitizeUser({ email }).email,
+                error: emailError.message
+              });
+            }
+
+            // Auto-login the upgraded user
+            ProductionDebugger.logSessionAction(req, 'pre_regenerate_upgrade', { userId: upgradedUser.id, email: upgradedUser.email });
+            req.session.regenerate(err => {
+              if (err) {
+                logger.error('Error regenerating session after account upgrade:', err);
+                ProductionDebugger.logError(err, 'session_regenerate_upgrade', req);
+                req.session.destroy(destroyErr => {
+                  if (destroyErr) {
+                    logger.error('Failed to destroy session after upgrade regeneration error:', destroyErr);
+                  }
+                });
+                return handleControllerError(err, 'register (account upgrade)', req, res, next);
+              }
+
+              ProductionDebugger.logSessionAction(req, 'post_regenerate_upgrade', { userId: upgradedUser.id, email: upgradedUser.email, newSessionId: req.session.id });
+
+              req.session.userId = upgradedUser.id;
+              req.session.userEmail = upgradedUser.email;
+              req.session.userName = first_name;
+              req.session.userLastName = last_name;
+              req.session.accountType = 'client';
+              req.session.isAdminPortal = false;
+              req.session.createdAt = new Date();
+              req.session.lastActivity = new Date();
+              req.session.lastRegeneration = new Date();
+              req.session.regenerationCount = 1;
+
+              ProductionDebugger.logSessionAction(req, 'session_data_set_upgrade', {
+                userId: upgradedUser.id,
+                email: upgradedUser.email,
+                sessionId: req.session.id,
+                accountType: 'client'
+              });
+
+              logger.info('Auto-login after account upgrade successful', {
+                userId: upgradedUser.id,
+                email: sanitizerUtils.sanitizeUser({ email: upgradedUser.email }).email,
+                sessionId: sanitizerUtils.sanitizeSession({ id: req.session.id }).id
+              });
+              
+              // Track user registration metric
+              metricsCollector.recordUserRegistration();
+              
+              ApiResponse.success(res, {
+                message: 'Cuenta de WhatsApp actualizada exitosamente. Tu cuenta ya tiene acceso completo al portal web.',
+                user: {
+                  id: upgradedUser.id,
+                  email: upgradedUser.email,
+                  firstName: first_name,
+                  lastName: last_name,
+                  isEmailVerified: false,
+                  isUpgraded: true
+                }
+              });
+            });
+            
+            return; // Exit the registration function
+            
+          } catch (upgradeError) {
+            logger.error('Error upgrading WhatsApp account', {
+              error: upgradeError.message,
+              existingUserId: existingUser.id,
+              email: sanitizerUtils.sanitizeUser({ email }).email
+            });
+            return ApiResponse.internalServerError(res, 'Error al actualizar tu cuenta. Por favor, inténtalo de nuevo.');
+          }
+          
+        } else {
+          return ApiResponse.conflict(res, 'Ya existe un usuario con este número de teléfono.');
+        }
+      }
+    }
+
     logger.debug('Hashing password for registration', { 
       email: sanitizerUtils.sanitizeUser({ email }).email 
     });
@@ -72,16 +260,19 @@ exports.register = async (req, res, next) => {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+    // Normalize phone for consistent storage
+    const normalizedPhone = whatsapp_phone ? normalizePhoneForStorage(whatsapp_phone) : null;
+    
     const insertUserQuery = `
             INSERT INTO users (
-              email, password_hash, first_name, last_name, whatsapp_phone, account_type, role, is_admin_portal, account_created_at,
+              email, password_hash, first_name, last_name, whatsapp_phone, phone, account_type, role, is_admin_portal, account_created_at,
               is_email_verified, email_verification_token, email_verification_expires
             )
-            VALUES ($1, $2, $3, $4, $5, 'client', 'client', false, CURRENT_TIMESTAMP, false, $6, $7)
+            VALUES ($1, $2, $3, $4, $5, $6, 'client', 'client', false, CURRENT_TIMESTAMP, false, $7, $8)
             RETURNING id, email, created_at;
         `;
     const insertParams = [
-      email, passwordHash, first_name, last_name, whatsapp_phone,
+      email, passwordHash, first_name, last_name, normalizedPhone, normalizedPhone,
       verificationToken, verificationExpires
     ];
 
@@ -129,6 +320,12 @@ exports.register = async (req, res, next) => {
       if (err) {
         logger.error('Error regenerating session after registration:', err);
         ProductionDebugger.logError(err, 'session_regenerate_registration', req);
+        // Properly destroy the session on regeneration failure
+        req.session.destroy(destroyErr => {
+          if (destroyErr) {
+            logger.error('Failed to destroy session after registration regeneration error:', destroyErr);
+          }
+        });
         return handleControllerError(err, 'register (session regenerate)', req, res, next);
       }
 
@@ -181,27 +378,32 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email) { return ApiResponse.badRequest(res, 'El correo electrónico es requerido'); }
+  if (!email) { return ApiResponse.badRequest(res, 'El correo electrónico o teléfono es requerido'); }
   if (!password) { return ApiResponse.badRequest(res, 'La contraseña es requerida'); }
 
   try {
+    // Determine if input is email or phone
+    const isEmail = email.includes('@');
+    const identifier = isEmail ? email : email.replace(/\D/g, ''); // Clean phone number
+    
     logger.debug('Login attempt started', {
-      email: sanitizerUtils.sanitizeUser({ email }).email
+      identifier: isEmail ? sanitizerUtils.sanitizeUser({ email }).email : 'phone',
+      type: isEmail ? 'email' : 'phone'
     });
 
     logger.debug('Checking account lockout status', {
-      email: sanitizerUtils.sanitizeUser({ email }).email
+      identifier: isEmail ? sanitizerUtils.sanitizeUser({ email }).email : 'phone'
     });
     const lockStatus = await authSecurity.checkLockStatus(email);
     logger.debug('Lock status check completed', {
-      email: sanitizerUtils.sanitizeUser({ email }).email,
+      identifier: isEmail ? sanitizerUtils.sanitizeUser({ email }).email : 'phone',
       isLocked: lockStatus.locked,
       remainingSeconds: lockStatus.remainingSeconds
     });
 
     if (lockStatus.locked) {
       logger.warn('Login attempt for locked account', {
-        email: sanitizerUtils.sanitizeUser({ email }).email,
+        identifier: isEmail ? sanitizerUtils.sanitizeUser({ email }).email : 'phone',
         remainingSeconds: lockStatus.remainingSeconds
       });
       await securityService.logActivity( null, 'login_account_locked', req.ip, req.headers['user-agent'], { email, remainingSeconds: lockStatus.remainingSeconds });
@@ -224,14 +426,30 @@ exports.login = async (req, res, next) => {
       portal: isAdminPortal ? 'ADMIN PORTAL' : 'CLIENT PORTAL'
     });
 
-    logger.debug(`[Login Controller] Retrieving user data for email: ${email}`);
+    logger.debug(`[Login Controller] Retrieving user data for: ${isEmail ? email : 'phone'}`);
     
     let user;
     try {
-      user = await userRepository.findByEmail(email);
-      logger.debug(`[Login Controller] Database query completed for ${email}, user found: ${!!user}`);
+      if (isEmail) {
+        user = await userRepository.findByEmail(email);
+      } else {
+        // Phone login - use normalized WhatsApp phone format
+        const normalizedPhone = userRepository.normalizeWhatsAppPhone(identifier);
+        user = await userRepository.findByWhatsAppPhone(normalizedPhone);
+        
+        // Fallback to old phone lookup for legacy users
+        if (!user) {
+          const phoneVariants = getPhoneVariants(identifier);
+          const phoneQuery = 'SELECT * FROM users WHERE phone = ANY($1) LIMIT 1';
+          const { rows } = await db.query(phoneQuery, [phoneVariants]);
+          user = rows[0];
+        }
+        
+        logger.debug(`[Login Controller] Phone lookup with normalized: ${normalizedPhone}, found: ${!!user}`);
+      }
+      logger.debug(`[Login Controller] Database query completed, user found: ${!!user}`);
     } catch (dbError) {
-      logger.error(`[Login Controller] Database error during user lookup for ${email}: ${dbError.message}`, {
+      logger.error(`[Login Controller] Database error during user lookup: ${dbError.message}`, {
         error: dbError,
         stack: dbError.stack
       });
@@ -239,13 +457,13 @@ exports.login = async (req, res, next) => {
     }
 
     if (!user) {
-      logger.warn(`[Login Controller] Login attempt failed: User not found for email ${email}`);
+      logger.warn(`[Login Controller] Login attempt failed: User not found for ${isEmail ? 'email' : 'phone'} ${email}`);
       await authSecurity.recordFailedAttempt(email, {
         ipAddress: req.ip,
         userAgent: req.headers['user-agent'],
         userId: null
       });
-      return ApiResponse.unauthorized(res, 'Correo electrónico o contraseña incorrectos.');
+      return ApiResponse.unauthorized(res, 'Correo electrónico/teléfono o contraseña incorrectos.');
     }
     logger.debug(`[Login Controller] User found for email ${email}: ID=${user.id}, is_email_verified=${user.is_email_verified}, role=${user.role}`);
     logger.debug(`[Login Controller] Password hash exists: ${!!user.password_hash}`);
@@ -403,9 +621,14 @@ exports.login = async (req, res, next) => {
           userId: user.id,
           sessionId: req.session?.id
         });
-        // Destroy potentially partially populated session data if regenerate fails
-        for (let key in req.session) { if (key !== 'cookie') delete req.session[key]; }
-        return next(createError('Error al inicializar la sesión durante el inicio de sesión.', 500)); // Use createError helper
+        // Properly destroy the session on regeneration failure to prevent session fixation
+        req.session.destroy(destroyErr => {
+          if (destroyErr) {
+            logger.error(`[Login Controller] Failed to destroy session after regeneration error for ${email}:`, destroyErr);
+          }
+          return next(createError('Error al inicializar la sesión durante el inicio de sesión. Por favor, intente nuevamente.', 500));
+        });
+        return; // Prevent further execution
       }
 
       logger.debug(`[Login Controller] Session regenerated successfully for user ${email}, new session ID: ${req.session.id}`);
@@ -415,8 +638,8 @@ exports.login = async (req, res, next) => {
       req.session.userId = user.id;
       logger.debug(`[Login Controller] Set req.session.userId = ${user.id}`);
 
-      req.session.userEmail = user.email;
-      logger.debug(`[Login Controller] Set req.session.userEmail = ${user.email}`);
+      req.session.userEmail = user.account_email;
+      logger.debug(`[Login Controller] Set req.session.userEmail = ${user.account_email}`);
 
       req.session.userName = user.first_name || ''; // Store consistently
       logger.debug(`[Login Controller] Set req.session.userName = ${user.first_name || ''}`);
@@ -455,7 +678,7 @@ exports.login = async (req, res, next) => {
 
         logger.debug(`[Login Controller] Session saved successfully for user ${email}, session ID: ${req.session.id}`);
 
-        logger.info(`[Login Controller] ${isAdminPortal ? '🔐 ADMIN LOGIN SUCCESS' : '👤 USER LOGIN SUCCESS'}: ${user.email} (ID: ${user.id}) SessionID: ${req.session.id}`);
+        logger.info(`[Login Controller] ${isAdminPortal ? '🔐 ADMIN LOGIN SUCCESS' : '👤 USER LOGIN SUCCESS'}: ${user.account_email} (ID: ${user.id}) SessionID: ${req.session.id}`);
         if (isAdminPortal) {
           logger.info(`[Login Controller] Admin login details: account_type=${user.account_type}, is_admin_portal=${user.is_admin_portal}`);
         }
@@ -469,7 +692,7 @@ exports.login = async (req, res, next) => {
           isAdminPortal ? 'admin_login' : 'client_login',
           req.ip,
           req.headers['user-agent'],
-          { email: user.email, portal: isAdminPortal ? 'admin' : 'client' }
+          { email: user.account_email, portal: isAdminPortal ? 'admin' : 'client' }
         ).catch(err => logger.error('Error logging login activity:', err));
 
         // Prepare user data for response (don't send hash)
@@ -481,7 +704,7 @@ exports.login = async (req, res, next) => {
         ApiResponse.success(res, {
           user: {
             id: user.id,
-            email: user.email,
+            email: user.account_email, // Use correct database column name
             first_name: user.first_name,
             last_name: user.last_name,
             accountType: user.account_type, // camelCase
@@ -642,9 +865,9 @@ exports.resendVerificationEmail = async (req, res, next) => {
 
     // Find user by email
     const findUserQuery = `
-      SELECT id, email, is_email_verified, email_verification_token, email_verification_expires
+      SELECT id, account_email as email, is_email_verified, email_verification_token, email_verification_expires
       FROM users
-      WHERE email = $1
+      WHERE account_email = $1
     `;
     const { rows } = await db.query(findUserQuery, [email]);
 
@@ -719,7 +942,7 @@ exports.verifyEmail = async (req, res, next) => {
 
     // Find user with this verification token
     const findUserQuery = `
-      SELECT id, email, is_email_verified, email_verification_expires
+      SELECT id, account_email as email, is_email_verified, email_verification_expires
       FROM users
       WHERE email_verification_token = $1
     `;

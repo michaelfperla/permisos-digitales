@@ -11,11 +11,54 @@ const { processStuckPermits } = require('./stuck-permits.job');
 const { getInstance: getPdfProcessorInstance } = require('./pdf-generation-processor.job');
 const whatsappRetentionJob = require('./whatsapp-data-retention.job');
 const WhatsAppStateCleanupJob = require('./whatsapp-state-cleanup.job');
+const dataRetentionJob = require('./data-retention.job');
+const whatsappRenewalRemindersJob = require('./whatsapp-renewal-reminders.job');
+const XCampaignJob = require('./x-campaign.job');
+// const keyRotationJob = require('./key-rotation.job'); // File doesn't exist
+const { cleanupExpiredExportTokens } = require('./privacy-export-cleanup.job');
 const unifiedConfig = require('../config/unified-config');
 const config = unifiedConfig.getSync();
 
 function initScheduledJobs() {
   logger.info('Initializing scheduled jobs');
+
+  // DISABLED X Campaign - Due to X algorithm suppression (getting 0 views)
+  // const xCampaignJob = new XCampaignJob();
+  // logger.info('X Campaign Job initialized', xCampaignJob.getStatus());
+
+  // X Campaign Posts - Mexico City Time (UTC-6) - DISABLED
+  // Regular daytime posts - DISABLED
+  // const dayPostTimes = ['7:00', '9:00', '11:00', '13:00', '15:00', '17:00', '19:00', '21:00', '23:00'];
+  // dayPostTimes.forEach(time => {
+  //   const [hour, minute] = time.split(':');
+  //   cron.schedule(`${minute} ${hour} * * *`, async () => {
+  //     logger.info(`Running X campaign post for ${time} Mexico City time`);
+  //     try {
+  //       await xCampaignJob.postScheduledContent(time);
+  //     } catch (error) {
+  //       logger.error(`Error running X campaign post for ${time}:`, error);
+  //     }
+  //   }, {
+  //     timezone: "America/Mexico_City"
+  //   });
+  // });
+
+  // Late night posts - DISABLED
+  // const nightPostTimes = ['2:00', '4:00', '6:00'];
+  // nightPostTimes.forEach(time => {
+  //   const [hour, minute] = time.split(':');
+  //   cron.schedule(`${minute} ${hour} * * *`, async () => {
+  //     logger.info(`Running X campaign post for ${time} Mexico City time`);
+  //     try {
+  //       await xCampaignJob.postScheduledContent(time);
+  //     } catch (error) {
+  //       logger.error(`Error running X campaign post for ${time}:`, error);
+  //     }
+  //   }, {
+  //     timezone: "America/Mexico_City"
+  //   });
+  // });
+  logger.info('X Campaign DISABLED - Posts were getting 0 views due to algorithm suppression');
 
   // Daily verification job at 1:00 AM
   // DISABLED: This job references columns that don't exist in current schema
@@ -71,6 +114,27 @@ function initScheduledJobs() {
     }
   });
   logger.info('Unpaid application cleanup job scheduled to run daily at 2:00 AM');
+  
+  // Expire unpaid applications after 48 hours - runs every 6 hours
+  cron.schedule('0 */6 * * *', async () => {
+    logger.info('Running 48-hour application expiration job');
+    try {
+      const db = require('../db');
+      const result = await db.query(`
+        UPDATE permit_applications 
+        SET status = 'EXPIRED', 
+            updated_at = NOW()
+        WHERE status = 'AWAITING_PAYMENT'
+        AND created_at < NOW() - INTERVAL '48 hours'
+        RETURNING id
+      `);
+      
+      logger.info(`Expired ${result.rows.length} applications older than 48 hours`);
+    } catch (error) {
+      logger.error('Error running 48-hour expiration job:', error);
+    }
+  });
+  logger.info('48-hour expiration job scheduled to run every 6 hours');
 
   // Stuck permits job - runs every 10 minutes
   cron.schedule('*/10 * * * *', async () => {
@@ -134,8 +198,8 @@ function initScheduledJobs() {
   });
   logger.info('Email queue cleanup scheduled for 3:00 AM daily');
 
-  // WhatsApp data retention cleanup - runs daily at 2:00 AM
-  cron.schedule('0 2 * * *', async () => {
+  // WhatsApp data retention cleanup - runs daily at 3:00 AM (moved to avoid conflict)
+  cron.schedule('0 3 * * *', async () => {
     logger.info('Running WhatsApp data retention cleanup');
     try {
       const result = await whatsappRetentionJob.execute();
@@ -144,11 +208,60 @@ function initScheduledJobs() {
       logger.error('Error running WhatsApp data retention cleanup:', error);
     }
   });
-  logger.info('WhatsApp data retention cleanup scheduled for 2:00 AM daily');
+  logger.info('WhatsApp data retention cleanup scheduled for 3:00 AM daily');
+
+  // Data Retention Job - runs daily at 2:00 AM
+  cron.schedule('0 2 * * *', async () => {
+    logger.info('Running data retention job');
+    try {
+      const result = await dataRetentionJob.execute();
+      logger.info('Data retention job completed:', result);
+    } catch (error) {
+      logger.error('Error running data retention job:', error);
+    }
+  });
+  logger.info('Data retention job scheduled for 2:00 AM daily');
 
   // WhatsApp state cleanup - schedule to run every 30 minutes
   WhatsAppStateCleanupJob.schedule();
   logger.info('WhatsApp state cleanup job scheduled');
+  
+  // Privacy export token cleanup - runs daily at 3:00 AM
+  cron.schedule('0 3 * * *', async () => {
+    logger.info('Running privacy export token cleanup job');
+    try {
+      await cleanupExpiredExportTokens();
+    } catch (error) {
+      logger.error('Error running privacy export cleanup job:', error);
+    }
+  });
+  logger.info('Privacy export cleanup job scheduled for 3:00 AM daily');
+
+  // WhatsApp renewal reminders - runs daily at 10:00 AM
+  cron.schedule('0 10 * * *', async () => {
+    logger.info('Running WhatsApp renewal reminders job');
+    try {
+      const result = await whatsappRenewalRemindersJob.execute();
+      logger.info('WhatsApp renewal reminders job completed:', result);
+    } catch (error) {
+      logger.error('Error running WhatsApp renewal reminders job:', error);
+    }
+  });
+  logger.info('WhatsApp renewal reminders job scheduled to run daily at 10:00 AM');
+
+  // Key rotation check - runs daily at midnight
+  if (process.env.ENABLE_KEY_ROTATION === 'true') {
+    cron.schedule(keyRotationJob.schedule, async () => {
+      logger.info(`Running ${keyRotationJob.name}`);
+      try {
+        const result = await keyRotationJob.execute();
+        logger.info(`${keyRotationJob.name} completed`, result);
+      } catch (error) {
+        logger.error(`Error running ${keyRotationJob.name}:`, error);
+      }
+    });
+    logger.info(`${keyRotationJob.name} scheduled at ${keyRotationJob.schedule}`);
+  }
 
   // Start PDF Generation Processor (not a cron job, runs continuously)
   try {

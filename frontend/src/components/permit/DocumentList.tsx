@@ -1,6 +1,7 @@
 import React from 'react';
-import { FaDownload, FaFilePdf, FaExclamationTriangle, FaBook } from 'react-icons/fa';
+import { FaDownload, FaFilePdf, FaExclamationTriangle, FaBook, FaMobile } from 'react-icons/fa';
 import styles from '../../pages/PermitDetailsPage.module.css';
+import { isMobileDevice } from '../../utils/deviceDetection';
 
 interface Document {
   type: 'permiso' | 'certificado' | 'placas' | 'recomendaciones';
@@ -17,6 +18,8 @@ interface DocumentListProps {
 }
 
 const DocumentList: React.FC<DocumentListProps> = ({ applicationData, onDownload, isDownloading, downloadingTypes }) => {
+  const isMobile = isMobileDevice();
+  
   // Define all possible documents - recommendations are always available (generated on-demand)
   const allPossibleDocuments: Document[] = [
     { type: 'permiso', path: applicationData?.application?.permit_file_path, name: 'Certificado Principal del Permiso.pdf' },
@@ -43,22 +46,39 @@ const DocumentList: React.FC<DocumentListProps> = ({ applicationData, onDownload
     <div className={styles.documentsContainer}>
       {/* Download All Button */}
       {documents.length > 1 && (
-        <button
-          type="button"
-          className={`${styles.downloadButton} ${styles.downloadAllButton}`}
-          onClick={() => {
-            // Download all PDFs with staggered timing
-            documents.forEach((doc, index) => {
-              setTimeout(() => {
-                onDownload(doc.type);
-              }, index * 500);
-            });
-          }}
-          disabled={isDownloading}
-        >
-          <FaDownload className={styles.downloadIcon} />
-          <span>{isDownloading ? 'Descargando...' : 'Descargar Todos los Documentos'}</span>
-        </button>
+        <>
+          <button
+            type="button"
+            className={`${styles.downloadButton} ${styles.downloadAllButton}`}
+            onClick={() => {
+              if (isMobile) {
+                // Mobile: Download all immediately without delays to avoid popup blocking
+                documents.forEach((doc) => {
+                  onDownload(doc.type);
+                });
+              } else {
+                // Desktop: Use staggered timing for better UX
+                documents.forEach((doc, index) => {
+                  setTimeout(() => {
+                    onDownload(doc.type);
+                  }, index * 500);
+                });
+              }
+            }}
+            disabled={isDownloading}
+          >
+            {isMobile && <FaMobile className={styles.downloadIcon} />}
+            {!isMobile && <FaDownload className={styles.downloadIcon} />}
+            <span>{isDownloading ? 'Descargando...' : 'Descargar Todos los Documentos'}</span>
+          </button>
+          
+          {/* Mobile-specific note */}
+          {isMobile && documents.length > 1 && (
+            <div className={styles.mobileDownloadNote}>
+              <small>💡 En móviles, los archivos se descargan uno por uno. Si algún archivo no se descarga, inténtelo individualmente.</small>
+            </div>
+          )}
+        </>
       )}
       
       {/* Individual Documents */}

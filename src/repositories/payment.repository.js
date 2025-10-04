@@ -31,7 +31,7 @@ class PaymentRepository extends BaseRepository {
         }
       } else if (eventType === 'payment.confirmed' || eventType === 'payment.received') {
         // Default amount for confirmed payments
-        amount = 150.00;
+        amount = 99.00;
       }
       
       if (eventData.currency) {
@@ -196,7 +196,7 @@ class PaymentRepository extends BaseRepository {
         SELECT pa.id, pa.status, pa.created_at, pa.updated_at,
                pa.payment_processor_order_id, pa.nombre_completo as applicant_name,
                pa.marca, pa.linea, pa.ano_modelo, pa.importe as amount,
-               u.email as applicant_email, pa.curp_rfc
+               u.account_email as applicant_email, pa.curp_rfc
         FROM permit_applications pa
         JOIN users u ON pa.user_id = u.id
         WHERE pa.status = $1
@@ -513,7 +513,7 @@ class PaymentRepository extends BaseRepository {
           pa.linea,
           pa.ano_modelo,
           pa.importe as amount,
-          u.email as user_email,
+          u.account_email as user_email,
           u.first_name,
           u.last_name,
           u.phone,

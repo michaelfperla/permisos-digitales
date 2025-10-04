@@ -320,11 +320,11 @@ class AdminAuditController extends BaseController {
 
     // Most active admins
     const mostActiveAdmins = await db('admin_audit_logs')
-      .select('admin_id', 'users.email', 'users.full_name')
+      .select('admin_id', 'users.account_email', 'users.full_name')
       .count('* as action_count')
       .leftJoin('users', 'admin_audit_logs.admin_id', 'users.id')
       .whereBetween('admin_audit_logs.created_at', [startDate, endDate])
-      .groupBy('admin_id', 'users.email', 'users.full_name')
+      .groupBy('admin_id', 'users.account_email', 'users.full_name')
       .orderBy('action_count', 'desc')
       .limit(10);
 

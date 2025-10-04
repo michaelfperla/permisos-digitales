@@ -171,17 +171,42 @@ class UnifiedProductionConfig {
         retryDelayOnFailover: 100
       },
       stripe: {
-        privateKey: process.env.STRIPE_PRIVATE_KEY || 'sk_test_placeholder',
-        publicKey: process.env.STRIPE_PUBLIC_KEY || 'pk_test_placeholder',
-        webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder',
+        privateKey: process.env.STRIPE_PRIVATE_KEY || (() => {
+          if (process.env.NODE_ENV === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+            throw new Error('[CRITICAL] STRIPE_PRIVATE_KEY must be set in production environment');
+          }
+          return 'sk_test_placeholder';
+        })(),
+        publicKey: process.env.STRIPE_PUBLIC_KEY || (() => {
+          if (process.env.NODE_ENV === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+            throw new Error('[CRITICAL] STRIPE_PUBLIC_KEY must be set in production environment');
+          }
+          return 'pk_test_placeholder';
+        })(),
+        webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || (() => {
+          if (process.env.NODE_ENV === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+            throw new Error('[CRITICAL] STRIPE_WEBHOOK_SECRET must be set in production environment');
+          }
+          return 'whsec_placeholder';
+        })(),
         apiVersion: '2022-11-15',
         maxNetworkRetries: 3,
         timeout: 10000
       },
       security: {
-        jwtSecret: process.env.JWT_SECRET || 'default-jwt-secret-change-in-production',
+        jwtSecret: process.env.JWT_SECRET || (() => {
+          if (process.env.NODE_ENV === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+            throw new Error('[CRITICAL] JWT_SECRET must be set in production environment');
+          }
+          return 'default-jwt-secret-change-in-production';
+        })(),
         bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
-        sessionSecret: process.env.SESSION_SECRET || 'default-session-secret',
+        sessionSecret: process.env.SESSION_SECRET || (() => {
+          if (process.env.NODE_ENV === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+            throw new Error('[CRITICAL] SESSION_SECRET must be set in production environment');
+          }
+          return 'default-session-secret';
+        })(),
         corsOrigins: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000']
       },
       // Government portal configuration
@@ -359,18 +384,22 @@ class UnifiedProductionConfig {
       throw new Error(`Configuration validation failed. Missing required values: ${missing.join(', ')}`);
     }
 
-    // Warn about default values in production
-    if (config.env === 'production') {
-      const warnings = [];
+    // Fail hard on insecure defaults in production UNLESS using AWS Secrets Manager
+    if (config.env === 'production' && process.env.USE_SECRETS_MANAGER !== 'true') {
+      const criticalErrors = [];
+      
       if (config.security.jwtSecret === 'default-jwt-secret-change-in-production') {
-        warnings.push('Using default JWT secret in production');
+        criticalErrors.push('JWT secret contains development default');
       }
-      if (config.stripe.privateKey.includes('placeholder')) {
-        warnings.push('Using placeholder Stripe key in production');
+      if (config.security.sessionSecret === 'default-session-secret') {
+        criticalErrors.push('Session secret contains development default');
+      }
+      if (config.stripe.privateKey.includes('placeholder') || config.stripe.privateKey.includes('test')) {
+        criticalErrors.push('Stripe private key is not production-ready');
       }
       
-      if (warnings.length > 0) {
-        logger.warn('[UnifiedConfig] Production configuration warnings', { warnings });
+      if (criticalErrors.length > 0) {
+        throw new Error(`[CRITICAL] Production security violations: ${criticalErrors.join(', ')}`);
       }
     }
   }

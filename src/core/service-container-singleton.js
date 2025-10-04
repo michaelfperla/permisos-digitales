@@ -51,17 +51,22 @@ async function initializeContainer(config = null) {
     }
   }
 
-  // Register services with config
-  const { registerPermisosServices } = require('./service-registry');
-  registerPermisosServices(container, actualConfig);
+  // Only register services if they haven't been registered yet
+  if (container.factories.size === 0) {
+    const { registerPermisosServices } = require('./service-registry');
+    registerPermisosServices(container, actualConfig);
+    
+    logger.info('[ServiceContainerSingleton] Services registered, initializing container...', {
+      servicesRegistered: container.factories.size,
+      environment: actualConfig.env
+    });
+  }
 
-  logger.info('[ServiceContainerSingleton] Services registered, initializing container...', {
-    servicesRegistered: container.factories.size,
-    environment: actualConfig.env
-  });
-
-  // Initialize container
-  await container.initialize(actualConfig);
+  // Initialize container only if not already initialized
+  if (!container.initialized) {
+    await container.initialize(actualConfig);
+  }
+  
   isInitialized = true;
 
   logger.info('[ServiceContainerSingleton] Container initialized successfully', {

@@ -12,7 +12,7 @@ const { RateLimiterRedis } = require('rate-limiter-flexible');
 
 class WhatsAppClientService {
   constructor() {
-    this.apiVersion = process.env.WHATSAPP_API_VERSION || 'v17.0';
+    this.apiVersion = process.env.WHATSAPP_API_VERSION || 'v23.0';
     this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
     this.accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;

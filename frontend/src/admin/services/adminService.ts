@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { getCsrfToken } from './authService';
+import { sanitizeAdminParams } from '../utils/sanitization';
 import { PermitErrorCategory, PermitErrorSeverity } from '../../constants/application.constants';
 import { logger } from '../../utils/logger';
 
@@ -11,6 +12,7 @@ const api = axios.create({
     'X-Portal-Type': 'admin',
   },
   withCredentials: true,
+  timeout: 15000, // 15 second timeout to prevent hanging requests
 });
 
 export interface DashboardStats {
@@ -28,7 +30,8 @@ export interface Application {
   id: number;
   status: string;
   created_at: string;
-  updated_at: string;  payment_verified_at?: string;
+  updated_at: string;
+  payment_verified_at?: string;
   payment_reference?: string;
   nombre_completo: string;
   marca: string;
@@ -194,12 +197,18 @@ export const getAllApplications = async (
   searchTerm?: string,
 ): Promise<PaginatedApplications> => {
   try {
-    const params: Record<string, any> = { page, limit };
+    // Sanitize all input parameters to prevent XSS and injection attacks
+    const rawParams: Record<string, any> = { page, limit };
+    if (status) rawParams.status = status;
+    if (startDate) rawParams.startDate = startDate;
+    if (endDate) rawParams.endDate = endDate;
+    if (searchTerm) rawParams.search = searchTerm;
 
-    if (status) params.status = status;
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
-    if (searchTerm) params.search = searchTerm;
+    const params = sanitizeAdminParams(rawParams);
+    
+    if (import.meta.env.DEV) {
+      logger.debug('[getAllApplications] Sanitized params:', params);
+    }
 
     const response = await api.get<any>('/applications', { params });
 
@@ -727,6 +736,33 @@ export const uploadManualPDFs = async (
   } catch (error: any) {
     logger.error(`Failed to upload PDFs for application ${applicationId}:`, error);
     throw new Error(error.response?.data?.message || 'Failed to upload PDFs');
+  }
+};
+
+/**
+ * Update application status
+ */
+export const updateApplicationStatus = async (
+  applicationId: number,
+  status: string,
+  reason?: string
+): Promise<{ success: boolean; message?: string; application?: ApplicationDetails }> => {
+  try {
+    const csrfTokenVal = await getCsrfToken();
+    const response = await api.patch(
+      `/applications/${applicationId}/status`,
+      { status, reason },
+      { headers: { 'X-CSRF-Token': csrfTokenVal } }
+    );
+    
+    return {
+      success: response.data?.success || true,
+      message: response.data?.data?.message || response.data?.message || 'Status updated successfully',
+      application: response.data?.data?.application || response.data?.application
+    };
+  } catch (error: any) {
+    logger.error(`Failed to update status for application ${applicationId}:`, error);
+    throw new Error(error.response?.data?.message || 'Failed to update application status');
   }
 };
 

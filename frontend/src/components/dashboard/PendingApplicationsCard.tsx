@@ -17,13 +17,13 @@ const PendingApplicationsCard: React.FC<PendingApplicationsCardProps> = ({ class
 
   // Helper function to safely format price
   const formatPrice = (importe: any): string => {
-    if (importe === null || importe === undefined) return '150.00';
+    if (importe === null || importe === undefined) return '99.00';
     if (typeof importe === 'number') return importe.toFixed(2);
     if (typeof importe === 'string') {
       const parsed = parseFloat(importe);
-      return isNaN(parsed) ? '150.00' : parsed.toFixed(2);
+      return isNaN(parsed) ? '99.00' : parsed.toFixed(2);
     }
-    return '150.00';
+    return '99.00';
   };
 
   useEffect(() => {

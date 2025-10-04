@@ -17,6 +17,11 @@ import MobileTable from '../components/ui/MobileTable/MobileTable';
 import { getApplications, downloadPermit } from '../services/applicationService';
 import Icon from '../shared/components/ui/Icon';
 import { useToast } from '../shared/hooks/useToast';
+import { 
+  formatDateMexicoWithTZ, 
+  calculatePermitExpirationDate, 
+  getExpirationStatusMessage 
+} from '../utils/permitBusinessDays';
 
 const UserPermitsPage: React.FC = () => {
   const { showToast } = useToast();
@@ -366,8 +371,34 @@ const UserPermitsPage: React.FC = () => {
                 id: 'expiration',
                 header: 'Vencimiento',
                 mobileLabel: 'Vencimiento',
-                cell: (permit) =>
-                  permit.fecha_vencimiento ? formatDate(permit.fecha_vencimiento) : 'N/A',
+                cell: (permit) => {
+                  // Use business rules for PERMIT_READY permits
+                  if (permit.status === 'PERMIT_READY' && (permit.fecha_expedicion || permit.updated_at)) {
+                    const permitReadyDate = permit.fecha_expedicion || permit.updated_at;
+                    const calculatedExpiration = calculatePermitExpirationDate(permitReadyDate);
+                    const statusInfo = getExpirationStatusMessage(permitReadyDate, permit.status);
+                    
+                    return (
+                      <span>
+                        {formatDateMexicoWithTZ(calculatedExpiration)}
+                        {statusInfo.urgency !== 'normal' && (
+                          <div style={{ 
+                            fontSize: '0.8em', 
+                            color: statusInfo.urgency === 'expired' ? 'var(--color-danger)' : 
+                                   statusInfo.urgency === 'critical' ? 'var(--color-warning)' : 
+                                   'var(--color-info)',
+                            marginTop: '2px'
+                          }}>
+                            {statusInfo.message}
+                          </div>
+                        )}
+                      </span>
+                    );
+                  }
+                  
+                  // For other statuses, show stored date or N/A
+                  return permit.fecha_vencimiento ? formatDateMexicoWithTZ(permit.fecha_vencimiento) : 'N/A';
+                },
                 sortable: true,
                 mobilePriority: 4,
               },

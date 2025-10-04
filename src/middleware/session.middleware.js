@@ -30,7 +30,7 @@ class IORedisStore extends session.Store {
 
       const key = this.prefix + sid;
       const data = await this.client.get(key);
-      
+
       if (!data) {
         return callback(null, null);
       }
@@ -54,12 +54,13 @@ class IORedisStore extends session.Store {
 
       const key = this.prefix + sid;
       const data = JSON.stringify(session);
-      
+
       await this.client.set(key, data, 'EX', this.ttl);
       callback && callback();
     } catch (error) {
       logger.error('Session set error:', error);
-      callback && callback(error);
+      // Return success to allow request to continue even if save failed
+      callback && callback();
     }
   }
 
@@ -77,7 +78,8 @@ class IORedisStore extends session.Store {
       callback && callback();
     } catch (error) {
       logger.error('Session destroy error:', error);
-      callback && callback(error);
+      // For destroy, continue without error (session should be destroyed regardless)
+      callback && callback();
     }
   }
 
@@ -95,7 +97,8 @@ class IORedisStore extends session.Store {
       callback && callback();
     } catch (error) {
       logger.error('Session touch error:', error);
-      callback && callback(error);
+      // For touch, continue without error (non-critical operation)
+      callback && callback();
     }
   }
 }
@@ -108,66 +111,80 @@ class IORedisStore extends session.Store {
  */
 const createSessionMiddleware = (redisClient, sessionSecret) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  
-  // Create the session configuration once
+
+  // Define session duration constants for consistency
+  const SESSION_TTL_SECONDS = 14400; // 4 hours in seconds
+  const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000; // 4 hours in milliseconds
+
+  // In production, we only support ONE primary domain to avoid cross-domain issues
+  // All .com traffic should be redirected to .com.mx at the infrastructure level
+  const PRIMARY_DOMAIN = isProduction ? '.permisosdigitales.com.mx' : undefined;
+
+  // Create single session middleware instance
   const sessionConfig = {
-    store: redisClient ? new IORedisStore({ 
+    store: redisClient ? new IORedisStore({
       client: redisClient,
       prefix: 'sess:',
-      ttl: 3600 // 1 hour
+      ttl: SESSION_TTL_SECONDS // 4 hours in seconds for Redis
     }) : undefined,
     secret: sessionSecret || process.env.SESSION_SECRET || 'your-secret-key-here-change-in-production',
-    name: 'permisos.sid', // Custom session name
+    name: 'permisos.sid',
     resave: false,
     saveUninitialized: false,
-    rolling: true, // Reset expiry on each request
+    rolling: false, // Disable rolling to prevent race conditions
     cookie: {
-      secure: isProduction, // Require HTTPS in production
-      httpOnly: true, // Prevent XSS attacks
-      maxAge: 3600000, // 1 hour in milliseconds
-      sameSite: isProduction ? 'none' : 'lax', // 'none' required for cross-subdomain with secure
+      secure: isProduction,
+      httpOnly: true,
+      maxAge: SESSION_TTL_MS,
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/',
-      domain: isProduction ? '.permisosdigitales.com.mx' : undefined // Allow cross-subdomain in production
+      domain: PRIMARY_DOMAIN
     }
   };
 
-  // Log the session configuration (without secret)
-  logger.info('[SessionMiddleware] Session configuration:', {
-    hasStore: !!sessionConfig.store,
-    storeType: redisClient ? 'Redis' : 'MemoryStore',
-    hasSecret: !!sessionConfig.secret && sessionConfig.secret !== 'your-secret-key-here-change-in-production',
-    cookieSecure: sessionConfig.cookie.secure,
-    cookieSameSite: sessionConfig.cookie.sameSite
+  const sessionMiddleware = session(sessionConfig);
+
+  logger.info('[SessionMiddleware] Created session middleware:', {
+    domain: PRIMARY_DOMAIN || 'localhost',
+    secure: sessionConfig.cookie.secure,
+    sameSite: sessionConfig.cookie.sameSite,
+    hasStore: !!sessionConfig.store
   });
 
-  // Create the middleware once
-  const sessionMiddleware = session(sessionConfig);
-  
-  // Return a wrapper that sets domain dynamically
   return (req, res, next) => {
-    // Log domain information for debugging
-    logDomainInfo(req, 'session');
-
-    // Get cookie domain for this request
     const cookieDomain = getCookieDomain(req);
-    
-    // Override cookie domain for this request
-    if (req.session && req.session.cookie) {
-      req.session.cookie.domain = cookieDomain;
+
+    // Check if domain detection returned null (invalid domain)
+    if (cookieDomain === null) {
+      logger.error('[SessionMiddleware] Security: Invalid domain detected', {
+        host: req.get('host'),
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      return res.status(403).json({
+        error: 'Invalid domain',
+        message: 'This domain is not authorized to access this service'
+      });
     }
-    
-    // Apply the session middleware
-    sessionMiddleware(req, res, (err) => {
-      if (err) {
-        logger.error('Session middleware error:', {
-          error: err.message,
-          stack: err.stack,
-          host: req.get('host'),
-          userAgent: req.get('User-Agent')
-        });
-      }
-      next(err);
-    });
+
+    // Check if the domain matches our expected primary domain
+    if (isProduction && cookieDomain !== PRIMARY_DOMAIN) {
+      logger.error('[SessionMiddleware] Security: Rejecting non-primary domain', {
+        domain: cookieDomain,
+        expectedDomain: PRIMARY_DOMAIN,
+        host: req.get('host'),
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      // Reject request for security - only allow primary domain
+      return res.status(403).json({
+        error: 'Domain not supported',
+        message: 'This domain is not authorized to access this service'
+      });
+    }
+
+    // Use the single session middleware
+    sessionMiddleware(req, res, next);
   };
 };
 

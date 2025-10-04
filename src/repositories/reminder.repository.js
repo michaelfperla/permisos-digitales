@@ -260,7 +260,7 @@ class ReminderRepository extends BaseRepository {
   async getReminderHistory(applicationId) {
     try {
       const query = `
-        SELECT er.*, u.email as user_email, u.first_name, u.last_name
+        SELECT er.*, u.account_email as user_email, u.first_name, u.last_name
         FROM email_reminders er
         JOIN users u ON er.user_id = u.id
         WHERE er.application_id = $1

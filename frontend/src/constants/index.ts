@@ -17,5 +17,5 @@ export { PaymentMethodType } from './payment.constants';
 export { PaymentFees } from './payment.constants';
 
 // Re-export specific values for backward compatibility
-export const DEFAULT_PERMIT_FEE = 150.0;
+export const DEFAULT_PERMIT_FEE = 99.0;
 export const DEFAULT_CURRENCY = 'MXN';

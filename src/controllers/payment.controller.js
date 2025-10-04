@@ -31,8 +31,8 @@ const createPaymentOrder = async (req, res) => {
     const user = await req.userRepository.findById(userId);
     const customerData = {
       name: `${user.first_name} ${user.last_name}`,
-      email: user.email,
-      phone: user.phone || ''
+      email: user.account_email || user.email || null, // Handle both field names, allow null
+      phone: user.whatsapp_phone || user.phone || ''
     };
 
     const customer = await stripePaymentService.createCustomer(customerData);
@@ -198,7 +198,7 @@ const processOxxoPayment = async (req, res) => {
         eventData: {
           status: paymentResult.status || 'pending_payment',
           paymentMethod: 'oxxo_cash',
-          amount: paymentResult.amount || 150.00,
+          amount: paymentResult.amount || 99.00,
           currency: paymentResult.currency || 'MXN',
           oxxoReference: paymentResult.oxxoReference,
           expiresAt: paymentResult.expiresAt,

@@ -7,7 +7,7 @@ import {
   BsPlus,
   BsDash,
 } from 'react-icons/bs';
-import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt, FaMoneyBillWave } from 'react-icons/fa';
+import { FaHome, FaEnvelope, FaFileAlt, FaShieldAlt, FaMoneyBillWave, FaWhatsapp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import styles from './HomePage.module.css';
@@ -110,6 +110,18 @@ const HomePage: React.FC = () => {
                 Solicitar Permiso Ahora
               </Button>
             </Link>
+            <div className={styles.alternativeOption}>
+              <span className={styles.alternativeText}>¿Prefieres WhatsApp?</span>
+              <a 
+                href="https://wa.me/5216641633345?text=Hola!%20Quiero%20solicitar%20mi%20permiso%20digital%20de%20circulaci%C3%B3n%20por%20WhatsApp.%20%C2%BFMe%20pueden%20ayudar?"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.whatsappButton}
+              >
+                <Icon IconComponent={FaWhatsapp} size="sm" />
+                <span>Solicitar por WhatsApp</span>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -146,7 +158,7 @@ const HomePage: React.FC = () => {
                     <h3>Permiso Digital de Circulación</h3>
                     <div className={styles.pricingAmount}>
                       <span className={styles.pricingCurrency}>$</span>
-                      <span className={styles.pricingNumber}>150</span>
+                      <span className={styles.pricingNumber}>{DEFAULT_PERMIT_FEE}</span>
                       <span className={styles.pricingCurrency}>MXN</span>
                     </div>
                     <p className={styles.pricingDescription}>Pago único • Sin mensualidades • Sin comisiones ocultas</p>
@@ -270,6 +282,17 @@ const HomePage: React.FC = () => {
         </div>
         <Footer />
       </div>
+
+      {/* Floating WhatsApp Button */}
+      <a 
+        href="https://wa.me/5216641633345?text=Hola!%20Quiero%20solicitar%20mi%20permiso%20digital%20de%20circulaci%C3%B3n%20por%20WhatsApp.%20%C2%BFMe%20pueden%20ayudar?"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.floatingWhatsappButton}
+        aria-label="Contactar por WhatsApp"
+      >
+        <Icon IconComponent={FaWhatsapp} size="lg" />
+      </a>
     </div>
   );
 };

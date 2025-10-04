@@ -15,7 +15,17 @@ const storageService = require('./storage/storage-service');
 const metricsCollector = require('../monitoring/metrics-collector');
 const emailService = require('./email.service');
 const recommendationsPdfService = require('./recommendations-pdf.service');
-const whatsappService = require('./whatsapp/simple-whatsapp.service');
+const SimpleWhatsAppService = require('./whatsapp/simple-whatsapp.service');
+
+// Create and initialize WhatsApp service instance
+let whatsappServiceInstance = null;
+const getWhatsAppService = async () => {
+  if (!whatsappServiceInstance) {
+    whatsappServiceInstance = new SimpleWhatsAppService();
+    await whatsappServiceInstance.initialize();
+  }
+  return whatsappServiceInstance;
+};
 
 /**
  * Mask phone number for privacy in logs
@@ -84,7 +94,7 @@ async function savePdfToStorage(pdfBuffer, applicationId, type, permitId, timest
     const saveOptions = {
       originalName,
       subDirectory: `permits/${applicationId}`,
-      prefix: type,
+      prefix: governmentFilename ? '' : type, // Only add prefix if no government filename
       contentType: 'application/pdf',
       preserveOriginalFilename: !!governmentFilename, // Preserve if we have government filename
       metadata: {
@@ -352,11 +362,16 @@ Alternatively, set the PUPPETEER_EXECUTABLE_PATH environment variable to point t
 
     // Step 7: Prepare permit data
     logger.info(`[Step 7/10] Preparing permit data`);
+    // Use business rules for date calculation
+    const { convertToMexicoTimezone, calculatePermitExpirationDate } = require('../utils/permit-business-days');
+    const mexicoToday = convertToMexicoTimezone(new Date());
+    const todayString = mexicoToday.toISOString().split('T')[0];
+    
     const permitData = {
       folio: `HTZ-${applicationId}`, // Use a simple format based on application ID
-      importe: appData.importe || 150.00, // Use the importe from the application data
-      fechaExpedicion: new Date().toISOString().split('T')[0], // Today's date
-      fechaVencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0] // 1 year from today
+      importe: appData.importe || 99.00, // Use the importe from the application data
+      fechaExpedicion: todayString, // Today's date in Mexico timezone
+      fechaVencimiento: calculatePermitExpirationDate(mexicoToday) // Calculate using business rules
     };
     logger.info('[Step 7/10] Using application data for permit:', permitData);
 
@@ -614,7 +629,7 @@ async function fillPermitForm(page, appData) {
       await page.waitForSelector(importeSelector, { visible: true, timeout: 5000 });
 
       // Use the importe from appData if available, otherwise use default value
-      const importeValue = appData.importe ? appData.importe.toString() : '150.00';
+      const importeValue = appData.importe ? appData.importe.toString() : '99.00';
       logger.info(`Setting importe field to: ${importeValue}`);
 
       // Clear the field first (it might have a default value)
@@ -892,12 +907,12 @@ async function extractPermitData(page, detailsPageUrl) {
 
       // If not found, set a default value
       if (!permitData.importe) {
-        permitData.importe = 150.00;
+        permitData.importe = 99.00;
         logger.info(`Using default importe: ${permitData.importe}`);
       }
     } catch (importeError) {
       logger.error('Error extracting importe:', importeError);
-      permitData.importe = 150.00; // Default fallback
+      permitData.importe = 99.00; // Default fallback
     }
 
     // Extract fechaExpedicion (issue date)
@@ -964,7 +979,7 @@ async function extractPermitData(page, detailsPageUrl) {
         }
       }
 
-      // If not found, calculate expiry date as 30 days from issue date
+      // If not found, calculate expiry date as 30 days from expedition date
       if (!permitData.fechaVencimiento && permitData.fechaExpedicion) {
         const expedicionDate = new Date(permitData.fechaExpedicion);
         const vencimientoDate = new Date(expedicionDate);
@@ -1181,6 +1196,20 @@ function downloadFileAsBuffer(url, cookies) {
           }
           logger.info(`Extracted original filename from headers: ${originalFilename}`);
         }
+      } else {
+        logger.warn(`No Content-Disposition header found for ${url}`);
+        // Try to extract from URL as fallback
+        try {
+          const urlParts = url.split('/');
+          const lastPart = urlParts[urlParts.length - 1];
+          const cleanName = lastPart.split('?')[0];
+          if (cleanName && cleanName.endsWith('.pdf')) {
+            originalFilename = decodeURIComponent(cleanName);
+            logger.info(`Extracted filename from URL as fallback: ${originalFilename}`);
+          }
+        } catch (e) {
+          logger.warn(`Could not extract filename from URL: ${e.message}`);
+        }
       }
 
       // Collect data chunks
@@ -1329,9 +1358,48 @@ async function downloadPDFWithPage(page, pdfUrl) {
   logger.info(`Starting browser-based download for ${pdfUrl}`);
 
   try {
+    // Try to extract filename from URL first
+    let originalFilename = null;
+    try {
+      const urlParts = pdfUrl.split('/');
+      const lastPart = urlParts[urlParts.length - 1];
+      // Remove query parameters if any
+      const cleanName = lastPart.split('?')[0];
+      if (cleanName && cleanName.endsWith('.pdf')) {
+        originalFilename = decodeURIComponent(cleanName);
+        logger.info(`Extracted filename from URL: ${originalFilename}`);
+      }
+    } catch (e) {
+      logger.warn(`Could not extract filename from URL: ${e.message}`);
+    }
+
     // Navigate to the PDF URL
     logger.info(`Navigating to PDF URL: ${pdfUrl}`);
+    
+    // Set up response listener to capture headers
+    let responseHeaders = null;
+    page.once('response', response => {
+      if (response.url() === pdfUrl) {
+        responseHeaders = response.headers();
+        logger.info('Captured response headers from browser navigation');
+      }
+    });
+    
     await page.goto(pdfUrl, { waitUntil: 'networkidle0', timeout: 20000 });
+
+    // Try to extract filename from Content-Disposition header if available
+    if (!originalFilename && responseHeaders && responseHeaders['content-disposition']) {
+      const contentDisposition = responseHeaders['content-disposition'];
+      logger.info(`Browser Content-Disposition: ${contentDisposition}`);
+      const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      if (filenameMatch && filenameMatch[1]) {
+        originalFilename = filenameMatch[1].replace(/['"]/g, '');
+        if (originalFilename.includes("UTF-8''")) {
+          originalFilename = decodeURIComponent(originalFilename.split("UTF-8''")[1]);
+        }
+        logger.info(`Extracted filename from browser headers: ${originalFilename}`);
+      }
+    }
 
     // Use PDF printing functionality of browser to get buffer
     logger.info('Using browser PDF functionality');
@@ -1340,11 +1408,12 @@ async function downloadPDFWithPage(page, pdfUrl) {
       printBackground: true
     });
 
-    logger.info(`PDF generated via browser (${pdfBuffer.length} bytes)`);
+    logger.info(`PDF generated via browser (${pdfBuffer.length} bytes, filename: ${originalFilename || 'not captured'})`);
 
     return {
       buffer: pdfBuffer,
-      size: pdfBuffer.length
+      size: pdfBuffer.length,
+      originalFilename: originalFilename
     };
   } catch (error) {
     logger.error(`Error during browser-based download: ${error.message}`);
@@ -1391,7 +1460,8 @@ async function downloadPermitPdfs(page, pdfLinks, cookies, applicationId) {
             logger.info(`Falling back to browser-based download for ${type}`);
             const browserResult = await downloadPDFWithPage(page, pdfLinks[type]);
             pdfBuffer = browserResult.buffer;
-            logger.info(`Successfully downloaded ${type} PDF via browser (${browserResult.size} bytes)`);
+            originalFilename = browserResult.originalFilename;
+            logger.info(`Successfully downloaded ${type} PDF via browser (${browserResult.size} bytes, filename: ${originalFilename || 'not captured'})`);
           }
 
           // Save PDF to storage (S3 or local)
@@ -1484,18 +1554,51 @@ async function updateApplicationWithPermitData(applicationId, permitData, pdfFil
           url_expiration_hours: 48
         };
         
-        // Send the email
-        await emailService.sendPermitReadyEmail(appData.user_email, emailData);
+        // Send the email (wrapped in try-catch to not block WhatsApp notifications)
+        try {
+          await emailService.sendPermitReadyEmail(appData.user_email, emailData);
+          logger.info(`Permit ready email sent to ${appData.user_email}`);
+        } catch (emailError) {
+          logger.error(`Failed to send permit ready email to ${appData.user_email}: ${emailError.message}`);
+          // Continue to send WhatsApp notification even if email fails
+        }
         
-        logger.info(`Permit ready email sent to ${appData.user_email}`);
-        
+        // Debug log to see what notification data we have
+        logger.info('Checking notification data for WhatsApp delivery', {
+          applicationId,
+          hasWhatsappPhone: !!appData.whatsapp_phone,
+          hasUserEmail: !!appData.user_email,
+          whatsappPhone: appData.whatsapp_phone ? maskPhoneNumber(appData.whatsapp_phone) : 'none',
+          phoneLength: appData.whatsapp_phone ? appData.whatsapp_phone.length : 0,
+          permitUrl: permisoUrl ? 'generated' : 'missing',
+          userId: appData.user_id
+        });
+
         // Send WhatsApp notification if user has WhatsApp phone
-        if (appData.whatsapp_phone) {
+        if (appData.whatsapp_phone && appData.whatsapp_phone.trim().length > 0) {
           try {
+            // Validate phone number format (basic security check)
+            const phoneRegex = /^(\+?52)?1?\d{10}$/;
+            if (!phoneRegex.test(appData.whatsapp_phone.replace(/\s+/g, ''))) {
+              throw new Error(`Invalid WhatsApp phone format: ${maskPhoneNumber(appData.whatsapp_phone)}`);
+            }
+
             logger.info(`Sending WhatsApp notification for permit ready to ${maskPhoneNumber(appData.whatsapp_phone)}`);
+
+            // Initialize WhatsApp service with better error handling
+            let whatsappService;
+            try {
+              whatsappService = await getWhatsAppService();
+              if (!whatsappService) {
+                throw new Error('WhatsApp service initialization returned null');
+              }
+            } catch (initError) {
+              throw new Error(`WhatsApp service initialization failed: ${initError.message}`);
+            }
+
             await whatsappService.handlePermitReady(applicationId, permisoUrl, appData.whatsapp_phone);
             logger.info(`WhatsApp notification sent successfully to ${maskPhoneNumber(appData.whatsapp_phone)}`);
-            
+
             // Log successful delivery in payment_events
             await paymentRepository.createPaymentEvent(
               applicationId,
@@ -1549,11 +1652,18 @@ async function updateApplicationWithPermitData(applicationId, permitData, pdfFil
               logger.error(`Failed to queue WhatsApp retry: ${queueError.message}`);
             }
           }
+        } else {
+          logger.warn('No WhatsApp phone found for notification', {
+            applicationId,
+            userId: appData.user_id,
+            hasUserEmail: !!appData.user_email,
+            phoneValue: appData.whatsapp_phone || 'null/undefined'
+          });
         }
       }
-    } catch (emailError) {
-      // Log but don't fail
-      logger.error(`Failed to send permit ready email: ${emailError.message}`);
+    } catch (notificationError) {
+      // Log but don't fail the entire process
+      logger.error(`Failed to send notifications: ${notificationError.message}`);
     }
     
     return { id: applicationId, status: 'PERMIT_READY' };

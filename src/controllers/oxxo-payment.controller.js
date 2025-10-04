@@ -82,7 +82,7 @@ class OxxoPaymentController {
           eventData: {
             status: paymentResult.status || 'pending_payment',
             paymentMethod: 'oxxo_cash',
-            amount: paymentResult.amount || 150.00,
+            amount: paymentResult.amount || 99.00,
             currency: paymentResult.currency || 'MXN',
             oxxoReference: paymentResult.oxxoReference || 'PENDING',
             expiresAt: paymentResult.expiresAt || Math.floor(Date.now() / 1000) + (48 * 60 * 60),

@@ -3,6 +3,11 @@ import { FaInfoCircle, FaStore, FaExclamationTriangle, FaTimesCircle, FaSpinner 
 import styles from '../../pages/PermitDetailsPage.module.css';
 import QueueStatusDisplay from './QueueStatusDisplay';
 import { ApplicationStatusDisplay } from '../../constants/application.constants';
+import { 
+  formatDateMexicoWithTZ, 
+  calculatePermitExpirationDate, 
+  getExpirationStatusMessage 
+} from '../../utils/permitBusinessDays';
 
 interface PermitStatusDisplayProps {
   status?: string;
@@ -85,13 +90,49 @@ const PermitStatusDisplay: React.FC<PermitStatusDisplayProps> = ({ status, appli
         return {
           title: '¡Tu Permiso está Listo!',
           icon: <FaInfoCircle className={`${styles.statusInstructionsIcon} ${styles.statusInstructionsIconSuccess}`} />,
-          content: <p>Tu permiso ha sido generado correctamente y está listo para descargar. Utiliza el botón de descarga para obtener tu documento.</p>,
+          content: (() => {
+            // Show expiration information with business rules
+            const permitReadyDate = applicationData?.fecha_expedicion || applicationData?.updated_at;
+            
+            if (permitReadyDate && status === 'PERMIT_READY') {
+              const calculatedExpiration = calculatePermitExpirationDate(permitReadyDate);
+              const statusInfo = getExpirationStatusMessage(permitReadyDate, status);
+              
+              return (
+                <div>
+                  <p>Tu permiso ha sido generado correctamente y está listo para descargar. Utiliza el botón de descarga para obtener tu documento.</p>
+                  <div style={{ marginTop: '12px', padding: '8px', backgroundColor: 'var(--color-background-secondary)', borderRadius: '4px' }}>
+                    <p style={{ margin: 0, fontSize: '0.9em' }}>
+                      <strong>Fecha de vencimiento:</strong> {formatDateMexicoWithTZ(calculatedExpiration)}
+                    </p>
+                    {statusInfo.urgency !== 'normal' && (
+                      <p style={{ 
+                        margin: '4px 0 0 0', 
+                        fontSize: '0.9em',
+                        color: statusInfo.urgency === 'critical' ? 'var(--color-warning)' : 'var(--color-info)'
+                      }}>
+                        <strong>{statusInfo.message}</strong>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            
+            return <p>Tu permiso ha sido generado correctamente y está listo para descargar. Utiliza el botón de descarga para obtener tu documento.</p>;
+          })(),
         };
       case 'EXPIRED':
         return {
+          title: 'Permiso Expirado',
+          icon: <FaExclamationTriangle className={`${styles.statusInstructionsIcon} ${styles.statusInstructionsIconWarning}`} />,
+          content: <p>Este permiso ha expirado. Para circular, necesitas solicitar una renovación o un nuevo permiso.</p>,
+        };
+      case 'VENCIDO':
+        return {
           title: 'Permiso Vencido',
           icon: <FaExclamationTriangle className={`${styles.statusInstructionsIcon} ${styles.statusInstructionsIconWarning}`} />,
-          content: <p>Este permiso ha vencido. Para circular, necesitas solicitar una renovación o un nuevo permiso.</p>,
+          content: <p>Este permiso ha vencido después de 30 días. Para circular, necesitas solicitar una renovación o un nuevo permiso.</p>,
         };
       default:
         // Try to get the Spanish label from the constants, fallback to a generic message

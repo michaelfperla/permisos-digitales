@@ -525,7 +525,7 @@ describe.skip('Puppeteer Permit Form Navigation and Verification', () => {
         nombre_solicitante: 'JUAN PEREZ PRUEBA',
         rfc_solicitante: 'PEPJ800101XXX',
         domicilio_solicitante: 'CALLE FALSA 123, COL TEST, PRUEBALANDIA',
-        importe: '150.00'
+        importe: '99.00'
       };
 
       // Fill regular input fields
@@ -701,7 +701,7 @@ describe.skip('Puppeteer Permit Form Navigation and Verification', () => {
         nombre_solicitante: 'JUAN PEREZ PRUEBA',
         rfc_solicitante: 'PEPJ800101XXX',
         domicilio_solicitante: 'CALLE FALSA 123, COL TEST, PRUEBALANDIA',
-        importe: '150.00'
+        importe: '99.00'
       };
 
       // Fill regular input fields

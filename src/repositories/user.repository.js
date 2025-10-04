@@ -9,7 +9,7 @@ class UserRepository extends BaseRepository {
 
   async findByEmail(email) {
     logger.debug(`[User Repository] findByEmail called for email: ${email}`);
-    const query = 'SELECT * FROM users WHERE email = $1';
+    const query = 'SELECT * FROM users WHERE account_email = $1';
     logger.debug(`[User Repository] Executing SQL query: ${query}`);
 
     try {
@@ -48,6 +48,79 @@ class UserRepository extends BaseRepository {
     }
   }
 
+  /**
+   * Find user by WhatsApp phone number (primary identifier for WhatsApp users)
+   */
+  async findByWhatsAppPhone(whatsappPhone) {
+    logger.debug(`[User Repository] findByWhatsAppPhone called for phone: ${whatsappPhone}`);
+    const query = 'SELECT * FROM users WHERE whatsapp_phone = $1';
+    
+    try {
+      const result = await db.query(query, [whatsappPhone]);
+      
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        logger.debug(`[User Repository] WhatsApp user found with ID: ${user.id}`);
+        return user;
+      }
+      
+      logger.debug(`[User Repository] No user found with WhatsApp phone: ${whatsappPhone}`);
+      return null;
+    } catch (error) {
+      logger.error(`[User Repository] Error in findByWhatsAppPhone for ${whatsappPhone}:`, {
+        error: error.message,
+        stack: error.stack,
+        query: query,
+        parameters: [whatsappPhone]
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Find user by either email or WhatsApp phone (for portal login)
+   */
+  async findByEmailOrPhone(identifier) {
+    logger.debug(`[User Repository] findByEmailOrPhone called for identifier: ${identifier}`);
+    
+    // Check if identifier looks like email or phone
+    if (identifier.includes('@')) {
+      return await this.findByEmail(identifier);
+    } else {
+      // Assume it's a phone number, normalize it first
+      const normalizedPhone = this.normalizeWhatsAppPhone(identifier);
+      return await this.findByWhatsAppPhone(normalizedPhone);
+    }
+  }
+
+  /**
+   * Normalize phone number to WhatsApp 521 format
+   */
+  normalizeWhatsAppPhone(phone) {
+    if (!phone) return null;
+    
+    // Remove all non-numeric characters
+    const cleaned = phone.toString().replace(/[^\d]/g, '');
+    
+    // If already in 521 format, return as-is
+    if (cleaned.startsWith('521') && cleaned.length === 13) {
+      return cleaned;
+    }
+    
+    // If starts with 52 (10 digits), convert to 521
+    if (cleaned.startsWith('52') && cleaned.length === 12) {
+      return '521' + cleaned.slice(2);
+    }
+    
+    // If just 10 digits, add 521 prefix
+    if (cleaned.length === 10) {
+      return '521' + cleaned;
+    }
+    
+    // Return original if can't normalize
+    return cleaned;
+  }
+
   async findUsersWithPagination(filters = {}, pagination = {}) {
     const { role, search } = filters;
     const { page = 1, limit = 10 } = pagination;
@@ -57,7 +130,7 @@ class UserRepository extends BaseRepository {
 
     let countQuery = 'SELECT COUNT(*) FROM users WHERE 1=1';
     let query = `
-      SELECT id, email, first_name, last_name, account_type, is_admin_portal, created_at, updated_at
+      SELECT id, account_email as email, first_name, last_name, account_type, is_admin_portal, created_at, updated_at
       FROM users
       WHERE 1=1
     `;
@@ -73,12 +146,12 @@ class UserRepository extends BaseRepository {
       params.push(`%${search}%`);
       const paramIndex = params.length;
       query += ` AND (
-        email ILIKE $${paramIndex} OR
+        account_email ILIKE $${paramIndex} OR
         first_name ILIKE $${paramIndex} OR
         last_name ILIKE $${paramIndex}
       )`;
       countQuery += ` AND (
-        email ILIKE $${paramIndex} OR
+        account_email ILIKE $${paramIndex} OR
         first_name ILIKE $${paramIndex} OR
         last_name ILIKE $${paramIndex}
       )`;
@@ -110,18 +183,30 @@ class UserRepository extends BaseRepository {
   }
 
   async createUser(userData) {
-    const { email, password_hash, first_name, last_name, account_type = 'client', created_by = null, is_admin_portal = false } = userData;
+    const { 
+      email, 
+      account_email, 
+      password_hash, 
+      first_name, 
+      last_name, 
+      account_type = 'client', 
+      created_by = null, 
+      is_admin_portal = false 
+    } = userData;
+    
+    // Handle both email and account_email for backward compatibility
+    const finalEmail = account_email !== undefined ? account_email : email;
 
     const query = `
       INSERT INTO users
-      (email, password_hash, first_name, last_name, account_type, created_by, is_admin_portal)
+      (account_email, password_hash, first_name, last_name, account_type, created_by, is_admin_portal)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id, email, first_name, last_name, account_type, is_admin_portal, created_at
+      RETURNING id, account_email as email, first_name, last_name, account_type, is_admin_portal, created_at
     `;
 
     try {
       const { rows } = await db.query(query, [
-        email,
+        finalEmail,
         password_hash,
         first_name,
         last_name,
@@ -176,7 +261,7 @@ class UserRepository extends BaseRepository {
   }
 
   async emailExists(email) {
-    const query = 'SELECT 1 FROM users WHERE email = $1';
+    const query = 'SELECT 1 FROM users WHERE account_email = $1';
 
     try {
       const { rowCount } = await db.query(query, [email]);
@@ -190,7 +275,7 @@ class UserRepository extends BaseRepository {
   async getUserDetails(userId) {
     const query = `
       SELECT
-        u.id, u.email, u.first_name, u.last_name,
+        u.id, u.account_email as email, u.first_name, u.last_name,
         u.account_type, u.is_admin_portal, u.created_at, u.updated_at,
         u.role, u.created_by,
         creator.first_name as created_by_first_name,
@@ -296,7 +381,7 @@ class UserRepository extends BaseRepository {
       const query = `
         SELECT 
           u.id,
-          u.email,
+          u.account_email as email,
           u.first_name,
           u.last_name,
           u.is_email_verified,
@@ -313,7 +398,7 @@ class UserRepository extends BaseRepository {
           AND prt_active.expires_at > CURRENT_TIMESTAMP 
           AND prt_active.used_at IS NULL
         WHERE prt.token = $1
-        GROUP BY u.id, u.email, u.first_name, u.last_name, 
+        GROUP BY u.id, u.account_email, u.first_name, u.last_name, 
                  u.is_email_verified, u.account_status, 
                  u.created_at, u.last_login_at,
                  prt.expires_at, prt.used_at
@@ -344,7 +429,7 @@ class UserRepository extends BaseRepository {
       const query = `
         SELECT 
           u.id,
-          u.email,
+          u.account_email as email,
           u.first_name,
           u.last_name,
           u.is_email_verified,
@@ -357,8 +442,8 @@ class UserRepository extends BaseRepository {
         LEFT JOIN password_reset_tokens prt ON u.id = prt.user_id 
           AND prt.expires_at > CURRENT_TIMESTAMP 
           AND prt.used_at IS NULL
-        WHERE LOWER(u.email) = LOWER($1)
-        GROUP BY u.id, u.email, u.first_name, u.last_name, 
+        WHERE LOWER(u.account_email) = LOWER($1)
+        GROUP BY u.id, u.account_email, u.first_name, u.last_name, 
                  u.is_email_verified, u.account_status, 
                  u.created_at, u.last_login_at
       `;
@@ -558,7 +643,7 @@ class UserRepository extends BaseRepository {
     try {
       // Get user profile
       const userQuery = `
-        SELECT id, email, first_name, last_name, whatsapp_phone, 
+        SELECT id, account_email as email, first_name, last_name, whatsapp_phone, 
                account_type, role, created_at, updated_at, 
                is_email_verified
         FROM users 

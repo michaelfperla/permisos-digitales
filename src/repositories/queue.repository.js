@@ -159,12 +159,17 @@ class EmailQueueRepository extends BaseRepository {
   async getRetryEmails(limit = 10) {
     const now = new Date();
     
-    return await this.db('email_queue')
-      .where('status', 'retry')
-      .where('next_retry_at', '<=', now)
-      .where('attempts', '<', this.db.raw('max_attempts'))
-      .orderBy('priority', 'asc')
-      .limit(limit);
+    const query = `
+      SELECT * FROM ${this.tableName}
+      WHERE status = $1 
+      AND next_retry_at <= $2
+      AND attempts < max_attempts
+      ORDER BY priority ASC
+      LIMIT $3
+    `;
+    
+    const result = await this.executeQuery(query, ['retry', now, limit]);
+    return result.rows;
   }
 
   /**
@@ -216,10 +221,14 @@ class EmailQueueRepository extends BaseRepository {
   async cleanOldEmails(daysToKeep = 30) {
     const cutoffDate = new Date(Date.now() - daysToKeep * 24 * 60 * 60 * 1000);
     
-    const deleted = await this.db('email_queue')
-      .whereIn('status', ['sent', 'failed', 'cancelled'])
-      .where('updated_at', '<', cutoffDate)
-      .delete();
+    const query = `
+      DELETE FROM ${this.tableName}
+      WHERE status IN ('sent', 'failed', 'cancelled')
+      AND updated_at < $1
+    `;
+    
+    const result = await this.executeQuery(query, [cutoffDate]);
+    const deleted = result.rowCount;
 
     logger.info('Cleaned old emails from queue', {
       deleted,

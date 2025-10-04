@@ -15,6 +15,7 @@ const paymentRecoveryService = require('../services/payment-recovery.service');
 const alertService = require('../services/alert.service');
 // Import service container singleton
 const { getService } = require('../core/service-container-singleton');
+const whatsappNotificationService = require('../services/whatsapp-notification.service');
 
 // Helper to get PDF queue service
 const getPdfQueueService = () => {
@@ -79,8 +80,8 @@ const createPaymentOrder = async (req, res) => {
     const user = await userRepository.findById(userId);
     const customerData = {
       name: `${user.first_name} ${user.last_name}`,
-      email: user.email,
-      phone: user.phone || ''
+      email: user.account_email || user.email || null, // Handle both field names, allow null
+      phone: user.whatsapp_phone || user.phone || ''
     };
 
     const customer = await stripePaymentService.createCustomer(customerData);
@@ -718,6 +719,9 @@ const handlePaymentIntentSucceeded = async (paymentIntent, paymentRepository, ap
       applicationId,
       status: ApplicationStatus.PAYMENT_RECEIVED
     });
+
+    // Send WhatsApp credentials if this is a WhatsApp payment
+    await handleWhatsAppCredentialDeliveryFromPaymentIntent(paymentIntent, applicationId, client);
     
   } catch (error) {
     logger.error('[WEBHOOK] Error in payment processing', {
@@ -1251,7 +1255,9 @@ const handleCheckoutSessionCompleted = async (session, paymentRepository, applic
       sessionId: session.id,
       paymentStatus: session.payment_status,
       metadata: session.metadata,
-      paymentIntentId: session.payment_intent
+      paymentIntentId: session.payment_intent,
+      source: session.metadata?.source,
+      whatsappFlow: session.metadata?.source === 'whatsapp'
     });
     
     // Extract application ID from session metadata
@@ -1376,15 +1382,23 @@ const handleCheckoutSessionCompleted = async (session, paymentRepository, applic
       applicationId,
       sessionId: session.id,
       paymentIntentId: session.payment_intent,
-      newStatus: ApplicationStatus.PAYMENT_RECEIVED
+      newStatus: ApplicationStatus.PAYMENT_RECEIVED,
+      source: session.metadata?.source,
+      isWhatsAppPayment: session.metadata?.source === 'whatsapp'
     });
-    
+
     // The PDF Generation Processor will automatically pick up this application
     // since it now has PAYMENT_RECEIVED status
     logger.info('[WEBHOOK] Application ready for PDF processor pickup', {
       applicationId,
-      status: ApplicationStatus.PAYMENT_RECEIVED
+      status: ApplicationStatus.PAYMENT_RECEIVED,
+      source: session.metadata?.source,
+      isWhatsAppPayment: session.metadata?.source === 'whatsapp',
+      processorInterval: process.env.PDF_PROCESSOR_INTERVAL || '5000ms'
     });
+
+    // Send WhatsApp credentials if this is a WhatsApp payment
+    await handleWhatsAppCredentialDelivery(session, applicationId, client);
     
   } catch (error) {
     logger.error('[WEBHOOK] Error processing checkout.session.completed', {
@@ -1422,6 +1436,353 @@ const handlePaymentMethodDetached = async (paymentMethod, paymentRepository, cli
   } catch (error) {
     logger.error('Error handling payment_method.detached:', error);
     throw error;
+  }
+};
+
+/**
+ * Handle WhatsApp credential delivery after successful payment
+ */
+const handleWhatsAppCredentialDelivery = async (session, applicationId, client = null) => {
+  try {
+    // Check if this is a WhatsApp payment
+    const source = session.metadata?.source;
+    const phoneNumber = session.metadata?.phone_number;
+    
+    if (source !== 'whatsapp' || !phoneNumber) {
+      logger.debug('[WEBHOOK] Not a WhatsApp payment, skipping credential delivery', {
+        applicationId,
+        source,
+        hasPhone: !!phoneNumber
+      });
+      return;
+    }
+
+    logger.info('[WEBHOOK] Processing WhatsApp credential delivery', {
+      applicationId,
+      phoneNumber
+    });
+
+    // Get application and user details
+    const appQuery = `
+      SELECT pa.*, u.id as user_id, u.first_name, u.last_name, u.account_email, 
+             u.whatsapp_phone, u.source, u.created_at as user_created_at
+      FROM permit_applications pa 
+      JOIN users u ON pa.user_id = u.id 
+      WHERE pa.id = $1
+    `;
+    
+    const { rows: appRows } = await (client || require('../db')).query(appQuery, [applicationId]);
+    
+    if (!appRows.length) {
+      logger.error('[WEBHOOK] Application or user not found for credential delivery', {
+        applicationId
+      });
+      return;
+    }
+
+    const application = appRows[0];
+    const user = {
+      id: application.user_id,
+      firstName: application.first_name,
+      lastName: application.last_name,
+      email: application.account_email,
+      whatsappPhone: application.whatsapp_phone,
+      source: application.source,
+      userCreatedAt: application.user_created_at
+    };
+
+    // Check if this is a new WhatsApp user (first payment)
+    // More reliable than time-based detection
+    const permitCountQuery = `
+      SELECT COUNT(*) as permit_count 
+      FROM permit_applications 
+      WHERE user_id = $1 
+      AND status IN ('PERMIT_READY', 'PERMIT_GENERATED', 'PAYMENT_RECEIVED')
+    `;
+    const { rows: countRows } = await (client || require('../db')).query(permitCountQuery, [user.id]);
+    const permitCount = parseInt(countRows[0].permit_count) || 0;
+    
+    // User is considered "new" if they're from WhatsApp AND have zero completed permits
+    // This current payment will be their first
+    const isNewUser = user.source === 'whatsapp' && permitCount === 0;
+
+    logger.info('[WEBHOOK] User status analysis', {
+      applicationId,
+      userId: user.id,
+      source: user.source,
+      permitCount,
+      isNewUser,
+      phoneNumber
+    });
+
+    if (!isNewUser) {
+      logger.info('[WEBHOOK] Existing user or non-WhatsApp user, sending payment success notification only', {
+        applicationId,
+        userId: user.id,
+        source: user.source,
+        permitCount,
+        phoneNumber
+      });
+      
+      // Send payment success notification
+      await whatsappNotificationService.sendPaymentSuccess(
+        phoneNumber,
+        user.firstName,
+        applicationId,
+        true // hasPortalAccess
+      );
+      return;
+    }
+
+    // For new users, we need to get their temporary password
+    const userAccountService = require('../services/whatsapp/user-account.service');
+    const passwordCache = require('../services/whatsapp/password-cache.service');
+    
+    // Try to retrieve the stored temporary password from Redis first
+    let temporaryPassword = null;
+    
+    try {
+      // First attempt: Get password from Redis cache
+      temporaryPassword = await passwordCache.getTemporaryPassword(user.id);
+      
+      if (temporaryPassword) {
+        logger.info('[WEBHOOK] Retrieved cached password for WhatsApp user', {
+          userId: user.id,
+          phoneNumber
+        });
+        
+        // Clear password from cache after successful retrieval (optional for security)
+        await passwordCache.clearTemporaryPassword(user.id);
+        
+      } else {
+        // Fallback: Generate new password if not found in cache
+        logger.warn('[WEBHOOK] No cached password found, generating new one', {
+          userId: user.id,
+          phoneNumber
+        });
+        
+        const words = ['Solar', 'Luna', 'Cielo', 'Mar', 'Monte', 'Rio', 'Viento', 'Fuego', 'Tierra', 'Agua'];
+        const word1 = words[Math.floor(Math.random() * words.length)];
+        const word2 = words[Math.floor(Math.random() * words.length)];
+        const num1 = Math.floor(Math.random() * 900) + 100;
+        const num2 = Math.floor(Math.random() * 900) + 100;
+        temporaryPassword = `${word1}-${num1}-${word2}-${num2}`;
+        
+        // Update user's password with the new one
+        const bcrypt = require('bcrypt');
+        const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+        
+        const updateQuery = 'UPDATE users SET password_hash = $1 WHERE id = $2';
+        await (client || require('../db')).query(updateQuery, [passwordHash, user.id]);
+        
+        logger.info('[WEBHOOK] Generated and stored new password for WhatsApp user', {
+          userId: user.id,
+          phoneNumber
+        });
+      }
+      
+    } catch (passwordError) {
+      logger.error('[WEBHOOK] Error generating password for WhatsApp user', {
+        error: passwordError.message,
+        userId: user.id,
+        phoneNumber
+      });
+      
+      // Still send payment success notification even if password fails
+      await whatsappNotificationService.sendPaymentSuccess(
+        phoneNumber,
+        user.firstName,
+        applicationId,
+        false // hasPortalAccess - false since no password
+      );
+      return;
+    }
+
+    // Send portal credentials via WhatsApp with retry logic
+    const userDetails = {
+      firstName: user.firstName,
+      email: user.email || application.delivery_email,
+      whatsappPhone: user.whatsappPhone
+    };
+
+    let whatsappDeliverySuccess = false;
+    let retries = 3;
+    
+    while (retries > 0 && !whatsappDeliverySuccess) {
+      try {
+        await whatsappNotificationService.sendPortalCredentials(
+          phoneNumber,
+          userDetails,
+          temporaryPassword
+        );
+        
+        whatsappDeliverySuccess = true;
+        logger.info('[WEBHOOK] WhatsApp credentials delivered successfully', {
+          userId: user.id,
+          phoneNumber,
+          attemptsUsed: 4 - retries
+        });
+        
+        // Track successful delivery metrics
+        try {
+          const metricsCollector = require('../monitoring/metrics-collector');
+          metricsCollector.recordEvent('whatsapp_credentials_sent', {
+            userId: user.id,
+            hasEmail: !!userDetails.email,
+            isNewUser: true,
+            attemptsUsed: 4 - retries
+          });
+        } catch (metricsError) {
+          logger.debug('[WEBHOOK] Error recording metrics (non-critical)', {
+            error: metricsError.message
+          });
+        }
+        
+        break; // Success - exit retry loop
+        
+      } catch (whatsappError) {
+        retries--;
+        logger.warn('[WEBHOOK] WhatsApp credentials delivery failed', {
+          error: whatsappError.message,
+          userId: user.id,
+          phoneNumber,
+          retriesLeft: retries
+        });
+        
+        if (retries === 0) {
+          // All retries exhausted - log critical error
+          logger.error('[WEBHOOK] Failed to send WhatsApp credentials after all attempts', {
+            error: whatsappError.message,
+            stack: whatsappError.stack,
+            userId: user.id,
+            phoneNumber,
+            totalAttempts: 3
+          });
+          
+          // Don't fail the entire webhook - email fallback will be attempted
+          break;
+          
+        } else {
+          // Wait before retry (exponential backoff)
+          const waitTime = (4 - retries) * 2000; // 2s, 4s wait times
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
+    }
+
+    // Send email backup (always send if have email, critical if WhatsApp failed)
+    if (userDetails.email) {
+      try {
+        // Add temporaryPassword to user object for email service
+        const userWithPassword = { ...user, temporaryPassword };
+        await userAccountService.sendPortalAccessEmail(userWithPassword, userDetails.email);
+        
+        const emailLogLevel = whatsappDeliverySuccess ? 'info' : 'warn';
+        logger[emailLogLevel]('[WEBHOOK] Portal access email sent', {
+          userId: user.id,
+          email: userDetails.email,
+          isBackupAfterWhatsAppFailure: !whatsappDeliverySuccess
+        });
+        
+        // Track email delivery metrics
+        try {
+          const metricsCollector = require('../monitoring/metrics-collector');
+          metricsCollector.recordEvent('email_credentials_sent', {
+            userId: user.id,
+            isBackupAfterWhatsAppFailure: !whatsappDeliverySuccess,
+            whatsappSuccess: whatsappDeliverySuccess
+          });
+        } catch (metricsError) {
+          logger.debug('[WEBHOOK] Error recording email metrics (non-critical)', {
+            error: metricsError.message
+          });
+        }
+        
+      } catch (emailError) {
+        const emailLogLevel = whatsappDeliverySuccess ? 'error' : 'critical';
+        logger[emailLogLevel === 'critical' ? 'error' : emailLogLevel]('[WEBHOOK] Error sending portal access email', {
+          error: emailError.message,
+          userId: user.id,
+          email: userDetails.email,
+          isCritical: !whatsappDeliverySuccess
+        });
+        
+        // If both WhatsApp and email failed, this is critical
+        if (!whatsappDeliverySuccess) {
+          logger.error('[WEBHOOK] CRITICAL: Both WhatsApp and email credential delivery failed', {
+            userId: user.id,
+            phoneNumber,
+            email: userDetails.email,
+            applicationId
+          });
+        }
+      }
+    } else if (!whatsappDeliverySuccess) {
+      // No email available and WhatsApp failed - critical situation
+      logger.error('[WEBHOOK] CRITICAL: WhatsApp delivery failed and no email available for backup', {
+        userId: user.id,
+        phoneNumber,
+        applicationId
+      });
+    }
+
+    logger.info('[WEBHOOK] WhatsApp credential delivery process completed', {
+      applicationId,
+      userId: user.id,
+      phoneNumber,
+      hasEmail: !!userDetails.email,
+      whatsappDeliverySuccess,
+      emailDeliveryAttempted: !!userDetails.email,
+      overallSuccess: whatsappDeliverySuccess || (userDetails.email ? true : false) // Success if either method worked
+    });
+
+  } catch (error) {
+    logger.error('[WEBHOOK] Error in WhatsApp credential delivery', {
+      error: error.message,
+      stack: error.stack,
+      applicationId,
+      sessionId: session.id
+    });
+    // Don't throw - this shouldn't fail the payment processing
+  }
+};
+
+/**
+ * Handle WhatsApp credential delivery from payment intent (alternative flow)
+ */
+const handleWhatsAppCredentialDeliveryFromPaymentIntent = async (paymentIntent, applicationId, client = null) => {
+  try {
+    // Check if this is a WhatsApp payment
+    const source = paymentIntent.metadata?.source;
+    const phoneNumber = paymentIntent.metadata?.phone_number;
+    
+    if (source !== 'whatsapp' || !phoneNumber) {
+      logger.debug('[WEBHOOK] Not a WhatsApp payment intent, skipping credential delivery', {
+        applicationId,
+        source,
+        hasPhone: !!phoneNumber
+      });
+      return;
+    }
+
+    // Create a session-like object for reusing the existing handler
+    const sessionLike = {
+      id: paymentIntent.id,
+      metadata: paymentIntent.metadata,
+      payment_intent: paymentIntent.id
+    };
+
+    // Reuse the existing handler
+    await handleWhatsAppCredentialDelivery(sessionLike, applicationId, client);
+
+  } catch (error) {
+    logger.error('[WEBHOOK] Error in WhatsApp credential delivery from payment intent', {
+      error: error.message,
+      stack: error.stack,
+      applicationId,
+      paymentIntentId: paymentIntent.id
+    });
+    // Don't throw - this shouldn't fail the payment processing
   }
 };
 

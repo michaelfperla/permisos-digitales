@@ -152,7 +152,7 @@ describe('Stripe Payment Controller', () => {
       marca: 'Toyota',
       linea: 'Camry',
       ano_modelo: '2023',
-      importe: 150
+      importe: 99
     };
 
     const mockUser = {
@@ -190,7 +190,7 @@ describe('Stripe Payment Controller', () => {
       expect(ApiResponse.success).toHaveBeenCalledWith(res, expect.objectContaining({
         applicationId: 1,
         customerId: 'cus_test123',
-        amount: 150,
+        amount: 99,
         currency: 'MXN'
       }));
     });
@@ -241,7 +241,7 @@ describe('Stripe Payment Controller', () => {
       marca: 'Toyota',
       linea: 'Camry',
       ano_modelo: '2023',
-      importe: 150
+      importe: 99
     };
 
     const mockPaymentResult = {
@@ -270,7 +270,7 @@ describe('Stripe Payment Controller', () => {
 
       expect(stripePaymentService.createChargeWithToken).toHaveBeenCalledWith(expect.objectContaining({
         customerId: 'cus_test123',
-        amount: 150,
+        amount: 99,
         currency: 'MXN',
         paymentMethodId: 'pm_test123',
         applicationId: 1
@@ -326,7 +326,7 @@ describe('Stripe Payment Controller', () => {
       marca: 'Toyota',
       linea: 'Camry',
       ano_modelo: '2023',
-      importe: 150
+      importe: 99
     };
 
     const mockOxxoResult = {
@@ -359,7 +359,7 @@ describe('Stripe Payment Controller', () => {
 
       expect(stripePaymentService.processOxxoPayment).toHaveBeenCalledWith(expect.objectContaining({
         customerId: 'cus_test123',
-        amount: 150,
+        amount: 99,
         currency: 'MXN',
         applicationId: 1
       }));
@@ -409,7 +409,7 @@ describe('Stripe Payment Controller', () => {
       id: 1,
       user_id: 1,
       status: ApplicationStatus.PAYMENT_PROCESSING,
-      importe: 150,
+      importe: 99,
       created_at: '2024-01-01T00:00:00.000Z',
       updated_at: '2024-01-01T01:00:00.000Z'
     };
@@ -443,7 +443,7 @@ describe('Stripe Payment Controller', () => {
         status: ApplicationStatus.PAYMENT_PROCESSING,
         paymentStatus: 'processing',
         paymentMethod: 'card',
-        amount: 150,
+        amount: 99,
         stripeStatus: 'processing'
       }));
     });
@@ -548,7 +548,7 @@ describe('Stripe Payment Controller', () => {
     const mockApplication = {
       id: 1,
       user_id: 1,
-      importe: 150,
+      importe: 99,
       marca: 'Toyota',
       linea: 'Camry'
     };
@@ -580,7 +580,7 @@ describe('Stripe Payment Controller', () => {
 
       expect(stripePaymentService.createPaymentIntentForCard).toHaveBeenCalledWith(expect.objectContaining({
         customerId: 'cus_test123',
-        amount: 150,
+        amount: 99,
         description: 'Permiso de Circulación para Toyota Camry',
         applicationId: 1,
         userId: 1,

@@ -420,18 +420,20 @@ class StripePaymentService {
       throw new Error('Customer name is required');
     }
 
-    if (!customerData.email) {
-      throw new Error('Customer email is required');
-    }
+    // Email is optional for WhatsApp users - Stripe supports customers without email
+    const email = customerData.email && customerData.email.trim()
+      ? customerData.email.trim().toLowerCase()
+      : null;
 
     const sanitizedData = {
       name: customerData.name.trim(),
-      email: customerData.email.trim().toLowerCase(),
+      email: email,
       phone: customerData.phone ? customerData.phone.trim() : ''
     };
 
-    // Use stable idempotency key based on email to prevent duplicate customers
-    const customerIdempotencyKey = idempotencyKey || `customer-${sanitizedData.email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    // Use stable idempotency key based on phone or email to prevent duplicate customers
+    const identifier = email || sanitizedData.phone || `customer-${Date.now()}`;
+    const customerIdempotencyKey = idempotencyKey || `customer-${identifier.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
     logger.debug('Creating customer in Stripe:', {
       name: sanitizedData.name,
@@ -446,43 +448,49 @@ class StripePaymentService {
           await this.initializeStripe();
         }
 
-        // Check for existing customer first
-        try {
-          // Use standard Stripe SDK to find customer by email
-          const customers = await this.stripe.customers.list({
-            email: sanitizedData.email,
-            limit: 1
-          });
-          const existingCustomer = customers.data[0];
-
-          if (existingCustomer) {
-            logger.debug('Customer already exists in Stripe:', {
-              customerId: existingCustomer.id,
-              idempotencyKey: customerIdempotencyKey
+        // Check for existing customer first (only if we have an email)
+        if (sanitizedData.email) {
+          try {
+            // Use standard Stripe SDK to find customer by email
+            const customers = await this.stripe.customers.list({
+              email: sanitizedData.email,
+              limit: 1
             });
+            const existingCustomer = customers.data[0];
 
-            return {
-              id: existingCustomer.id,
-              name: existingCustomer.name,
-              email: existingCustomer.email,
-              phone: existingCustomer.phone || '',
-              created_at: new Date(existingCustomer.created * 1000).toISOString(),
-              existing: true,
-              idempotencyKey: customerIdempotencyKey
-            };
+            if (existingCustomer) {
+              logger.debug('Customer already exists in Stripe:', {
+                customerId: existingCustomer.id,
+                idempotencyKey: customerIdempotencyKey
+              });
+
+              return {
+                id: existingCustomer.id,
+                name: existingCustomer.name,
+                email: existingCustomer.email,
+                phone: existingCustomer.phone || '',
+                created_at: new Date(existingCustomer.created * 1000).toISOString(),
+                existing: true,
+                idempotencyKey: customerIdempotencyKey
+              };
+            }
+          } catch (findError) {
+            logger.debug('Error checking for existing customer:', {
+              error: findError.message,
+              email: sanitizedData.email
+            });
           }
-        } catch (findError) {
-          logger.debug('Error checking for existing customer:', {
-            error: findError.message,
-            email: sanitizedData.email
-          });
         }
 
         const customerRequest = {
           name: sanitizedData.name,
-          email: sanitizedData.email,
           phone: sanitizedData.phone
         };
+
+        // Only include email if it's not null
+        if (sanitizedData.email) {
+          customerRequest.email = sanitizedData.email;
+        }
 
         logger.debug('Creating customer with request:', {
           request: customerRequest,
@@ -507,32 +515,37 @@ class StripePaymentService {
           if (customerError.code === 'resource_already_exists') {
             logger.debug('Received duplicate customer error, attempting to fetch existing customer');
 
-            try {
-              // Use standard Stripe SDK to find customer by email
-          const customers = await this.stripe.customers.list({
-            email: sanitizedData.email,
-            limit: 1
-          });
-          const existingCustomer = customers.data[0];
-
-              if (existingCustomer) {
-                logger.debug('Found existing customer after duplicate error:', {
-                  customerId: existingCustomer.id,
-                  idempotencyKey: customerIdempotencyKey
+            // Only try to find by email if we have one
+            if (sanitizedData.email) {
+              try {
+                // Use standard Stripe SDK to find customer by email
+                const customers = await this.stripe.customers.list({
+                  email: sanitizedData.email,
+                  limit: 1
                 });
+                const existingCustomer = customers.data[0];
 
-                return {
-                  id: existingCustomer.id,
-                  name: existingCustomer.name,
-                  email: existingCustomer.email,
-                  phone: existingCustomer.phone || '',
-                  created_at: new Date(existingCustomer.created * 1000).toISOString(),
-                  existing: true,
-                  idempotencyKey: customerIdempotencyKey
-                };
+                if (existingCustomer) {
+                  logger.debug('Found existing customer after duplicate error:', {
+                    customerId: existingCustomer.id,
+                    idempotencyKey: customerIdempotencyKey
+                  });
+
+                  return {
+                    id: existingCustomer.id,
+                    name: existingCustomer.name,
+                    email: existingCustomer.email,
+                    phone: existingCustomer.phone || '',
+                    created_at: new Date(existingCustomer.created * 1000).toISOString(),
+                    existing: true,
+                    idempotencyKey: customerIdempotencyKey
+                  };
+                }
+              } catch (fetchError) {
+                logger.error('Error fetching customer after duplicate error:', fetchError);
               }
-            } catch (fetchError) {
-              logger.error('Error fetching customer after duplicate error:', fetchError);
+            } else {
+              logger.debug('No email available to search for existing customer after duplicate error');
             }
           }
 
@@ -694,7 +707,8 @@ class StripePaymentService {
         }
 
         // Create customer first with retry logic
-        const customerIdempotencyKey = `customer-${sanitizedData.email}-${Date.now()}`;
+        const emailOrPhone = sanitizedData.email || sanitizedData.phone || 'no-email';
+        const customerIdempotencyKey = `customer-${emailOrPhone}-${Date.now()}`;
         const customer = await this.createCustomer({
           name: sanitizedData.name,
           email: sanitizedData.email,

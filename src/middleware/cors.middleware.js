@@ -11,12 +11,13 @@ const corsOptions = {
 
     const allowedOrigins = process.env.NODE_ENV === 'production'
       ? [
+        // Primary .com.mx domains only (after redirect)
         'https://permisosdigitales.com.mx',
         'https://www.permisosdigitales.com.mx',
-        'https://permisosdigitales.com',
-        'https://www.permisosdigitales.com',
-        'https://d2gtd1yvnspajh.cloudfront.net',
+        'https://admin.permisosdigitales.com.mx',
         'https://api.permisosdigitales.com.mx',
+        'https://d2gtd1yvnspajh.cloudfront.net',
+        // Note: .com domains redirect to .com.mx, no CORS needed for them
       ]
       : [
         'http://localhost:3000',
@@ -49,7 +50,7 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Cookie', 'X-Portal-Type'],
   exposedHeaders: ['Set-Cookie'],
   credentials: true,

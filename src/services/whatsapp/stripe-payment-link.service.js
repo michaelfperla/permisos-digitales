@@ -135,7 +135,8 @@ class StripePaymentLinkService {
         cancelUrl
       } = options;
 
-      const session = await stripePaymentService.stripe.checkout.sessions.create({
+      // Build session options
+      const sessionOptions = {
         payment_method_types: ['card', 'oxxo'],
         line_items: [{
           price_data: {
@@ -151,7 +152,6 @@ class StripePaymentLinkService {
         mode: 'payment',
         success_url: successUrl || `https://permisosdigitales.com.mx/payment-success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: cancelUrl || 'https://permisosdigitales.com.mx/payment-cancelled',
-        customer_email: customerEmail,
         metadata: {
           application_id: applicationId,
           ...metadata
@@ -164,7 +164,14 @@ class StripePaymentLinkService {
         },
         // Checkout session expires in 23 hours (Stripe max is 24 hours)
         expires_at: Math.floor(Date.now() / 1000) + (23 * 60 * 60)
-      });
+      };
+
+      // Only include customer_email if we have a valid email
+      if (customerEmail && customerEmail.trim() && customerEmail.includes('@')) {
+        sessionOptions.customer_email = customerEmail;
+      }
+
+      const session = await stripePaymentService.stripe.checkout.sessions.create(sessionOptions);
 
       logger.info('Stripe checkout session created', {
         sessionId: session.id,

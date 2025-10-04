@@ -249,7 +249,7 @@ Extrae la información relevante del mensaje. Si el usuario está corrigiendo in
 • Domicilio
 • Datos completos del vehículo
 
-El costo es de $150 MXN y el permiso se genera en 5-10 minutos después del pago.
+El costo es de $99 MXN y el permiso se genera en 5-10 minutos después del pago.
 
 ¿Continuamos con tu solicitud?`;
   }

@@ -220,6 +220,13 @@
   margin-top: var(--space-3);
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* --- Overlapping Content Section --- */
@@ -744,5 +751,155 @@
     left: 16px;
     top: 36px;
     bottom: calc(-1 * var(--space-4) + 2px);
+  }
+}
+
+/* WhatsApp Button Styles - Secondary/Subtle */
+.whatsappButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: transparent;
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  border: 1.5px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease-in-out;
+  margin-top: 0;
+  min-width: 180px;
+  justify-content: center;
+  position: relative;
+}
+
+.whatsappButton:hover {
+  background-color: rgba(37, 211, 102, 0.05);
+  border-color: #25D366;
+  color: #25D366;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.15);
+  text-decoration: none;
+}
+
+.whatsappButton:focus {
+  outline: 2px solid #25D366;
+  outline-offset: 2px;
+  border-color: #25D366;
+  color: #25D366;
+}
+
+/* Floating WhatsApp Button - Attention-grabbing but not disturbing */
+.floatingWhatsappButton {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  animation: gentleBounce 3s ease-in-out infinite;
+}
+
+.floatingWhatsappButton:hover {
+  background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5), 0 0 0 8px rgba(37, 211, 102, 0.1);
+  color: white;
+  text-decoration: none;
+  animation: none;
+}
+
+.floatingWhatsappButton:focus {
+  outline: 2px solid #25D366;
+  outline-offset: 4px;
+}
+
+/* Gentle bounce animation - attention-grabbing but not disturbing */
+@keyframes gentleBounce {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3), 0 0 0 0 rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.35), 0 0 0 4px rgba(37, 211, 102, 0.1);
+  }
+}
+
+/* Subtle glow effect for extra attention */
+.floatingWhatsappButton::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #25D366, #128C7E, #25D366);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.floatingWhatsappButton:hover::before {
+  opacity: 0.3;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alternative Option Styling */
+.alternativeOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.alternativeText {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  margin-bottom: var(--space-1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .whatsappButton {
+    min-width: 180px;
+    font-size: var(--font-size-xs);
+    padding: var(--space-2) var(--space-3);
+  }
+  
+  .floatingWhatsappButton {
+    width: 54px;
+    height: 54px;
+    bottom: 20px;
+    right: 16px;
+    box-shadow: 0 3px 15px rgba(37, 211, 102, 0.4), 0 0 0 0 rgba(37, 211, 102, 0.3);
+  }
+  
+  .floatingWhatsappButton:hover {
+    transform: scale(1.08) translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5), 0 0 0 6px rgba(37, 211, 102, 0.1);
   }
 }

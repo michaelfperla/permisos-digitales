@@ -194,8 +194,8 @@ function registerPermisosServices(serviceContainer, config) {
   serviceContainer.registerService('auditService', async (deps, config) => {
     const AuditService = require('../services/audit.service');
     const auditService = new AuditService({
-      database: deps.database,
-      redis: deps.redis,
+      database: deps.database,  // Pass the database service wrapper
+      redis: deps.redis?.client || deps.redis,  // Extract Redis client
       logger: logger
     });
     logger.info('[ServiceRegistry] Audit service registered');
@@ -266,7 +266,7 @@ function registerPermisosServices(serviceContainer, config) {
         // Fallback to development service
         const DevPdfQueueService = require('../services/pdf-queue-dev.service');
         logger.info('[ServiceRegistry] PDF Queue service registered (dev fallback)');
-        return DevPdfQueueService;
+        return DevPdfQueueService.getInstance();
       }
     } catch (error) {
       // Return stub service for graceful degradation
@@ -274,6 +274,7 @@ function registerPermisosServices(serviceContainer, config) {
       return {
         addJob: async () => ({ id: 'stub-job-' + Date.now() }),
         getQueueStats: async () => ({ active: 0, waiting: 0, completed: 0, failed: 0 }),
+        getApplicationQueueStatus: async () => null,
         getHealthStatus: async () => ({ healthy: false, reason: 'stub_service' }),
         shutdown: async () => {}
       };

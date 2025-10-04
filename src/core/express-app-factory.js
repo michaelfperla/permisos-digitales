@@ -46,11 +46,15 @@ class PermisosExpressAppFactory {
    * @private
    */
   configureMiddleware(app, config) {
+    // Domain redirect middleware - MUST be first to ensure correct domain
+    const domainRedirectMiddleware = require('../middleware/domain-redirect.middleware');
+    app.use(domainRedirectMiddleware);
+
     // Security middleware
     const corsMiddleware = require('../middleware/cors.middleware');
     const securityMiddleware = require('../middleware/security.middleware');
     const { performanceMonitoring } = require('../middleware/monitoring.middleware');
-    
+
     app.use(corsMiddleware);
     app.use(securityMiddleware);
     
@@ -94,17 +98,22 @@ class PermisosExpressAppFactory {
 
     // Body parsing - handle webhook routes separately
     app.use((req, res, next) => {
-      if (req.path === '/webhook/stripe') {
-        // Use raw body parser for Stripe webhooks
-        express.raw({ type: 'application/json' })(req, res, next);
+      if (req.path === '/webhook/stripe' || req.path === '/api/whatsapp/webhook') {
+        // Use raw body parser for webhooks that require signature validation
+        express.raw({ 
+          type: 'application/json',
+          verify: (req, res, buf) => {
+            req.rawBody = buf.toString('utf8');
+          }
+        })(req, res, next);
       } else {
         express.json({ limit: '10mb' })(req, res, next);
       }
     });
     
     app.use((req, res, next) => {
-      if (req.path === '/webhook/stripe') {
-        // Skip URL encoding for Stripe webhooks
+      if (req.path === '/webhook/stripe' || req.path === '/api/whatsapp/webhook') {
+        // Skip URL encoding for webhooks
         next();
       } else {
         express.urlencoded({ extended: true, limit: '10mb' })(req, res, next);
@@ -130,7 +139,7 @@ class PermisosExpressAppFactory {
   configureRoutes(app, config) {
     const routes = require('../routes');
     
-    // Mount routes directly (no /api prefix)
+    // Mount API routes first (they have priority)
     app.use('/', routes);
 
     // Health check route

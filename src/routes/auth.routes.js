@@ -47,8 +47,26 @@ router.post(
 
 const loginValidationRules = [
   body('email')
-    .isEmail().withMessage('Escribe un correo válido.')
-    .normalizeEmail(),
+    .custom((value) => {
+      // Accept either email or phone number
+      const isEmail = value.includes('@');
+      const isPhone = /^[0-9+\-\s()]+$/.test(value);
+      
+      if (!isEmail && !isPhone) {
+        throw new Error('Escribe un correo válido o número de teléfono.');
+      }
+      
+      if (isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        throw new Error('Escribe un correo válido.');
+      }
+      
+      if (isPhone && value.replace(/\D/g, '').length < 10) {
+        throw new Error('El número de teléfono debe tener al menos 10 dígitos.');
+      }
+      
+      return true;
+    })
+    .trim(),
 
   body('password')
     .notEmpty().withMessage('Falta tu contraseña.')

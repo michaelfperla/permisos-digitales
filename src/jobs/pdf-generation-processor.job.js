@@ -76,7 +76,14 @@ class PdfGenerationProcessor {
         return;
       }
 
-      logger.info(`Found ${pendingApplications.length} applications pending PDF generation`);
+      logger.info(`[PDF-PROCESSOR] Found ${pendingApplications.length} applications pending PDF generation`, {
+        applicationIds: pendingApplications.map(app => app.id),
+        sources: pendingApplications.map(app => ({
+          id: app.id,
+          source: app.source || 'unknown',
+          paymentOrderId: app.payment_processor_order_id
+        }))
+      });
 
       const pdfQueueService = getPdfQueueService();
       if (!pdfQueueService) {
@@ -105,12 +112,14 @@ class PdfGenerationProcessor {
   }
 
   async processApplication(application, pdfQueueService) {
-    const { id: applicationId, user_id: userId, payment_processor_order_id } = application;
-    
-    logger.info('Processing deferred PDF generation', {
+    const { id: applicationId, user_id: userId, payment_processor_order_id, source } = application;
+
+    logger.info('[PDF-PROCESSOR] Processing deferred PDF generation', {
       applicationId,
       userId,
-      paymentIntentId: payment_processor_order_id
+      paymentIntentId: payment_processor_order_id,
+      source: source || 'unknown',
+      isWhatsAppPayment: source === 'whatsapp'
     });
 
     try {

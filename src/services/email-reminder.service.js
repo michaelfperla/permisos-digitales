@@ -133,7 +133,7 @@ class EmailReminderService {
         userName: application.nombre_completo,
         vehicleDetails: `${application.marca} ${application.linea} ${application.ano_modelo}`,
         applicantName: application.nombre_completo,
-        amount: application.importe || 150,
+        amount: application.importe || 99,
         statusText: this.getStatusText(application.status),
         timeRemaining: this.formatTimeRemaining(application.expires_at),
         expirationDate: new Date(application.expires_at).toLocaleString('es-MX', {
@@ -202,7 +202,7 @@ class EmailReminderService {
         userName: application.nombre_completo,
         vehicleDetails: `${application.marca} ${application.linea} ${application.ano_modelo}`,
         applicantName: application.nombre_completo,
-        amount: application.importe || 150,
+        amount: application.importe || 99,
         statusText: this.getStatusText(application.status),
         timeRemaining: this.formatTimeRemaining(application.expires_at),
         expirationDate: new Date(application.expires_at).toLocaleString('es-MX', {
