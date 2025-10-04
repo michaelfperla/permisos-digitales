@@ -422,7 +422,7 @@ class EmailReminderService {
         FROM permit_applications a
         JOIN users u ON a.user_id = u.id
         WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
-        AND a.fecha_vencimiento::date = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date + INTERVAL '3 days'
+        AND a.fecha_vencimiento::date = (NOW() AT TIME ZONE 'America/Mexico_City')::date + INTERVAL '3 days'
         AND u.account_email IS NOT NULL
       `);
 
@@ -444,7 +444,7 @@ class EmailReminderService {
         FROM permit_applications a
         JOIN users u ON a.user_id = u.id
         WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
-        AND a.fecha_vencimiento::date = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+        AND a.fecha_vencimiento::date = (NOW() AT TIME ZONE 'America/Mexico_City')::date
         AND u.account_email IS NOT NULL
       `);
 

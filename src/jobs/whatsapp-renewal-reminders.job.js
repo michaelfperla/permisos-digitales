@@ -30,7 +30,7 @@ class WhatsAppRenewalRemindersJob {
             a.fecha_vencimiento,
             a.status,
             a.renewed_from_id,
-            (a.fecha_vencimiento - (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date) as days_until_expiry,
+            (a.fecha_vencimiento - (NOW() AT TIME ZONE 'America/Mexico_City')::date) as days_until_expiry,
             COALESCE(u.whatsapp_phone, u.phone) as phone,
             u.account_email as email,
             u.whatsapp_notifications_enabled,
