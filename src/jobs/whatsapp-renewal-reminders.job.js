@@ -30,7 +30,7 @@ class WhatsAppRenewalRemindersJob {
             a.fecha_vencimiento,
             a.status,
             a.renewed_from_id,
-            (a.fecha_vencimiento - CURRENT_DATE) as days_until_expiry,
+            (a.fecha_vencimiento - (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date) as days_until_expiry,
             u.phone,
             u.email,
             u.whatsapp_notifications_enabled,
@@ -51,6 +51,7 @@ class WhatsAppRenewalRemindersJob {
           JOIN users u ON a.user_id = u.id
           WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
             AND u.phone IS NOT NULL
+            AND u.phone ~ '^52[0-9]{10}$'
             AND u.whatsapp_notifications_enabled = true
             -- Only include permits that haven't been renewed
             AND NOT EXISTS (
@@ -161,30 +162,42 @@ class WhatsAppRenewalRemindersJob {
       // Import WhatsApp service
       const WhatsAppService = require('../services/whatsapp/simple-whatsapp.service');
       const whatsappService = new WhatsAppService();
-      
+
       // Initialize the service (required to set apiUrl)
       await whatsappService.initialize();
-      
+
       // Send the message
       await whatsappService.sendMessage(phone, message);
-      
-      // Record that reminder was sent
+
+      // Record that reminder was sent (always record to prevent retries)
       await this.recordReminderSent(applicationId, phone, 'whatsapp_renewal_reminder');
-      
+
       logger.info('Renewal reminder sent successfully', {
         phone: phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'), // Mask middle digits
         applicationId,
         messageLength: message.length
       });
-      
+
       return true;
     } catch (error) {
+      // Record attempt even if failed (prevents infinite retries)
+      try {
+        await this.recordReminderSent(applicationId, phone, 'whatsapp_renewal_reminder');
+      } catch (recordError) {
+        logger.error('Failed to record failed reminder attempt', {
+          applicationId,
+          error: recordError.message
+        });
+      }
+
       logger.error('Failed to send renewal reminder', {
         phone: phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2'),
         applicationId,
         error: error.message
       });
-      throw error;
+
+      // Don't throw - let the job continue with other permits
+      return false;
     }
   }
 

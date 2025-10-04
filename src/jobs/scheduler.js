@@ -237,7 +237,7 @@ function initScheduledJobs() {
   });
   logger.info('Privacy export cleanup job scheduled for 3:00 AM daily');
 
-  // Permit expiration notifications (WhatsApp + Email) - runs daily at 10:00 AM
+  // Permit expiration notifications (WhatsApp + Email) - runs daily at 10:00 AM Mexico City time
   cron.schedule('0 10 * * *', async () => {
     logger.info('Running permit expiration notifications job');
     try {
@@ -252,6 +252,8 @@ function initScheduledJobs() {
     } catch (error) {
       logger.error('Error running permit expiration notifications job:', error);
     }
+  }, {
+    timezone: "America/Mexico_City"
   });
   logger.info('WhatsApp renewal reminders job scheduled to run daily at 10:00 AM');
 

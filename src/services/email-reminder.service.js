@@ -301,14 +301,21 @@ class EmailReminderService {
         html
       });
 
-      if (emailResult.success) {
-        await db.query(`
-          INSERT INTO permit_expiration_notifications (application_id, notification_type, sent_at)
-          VALUES ($1, 'three_day_warning', NOW())
-        `, [permit.id]);
+      // Always record attempt, even if failed (prevents retry loops)
+      await db.query(`
+        INSERT INTO permit_expiration_notifications (application_id, notification_type, sent_at)
+        VALUES ($1, 'three_day_warning', NOW())
+        ON CONFLICT (application_id, notification_type) DO NOTHING
+      `, [permit.id]);
 
+      if (emailResult.success) {
         logger.info(`3-day expiration notification sent for permit ${permit.id}`, {
           email: user.email
+        });
+      } else {
+        logger.error(`Failed to send 3-day notification for permit ${permit.id}`, {
+          email: user.email,
+          error: emailResult.error
         });
       }
 
@@ -370,14 +377,21 @@ class EmailReminderService {
         html
       });
 
-      if (emailResult.success) {
-        await db.query(`
-          INSERT INTO permit_expiration_notifications (application_id, notification_type, sent_at)
-          VALUES ($1, 'expiry_day', NOW())
-        `, [permit.id]);
+      // Always record attempt, even if failed (prevents retry loops)
+      await db.query(`
+        INSERT INTO permit_expiration_notifications (application_id, notification_type, sent_at)
+        VALUES ($1, 'expiry_day', NOW())
+        ON CONFLICT (application_id, notification_type) DO NOTHING
+      `, [permit.id]);
 
+      if (emailResult.success) {
         logger.info(`Expiry day notification sent for permit ${permit.id}`, {
           email: user.email
+        });
+      } else {
+        logger.error(`Failed to send expiry day notification for permit ${permit.id}`, {
+          email: user.email,
+          error: emailResult.error
         });
       }
 
@@ -404,12 +418,12 @@ class EmailReminderService {
 
       // Get permits expiring in 3 days
       const threeDayPermits = await db.query(`
-        SELECT a.*, u.email, u.id as user_id
+        SELECT a.*, u.account_email as email, u.id as user_id
         FROM permit_applications a
         JOIN users u ON a.user_id = u.id
         WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
-        AND a.fecha_vencimiento::date = CURRENT_DATE + INTERVAL '3 days'
-        AND u.email IS NOT NULL
+        AND a.fecha_vencimiento::date = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date + INTERVAL '3 days'
+        AND u.account_email IS NOT NULL
       `);
 
       for (const permit of threeDayPermits.rows) {
@@ -426,12 +440,12 @@ class EmailReminderService {
 
       // Get permits expiring today
       const expiryDayPermits = await db.query(`
-        SELECT a.*, u.email, u.id as user_id
+        SELECT a.*, u.account_email as email, u.id as user_id
         FROM permit_applications a
         JOIN users u ON a.user_id = u.id
         WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
-        AND a.fecha_vencimiento::date = CURRENT_DATE
-        AND u.email IS NOT NULL
+        AND a.fecha_vencimiento::date = (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date
+        AND u.account_email IS NOT NULL
       `);
 
       for (const permit of expiryDayPermits.rows) {
