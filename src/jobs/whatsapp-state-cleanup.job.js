@@ -142,15 +142,15 @@ class WhatsAppStateCleanupJob {
       
       // Mark incomplete applications older than 24 hours with no payment as expired
       const result = await client.query(`
-        UPDATE permit_applications 
+        UPDATE permit_applications
         SET status = 'EXPIRED',
             updated_at = NOW()
         WHERE status IN ('AWAITING_PAYMENT', 'INCOMPLETE')
           AND created_at < NOW() - INTERVAL '24 hours'
           AND NOT EXISTS (
-            SELECT 1 FROM payments 
-            WHERE payments.application_id = permit_applications.id 
-            AND payments.status = 'succeeded'
+            SELECT 1 FROM payment_events
+            WHERE payment_events.application_id = permit_applications.id
+            AND payment_events.event_type IN ('payment_intent.succeeded', 'checkout.session.completed')
           )
         RETURNING id
       `);
