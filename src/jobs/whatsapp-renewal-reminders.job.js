@@ -31,8 +31,8 @@ class WhatsAppRenewalRemindersJob {
             a.status,
             a.renewed_from_id,
             (a.fecha_vencimiento - (CURRENT_DATE AT TIME ZONE 'America/Mexico_City')::date) as days_until_expiry,
-            u.phone,
-            u.email,
+            COALESCE(u.whatsapp_phone, u.phone) as phone,
+            u.account_email as email,
             u.whatsapp_notifications_enabled,
             a.nombre_completo,
             a.marca,
@@ -50,8 +50,8 @@ class WhatsAppRenewalRemindersJob {
           FROM permit_applications a
           JOIN users u ON a.user_id = u.id
           WHERE a.status IN ('PERMIT_READY', 'ACTIVE')
-            AND u.phone IS NOT NULL
-            AND u.phone ~ '^52[0-9]{10}$'
+            AND (u.whatsapp_phone IS NOT NULL OR u.phone IS NOT NULL)
+            AND COALESCE(u.whatsapp_phone, u.phone) ~ '^52(1)?[0-9]{10}$'
             AND u.whatsapp_notifications_enabled = true
             -- Only include permits that haven't been renewed
             AND NOT EXISTS (
