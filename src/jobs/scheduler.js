@@ -237,14 +237,20 @@ function initScheduledJobs() {
   });
   logger.info('Privacy export cleanup job scheduled for 3:00 AM daily');
 
-  // WhatsApp renewal reminders - runs daily at 10:00 AM
+  // Permit expiration notifications (WhatsApp + Email) - runs daily at 10:00 AM
   cron.schedule('0 10 * * *', async () => {
-    logger.info('Running WhatsApp renewal reminders job');
+    logger.info('Running permit expiration notifications job');
     try {
-      const result = await whatsappRenewalRemindersJob.execute();
-      logger.info('WhatsApp renewal reminders job completed:', result);
+      // Send WhatsApp notifications
+      const whatsappResult = await whatsappRenewalRemindersJob.execute();
+      logger.info('WhatsApp expiration notifications completed:', whatsappResult);
+
+      // Send Email notifications
+      const emailReminderServiceInstance = new emailReminderService();
+      const emailResult = await emailReminderServiceInstance.processPermitExpirationNotifications();
+      logger.info('Email expiration notifications completed:', emailResult);
     } catch (error) {
-      logger.error('Error running WhatsApp renewal reminders job:', error);
+      logger.error('Error running permit expiration notifications job:', error);
     }
   });
   logger.info('WhatsApp renewal reminders job scheduled to run daily at 10:00 AM');

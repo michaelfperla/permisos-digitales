@@ -11,23 +11,19 @@ class WhatsAppRenewalRemindersJob {
 
   /**
    * Find permits eligible for renewal reminders
-   * Reminder schedule:
-   * - 7 days before expiry (early reminder)
-   * - 3 days before expiry (urgent reminder) 
-   * - 1 day before expiry (final reminder)
-   * - Day of expiry (same day reminder)
-   * - 7 days after expiry (grace period reminder)
-   * - 15 days after expiry (final grace reminder)
+   * Simplified reminder schedule:
+   * - 3 days before expiry
+   * - Day of expiry
    */
   async findPermitsForReminders() {
     const db = require('../db');
-    
+
     try {
       // Query for permits that need renewal reminders
       const { rows } = await db.query(`
         WITH renewal_candidates AS (
           -- Get latest permit per user (excluding those already renewed)
-          SELECT DISTINCT ON (a.user_id) 
+          SELECT DISTINCT ON (a.user_id)
             a.id,
             a.user_id,
             a.folio,
@@ -48,8 +44,8 @@ class WhatsAppRenewalRemindersJob {
             a.curp_rfc,
             a.domicilio,
             -- Check if user has any renewal reminders sent today
-            (SELECT COUNT(*) FROM whatsapp_renewal_reminders wrr 
-             WHERE wrr.application_id = a.id 
+            (SELECT COUNT(*) FROM whatsapp_renewal_reminders wrr
+             WHERE wrr.application_id = a.id
              AND wrr.sent_at::date = CURRENT_DATE) as reminders_sent_today
           FROM permit_applications a
           JOIN users u ON a.user_id = u.id
@@ -58,7 +54,7 @@ class WhatsAppRenewalRemindersJob {
             AND u.whatsapp_notifications_enabled = true
             -- Only include permits that haven't been renewed
             AND NOT EXISTS (
-              SELECT 1 FROM permit_applications renewed 
+              SELECT 1 FROM permit_applications renewed
               WHERE renewed.renewed_from_id = a.id
             )
           ORDER BY a.user_id, a.created_at DESC
@@ -67,18 +63,10 @@ class WhatsAppRenewalRemindersJob {
         FROM renewal_candidates
         WHERE reminders_sent_today = 0  -- No reminders sent today
         AND (
-          -- 7 days before expiry (early reminder)
-          days_until_expiry = 7 OR
-          -- 3 days before expiry (urgent reminder)
+          -- 3 days before expiry
           days_until_expiry = 3 OR
-          -- 1 day before expiry (final reminder)
-          days_until_expiry = 1 OR
-          -- Day of expiry (same day reminder)
-          days_until_expiry = 0 OR
-          -- 7 days after expiry (grace period)
-          days_until_expiry = -7 OR
-          -- 15 days after expiry (final grace)
-          days_until_expiry = -15
+          -- Day of expiry
+          days_until_expiry = 0
         )
         ORDER BY days_until_expiry DESC, user_id
       `);
@@ -95,184 +83,74 @@ class WhatsAppRenewalRemindersJob {
    * Get reminder message based on days until expiry
    */
   getReminderMessage(daysUntilExpiry, permitData) {
-    const { 
-      folio, 
-      nombre_completo, 
-      marca, 
-      linea, 
-      color, 
+    const {
+      folio,
+      nombre_completo,
+      marca,
+      linea,
+      color,
       ano_modelo,
       numero_motor,
       numero_serie,
-      fecha_vencimiento 
+      fecha_vencimiento
     } = permitData;
-    
+
     const name = nombre_completo ? nombre_completo.split(' ')[0] : 'Usuario';
-    
+
     // Format vehicle details
-    const vehicleInfo = `${marca || 'N/A'} ${linea || ''} ${ano_modelo || ''}`.trim();
     const vehicleColor = color || 'N/A';
     const motorNumber = numero_motor || 'N/A';
     const serieNumber = numero_serie || 'N/A';
-    
+
     // Format expiration date
     const expirationDate = new Date(fecha_vencimiento).toLocaleDateString('es-MX', {
       day: '2-digit',
-      month: '2-digit', 
+      month: '2-digit',
       year: 'numeric'
     });
 
-    if (daysUntilExpiry === 7) {
-      return `🔔 *RECORDATORIO: RENOVACIÓN DISPONIBLE*\n\n` +
-             `Hola ${name}, tu permiso provisional vence en 7 días.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Vence:* ${expirationDate} (7 días)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `💰 *Costo:* $99 MXN • ⚡ *Tiempo:* 30 segundos\n\n` +
-             `🚀 *¿RENOVAR CON ESTOS DATOS?*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `💡 *Renueva ahora y evita trámites de último momento*\n\n` +
-             `¿Preguntas? Escribe *ayuda*`;
-    }
-
     if (daysUntilExpiry === 3) {
-      return `⚠️ *URGENTE: RENOVACIÓN NECESARIA*\n\n` +
-             `${name}, tu permiso vence en solo 3 días.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Vence:* ${expirationDate} (3 días)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `💰 *Costo:* $99 MXN • ⚡ *Tiempo:* 30 segundos\n\n` +
-             `🚨 *¡ACCIÓN INMEDIATA REQUERIDA!*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `🚨 *¡No esperes al último día!*\n\n` +
-             `¿Ayuda? Escribe *ayuda*`;
-    }
-
-    if (daysUntilExpiry === 1) {
-      return `🚨 *ÚLTIMO DÍA: RENUEVA HOY*\n\n` +
-             `${name}, tu permiso vence MAÑANA.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Vence:* ${expirationDate} (MAÑANA)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `💰 *Costo:* $99 MXN\n` +
-             `💳 *Pago inmediato:* Tarjeta • 🏪 *OXXO:* 1-4 horas\n\n` +
-             `🚨 *¡ÚLTIMA OPORTUNIDAD!*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `🆘 *Soporte urgente:* *ayuda*`;
+      return `⚠️ *TU PERMISO VENCE EN 3 DÍAS*\n\n` +
+             `Hola ${name}, tu permiso provisional vence pronto.\n\n` +
+             `📋 *INFORMACIÓN DE TU PERMISO*\n` +
+             `*Folio:* ${folio}\n` +
+             `*Vence:* ${expirationDate} (3 días)\n\n` +
+             `🚗 *VEHÍCULO*\n` +
+             `${marca || 'N/A'} ${linea || 'N/A'} ${ano_modelo || 'N/A'}\n` +
+             `Color: ${vehicleColor}\n` +
+             `Serie: ${serieNumber}\n` +
+             `Motor: ${motorNumber}\n\n` +
+             `💰 *RENOVACIÓN*\n` +
+             `Costo: $99 MXN\n` +
+             `Tiempo: 30 segundos\n\n` +
+             `✅ Escribe *renovar* para renovar tu permiso\n` +
+             `❓ Escribe *ayuda* para más información`;
     }
 
     if (daysUntilExpiry === 0) {
-      return `🔴 *PERMISO VENCE HOY*\n\n` +
-             `${name}, tu permiso vence HOY.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Vence:* ${expirationDate} (HOY)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `📍 *Aún válido:* Hasta medianoche\n` +
-             `💰 *Costo:* $99 MXN\n\n` +
-             `🔴 *¡EMERGENCIA - ACTÚA AHORA!*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `💡 Tienes hasta 30 días después del vencimiento\n\n` +
-             `🆘 *Ayuda urgente:* *ayuda*`;
+      return `🚨 *TU PERMISO VENCE HOY*\n\n` +
+             `${name}, tu permiso provisional vence HOY.\n\n` +
+             `📋 *INFORMACIÓN DE TU PERMISO*\n` +
+             `*Folio:* ${folio}\n` +
+             `*Vence:* ${expirationDate} (HOY)\n\n` +
+             `🚗 *VEHÍCULO*\n` +
+             `${marca || 'N/A'} ${linea || 'N/A'} ${ano_modelo || 'N/A'}\n` +
+             `Color: ${vehicleColor}\n` +
+             `Serie: ${serieNumber}\n` +
+             `Motor: ${motorNumber}\n\n` +
+             `💰 *RENOVACIÓN URGENTE*\n` +
+             `Costo: $99 MXN\n` +
+             `Válido hasta: Medianoche\n\n` +
+             `🔴 *¡RENUEVA AHORA!*\n\n` +
+             `✅ Escribe *renovar* para renovar tu permiso\n` +
+             `❓ Escribe *ayuda* para asistencia urgente`;
     }
 
-    if (daysUntilExpiry === -7) {
-      return `📅 *PERÍODO DE GRACIA: 7 DÍAS VENCIDO*\n\n` +
-             `${name}, tu permiso venció hace 7 días.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Venció:* ${expirationDate} (hace 7 días)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `📍 *Estatus:* Período de gracia\n` +
-             `⏳ *Quedan:* 23 días para renovar\n` +
-             `💰 *Mismo precio:* $99 MXN\n\n` +
-             `✅ *¡AÚN PUEDES RENOVAR FÁCILMENTE!*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `🚫 *Después de 30 días:* Trámite completo nuevo\n\n` +
-             `¿Dudas? Escribe *ayuda*`;
-    }
-
-    if (daysUntilExpiry === -15) {
-      return `⚠️ *ÚLTIMA OPORTUNIDAD: 15 DÍAS PARA RENOVAR*\n\n` +
-             `${name}, tu permiso venció hace 15 días.\n\n` +
-             `📋 *DATOS PARA RENOVACIÓN*\n` +
-             `*Folio:* ${folio} • *Venció:* ${expirationDate} (hace 15 días)\n\n` +
-             `1. *Nombre completo:* ${nombre_completo}\n` +
-             `2. *CURP o RFC:* ${permitData.curp_rfc || 'N/A'}\n` +
-             `3. *Marca:* ${marca || 'N/A'}\n` +
-             `4. *Modelo:* ${linea || 'N/A'}\n` +
-             `5. *Color:* ${vehicleColor}\n` +
-             `6. *Año:* ${ano_modelo || 'N/A'}\n` +
-             `7. *Número de serie (VIN):* ${serieNumber}\n` +
-             `8. *Número de motor:* ${motorNumber}\n` +
-             `9. *Domicilio:* ${permitData.domicilio || 'N/A'}\n\n` +
-             `⏳ *QUEDAN SOLO:* 15 días\n` +
-             `💰 *Último precio:* $99 MXN\n\n` +
-             `🚨 *DESPUÉS DE 30 DÍAS:*\n` +
-             `• Proceso completo nuevo\n` +
-             `• Documentos desde cero\n` +
-             `• Más tiempo y dinero\n\n` +
-             `⚠️ *¡ÚLTIMA OPORTUNIDAD!*\n\n` +
-             `✅ Escribe *renovar* para continuar\n` +
-             `📝 Escribe el número del campo a corregir (1-9)\n` +
-             `❌ Escribe *cancelar* para salir\n\n` +
-             `🆘 *Soporte:* *ayuda*`;
-    }
-
-    // Default message (shouldn't reach here)
+    // Default fallback
     return `🔔 *RECORDATORIO DE RENOVACIÓN*\n\n` +
            `${name}, tu permiso necesita renovación.\n\n` +
            `📋 *Folio:* ${folio}\n\n` +
-           `Para renovar:\n` +
-           `*renovar*`;
+           `✅ Escribe *renovar* para continuar`;
   }
 
   /**
